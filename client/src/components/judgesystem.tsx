@@ -128,15 +128,18 @@ export default function EditJudgeBlocks() {
   function handleButtonClick() {
     if (buttonState === "goLive") {
       if (confirm("Are you sure?")) {
+        console.log(rounds);
+        const scheduleData = JSON.stringify(rounds, null, 2);
+        const blob = new Blob([scheduleData], { type: "application/json" });
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = "schedule.json";
+        link.click();
         setButtonState("makePrivate");
+        
       }
     } else if (buttonState === "makePrivate") {
-      const scheduleData = JSON.stringify(rounds, null, 2);
-      const blob = new Blob([scheduleData], { type: "application/json" });
-      const link = document.createElement("a");
-      link.href = URL.createObjectURL(blob);
-      link.download = "schedule.json";
-      link.click();
+      
       setSchedule([]);
       setRounds([]);
       setShowSchedule(false);
