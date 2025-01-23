@@ -14,7 +14,7 @@ export default function AdminPanel() {
   const loadComponent = (Comp: React.ElementType) => setComponent(<Comp />);
 
   return (
-    <div className="flex flex-row h-[100vh]">
+    <div className="flex flex-row h-[100%] min-h-screen">
       <div className="w-48 bg-gray-200 p-4 text-black flex flex-col items-center">
         <div className="mb-4 font-bold">W HackCC Admins</div>
         <button onClick={() => loadComponent(Apps)} className="w-full py-2 mb-2 bg-gray-300">
