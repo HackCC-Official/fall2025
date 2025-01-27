@@ -1,4 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import axios from "axios";
+
 
 export default function EditJudgeBlocks() {
   const [numJudges, setNumJudges] = useState(0);
@@ -101,51 +103,82 @@ export default function EditJudgeBlocks() {
 
   function calculateRoundTimes(start : string) {
     const [time, meridiem] = start.split(" ");
-    let [hour, minute] = time.split(":").map(Number); // Correctly splitting and mapping to numbers
+    let [hour, minute] = time.split(":").map(Number);
   
-    // Adjusting hour based on AM/PM
+    // Adjust hour based on AM/PM
     if (meridiem === "PM" && hour !== 12) hour += 12;
     if (meridiem === "AM" && hour === 12) hour = 0;
   
-    // Iterating through rounds to calculate times
-    return rounds.map((round, index) => {
+    const roundDurations = rounds.map((round, index) => {
       const formattedTime = `${String(hour % 12 || 12).padStart(2, "0")}:${String(minute).padStart(2, "0")} ${
         hour < 12 ? "AM" : "PM"
       }`;
-      minute += 10; // Incrementing by 10 minutes per round
   
-      // Handling hour rollover
+      minute += 10; // Increment by 10 minutes for each round
       if (minute >= 60) {
         minute -= 60;
         hour += 1;
       }
   
-      return { ...round, time: formattedTime }; // Adding formatted time to the round
+      return {
+        ...round,
+        time: formattedTime,
+      };
     });
+  
+    return roundDurations;
   }
   
-
   function handleButtonClick() {
     if (buttonState === "goLive") {
       if (confirm("Are you sure?")) {
-        console.log(rounds);
-        const scheduleData = JSON.stringify(rounds, null, 2);
-        const blob = new Blob([scheduleData], { type: "application/json" });
-        const link = document.createElement("a");
-        link.href = URL.createObjectURL(blob);
-        link.download = "schedule.json";
-        link.click();
-        setButtonState("makePrivate");
-        
+        // Prepare data for the backend in ResponseRoundDTO format
+        const updatedRounds = calculateRoundTimes(startTime); // Get rounds with updated times
+        const scheduleData = updatedRounds.map((round) => ({
+          round: round.round,
+          assignments: JSON.stringify(round.assignments),
+          startTime: round.time,
+        }));
+        // Log the data before saving
+        console.log("Data to be sent to the backend:", scheduleData);
+  
+        // Send the JSON data to the backend
+        axios
+          .post("http://localhost:5001/rounds", scheduleData)
+          .then((response) => {
+            console.log("Schedule saved successfully:", response.data);
+            setButtonState("makePrivate");
+          })
+          .catch((error) => {
+            console.error("Error saving schedule:", error);
+            alert("Failed to save the schedule. Please try again.");
+          });
       }
     } else if (buttonState === "makePrivate") {
-      
-      setSchedule([]);
-      setRounds([]);
-      setShowSchedule(false);
-      setButtonState("initial");
+      if (confirm("Are you sure you want to make the schedule private?")) {
+        // Send a nil value (or equivalent empty payload) to the backend
+        axios
+          .post("http://localhost:5001/rounds", null)
+          .then((response) => {
+            console.log("Schedule successfully marked as private:", response.data);
+  
+            // Clear local states
+            setSchedule([]);
+            setRounds([]);
+            setShowSchedule(false);
+            setButtonState("initial");
+          })
+          .catch((error) => {
+            console.error("Error making schedule private:", error);
+            alert("Failed to make the schedule private. Please try again.");
+          });
+      }
     }
   }
+  
+
+
+  
 
   const buttonText =
     buttonState === "goLive"
