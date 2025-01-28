@@ -1,0 +1,20 @@
+services:
+  next-app:
+    image: "ghcr.io/hackcc-official/spring2025:latest"
+    container_name: next-app
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - 4000:3000
+    networks:
+      - hackcc-network
+
+  # Add more containers below (nginx, postgres, etc.)
+
+# Define a network, which allows containers to communicate
+# with each other, by using their container name as a hostname
+networks:
+  hackcc-network:
+    external: true
