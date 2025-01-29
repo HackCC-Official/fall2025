@@ -34,15 +34,15 @@ server {
     client_max_body_size 20M;
   }
     
-  location /qr-service {
+  location /qr-service/ {
     resolver 127.0.0.11 valid=30s;
-    proxy_pass http://qr-service:3000;
+    proxy_pass http://qr-service:3000/;
     client_max_body_size 20M;
   }
 
-  location /account-service {
+  location /account-service/ {
     resolver 127.0.0.11 valid=30s;
-    proxy_pass http://account-service:3000;
+    proxy_pass http://account-service:3000/;
     client_max_body_size 20M;
   }
 }
