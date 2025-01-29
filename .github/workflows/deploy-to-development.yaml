@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - development
-      - development-evan
 jobs:
   build-and-publish:
     name: build and publish image
