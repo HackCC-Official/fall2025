@@ -1,6 +1,6 @@
 services:
   next-app:
-    image: "ghcr.io/hackcc-official/spring2025:latest"
+    image: "ghcr.io/hackcc-official/spring2025/next-app"
     container_name: next-app
     build:
       context: ./client
@@ -10,7 +10,23 @@ services:
       - 4000:3000
     networks:
       - hackcc-network
-
+  nginx:
+    image: "ghcr.io/hackcc-official/spring2025/nginx"
+    depends_on:
+      - next-app
+    build:
+      context: .
+      dockerfile: nginx.Dockerfile
+    env_file:
+      - .env
+    ports:
+      - "80:80"
+      - "443:443"
+    # volumes:
+    #   - ./certbot/www/:/var/www/certbot/:rw
+    #   - ./certbot/conf/:/etc/letsencrypt/:rw
+    networks:
+      - hackcc-network
   # Add more containers below (nginx, postgres, etc.)
 
 # Define a network, which allows containers to communicate
