@@ -11,6 +11,8 @@ export default {
       colors: {
         background: "var(--background)",
         foreground: "var(--foreground)",
+        royalpurple: "#302976",
+        lightpurple: "#6950D5"
       },
     },
   },
