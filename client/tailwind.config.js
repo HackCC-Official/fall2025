@@ -1,4 +1,3 @@
- 
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   important: true,
@@ -9,7 +8,14 @@ module.exports = {
   ],
   purge: ['./src/**/*.{js,ts,jsx,tsx}'], 
   theme: {
-    extend: {},
+    extend: {
+      colors: {
+        background: "var(--background)",
+        foreground: "var(--foreground)",
+        royalpurple: "#302976",
+        lightpurple: "#6950D5"
+      },
+    },
   },
   plugins: [],
 }
