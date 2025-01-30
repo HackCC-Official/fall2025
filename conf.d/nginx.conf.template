@@ -33,18 +33,28 @@ server {
     proxy_cache_bypass $http_upgrade;
     client_max_body_size 20M;
   }
+
+  location /qr-service/docs {
+    resolver 127.0.0.11 valid=30s;
+    proxy_pass http://qr-service:3000/qr-service/docs;
+    client_max_body_size 20M;
+  }
     
   location /qr-service/ {
     resolver 127.0.0.11 valid=30s;
-    rewrite ^/qr-service(/.*)$ $1 break;
-    proxy_pass http://qr-service:3000;
+    proxy_pass http://qr-service:3000/;
+    client_max_body_size 20M;
+  }
+
+  location /account-service/docs {
+    resolver 127.0.0.11 valid=30s;
+    proxy_pass http://account-service:3000/account-service/docs;
     client_max_body_size 20M;
   }
 
   location /account-service/ {
     resolver 127.0.0.11 valid=30s;
-    rewrite ^/account-service(/.*)$ $1 break;
-    proxy_pass http://account-service:3000;
+    proxy_pass http://account-service:3000/;
     client_max_body_size 20M;
   }
 }
