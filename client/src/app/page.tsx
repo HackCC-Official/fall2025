@@ -4,13 +4,13 @@ import Stars from "../components/stars"
 import Nav from "../components/navbar"
 import clouds from "../assets/temp_clouds.png"
 
-export default function Home() {
+export default function HomePage() {
   return (
-    <div className="bg-gradient-to-b from-royalpurple to-lightpurple flex h-screen">
+    <div className="flex bg-gradient-to-b from-royalpurple to-lightpurple h-screen">
       <Stars></Stars>
       <FrontPage></FrontPage>
-      <Image className="absolute w-screen bottom-0" src={clouds} alt="Clouds"></Image>
+      <Image className="bottom-0 absolute w-screen" src={clouds} alt="Clouds"></Image>
       <Nav></Nav>
     </div>
-  );
+  )
 }
