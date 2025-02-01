@@ -1,6 +1,11 @@
 # HackCC Spring 2025 Main Website
 The frontend application for HackCC of Spring 2025 that serves as the main website for hackathon particpants and as the an interface for organizers, sponsors or volunteers to use.
 
+## Documentation
+To start contributing to this repository, please review all the markdowns in [docs folder](./client/docs) that is in the client folder (the src folder for our Next app).
+
+It will be based loosely on [Bulletproof React](https://github.com/alan2207/bulletproof-react)
+
 ## Getting Started
 Follow the instructions below to run the application locally on your computer.
 
