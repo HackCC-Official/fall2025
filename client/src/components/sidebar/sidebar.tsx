@@ -4,12 +4,13 @@ import {
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
+  SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
 import { Dices, Folders, Mail, QrCode } from "lucide-react"
-
+import { LogoIcon } from "../logo-icon"
 // Menu items.
 const items = [
   {
@@ -36,10 +37,24 @@ const items = [
 
 export function AppSidebar() {
   return (
-    <Sidebar>
+    <Sidebar collapsible="icon">
+      <SidebarHeader>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton>
+              <div className="flex justify-center items-center bg-sidebar-primary rounded-lg text-sidebar-primary-foreground aspect-square size-4">
+                <LogoIcon className="h-full size-4" />
+              </div>
+              <div className="flex-1 font-semibold truncate">
+                HackCC Admin Panel
+              </div>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>HackCC Admin Panel</SidebarGroupLabel>
+          <SidebarGroupLabel className="text-lightpurple">Workspace</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {items.map((item) => (
