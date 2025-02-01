@@ -29,8 +29,8 @@ const items = [
     icon: Dices,
   },
   {
-    title: "QR Codes",
-    url: "/panel/qr-code",
+    title: "Attendance",
+    url: "/panel/attendance",
     icon: QrCode,
   },
 ]
