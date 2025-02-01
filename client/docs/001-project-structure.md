@@ -5,7 +5,7 @@
 > [!IMPORTANT]  
 > Components and other type of files should be camel-case. Not `oldComponent.tsx` but `new-component.tsx`.
 >  
-> However, the function or constant's name should be capitalized like `function thisIsAFunction() {}` or `const thisIsAConstant`
+> However, the function or constant's name within those file should be capitalized like `function thisIsAFunction() {}` or `const thisIsAConstant`
 
 > [!NOTE]
 > Although you can default export components (`export default function ...`)
