@@ -10,7 +10,7 @@
 > [!NOTE]
 > Although you can default export components (`export default function ...`)
 >
-> It is more recommended to named export them to keep the components naming (`export function ...`)
+> It is recommended to named export them to keep the components naming exact and consistent on imports (`export function ...`). However, for pages component, export them as default since Next.JS won't work if you don't do that.
 
 
 ## 1.1 Src folder structure
