@@ -14,7 +14,7 @@ Please use the following extension in order to comply to the project's stand
 - [Tailwind Sorter](https://marketplace.visualstudio.com/items?itemName=dejmedus.tailwind-sorter)
 - [ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint)
 
-## Installation
+### Installation
 Enter your working repository/folder and clone the repository
 ```bash
 git clone git@github.com:HackCC-Official/spring2025.git
@@ -24,7 +24,7 @@ Then enter directory and install the dependencies
 cd spring2025/client
 npm install
 ```
-## Running website locally
+### Running website locally
 First, run the development server:
 
 ```bash
