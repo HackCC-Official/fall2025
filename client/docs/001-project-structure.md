@@ -2,6 +2,17 @@
 > [!IMPORTANT]  
 > To see how to work with pages, please check out this [Next.JS Page Router documentation](https://nextjs.org/docs/pages).
 
+> [!IMPORTANT]  
+> Components and other type of files should be camel-case. Not `oldComponent.tsx` but `new-component.tsx`.
+>  
+> However, the function or constant's name should be capitalized like `function thisIsAFunction() {}` or `const thisIsAConstant`
+
+> [!NOTE]
+> Although you can default export components (`export default function ...`)
+>
+> It is more recommended to named export them to keep the components naming (`export function ...`)
+
+
 ## 1.1 Src folder structure
 ```sh
 src/
