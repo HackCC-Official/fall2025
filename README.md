@@ -6,6 +6,9 @@ To start contributing to this repository, please review all the markdowns in [do
 
 It will be based loosely on [Bulletproof React](https://github.com/alan2207/bulletproof-react)
 
+> [!IMPORTANT]
+> We are using a library component called **shadcn**. Consider checking their [documentation here](https://ui.shadcn.com/docs) if you plan on using, or modifying an existing component that utilizes a shadcn component. Do not modify any content in  `src/components/ui` unless given explicit permission to.  You can add components to it through using shadcn's command, but you shouldn't remove or edit any component that are in used. 
+
 ## Getting Started
 Follow the instructions below to run the application locally on your computer.
 
