@@ -8,7 +8,7 @@ import {
 
 import { loadSlim } from "@tsparticles/slim";
 
-export default function App() {
+export function Stars() {
     const [init, setInit] = useState(false);
 
     useEffect(() => {
