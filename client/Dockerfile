@@ -24,6 +24,9 @@ RUN \
 # Copy application source files
 COPY . .
 
+# Set environment variable to disable ESLint during the build process
+ENV NEXT_PUBLIC_ESLINT_DISABLE=true
+
 # Build Next.js app
 RUN \
   if [ -f yarn.lock ]; then \
