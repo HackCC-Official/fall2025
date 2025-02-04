@@ -55,6 +55,7 @@ export default function CreateEventPage() {
       lunch: values.lunch,
       dinner: values.dinner
     })
+    
     await createEvent({
       date: format(values.date, 'y-M-d'),
       startingTime: values.startingTime.toISOString(),
