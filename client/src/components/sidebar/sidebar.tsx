@@ -9,7 +9,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
-import { Dices, Folders, Mail, QrCode } from "lucide-react"
+import { Calendar, Dices, Folders, Mail, QrCode } from "lucide-react"
 import { LogoIcon } from "../logo-icon"
 // Menu items.
 const items = [
@@ -27,6 +27,11 @@ const items = [
     title: "Judging",
     url: "/panel/judging",
     icon: Dices,
+  },
+  {
+    title: "Event",
+    url: "/panel/event",
+    icon: Calendar,
   },
   {
     title: "Attendance",
