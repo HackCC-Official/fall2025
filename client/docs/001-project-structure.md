@@ -19,7 +19,7 @@ src/
 ├─ app/               # the app folder
 │  ├─ layout.tsx      # the main layout
 │  ├─ page.tsx        # the main page
-├─ feature/           # represent a certain feature of our application
+├─ features/           # represent a certain feature of our application
 ├─ pages/             # pages that our website comprises of, it is a combination of features
 ├─ libs/              # global libraries that are SHARED between features
 ├─ components/        # components that ARE used across many features
