@@ -43,8 +43,6 @@ export default function CreateEventPage() {
     }
   })
 
-  console.log(process.env.QR_SERVICE_URL)
-
   // 2. Define a submit handler.
   async function onSubmit(values: z.infer<typeof formSchema>) {
     console.log({

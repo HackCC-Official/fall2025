@@ -9,7 +9,6 @@ export async function getEvents(): Promise<EventDTO[]> {
 }
 
 export async function createEvent(eventDTO: EventDTO): Promise<EventDTO> {
-  console.log(process.env.QR_SERVICE_URL)
   return (await qrClient.request({
     method: 'POST',
     url: 'events',
