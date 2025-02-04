@@ -16,19 +16,11 @@ jobs:
         run: |
           echo ${{ secrets.PAT }} | docker login ghcr.io -u ${{ github.repository_owner }} --password-stdin
 
-      - name: Set environment variables
-        run: |
-          echo "NEXT_PUBLIC_QR_SERVICE_URL=${{ secrets.NEXT_PUBLIC_QR_SERVICE_URL }}" >> $GITHUB_ENV
-
-      - name: Print environment variable for debugging
-        run: |
-          echo "NEXT_PUBLIC_QR_SERVICE_URL=${{ secrets.NEXT_PUBLIC_QR_SERVICE_URL }}"
-
       - name: Build and Publish
         run: |
           touch .env
-          echo "${{ secrets.DEV_ENV_FILE }}" > .env.production
-          docker compose -f docker-compose.yaml build --no-cache
+          echo "${{ secrets.DEV_ENV_FILE }}" > .env
+          docker compose -f docker-compose.yaml build --no-cache --build-arg NEXT_PUBLIC_QR_SERVICE_URL=${{ secrets.NEXT_PUBLIC_QR_SERVICE_URL }}
           docker compose -f docker-compose.yaml push
   deployment:
     needs: build-and-publish

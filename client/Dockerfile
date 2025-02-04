@@ -25,7 +25,8 @@ RUN \
 COPY . .
 
 # Set environment variable to disable ESLint during the build process
-ENV NEXT_PUBLIC_ESLINT_DISABLE=true
+ARG NEXT_PUBLIC_QR_SERVICE_URL
+ENV NEXT_PUBLIC_QR_SERVICE_URL=${NEXT_PUBLIC_QR_SERVICE_URL}
 
 # Build Next.js app
 RUN \
