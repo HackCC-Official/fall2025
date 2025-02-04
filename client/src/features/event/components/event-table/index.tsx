@@ -4,7 +4,7 @@ import { EventDTO } from "../../types/event-dto";
 
 export function EventTable({ events } : { events: EventDTO[] }) {
   return (
-    <div className="mx-auto py-10 container">
+    <div className="mx-auto">
       <DataTable columns={columns} data={events} />
     </div>
   )

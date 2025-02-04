@@ -3,7 +3,6 @@
 import { ColumnDef } from "@tanstack/react-table"
 import { EventDTO } from "../../types/event-dto"
 import { format } from "date-fns";
-import { Badge } from "@/components/ui/badge";
 import { ActiveBadge, InactiveBadge } from "@/components/status-badge";
 
 export const columns: ColumnDef<EventDTO>[] = [
@@ -12,7 +11,7 @@ export const columns: ColumnDef<EventDTO>[] = [
     header: 'Event Date',
     cell: ({ row }) =>
       <div className="font-semibold">
-        {format(row.original.date, 'PP')}
+        {row.original.date}
       </div>
   },
   {
