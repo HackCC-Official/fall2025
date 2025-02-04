@@ -18,7 +18,7 @@ jobs:
       - name: Build and Publish
         run: |
           touch .env
-          echo "${{ secrets.DEV_ENV_FILE }}" > .env
+          echo "${{ secrets.DEV_ENV_FILE }}" > .env.production
           docker compose -f docker-compose.yaml build --no-cache
           docker compose -f docker-compose.yaml push
   deployment:
@@ -60,6 +60,7 @@ jobs:
             docker network create hackcc-network
             cd spring2025
             echo "${{ secrets.DEV_ENV_FILE }}" > .env
+            echo "${{ secrets.DEV_ENV_FILE }}" > .env.production
             echo "${{ secrets.PAT }}" | docker login ghcr.io --username "${{ github.repository_owner }}" --password-stdin
             docker compose pull
             docker compose up -d
