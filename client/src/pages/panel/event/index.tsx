@@ -7,8 +7,13 @@ import { Plus } from "lucide-react";
 import { useRouter } from "next/router";
 
 export const getStaticProps = (async () => {
-  const events = await getEvents();
-  return { props: { events } }
+  try {
+    const events = await getEvents();
+    return { props: { events } }
+  } catch (error) {
+    console.error('Error fetching data during build:', error);
+    return { props: { data: [] } };
+  }
 })
 
 export default function EventPage({ events } : { events: EventDTO[] }) {
