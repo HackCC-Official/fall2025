@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { useRouter } from "next/router";
 
-export const getStaticProps = (async () => {
+export const getServerSideProps = (async () => {
   try {
     const events = await getEvents();
     return { props: { events } }
