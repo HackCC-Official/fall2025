@@ -8,7 +8,6 @@ import { useRouter } from "next/router";
 
 export const getStaticProps = (async () => {
   const events = await getEvents();
-  console.log(events)
   return { props: { events } }
 })
 
@@ -16,7 +15,7 @@ export default function EventPage({ events } : { events: EventDTO[] }) {
   const router = useRouter()
   return (
     <div>
-      <h1 className="font-semibold text-4xl">Event</h1>
+      <h1 className="font-bold text-4xl">Event</h1>
       <p className="mt-2 text-muted-foreground text-sm">
         Manage the hackathon event by creating event dates which represent the actual day the hackathon is taking place
       </p>

@@ -17,7 +17,7 @@ export default function PanelLayout({ children } : { children: React.ReactNode }
   return (
     <SidebarProvider className={`${geistSans.variable} ${geistMono.variable}`}>
       <AppSidebar />
-      <main className='px-4 py-4 h-full container'>
+      <main className='px-8 py-4 h-full container'>
         <SidebarTrigger />
         <div className="mt-4">
           {children}
