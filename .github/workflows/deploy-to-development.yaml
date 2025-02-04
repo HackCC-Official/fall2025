@@ -27,7 +27,7 @@ jobs:
       - name: Build and Publish
         run: |
           touch .env
-          echo "${{ secrets.DEV_ENV_FILE }}" > .env
+          echo "${{ secrets.DEV_ENV_FILE }}" > .env.production
           docker compose -f docker-compose.yaml build --no-cache
           docker compose -f docker-compose.yaml push
   deployment:
