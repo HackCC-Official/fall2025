@@ -12,7 +12,7 @@ export const getStaticProps = (async () => {
     return { props: { events } }
   } catch (error) {
     console.error('Error fetching data during build:', error);
-    return { props: { data: [] } };
+    return { props: { events: [] } };
   }
 })
 
