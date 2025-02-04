@@ -13,6 +13,8 @@ import { Calendar } from "@/components/ui/calendar"
 import { Separator } from "@/components/ui/separator"
 import { TimePicker12 } from "@/components/time-picker/time-picker-12hr"
 import { Switch } from "@/components/ui/switch"
+import { useRouter } from "next/router"
+import { createEvent } from "@/features/event/api/event"
 
 const formSchema = z.object({
   date: z.date(),
@@ -26,6 +28,7 @@ const formSchema = z.object({
 })
 
 export default function CreateEventPage() {
+  const router = useRouter()
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -40,11 +43,32 @@ export default function CreateEventPage() {
     }
   })
 
+  console.log(process.env.QR_SERVICE_URL)
+
   // 2. Define a submit handler.
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    // Do something with the form values.
-    // ✅ This will be type-safe and validated.
-    console.log(values)
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    console.log({
+      date: format(values.date, 'y-M-d'),
+      startingTime: values.startingTime.toISOString(),
+      lateTime: values.lateTime.toISOString(),
+      endingTime:  values.endingTime.toISOString(),
+      active: values.active,
+      breakfast: values.breakfast,
+      lunch: values.lunch,
+      dinner: values.dinner
+    })
+    await createEvent({
+      date: format(values.date, 'y-M-d'),
+      startingTime: values.startingTime.toISOString(),
+      lateTime: values.lateTime.toISOString(),
+      endingTime:  values.endingTime.toISOString(),
+      active: values.active,
+      breakfast: values.breakfast,
+      lunch: values.lunch,
+      dinner: values.dinner
+    });
+
+    router.push('/panel/event')
   }
 
   return (
