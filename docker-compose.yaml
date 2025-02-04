@@ -5,6 +5,8 @@ services:
     build:
       context: ./client
       dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_QR_SERVICE_URL: ${NEXT_PUBLIC_QR_SERVICE_URL}
     restart: always
     ports:
       - 4000:3000
