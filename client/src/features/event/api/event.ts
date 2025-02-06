@@ -30,3 +30,10 @@ export async function updateEvent(id: string, eventDTO: EventDTO): Promise<Event
     data: eventDTO
   })).data
 }
+
+export async function deleteEvent(id: string) {
+  await qrClient.request({
+    method: 'DELETE',
+    url: 'events/' + id,
+  })
+}
