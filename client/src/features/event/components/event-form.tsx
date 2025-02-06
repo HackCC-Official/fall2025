@@ -12,6 +12,8 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { EventDTO } from "../types/event-dto";
 import { useRouter } from "next/router";
+import { useEffect } from "react";
+import { getEventByID } from "../api/event";
 
 const formSchema = z.object({
   date: z.date(),
@@ -25,10 +27,11 @@ const formSchema = z.object({
 })
 
 interface EventFormProps {
-  handleSubmit: (event: EventDTO) => Promise<EventDTO>
+  id?: string;
+  handleSubmit: (event: EventDTO) => Promise<EventDTO>;
 }
 
-export function EventForm({ handleSubmit } : EventFormProps) {
+export function EventForm({ id, handleSubmit } : EventFormProps) {
   const router = useRouter()
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -43,6 +46,25 @@ export function EventForm({ handleSubmit } : EventFormProps) {
       dinner: false
     }
   })
+
+  useEffect(() => {
+    const fetchData = async () => {
+      if (id) {
+        const eventDTO = await getEventByID(id);
+        form.reset({
+          ...eventDTO,
+          date: new Date(`${eventDTO.date}T00:00:00`),
+          startingTime: new Date(eventDTO.startingTime),
+          lateTime:  new Date(eventDTO.lateTime),
+          endingTime:   new Date(eventDTO.endingTime),
+        });
+      }
+    };
+
+    if (id) {
+      fetchData();
+    }
+  }, [form, form.reset, id]); 
 
     // 2. Define a submit handler.
     async function onSubmit(values: z.infer<typeof formSchema>) {
