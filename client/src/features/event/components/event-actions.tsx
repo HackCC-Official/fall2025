@@ -3,7 +3,6 @@ import { Edit, Trash } from "lucide-react";
 import { EventDTO } from "../types/event-dto";
 import { useRouter } from "next/router";
 import { deleteEvent } from "../api/event";
-import { revalidatePath } from "next/cache";
 
 interface EventActionsProps {
   event: EventDTO;

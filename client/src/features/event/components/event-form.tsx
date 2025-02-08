@@ -14,6 +14,7 @@ import { EventDTO } from "../types/event-dto";
 import { useRouter } from "next/router";
 import { useEffect } from "react";
 import { getEventByID } from "../api/event";
+import { getCurrentTime } from "../utils/time";
 
 const formSchema = z.object({
   date: z.date(),
@@ -51,12 +52,18 @@ export function EventForm({ id, handleSubmit } : EventFormProps) {
     const fetchData = async () => {
       if (id) {
         const eventDTO = await getEventByID(id);
+
+        // date objects are already in UTC
+        const startingTime = new Date(eventDTO.startingTime)
+        const lateTime = new Date(eventDTO.lateTime)
+        const endingTime = new Date(eventDTO.endingTime)
+
         form.reset({
           ...eventDTO,
           date: new Date(`${eventDTO.date}T00:00:00`),
-          startingTime: new Date(eventDTO.startingTime),
-          lateTime:  new Date(eventDTO.lateTime),
-          endingTime:   new Date(eventDTO.endingTime),
+          startingTime,
+          lateTime,
+          endingTime
         });
       }
     };
@@ -68,11 +75,20 @@ export function EventForm({ id, handleSubmit } : EventFormProps) {
 
     // 2. Define a submit handler.
     async function onSubmit(values: z.infer<typeof formSchema>) {
+      // get date
+      const date = format(values.date, 'y-MM-dd');
+
+      // get date in PST first then convert it into UTC
+      const startingTime = new Date(`${date}T${getCurrentTime(values.startingTime)}-08:00`).toISOString()
+      const lateTime = new Date(`${date}T${getCurrentTime(values.lateTime)}-08:00`).toISOString()
+      const endingTime = new Date(`${date}T${getCurrentTime(values.endingTime)}-08:00`).toISOString()
+    
+
       await handleSubmit({
-        date: format(values.date, 'y-M-d'),
-        startingTime: values.startingTime.toISOString(),
-        lateTime: values.lateTime.toISOString(),
-        endingTime:  values.endingTime.toISOString(),
+        date,
+        startingTime,
+        lateTime,
+        endingTime,
         active: values.active,
         breakfast: values.breakfast,
         lunch: values.lunch,
