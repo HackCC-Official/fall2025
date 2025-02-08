@@ -34,7 +34,7 @@ server {
 
   resolver 127.0.0.11 valid=30s;
 
-  set $upstream "qr-service";
+  set $upstream "minio";
 
   location /minio/ui/ {
     resolver 127.0.0.11 valid=30s;
