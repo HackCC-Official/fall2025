@@ -4,6 +4,8 @@ FROM nginx:1.21.0-alpine
 # Copy template files
 COPY conf.d/*.template /etc/nginx/templates/
 
+RUN echo 'include /etc/nginx/stream.conf;' >> /etc/nginx/nginx.conf
+
 # Expose port 80 for Nginx
 EXPOSE 80
 
