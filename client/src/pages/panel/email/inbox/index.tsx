@@ -23,7 +23,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import type { Email, Contact } from "@/pages/panel/email/lib/types";
+import type { Email, Contact } from "@/lib/email/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 
@@ -216,9 +216,9 @@ export default function InboxPage() {
                                                     email.status === "delivered"
                                                         ? "bg-green-50 text-green-700 ring-1 ring-green-600/20"
                                                         : email.status ===
-                                                          "sent"
-                                                        ? "bg-blue-50 text-blue-700 ring-1 ring-blue-600/20"
-                                                        : "bg-red-50 text-red-700 ring-1 ring-red-600/20"
+                                                            "sent"
+                                                          ? "bg-blue-50 text-blue-700 ring-1 ring-blue-600/20"
+                                                          : "bg-red-50 text-red-700 ring-1 ring-red-600/20"
                                                 }`}
                                             >
                                                 {email.status}
@@ -231,9 +231,9 @@ export default function InboxPage() {
                                                     "replied"
                                                         ? "bg-green-50 text-green-700 ring-1 ring-green-600/20"
                                                         : email.replyStatus ===
-                                                          "pending"
-                                                        ? "bg-yellow-50 text-yellow-700 ring-1 ring-yellow-600/20"
-                                                        : "bg-gray-50 text-gray-700 ring-1 ring-gray-600/20"
+                                                            "pending"
+                                                          ? "bg-yellow-50 text-yellow-700 ring-1 ring-yellow-600/20"
+                                                          : "bg-gray-50 text-gray-700 ring-1 ring-gray-600/20"
                                                 }`}
                                             >
                                                 {email.replyStatus}
@@ -302,9 +302,9 @@ export default function InboxPage() {
                                             "delivered"
                                                 ? "bg-green-50 text-green-700 ring-1 ring-green-600/20"
                                                 : selectedEmail?.status ===
-                                                  "sent"
-                                                ? "bg-blue-50 text-blue-700 ring-1 ring-blue-600/20"
-                                                : "bg-red-50 text-red-700 ring-1 ring-red-600/20"
+                                                    "sent"
+                                                  ? "bg-blue-50 text-blue-700 ring-1 ring-blue-600/20"
+                                                  : "bg-red-50 text-red-700 ring-1 ring-red-600/20"
                                         }`}
                                     >
                                         {selectedEmail?.status}
@@ -320,9 +320,9 @@ export default function InboxPage() {
                                             "replied"
                                                 ? "bg-green-50 text-green-700 ring-1 ring-green-600/20"
                                                 : selectedEmail?.replyStatus ===
-                                                  "pending"
-                                                ? "bg-yellow-50 text-yellow-700 ring-1 ring-yellow-600/20"
-                                                : "bg-gray-50 text-gray-700 ring-1 ring-gray-600/20"
+                                                    "pending"
+                                                  ? "bg-yellow-50 text-yellow-700 ring-1 ring-yellow-600/20"
+                                                  : "bg-gray-50 text-gray-700 ring-1 ring-gray-600/20"
                                         }`}
                                     >
                                         {selectedEmail?.replyStatus}

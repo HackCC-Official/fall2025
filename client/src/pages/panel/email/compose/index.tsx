@@ -30,11 +30,11 @@ import {
     DialogTrigger,
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import type { Contact, EmailTemplate } from "../lib/types";
+import type { Contact, EmailTemplate } from "@/lib/email/types";
 import {
     renderEmailTemplate,
     type EmailTemplateType,
-} from "../lib/email-renderer";
+} from "@/lib/email/email-renderer";
 import PanelLayout from "../../layout";
 
 const MOCK_CONTACTS: Contact[] = [

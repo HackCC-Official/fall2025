@@ -1,8 +1,8 @@
 import { render } from "@react-email/render";
 import type { Contact } from "./types";
-import ConfirmationEmail from "../emails/confirmation-template";
-import FollowUpEmail from "../emails/followup-template";
-import InvoiceEmail from "../emails/invoice-template";
+import ConfirmationEmail from "@/emails/confirmation-template";
+import FollowUpEmail from "@/emails/followup-template";
+import InvoiceEmail from "@/emails/invoice-template";
 import * as React from "react";
 
 export type EmailTemplateType =

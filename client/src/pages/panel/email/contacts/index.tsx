@@ -31,7 +31,7 @@ import {
     FormLabel,
     FormMessage,
 } from "@/components/ui/form";
-import type { Contact, CSVContact } from "../lib/types";
+import type { Contact, CSVContact } from "@/lib/email/types";
 import { Card, CardContent } from "@/components/ui/card";
 import PanelLayout from "../../layout";
 import Papa, { ParseResult } from "papaparse";
