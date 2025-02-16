@@ -132,19 +132,20 @@ export default function EditJudgeBlocks() {
   function handleButtonClick() {
     if (buttonState === "goLive") {
       if (confirm("Are you sure?")) {
-        // Prepare data for the backend in ResponseRoundDTO format
+        // Prepare data for the backend with private: false for each round
         const updatedRounds = calculateRoundTimes(startTime); // Get rounds with updated times
+       console.log(updatedRounds);
         const scheduleData = updatedRounds.map((round) => ({
           round: round.round,
-          assignments: JSON.stringify(round.assignments),
+          assignments: round.assignments,//JSON.stringify(round.assignments),
           startTime: round.time,
+          private: false, // Schedule is public (live)
         }));
-        // Log the data before saving
-        console.log("Data to be sent to the backend:", scheduleData);
+        
+        console.log("Data to be sent to the backend:", scheduleData, updatedRounds);
   
-        // Send the JSON data to the backend
         axios
-          .post("http://localhost:5001/rounds", scheduleData)
+          .post("http://localhost:5007/rounds", scheduleData)
           .then((response) => {
             console.log("Schedule saved successfully:", response.data);
             setButtonState("makePrivate");
@@ -156,13 +157,22 @@ export default function EditJudgeBlocks() {
       }
     } else if (buttonState === "makePrivate") {
       if (confirm("Are you sure you want to make the schedule private?")) {
-        // Send a nil value (or equivalent empty payload) to the backend
+        // Prepare data for the backend with private: true for each round
+        const updatedRounds = calculateRoundTimes(startTime); // Recalculate or reuse rounds if needed
+        const scheduleData = updatedRounds.map((round) => ({
+          round: round.round,
+          assignments: round.assignments,//JSON.stringify(round.assignments),
+          startTime: round.time,
+          private: false, // Schedule is public (live)
+        }));
+  
+        console.log("Data to be sent to the backend (private):", scheduleData);
+  
         axios
-          .post("http://localhost:5001/rounds", null)
+          .post("http://localhost:5007/rounds", scheduleData)
           .then((response) => {
             console.log("Schedule successfully marked as private:", response.data);
-  
-            // Clear local states
+            // Clear local states after update
             setSchedule([]);
             setRounds([]);
             setShowSchedule(false);

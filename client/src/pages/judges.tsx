@@ -13,7 +13,7 @@ export default function JudgesPage() {
 
   useEffect(() => {
     axios
-      .get("http://localhost:5001/rounds")
+      .get("http://localhost:5007/rounds")
       .then((response) => {
         console.log("Full response object:", response);
         console.log("Parsed response data:", response.data);
