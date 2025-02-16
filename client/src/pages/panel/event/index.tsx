@@ -21,9 +21,6 @@ export default function EventPage({ events } : { events: EventDTO[] }) {
   return (
     <div className="py-10">
       <h1 className="font-bold text-3xl">Event</h1>
-      <p className="mt-2 text-muted-foreground text-sm">
-        Manage the hackathon event by creating event dates which represent the actual day the hackathon is taking place
-      </p>
       <div className="flex space-x-4 my-4">
         <Button onClick={() => router.push('/panel/event/create')}>
           <Plus />
