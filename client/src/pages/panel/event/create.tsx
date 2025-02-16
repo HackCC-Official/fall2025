@@ -6,8 +6,8 @@ import { createEvent } from "@/features/event/api/event"
 
 export default function CreateEventPage() {
   return (
-    <div>
-      <h1 className="font-bold text-4xl">Create Event</h1>
+    <div className="py-10">
+      <h1 className="font-bold text-3xl">Create Event</h1>
       <p className="mt-2 text-muted-foreground text-sm">
         Create Event Date object that signifies an active Hackathon day
       </p>

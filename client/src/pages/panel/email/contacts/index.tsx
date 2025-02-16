@@ -174,9 +174,9 @@ export default function ContactsPage() {
     };
 
     return (
-        <div className="container mx-auto py-10">
+        <div className="mx-auto py-10">
             <div className="flex justify-between items-center mb-8">
-                <h1 className="text-3xl font-semibold tracking-tight">
+                <h1 className="font-semibold text-3xl tracking-tight">
                     Contacts
                 </h1>
                 <div className="flex items-center space-x-2">
@@ -310,7 +310,7 @@ export default function ContactsPage() {
                                                 </FormLabel>
                                                 <FormControl>
                                                     <textarea
-                                                        className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                                        className="flex bg-background disabled:opacity-50 px-3 py-2 border border-input rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ring-offset-background focus-visible:ring-offset-2 w-full min-h-[80px] placeholder:text-muted-foreground text-sm disabled:cursor-not-allowed"
                                                         placeholder="Add any additional notes..."
                                                         {...field}
                                                     />
@@ -352,16 +352,16 @@ export default function ContactsPage() {
                                 </DialogDescription>
                             </DialogHeader>
                             <div className="space-y-6">
-                                <div className="rounded-lg border p-4 bg-muted/50">
-                                    <h4 className="font-medium mb-2">
+                                <div className="bg-muted/50 p-4 border rounded-lg">
+                                    <h4 className="mb-2 font-medium">
                                         Required CSV Columns:
                                     </h4>
-                                    <div className="grid grid-cols-2 gap-2 text-sm">
+                                    <div className="gap-2 grid grid-cols-2 text-sm">
                                         <div>
                                             <span className="font-medium text-primary">
                                                 Required:
                                             </span>
-                                            <ul className="list-disc list-inside mt-1 text-muted-foreground">
+                                            <ul className="mt-1 text-muted-foreground list-disc list-inside">
                                                 <li>name</li>
                                                 <li>email</li>
                                                 <li>company</li>
@@ -371,7 +371,7 @@ export default function ContactsPage() {
                                             <span className="font-medium text-primary">
                                                 Optional:
                                             </span>
-                                            <ul className="list-disc list-inside mt-1 text-muted-foreground">
+                                            <ul className="mt-1 text-muted-foreground list-disc list-inside">
                                                 <li>role</li>
                                                 <li>phone</li>
                                                 <li>linkedIn</li>
@@ -381,7 +381,7 @@ export default function ContactsPage() {
                                     </div>
                                 </div>
 
-                                <div className="grid gap-2">
+                                <div className="gap-2 grid">
                                     <Label htmlFor="csv-file">
                                         Select CSV File
                                     </Label>
@@ -393,7 +393,7 @@ export default function ContactsPage() {
                                         ref={fileInputRef}
                                     />
                                     {selectedFile && (
-                                        <p className="text-sm text-muted-foreground">
+                                        <p className="text-muted-foreground text-sm">
                                             Selected: {selectedFile.name}
                                         </p>
                                     )}
@@ -436,7 +436,7 @@ export default function ContactsPage() {
                                 className="pl-10"
                             />
                             <svg
-                                className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground"
+                                className="top-1/2 left-3 absolute w-4 h-4 text-muted-foreground -translate-y-1/2"
                                 xmlns="http://www.w3.org/2000/svg"
                                 fill="none"
                                 viewBox="0 0 24 24"
@@ -485,7 +485,7 @@ export default function ContactsPage() {
                                                 href={contact.linkedIn}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
-                                                className="text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+                                                className="text-blue-500 hover:text-blue-700 dark:hover:text-blue-300 dark:text-blue-400"
                                             >
                                                 Profile
                                             </a>
@@ -496,7 +496,7 @@ export default function ContactsPage() {
                                     <TableCell>
                                         {contact.notes ? (
                                             <span
-                                                className="truncate max-w-[200px] block"
+                                                className="block max-w-[200px] truncate"
                                                 title={contact.notes}
                                             >
                                                 {contact.notes}

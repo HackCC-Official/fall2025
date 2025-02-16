@@ -2,8 +2,8 @@ import PanelLayout from "../layout"
 
 export default function AttendancePage() {
   return (
-    <div>
-      Attendance
+    <div className="py-10">
+      <h1 className="font-bold text-xl">Attendance</h1>
     </div>
   )
 }
