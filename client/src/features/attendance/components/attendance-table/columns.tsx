@@ -7,8 +7,8 @@ export const columns: ColumnDef<AttendanceDTO>[] = [
     header: 'ID'
   },
   {
-    accessorKey: 'account_id',
-    header: 'Account Name'
+    accessorKey: 'account.email',
+    header: 'Account Email'
   },
   {
     accessorKey: 'checkedInAt',

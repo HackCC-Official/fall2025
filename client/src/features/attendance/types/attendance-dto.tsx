@@ -1,3 +1,5 @@
+import { AccountDTO } from "@/features/account/types/account-dto";
+
 export enum AttendanceStatus {
   PRESENT = 'PRESENT',
   LATE = 'LATE',
@@ -7,7 +9,7 @@ export enum AttendanceStatus {
 export interface AttendanceDTO {
   status: AttendanceStatus;
   id: string;
-  account_id: string;
+  account: AccountDTO;
   event_id: string;
   checkedInAt: string;
 }
