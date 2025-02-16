@@ -60,6 +60,19 @@ server {
     client_max_body_size 20M;
   }
 
+  location /outreach-service/docs {
+    proxy_pass http://outreach-service:3000/outreach-service/docs;
+    proxy_set_header Host $host;  # Ensure proper forwarding
+    client_max_body_size 20M;
+  }
+
+  location /outreach-service/ {
+    resolver 127.0.0.11 valid=30s;
+    proxy_pass http://outreach-service:3000/outreach-service/;
+    proxy_set_header Host $host;  # Ensures that the full URL is forwarded
+    client_max_body_size 20M;
+  }
+
   location /rabbitmq/api/ {
       rewrite ^ $request_uri;
       rewrite ^/rabbitmq/api/(.*) /api/$1 break;
