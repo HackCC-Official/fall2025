@@ -580,11 +580,11 @@ export default function ComposePage() {
     };
 
     return (
-        <div className="container mx-auto py-10">
-            <h1 className="text-4xl font-bold mb-8">Compose Email</h1>
+        <div className="mx-auto py-10">
+            <h1 className="mb-8 font-bold text-4xl">Compose Email</h1>
 
             <Tabs defaultValue="compose" className="space-y-6">
-                <TabsList className="grid w-full grid-cols-2 max-w-[400px]">
+                <TabsList className="grid grid-cols-2 w-full max-w-[400px]">
                     <TabsTrigger value="compose">Compose</TabsTrigger>
                     <TabsTrigger
                         value="preview"
@@ -600,7 +600,7 @@ export default function ComposePage() {
                 </TabsList>
 
                 <TabsContent value="compose">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="gap-6 grid grid-cols-1 md:grid-cols-2">
                         <Card>
                             <CardHeader>
                                 <CardTitle>Select Recipients</CardTitle>
@@ -682,7 +682,7 @@ export default function ComposePage() {
                                                                     </DialogTitle>
                                                                 </DialogHeader>
                                                                 <div className="space-y-4">
-                                                                    <div className="grid grid-cols-2 gap-2">
+                                                                    <div className="gap-2 grid grid-cols-2">
                                                                         <div className="font-semibold">
                                                                             Name:
                                                                         </div>
@@ -868,13 +868,13 @@ export default function ComposePage() {
                         <CardContent>
                             {previewHtml ? (
                                 <div
-                                    className="prose dark:prose-invert max-w-none"
+                                    className="dark:prose-invert max-w-none prose"
                                     dangerouslySetInnerHTML={{
                                         __html: previewHtml,
                                     }}
                                 />
                             ) : (
-                                <div className="text-center py-8 text-muted-foreground">
+                                <div className="py-8 text-muted-foreground text-center">
                                     {!selectedTemplate
                                         ? "Select a template to preview the email."
                                         : !selectedContacts.size

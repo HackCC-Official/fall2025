@@ -87,9 +87,9 @@ export default function InboxPage() {
     }, []);
 
     return (
-        <div className="container mx-auto py-10 max-w-7xl">
+        <div className="mx-auto py-10 max-w-7xl">
             <div className="flex justify-between items-center mb-8">
-                <h1 className="text-3xl font-semibold tracking-tight">Inbox</h1>
+                <h1 className="font-semibold text-3xl tracking-tight">Inbox</h1>
                 <div className="flex items-center space-x-2">
                     <Button variant="outline" size="sm">
                         Mark all as read
@@ -119,7 +119,7 @@ export default function InboxPage() {
                                         className="pl-10"
                                     />
                                     <svg
-                                        className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground"
+                                        className="top-1/2 left-3 absolute w-4 h-4 text-muted-foreground -translate-y-1/2"
                                         xmlns="http://www.w3.org/2000/svg"
                                         fill="none"
                                         viewBox="0 0 24 24"
@@ -264,36 +264,36 @@ export default function InboxPage() {
                 >
                     <DialogContent className="max-w-2xl">
                         <DialogHeader>
-                            <DialogTitle className="text-xl font-semibold tracking-tight">
+                            <DialogTitle className="font-semibold text-xl tracking-tight">
                                 {selectedEmail?.subject}
                             </DialogTitle>
                         </DialogHeader>
                         <div className="space-y-6">
-                            <div className="grid gap-1">
+                            <div className="gap-1 grid">
                                 <h4 className="font-medium text-sm">
                                     Recipients
                                 </h4>
-                                <p className="text-sm text-muted-foreground">
+                                <p className="text-muted-foreground text-sm">
                                     {selectedEmail?.recipients
                                         .map((r) => `${r.name} (${r.company})`)
                                         .join(", ")}
                                 </p>
                             </div>
-                            <div className="grid gap-1">
+                            <div className="gap-1 grid">
                                 <h4 className="font-medium text-sm">Sent</h4>
-                                <p className="text-sm text-muted-foreground">
+                                <p className="text-muted-foreground text-sm">
                                     {selectedEmail?.sentAt.toLocaleString()}
                                 </p>
                             </div>
-                            <div className="grid gap-1">
+                            <div className="gap-1 grid">
                                 <h4 className="font-medium text-sm">Content</h4>
-                                <div className="text-sm whitespace-pre-wrap bg-muted/50 p-4 rounded-lg border">
+                                <div className="bg-muted/50 p-4 border rounded-lg text-sm whitespace-pre-wrap">
                                     {selectedEmail?.content}
                                 </div>
                             </div>
                             <div className="flex gap-6">
-                                <div className="grid gap-1.5">
-                                    <span className="text-sm font-medium">
+                                <div className="gap-1.5 grid">
+                                    <span className="font-medium text-sm">
                                         Delivery Status
                                     </span>
                                     <span
@@ -310,8 +310,8 @@ export default function InboxPage() {
                                         {selectedEmail?.status}
                                     </span>
                                 </div>
-                                <div className="grid gap-1.5">
-                                    <span className="text-sm font-medium">
+                                <div className="gap-1.5 grid">
+                                    <span className="font-medium text-sm">
                                         Reply Status
                                     </span>
                                     <span
