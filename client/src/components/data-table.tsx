@@ -33,7 +33,7 @@ export function DataTable<TData, TValue>({
   isLoading,
 }: CustomDataTableProps<TData, TValue>) {
   const tableData = useMemo(
-    () => (isLoading ? Array(30).fill({}) : data),
+    () => (isLoading ? Array(10).fill({}) : data),
     [isLoading, data]
   ); 
   const tableColumns = useMemo(
@@ -41,7 +41,7 @@ export function DataTable<TData, TValue>({
       isLoading
         ? columns.map((column) => ({
             ...column,
-            Cell: <Skeleton />,
+            cell: <Skeleton className="h-4" />,
           }))
         : columns,
     [isLoading, columns]
@@ -49,7 +49,7 @@ export function DataTable<TData, TValue>({
 
   const table = useReactTable({
     data: tableData,
-    columns: tableColumns,
+    columns: tableColumns as ColumnDef<TData, TValue>[],
     getCoreRowModel: getCoreRowModel(),
   })
  

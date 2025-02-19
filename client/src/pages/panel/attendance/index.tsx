@@ -30,7 +30,7 @@ export default function AttendancePage({ events }: { events: EventDTO[]  }) {
     queryKey: ['attendances', event?.date || '', status],
     queryFn: () => getAttendances({
         event_id: event?.id,
-        status: status === AttendanceStatus.ALL ? undefined : status
+        status: status
       })
   })
 

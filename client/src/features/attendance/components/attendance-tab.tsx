@@ -13,7 +13,7 @@ interface AttendanceTabProps {
 
 export function AttendanceTab({ className, setStatus, isLoading, data } : AttendanceTabProps) {
   return (
-    <Tabs defaultValue="absent" 
+    <Tabs defaultValue={AttendanceStatus.ALL} 
       onValueChange={(status) => setStatus(status as AttendanceStatus)}
       className={cn([
         "w-full",
