@@ -15,19 +15,41 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import { useMemo } from "react"
+import { Skeleton } from "./ui/skeleton"
  
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
   data: TData[]
 }
+
+interface CustomDataTableProps<TData, TValue> extends DataTableProps<TData, TValue> {
+  isLoading?: boolean;
+}
  
 export function DataTable<TData, TValue>({
   columns,
   data,
-}: DataTableProps<TData, TValue>) {
+  isLoading,
+}: CustomDataTableProps<TData, TValue>) {
+  const tableData = useMemo(
+    () => (isLoading ? Array(30).fill({}) : data),
+    [isLoading, data]
+  ); 
+  const tableColumns = useMemo(
+    () =>
+      isLoading
+        ? columns.map((column) => ({
+            ...column,
+            Cell: <Skeleton />,
+          }))
+        : columns,
+    [isLoading, columns]
+  );
+
   const table = useReactTable({
-    data,
-    columns,
+    data: tableData,
+    columns: tableColumns,
     getCoreRowModel: getCoreRowModel(),
   })
  
