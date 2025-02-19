@@ -24,7 +24,7 @@ export const getServerSideProps = (async () => {
 
 export default function AttendancePage({ events }: { events: EventDTO[]  }) {
   const [event, setEvent] = useState<EventDTO>();
-  const [status, setStatus] = useState<AttendanceStatus>();
+  const [status, setStatus] = useState<AttendanceStatus>(AttendanceStatus.ALL);
   console.log(status)
   const { isLoading, data } = useQuery({
     queryKey: ['attendances', event?.date || '', status],
