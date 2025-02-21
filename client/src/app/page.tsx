@@ -6,7 +6,7 @@ export default function HomePage() {
   return (
     <div className="flex bg-gradient-to-b from-royalpurple to-lightpurple h-screen">
       <FrontPage></FrontPage>
-      <Nav></Nav>
+      {/* <Nav></Nav> */}
     </div>
   )
 }

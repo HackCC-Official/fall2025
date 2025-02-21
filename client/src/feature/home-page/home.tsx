@@ -1,26 +1,34 @@
 import Image from "next/image";
-import plane from "./assets/temp_plane.png"
+import helicat from "./assets/HeliCat.png"
 import clouds from "./assets/temp_clouds.png"
+import title from "./assets/Title.png"
 import { Stars } from "./components/stars"
 import { Socials } from '../../components/socials'
 
 export default function home() {
     return(
-        <div>
+        <div className="flex">
             <Stars></Stars>
-            <div className="flex flex-row justify-around items-center w-screen h-screen">
-                <div className="z-10 flex flex-col justify-center items-center text-center">
-                    <h1 className="text-8xl bold">HACKCC</h1>
-                    <h2 className="mb-4 text-4xl">May 2nd-4th</h2>
-                    <input type="email" className="p-2 rounded-md w-96 caret-royalpurple" name="email" id="" placeholder="Enter your email for future updates!" />
-                    <button className="bg-pink-200 mt-4 px-4 py-2 rounded-md">Submit</button>
+            <Image className="bottom-0 absolute w-screen" src={clouds} alt="Clouds"></Image>
+            <div className="flex flex-col justify-center items-center w-screen h-screen z-50">
+                <div className="relative">
+                    <Image className="lg:h-48 md:h-44 sm:h-40 h-36 w-auto" src={title} alt="HackCC Logo"></Image>
+                    <Image className="absolute -right-3/4 bottom-3/4 animate-bobbing ease-linear" src={helicat} alt="HeliCat"></Image>
                 </div>
-                <div className="z-10">
-                    <Image className="" src={plane} alt="Plane"></Image>
+                <div className="lg:text-5xl md:mt-10 md:mb-20 mt-8 mb-16 text-center md:text-4xl text-3xl">
+                    <p>May 2-4, 2025 <span className="sm:inline hidden">|</span> <br className="sm:hidden inline" /> Northridge, CA</p>
+                </div>
+                <div className="lg:text-lg md:text-md text-sm flex flex-col text-center">
+                    <p>Sign up to receive updates about the event</p>
+                    <div>
+                        <input className="py-2 px-4 rounded-md md:my-5 md:mr-5 my-3 mr-3" type="email" placeholder="Enter your email address" />
+                        <button className="bg-pink-300 hover:bg-pink-400 text-white py-2 px-6 rounded-md cursor-pointer">Get Notified</button>
+                    </div>
                 </div>
             </div>
-            <Image className="bottom-0 absolute w-screen" src={clouds} alt="Clouds"></Image>
-            <Socials></Socials>
+            <div className="fixed bottom-20 mx-auto inset-x-0 flex justify-center items-center">
+                <Socials></Socials>
+            </div>
         </div>
     )
 }
