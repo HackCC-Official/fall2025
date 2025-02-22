@@ -3,15 +3,12 @@ import { useEffect, useMemo, useState } from "react";
 import Particles, { initParticlesEngine } from "@tsparticles/react";
 import {
     type Container,
-    FullScreen,
     type ISourceOptions,
-    MoveDirection,
-    OutMode,
 } from "@tsparticles/engine";
 
 import { loadSlim } from "@tsparticles/slim";
 
-export default function App() {
+export function Stars() {
     const [init, setInit] = useState(false);
 
     useEffect(() => {
