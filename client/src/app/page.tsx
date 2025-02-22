@@ -1,5 +1,5 @@
 import Image from "next/image";
-import FrontPage from "../features/home-page/home
+import FrontPage from "../features/home-page/home"
 import Stars from "../components/stars"
 import Nav from "../components/navbar"
 import clouds from "../assets/temp_clouds.png"
