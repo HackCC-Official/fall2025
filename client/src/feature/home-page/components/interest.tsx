@@ -40,6 +40,21 @@ export const Interest = () => {
     };*/
     return (
         <div>
+            <div>
+                <input 
+                name="email" 
+                className="py-2 px-4 rounded-md md:my-5 md:mr-5 my-3 mr-3" 
+                type="email" 
+                placeholder="Enter your email address"
+                />
+                <button type='submit' className="bg-pink-300 hover:bg-pink-400 text-white py-2 px-6 rounded-md cursor-pointer">Get Notified</button>
+            </div>
+        </div>
+    )
+}
+
+/*
+<div>
             <form onSubmit={handleSubmit}>
             <div>
                 <input 
@@ -47,14 +62,13 @@ export const Interest = () => {
                 className="py-2 px-4 rounded-md md:my-5 md:mr-5 my-3 mr-3" 
                 type="email" 
                 placeholder="Enter your email address"
-                //value={email}
-                //onChange={(e) => setEmail(e.target.value)}
-                //required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
                 />
                 <button type='submit' className="bg-pink-300 hover:bg-pink-400 text-white py-2 px-6 rounded-md cursor-pointer">Get Notified</button>
             </div>
         </form>
-        {/*status && <p className="lg:text-lg md:text-md text-sm flex flex-col text-center">{status}</p>*/}
+        {status && <p className="lg:text-lg md:text-md text-sm flex flex-col text-center">{status}</p>}
         </div>
-    )
-}
+        /*
