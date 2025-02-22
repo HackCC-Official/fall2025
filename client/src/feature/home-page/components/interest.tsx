@@ -71,4 +71,4 @@ export const Interest = () => {
         </form>
         {status && <p className="lg:text-lg md:text-md text-sm flex flex-col text-center">{status}</p>}
         </div>
-        /*
+        */
