@@ -9,4 +9,4 @@ export default function ApplicationPage() {
 }
 
 
-ApplicationPage.getLayout = (page: React.ReactElement) => <PanelLayout>{page}</PanelLayout>
+ApplicationPage.getLayout =(page: React.ReactElement) => <PanelLayout>{page}</PanelLayout>
