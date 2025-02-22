@@ -9,12 +9,12 @@ WORKDIR /app
 
 # Install dependencies based on the preferred package manager
 COPY package.json yarn.lock* package-lock.json* pnpm-lock.yaml* .npmrc* ./
-# Install dependencies using the package manager with conflict resolution fix
+# Install dependencies using the package manager
 RUN \
   if [ -f yarn.lock ]; then \
   yarn install --frozen-lockfile; \
   elif [ -f package-lock.json ]; then \
-  npm ci --legacy-peer-deps; \
+  npm ci; \
   elif [ -f pnpm-lock.yaml ]; then \
   corepack enable pnpm && pnpm install; \
   else \
@@ -25,8 +25,7 @@ RUN \
 COPY . .
 
 # Set environment variable to disable ESLint during the build process
-ARG NEXT_PUBLIC_QR_SERVICE_URL
-ENV NEXT_PUBLIC_QR_SERVICE_URL=${NEXT_PUBLIC_QR_SERVICE_URL}
+ENV NEXT_PUBLIC_ESLINT_DISABLE=true
 
 # Build Next.js app
 RUN \
@@ -58,10 +57,10 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./.next/standalo
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
 # Re-define runtime environment variables
-ARG NEXT_PUBLIC_QR_SERVICE_URL
-ENV NEXT_PUBLIC_QR_SERVICE_URL=${NEXT_PUBLIC_QR_SERVICE_URL}
-ARG NEXT_PUBLIC_OUTREACH_SERVICE_URL
-ENV NEXT_PUBLIC_OUTREACH_SERVICE_URLL=${NEXT_PUBLIC_OUTREACH_SERVICE_URL}
+ARG ENV_VARIABLE
+ENV ENV_VARIABLE=${ENV_VARIABLE}
+ARG NEXT_PUBLIC_ENV_VARIABLE
+ENV NEXT_PUBLIC_ENV_VARIABLE=${NEXT_PUBLIC_ENV_VARIABLE}
 
 # Expose the necessary port for the app
 EXPOSE 3000
