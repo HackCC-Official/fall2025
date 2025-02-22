@@ -5,11 +5,7 @@ services:
     build:
       context: ./client
       dockerfile: Dockerfile
-      args:
-        NEXT_PUBLIC_QR_SERVICE_URL: ${NEXT_PUBLIC_QR_SERVICE_URL}
     restart: always
-    env_file:
-      - .env
     ports:
       - 4000:3000
     networks:
