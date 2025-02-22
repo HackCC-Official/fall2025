@@ -2,7 +2,7 @@ server {
   listen 80;
   listen [::]:80;
 
-  server_name ${HOSTNAME};
+  server_name ${MAIN_HOSTNAME};
   server_tokens off;
 
   location /.well-known/acme-challenge/ {
@@ -10,7 +10,7 @@ server {
   }
 
   location / {
-      return 301 https://${HOSTNAME}$request_uri;
+      return 301 https://${MAIN_HOSTNAME}$request_uri;
   }
 }
 
@@ -20,8 +20,8 @@ server {
 
   server_name ${HOSTNAME};
 
-  ssl_certificate /etc/letsencrypt/live/${HOSTNAME}/fullchain.pem;
-  ssl_certificate_key /etc/letsencrypt/live/${HOSTNAME}/privkey.pem;
+  ssl_certificate /etc/letsencrypt/live/${MAIN_HOSTNAME}/fullchain.pem;
+  ssl_certificate_key /etc/letsencrypt/live/${MAIN_HOSTNAME}/privkey.pem;
 
   
   location / {
