@@ -10,12 +10,8 @@ import { outreachClient } from "../../../api/outreach-client";
  * Retrieves all contacts from the outreach service
  */
 export async function getContacts(): Promise<ContactDto[]> {
-    return (
-        await outreachClient.request({
-            method: "GET",
-            url: "contacts",
-        })
-    ).data;
+    const response = await outreachClient.get("/contacts");
+    return response.data.data; // Extract the nested data array
 }
 
 /**

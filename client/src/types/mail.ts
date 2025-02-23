@@ -1,13 +1,15 @@
+import type { EmailRecipient, EmailAttachment } from "@/features/outreach/types/email.dto";
+
 export interface Mail {
     id: string;
-    name: string;
-    email: string;
+    from: string;
+    to: EmailRecipient[];
     subject: string;
-    text: string;
+    html: string;
+    attachments?: EmailAttachment[];
     date: string;
     read: boolean;
     labels: string[];
-    selected?: boolean;
 }
 
 export interface MailState {

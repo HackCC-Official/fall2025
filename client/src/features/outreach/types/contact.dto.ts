@@ -3,6 +3,7 @@
  */
 export interface ContactDto {
     email: string;
+    name?: string;
     domain_name: string;
     organization: string;
     country?: string;

@@ -1,11 +1,9 @@
-import { Contact } from "./contacts-list";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { format } from "date-fns";
 import { Building2, Globe, Mail, MapPin, Phone, User } from "lucide-react";
-
+import type { ContactDto } from "@/features/outreach/types/contact.dto";
 interface ContactDisplayProps {
-    contact: Contact | null;
+    contact: ContactDto | null;
 }
 
 export function ContactDisplay({ contact }: ContactDisplayProps) {
@@ -77,7 +75,9 @@ export function ContactDisplay({ contact }: ContactDisplayProps) {
                         </div>
                         <div className="grid grid-cols-2 gap-4">
                             <div className="grid gap-1">
-                                <p className="text-sm font-medium">Department</p>
+                                <p className="text-sm font-medium">
+                                    Department
+                                </p>
                                 <p className="text-sm text-muted-foreground">
                                     {contact.department}
                                 </p>
@@ -101,9 +101,12 @@ export function ContactDisplay({ contact }: ContactDisplayProps) {
                     </CardHeader>
                     <CardContent className="grid gap-4">
                         <div className="grid gap-1">
-                            {contact.street && <p className="text-sm">{contact.street}</p>}
+                            {contact.street && (
+                                <p className="text-sm">{contact.street}</p>
+                            )}
                             <p className="text-sm">
-                                {contact.city}, {contact.state} {contact.postal_code}
+                                {contact.city}, {contact.state}{" "}
+                                {contact.postal_code}
                             </p>
                             <p className="text-sm">{contact.country}</p>
                         </div>
@@ -120,16 +123,19 @@ export function ContactDisplay({ contact }: ContactDisplayProps) {
                     <CardContent className="grid gap-4">
                         <div className="grid grid-cols-2 gap-4">
                             <div className="grid gap-1">
-                                <p className="text-sm font-medium">Created</p>
-                                <p className="text-sm text-muted-foreground">
-                                    {format(new Date(contact.created_at), "PPP")}
+                                <p className="text-sm font-medium">
+                                    Confidence Score
                                 </p>
-                            </div>
-                            <div className="grid gap-1">
-                                <p className="text-sm font-medium">Confidence Score</p>
-                                <p className="text-sm text-muted-foreground">
-                                    {(contact.confidence_score * 100).toFixed(0)}%
-                                </p>
+                                <div>
+                                    {contact.confidence_score != null && (
+                                        <span>
+                                            {contact.confidence_score.toFixed(
+                                                0
+                                            )}
+                                            %
+                                        </span>
+                                    )}
+                                </div>
                             </div>
                         </div>
                     </CardContent>
@@ -137,4 +143,4 @@ export function ContactDisplay({ contact }: ContactDisplayProps) {
             </div>
         </div>
     );
-} 
+}

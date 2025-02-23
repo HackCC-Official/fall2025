@@ -1,14 +1,25 @@
+"use client";
+
 import { create } from "zustand";
 
 interface ContactState {
     selected: string | null;
 }
 
-const useContactStore = create<ContactState>((set) => ({
-    selected: null,
+interface ContactStore {
+    contact: ContactState;
+    setContact: (contact: ContactState) => void;
+}
+
+const useContactStore = create<ContactStore>((set) => ({
+    contact: {
+        selected: null,
+    },
+    setContact: (contact) => set({ contact }),
 }));
 
 export const useContact = () => {
-    const store = useContactStore();
-    return [store, useContactStore.setState] as const;
+    const contact = useContactStore((state) => state.contact);
+    const setContact = useContactStore((state) => state.setContact);
+    return [contact, setContact] as const;
 }; 

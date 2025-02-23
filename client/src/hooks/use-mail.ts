@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { MailState } from "@/types/mail";
 
-const useMailStore = create<MailState>((set) => ({
+const useMailStore = create<MailState>(() => ({
     selected: null,
 }));
 

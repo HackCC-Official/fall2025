@@ -16,12 +16,12 @@ import {
     ResizableHandle,
 } from "@/components/ui/resizable";
 import { useMail } from "@/hooks/use-mail";
+import { useContact } from "@/hooks/use-contact";
 import { Nav } from "./nav";
 import { MailHeader } from "./mail-header";
 import { ContactsList } from "./contacts-list";
-import { CONTACTS } from "./contacts-list";
 import { ContactDisplay } from "./contact-display";
-import { useContact } from "@/hooks/use-contact";
+import type { ContactDto } from "@/features/outreach/types/contact.dto";
 
 interface MailProps {
     accounts: {
@@ -30,6 +30,7 @@ interface MailProps {
         icon: React.ReactNode;
     }[];
     mails: Mail[];
+    contacts: ContactDto[];
     defaultLayout: number[] | undefined;
     defaultCollapsed?: boolean;
     navCollapsedSize: number;
@@ -37,17 +38,23 @@ interface MailProps {
 
 export function Mail({
     mails,
+    contacts,
     defaultLayout = [20, 32, 48],
     defaultCollapsed = false,
     navCollapsedSize,
 }: MailProps) {
+    // Debug log
+    console.log("Mail component received contacts:", contacts);
+
     const [isCollapsed, setIsCollapsed] = React.useState(defaultCollapsed);
     const [mail] = useMail();
     const [contact] = useContact();
+
     const selectedMail =
         mails.find((item) => item.id === mail.selected) || null;
-    const selectedContact =
-        CONTACTS.find((item) => item.id === contact.selected) || null;
+    const selectedContact = Array.isArray(contacts)
+        ? contacts.find((item) => item.email === contact.selected) || null
+        : null;
 
     const [activeView, setActiveView] = React.useState<"mail" | "contacts">(
         "mail"
@@ -114,7 +121,9 @@ export function Mail({
                                     },
                                     {
                                         title: "Contacts",
-                                        label: CONTACTS.length.toString(),
+                                        label: Array.isArray(contacts)
+                                            ? contacts.length.toString()
+                                            : "0",
                                         icon: Users,
                                         variant:
                                             activeView === "contacts"
@@ -153,7 +162,7 @@ export function Mail({
                                     <MailList items={mails} />
                                 </div>
                             ) : (
-                                <ContactsList />
+                                <ContactsList contacts={contacts} />
                             )}
                         </ResizablePanel>
                         <ResizableHandle withHandle />

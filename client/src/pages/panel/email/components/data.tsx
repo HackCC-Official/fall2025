@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Mail } from "@/types/mail";
+import type { Mail } from "@/types/mail";
 import { CircleUser } from "lucide-react";
 
 export const accounts = [
@@ -13,20 +13,30 @@ export const accounts = [
 export const mails: Mail[] = [
     {
         id: "1",
-        name: "John Doe",
-        email: "john@example.com",
+        from: "outreach@hackcc.dev",
+        to: [
+            {
+                email: "john@techcorp.com",
+                name: "John Smith",
+            },
+        ],
         subject: "Sponsorship Opportunity",
-        text: "Hi HackCC team, I'm interested in sponsoring your upcoming hackathon...",
+        html: "Hi HackCC team, I'm interested in sponsoring your upcoming hackathon...",
         date: new Date().toISOString(),
         read: false,
         labels: ["sponsor"],
     },
     {
         id: "2",
-        name: "Jane Smith",
-        email: "jane@example.com",
+        from: "outreach@hackcc.dev",
+        to: [
+            {
+                email: "sarah@innovate.io",
+                name: "Sarah Johnson",
+            },
+        ],
         subject: "Workshop Proposal",
-        text: "Hello, I'd love to host a workshop at your next event...",
+        html: "Hello, I'd love to host a workshop at your next event...",
         date: new Date(Date.now() - 86400000).toISOString(),
         read: true,
         labels: ["workshop"],

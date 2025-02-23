@@ -29,8 +29,12 @@ export function HackersMail({
 
     const filteredMails = mails.filter(
         (mail) =>
-            mail.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            mail.email.toLowerCase().includes(searchQuery.toLowerCase())
+            mail.to?.[0]?.name
+                ?.toLowerCase()
+                .includes(searchQuery.toLowerCase()) ||
+            mail.to?.[0]?.email
+                ?.toLowerCase()
+                .includes(searchQuery.toLowerCase())
     );
 
     const selectedHacker = mails.find((m) => m.id === mail.selected);
@@ -84,14 +88,16 @@ export function HackersMail({
                                 >
                                     <div className="flex items-center gap-3">
                                         <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center">
-                                            {item.name.charAt(0).toUpperCase()}
+                                            {item.to?.[0]?.name
+                                                ?.charAt(0)
+                                                .toUpperCase()}
                                         </div>
                                         <div>
                                             <div className="font-medium">
-                                                {item.name}
+                                                {item.to?.[0]?.name}
                                             </div>
                                             <div className="text-sm text-muted-foreground">
-                                                {item.email}
+                                                {item.to?.[0]?.email}
                                             </div>
                                         </div>
                                     </div>
@@ -108,16 +114,16 @@ export function HackersMail({
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-4">
                                         <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center text-lg font-medium">
-                                            {selectedHacker.name
-                                                .charAt(0)
+                                            {selectedHacker.to?.[0]?.name
+                                                ?.charAt(0)
                                                 .toUpperCase()}
                                         </div>
                                         <div>
                                             <h2 className="text-xl font-semibold">
-                                                {selectedHacker.name}
+                                                {selectedHacker.to?.[0]?.name}
                                             </h2>
                                             <p className="text-muted-foreground">
-                                                {selectedHacker.email}
+                                                {selectedHacker.to?.[0]?.email}
                                             </p>
                                         </div>
                                     </div>
@@ -125,7 +131,7 @@ export function HackersMail({
                                         variant="outline"
                                         className="gap-2"
                                         onClick={() =>
-                                            (window.location.href = `/compose?to=${selectedHacker.email}`)
+                                            (window.location.href = `/compose?to=${selectedHacker.to?.[0]?.email}`)
                                         }
                                     >
                                         <MailIcon className="h-4 w-4" />

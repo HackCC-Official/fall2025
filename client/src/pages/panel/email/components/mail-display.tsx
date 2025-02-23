@@ -16,22 +16,24 @@ export function MailDisplay({ mail }: MailDisplayProps) {
                     <div className="flex items-start p-4">
                         <div className="flex items-start gap-4 text-sm">
                             <Avatar>
-                                <AvatarImage alt={mail.name} />
+                                <AvatarImage alt={mail.to?.[0]?.name} />
                                 <AvatarFallback>
-                                    {mail.name
-                                        .split(" ")
-                                        .map((chunk) => chunk[0])
-                                        .join("")}
+                                    {mail.to?.[0]?.name
+                                        ?.split(" ")
+                                        .map((chunk: string) => chunk[0])
+                                        .join("") || ""}
                                 </AvatarFallback>
                             </Avatar>
                             <div className="grid gap-1">
-                                <div className="font-semibold">{mail.name}</div>
+                                <div className="font-semibold">
+                                    {mail.to[0].name}
+                                </div>
                                 <div className="line-clamp-1 text-xs">
                                     {mail.subject}
                                 </div>
                                 <div className="line-clamp-1 text-xs">
                                     <span className="font-medium">From:</span>{" "}
-                                    {mail.email}
+                                    {mail.from}
                                 </div>
                             </div>
                         </div>
@@ -43,7 +45,7 @@ export function MailDisplay({ mail }: MailDisplayProps) {
                     </div>
                     <Separator />
                     <div className="flex-1 whitespace-pre-wrap p-4 text-sm">
-                        {mail.text}
+                        {mail.html}
                     </div>
                 </div>
             ) : (
