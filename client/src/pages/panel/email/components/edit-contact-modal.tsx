@@ -22,15 +22,23 @@ interface EditContactModalProps {
     onOpenChange: (open: boolean) => void;
 }
 
-export function EditContactModal({ contact, open, onOpenChange }: EditContactModalProps) {
+export default function EditContactModal({
+    contact,
+    open,
+    onOpenChange,
+}: EditContactModalProps) {
     const queryClient = useQueryClient();
     const [formData, setFormData] = useState({
-        first_name: contact.first_name,
-        last_name: contact.last_name,
-        email: contact.email,
-        position: contact.position,
-        organization: contact.organization,
+        first_name: contact?.first_name || "",
+        last_name: contact?.last_name || "",
+        email: contact?.email || "",
+        position: contact?.position || "",
+        organization: contact?.organization || "",
     });
+
+    if (!contact) {
+        return null;
+    }
 
     const handleSubmit = async () => {
         try {
@@ -141,4 +149,4 @@ export function EditContactModal({ contact, open, onOpenChange }: EditContactMod
             </DialogContent>
         </Dialog>
     );
-} 
+}

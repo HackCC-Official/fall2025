@@ -1,14 +1,14 @@
 "use client";
 
 import * as React from "react";
-import { Inbox, Search, Send, Users } from "lucide-react";
+import { Search, Send, Users } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { Separator } from "@radix-ui/react-separator";
 import { TooltipProvider } from "@radix-ui/react-tooltip";
 import { Input } from "@/components/ui/input";
-import { MailDisplay } from "./mail-display";
-import { MailList } from "./mail-list";
+import MailDisplay from "./mail-display";
+import MailList from "./mail-list";
 import type { Mail } from "@/types/mail";
 import {
     ResizablePanelGroup,
@@ -17,10 +17,10 @@ import {
 } from "@/components/ui/resizable";
 import { useMail } from "@/hooks/use-mail";
 import { useContact } from "@/hooks/use-contact";
-import { Nav } from "./nav";
-import { MailHeader } from "./mail-header";
-import { ContactsList } from "./contacts-list";
-import { ContactDisplay } from "./contact-display";
+import Nav from "./nav";
+import MailHeader from "./mail-header";
+import ContactsList from "./contacts-list";
+import ContactDisplay from "./contact-display";
 import type { ContactDto } from "@/features/outreach/types/contact.dto";
 
 interface MailProps {
@@ -36,9 +36,9 @@ interface MailProps {
     navCollapsedSize: number;
 }
 
-export function Mail({
-    mails,
-    contacts,
+export default function Mail({
+    mails = [],
+    contacts = [],
     defaultLayout = [20, 32, 48],
     defaultCollapsed = false,
     navCollapsedSize,
@@ -51,10 +51,9 @@ export function Mail({
     const [contact] = useContact();
 
     const selectedMail =
-        mails.find((item) => item.id === mail.selected) || null;
-    const selectedContact = Array.isArray(contacts)
-        ? contacts.find((item) => item.email === contact.selected) || null
-        : null;
+        mails?.find((item) => item.id === mail.selected) || null;
+    const selectedContact =
+        contacts?.find((item) => item.email === contact.selected) || null;
 
     const [activeView, setActiveView] = React.useState<"mail" | "contacts">(
         "mail"
@@ -104,20 +103,14 @@ export function Mail({
                                 isCollapsed={isCollapsed}
                                 links={[
                                     {
-                                        title: "Inbox",
-                                        label: "128",
-                                        icon: Inbox,
+                                        title: "Sent",
+                                        label: "",
+                                        icon: Send,
                                         variant:
                                             activeView === "mail"
                                                 ? "default"
                                                 : "ghost",
                                         onClick: () => setActiveView("mail"),
-                                    },
-                                    {
-                                        title: "Sent",
-                                        label: "",
-                                        icon: Send,
-                                        variant: "ghost",
                                     },
                                     {
                                         title: "Contacts",

@@ -1,4 +1,7 @@
-import type { EmailRecipient, EmailAttachment } from "@/features/outreach/types/email.dto";
+import type {
+    EmailRecipient,
+    EmailAttachment,
+} from "@/features/outreach/types/email.dto";
 
 export interface Mail {
     id: string;
@@ -14,4 +17,4 @@ export interface Mail {
 
 export interface MailState {
     selected: string | null;
-} 
+}

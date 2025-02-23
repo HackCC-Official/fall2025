@@ -20,14 +20,14 @@ interface HackersMailProps {
     defaultLayout?: number[];
 }
 
-export function HackersMail({
-    mails,
+export default function HackersMail({
+    mails = [],
     defaultLayout = [35, 65],
 }: HackersMailProps) {
     const [mail, setMail] = useMail();
     const [searchQuery, setSearchQuery] = React.useState("");
 
-    const filteredMails = mails.filter(
+    const filteredMails = (mails || []).filter(
         (mail) =>
             mail.to?.[0]?.name
                 ?.toLowerCase()

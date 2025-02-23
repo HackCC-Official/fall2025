@@ -6,7 +6,7 @@ interface MailHeaderProps {
     selectedMail: Mail | null;
 }
 
-export function MailHeader({ selectedMail }: MailHeaderProps) {
+export default function MailHeader({ selectedMail }: MailHeaderProps) {
     return (
         <div className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
             <div className="max-w-[1400px] mx-auto w-full">
@@ -34,7 +34,7 @@ export function MailHeader({ selectedMail }: MailHeaderProps) {
                                 variant="outline"
                                 className="gap-2"
                                 onClick={() =>
-                                    (window.location.href = `/compose?to=${selectedMail.email}`)
+                                    (window.location.href = `/compose?to=${selectedMail.to[0]?.email}`)
                                 }
                             >
                                 <MailIcon className="h-4 w-4" />
@@ -46,4 +46,4 @@ export function MailHeader({ selectedMail }: MailHeaderProps) {
             </div>
         </div>
     );
-} 
+}

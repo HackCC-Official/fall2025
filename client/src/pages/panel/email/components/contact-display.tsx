@@ -2,11 +2,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Building2, Globe, Mail, MapPin, Phone, User } from "lucide-react";
 import type { ContactDto } from "@/features/outreach/types/contact.dto";
+
 interface ContactDisplayProps {
     contact: ContactDto | null;
 }
 
-export function ContactDisplay({ contact }: ContactDisplayProps) {
+export default function ContactDisplay({ contact }: ContactDisplayProps) {
     if (!contact) {
         return (
             <div className="h-full flex flex-col items-center justify-center text-muted-foreground p-8">
@@ -53,6 +54,37 @@ export function ContactDisplay({ contact }: ContactDisplayProps) {
                                 <div className="flex items-center gap-2 text-sm">
                                     <Phone className="h-4 w-4 text-muted-foreground" />
                                     <span>{contact.phone_number}</span>
+                                </div>
+                            )}
+                            {contact.linkedin_url && (
+                                <div className="flex items-center gap-2 text-sm">
+                                    <svg
+                                        className="h-4 w-4 text-muted-foreground"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        strokeWidth="2"
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                    >
+                                        <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" />
+                                        <rect
+                                            width="4"
+                                            height="12"
+                                            x="2"
+                                            y="9"
+                                        />
+                                        <circle cx="4" cy="4" r="2" />
+                                    </svg>
+                                    <a
+                                        href={contact.linkedin_url}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-primary hover:underline"
+                                    >
+                                        LinkedIn Profile
+                                    </a>
                                 </div>
                             )}
                         </div>

@@ -19,13 +19,17 @@ interface AccountSwitcherProps {
     }[];
 }
 
-export function AccountSwitcher({
+export default function AccountSwitcher({
     isCollapsed,
-    accounts,
+    accounts = [],
 }: AccountSwitcherProps) {
     const [selectedAccount, setSelectedAccount] = React.useState<string>(
-        accounts[0].email
+        accounts?.[0]?.email || ""
     );
+
+    if (!accounts?.length) {
+        return null;
+    }
 
     return (
         <Select
@@ -56,7 +60,7 @@ export function AccountSwitcher({
                 </SelectValue>
             </SelectTrigger>
             <SelectContent>
-                {accounts.map((account) => (
+                {(accounts || []).map((account) => (
                     <SelectItem key={account.email} value={account.email}>
                         <div className="flex items-center gap-3 [&_svg]:h-4 [&_svg]:w-4 [&_svg]:shrink-0 [&_svg]:text-foreground">
                             {account.icon}

@@ -1,3 +1,5 @@
+"use client";
+
 import { ComponentProps } from "react";
 import { formatDistanceToNow } from "date-fns";
 import { cn } from "@/lib/utils";
@@ -10,13 +12,18 @@ interface MailListProps {
     items: Mail[];
 }
 
-export function MailList({ items }: MailListProps) {
+/**
+ * MailList Component - Displays a scrollable list of email messages
+ * @param {MailListProps} props - Component properties containing array of mail items
+ * @returns {JSX.Element} Rendered mail list component
+ */
+export default function MailList({ items = [] }: MailListProps) {
     const [mail, setMail] = useMail();
 
     return (
         <ScrollArea className="h-screen">
             <div className="flex flex-col gap-2 p-4 pt-0">
-                {items.map((item) => (
+                {(items || []).map((item) => (
                     <button
                         key={item.id}
                         className={cn(
@@ -60,7 +67,7 @@ export function MailList({ items }: MailListProps) {
                         <div className="line-clamp-2 text-xs text-muted-foreground">
                             {item.html.substring(0, 300)}
                         </div>
-                        {item.labels.length ? (
+                        {item.labels?.length ? (
                             <div className="flex items-center gap-2">
                                 {item.labels.map((label) => (
                                     <Badge
@@ -81,16 +88,24 @@ export function MailList({ items }: MailListProps) {
     );
 }
 
+/**
+ * Determines the badge variant based on the label type
+ * @param {string} label - The label to determine variant for
+ * @returns {ComponentProps<typeof Badge>["variant"]} The badge variant to use
+ */
 function getBadgeVariantFromLabel(
     label: string
 ): ComponentProps<typeof Badge>["variant"] {
-    if (["work"].includes(label.toLowerCase())) {
-        return "default";
+    switch (label.toLowerCase()) {
+        case "sponsor":
+            return "default";
+        case "workshop":
+            return "outline";
+        case "important":
+            return "destructive";
+        case "personal":
+            return "secondary";
+        default:
+            return "secondary";
     }
-
-    if (["personal"].includes(label.toLowerCase())) {
-        return "outline";
-    }
-
-    return "secondary";
 }

@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { useContact } from "@/hooks/use-contact";
 import type { ContactDto } from "@/features/outreach/types/contact.dto";
 import { cn } from "@/lib/utils";
-import { EditContactModal } from "./edit-contact-modal";
+import EditContactModal from "./edit-contact-modal";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -31,7 +31,7 @@ interface ContactsListProps {
     contacts: ContactDto[];
 }
 
-export function ContactsList({ contacts }: ContactsListProps) {
+export default function ContactsList({ contacts }: ContactsListProps) {
     const [contact, setContact] = useContact();
     const [searchQuery, setSearchQuery] = React.useState("");
     const [editingContact, setEditingContact] =
@@ -39,15 +39,14 @@ export function ContactsList({ contacts }: ContactsListProps) {
     const queryClient = useQueryClient();
     const [deleteId, setDeleteId] = React.useState<number | null>(null);
 
-    const contactsArray = Array.isArray(contacts) ? contacts : [];
-
     const filteredContacts = React.useMemo(() => {
+        const contactsArray = Array.isArray(contacts) ? contacts : [];
         return contactsArray.filter(
             (c) =>
                 c.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
                 c.email.toLowerCase().includes(searchQuery.toLowerCase())
         );
-    }, [contactsArray, searchQuery]);
+    }, [contacts, searchQuery]);
 
     const handleDelete = async (contactId: number) => {
         try {

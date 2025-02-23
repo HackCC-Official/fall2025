@@ -21,7 +21,6 @@ import {
     LucideIcon,
 } from "lucide-react";
 import { LogoIcon } from "../logo-icon";
-import { SidebarDropdown } from "./sidebar-dropdown";
 
 // Updated menu items with nested structure
 type MenuItem = {
@@ -104,23 +103,15 @@ export function AppSidebar() {
                         <SidebarMenu>
                             {items.map((item) => (
                                 <SidebarMenuItem key={item.title}>
-                                    {item.children ? (
-                                        <SidebarDropdown
-                                            icon={item.icon}
-                                            title={item.title}
-                                            items={item.children}
-                                        />
-                                    ) : (
-                                        <SidebarMenuButton asChild>
-                                            <a
-                                                href={item.url}
-                                                className="flex items-center gap-2"
-                                            >
-                                                <item.icon className="size-4" />
-                                                <span>{item.title}</span>
-                                            </a>
-                                        </SidebarMenuButton>
-                                    )}
+                                    <SidebarMenuButton asChild>
+                                        <a
+                                            href={item.url}
+                                            className="flex items-center gap-2"
+                                        >
+                                            <item.icon className="size-4" />
+                                            <span>{item.title}</span>
+                                        </a>
+                                    </SidebarMenuButton>
                                 </SidebarMenuItem>
                             ))}
                         </SidebarMenu>

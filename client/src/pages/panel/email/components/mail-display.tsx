@@ -1,3 +1,5 @@
+"use client";
+
 import { format } from "date-fns";
 import { Mail as MailIcon } from "lucide-react";
 import { Mail } from "@/types/mail";
@@ -8,7 +10,7 @@ interface MailDisplayProps {
     mail: Mail | null;
 }
 
-export function MailDisplay({ mail }: MailDisplayProps) {
+export default function MailDisplay({ mail }: MailDisplayProps) {
     return (
         <div className="flex h-full flex-col bg-background">
             {mail ? (

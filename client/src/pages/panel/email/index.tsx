@@ -3,14 +3,23 @@
 import * as React from "react";
 import PanelLayout from "../layout";
 import type { Mail } from "@/types/mail";
-import { accounts, mails } from "./components/data";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Building2, Users } from "lucide-react";
-import { HackersMail } from "./components/hackers-mail";
-import { AccountSwitcher } from "./components/account-switcher";
+import { Building2, Users, CircleUser } from "lucide-react";
+import HackersMail from "./components/hackers-mail";
+import AccountSwitcher from "./components/account-switcher";
 import { Separator } from "@/components/ui/separator";
-import { Mail as MailComponent } from "./components/mail";
+import MailComponent from "./components/mail";
 import { useContacts } from "@/hooks/use-contacts";
+
+const accounts = [
+    {
+        label: "HackCC",
+        email: "outreach@hackcc.dev",
+        icon: <CircleUser />,
+    },
+];
+
+const mails: Mail[] = [];
 
 const HACKER_SAMPLE_DATA: Mail[] = [
     {
