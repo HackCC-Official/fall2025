@@ -24,7 +24,7 @@ RUN \
 # Copy application source files
 COPY . .
 
-# Set environment variables
+# Set environment variable to disable ESLint during the build process
 ARG NEXT_PUBLIC_QR_SERVICE_URL
 ENV NEXT_PUBLIC_QR_SERVICE_URL=${NEXT_PUBLIC_QR_SERVICE_URL}
 ARG NEXT_PUBLIC_OUTREACH_SERVICE_URL
@@ -57,9 +57,6 @@ RUN addgroup --system --gid 1001 nodejs && \
   chown -R nextjs:nodejs /app
 
 USER nextjs
-
-# Create necessary directories
-RUN mkdir -p .next/standalone .next/static
 
 # Copy built application and static files from the builder
 COPY --from=builder /app/public ./public
