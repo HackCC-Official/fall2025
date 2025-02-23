@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build && mkdir -p .next/standalone/.next && cp -r .next/static .next/standalone/.next/",
+    "build": "next build && cp -r .next/static .next/standalone/.next/",
     "start": "next start",
     "lint": "next lint"
   },
@@ -52,7 +52,7 @@
     "react-resizable-panels": "^2.1.7",
     "tailwind-merge": "^3.0.1",
     "tailwindcss-animate": "^1.0.7",
-    "zod": "^3.24.1",
+    "zod": "^3.24.2",
     "zustand": "^5.0.3"
   },
   "devDependencies": {
