@@ -1,8 +1,16 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started
+first, use the following env template or the one found `.env.example` in order to run your app locally
+```
+# for deploying to prod or dev 
+MAIN_HOSTNAME=
+MINIO_HOSTNAME=
+NEXT_PUBLIC_QR_SERVICE_URL=
+NEXT_PUBLIC_OUTREACH_SERVICE_URL=
+```
 
-First, run the development server:
+then, run the development server:
 
 ```bash
 npm run dev
