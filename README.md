@@ -32,6 +32,17 @@ Then enter directory and install the dependencies
 cd spring2025/client
 npm install
 ```
+
+### Environment Variable
+Use the following env template or the one found `.env.example` in order to deploy to production or development server
+```
+# for deploying to prod or dev 
+MAIN_HOSTNAME=
+MINIO_HOSTNAME=
+NEXT_PUBLIC_QR_SERVICE_URL=
+NEXT_PUBLIC_OUTREACH_SERVICE_URL=
+```
+
 ### Running website locally
 First, run the development server:
 
