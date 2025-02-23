@@ -17,6 +17,14 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  async rewrites() {
+    return [
+        {
+            source: "/outreach-service/:path*",
+            destination: "https://dev.hackcc.net/outreach-service/:path*",
+        },
+    ];
+  },
 };
 
 export default nextConfig;
