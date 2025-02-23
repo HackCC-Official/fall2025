@@ -7,8 +7,9 @@ const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 );
 
+
 export const Interest = () => {
- const [email, setEmail] = useState("");
+    const [email, setEmail] = useState("");
     const [status, setStatus] = useState("");
 
     const isValidEmail = (email: string) => {
@@ -28,7 +29,7 @@ export const Interest = () => {
         const { error } = await supabase.from("interested_users").insert([{ email }]);
 
         if (error) {
-            if (error.code === "23505") { // 23505 = unique_violation in PostgreSQL
+            if (error.code === "23505") {
                 setStatus("You're already signed up! 🎉");
             } else {
                 setStatus("Error: " + error.message);
@@ -41,9 +42,8 @@ export const Interest = () => {
 
     
     return (
-<div>
-    <form onSubmit={handleSubmit}>
-            <div>
+        <div>
+            <form onSubmit={handleSubmit}>
                 <input 
                 name="email" 
                 className="my-3 md:my-5 mr-3 md:mr-5 px-4 py-2 rounded-md" 
@@ -54,8 +54,7 @@ export const Interest = () => {
                 required
                 />
                 <button type='submit' className="bg-pink-300 hover:bg-pink-400 px-6 py-2 rounded-md text-white cursor-pointer">Get Notified</button>
-            </div>
-        </form>
+            </form>
         {status && <p className="flex flex-col md:text-md text-sm lg:text-lg text-center">{status}</p>}
         </div>
     )
