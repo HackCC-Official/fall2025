@@ -3,7 +3,8 @@ import { AccountDTO } from "@/features/account/types/account-dto";
 export enum AttendanceStatus {
   PRESENT = 'PRESENT',
   LATE = 'LATE',
-  ABSENT = 'ABSENT'
+  ABSENT = 'ABSENT',
+  ALL = 'ALL'
 }
 
 export interface AttendanceDTO {
