@@ -31,7 +31,7 @@ import {
 } from "@/components/ui/select";
 
 interface EditContactDrawerProps {
-    contact: ContactDto;
+    contact?: ContactDto;
     open: boolean;
     onOpenChange: (open: boolean) => void;
 }
@@ -78,7 +78,10 @@ const contactFormSchema = z
         industry: z.string().optional(),
     })
     .transform((data) => {
-        const cleaned = { ...data } as Record<string, string>;
+        const cleaned = { ...data } as unknown as Record<
+            string,
+            string | number
+        >;
         Object.keys(cleaned).forEach((key) => {
             if (cleaned[key] === "") {
                 delete cleaned[key];
@@ -101,29 +104,34 @@ export default function EditContactDrawer({
     const form = useForm<ContactFormValues>({
         resolver: zodResolver(contactFormSchema),
         defaultValues: {
-            first_name: contact.first_name || "",
-            last_name: contact.last_name || "",
-            email: contact.email || "",
-            domain_name: contact.domain_name || "",
-            organization: contact.organization || "",
-            country: contact.country || "",
-            state: contact.state || "",
-            city: contact.city || "",
-            postal_code: contact.postal_code || "",
-            street: contact.street || "",
-            confidence_score: contact.confidence_score,
-            type: contact.type || "other",
-            number_of_sources: contact.number_of_sources,
-            pattern: contact.pattern || "",
-            department: contact.department || "",
-            position: contact.position || "",
-            twitter_handle: contact.twitter_handle || "",
-            linkedin_url: contact.linkedin_url || "",
-            phone_number: contact.phone_number || "",
-            company_type: contact.company_type || "",
-            industry: contact.industry || "",
+            first_name: contact?.first_name || "",
+            last_name: contact?.last_name || "",
+            email: contact?.email || "",
+            domain_name: contact?.domain_name || "",
+            organization: contact?.organization || "",
+            country: contact?.country || "",
+            state: contact?.state || "",
+            city: contact?.city || "",
+            postal_code: contact?.postal_code || "",
+            street: contact?.street || "",
+            confidence_score: contact?.confidence_score,
+            type: contact?.type || "other",
+            number_of_sources: contact?.number_of_sources,
+            pattern: contact?.pattern || "",
+            department: contact?.department || "",
+            position: contact?.position || "",
+            twitter_handle: contact?.twitter_handle || "",
+            linkedin_url: contact?.linkedin_url || "",
+            phone_number: contact?.phone_number || "",
+            company_type: contact?.company_type || "",
+            industry: contact?.industry || "",
         },
     });
+
+    // Return early if no contact
+    if (!contact) {
+        return null;
+    }
 
     const onSubmit = async (values: ContactFormValues) => {
         setIsSubmitting(true);
@@ -154,8 +162,16 @@ export default function EditContactDrawer({
 
             // Add required fields
             const contactData: Partial<ContactDto> = {
-                ...cleanedValues,
-                type: cleanedValues.type || "other", // Default type if not provided
+                ...Object.fromEntries(
+                    Object.entries(cleanedValues).map(([key, value]) => [
+                        key,
+                        key === "confidence_score" ||
+                        key === "number_of_sources"
+                            ? Number(value)
+                            : String(value),
+                    ])
+                ),
+                type: (cleanedValues.type as string) || "other", // Default type if not provided
             };
 
             await updateContact(contact.id.toString(), contactData);

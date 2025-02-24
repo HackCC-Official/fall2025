@@ -56,26 +56,21 @@ export async function updateContact(
 ): Promise<ContactDto> {
     console.log("Updating contact:", { id, data: contactDto });
     try {
-        // Convert string ID to number to match DTO type
-        const numericId = parseInt(id, 10);
-        if (isNaN(numericId)) {
-            throw new Error("Invalid contact ID");
-        }
-
         // Debug logging
-        console.log("Making request to:", `/contacts/${numericId}`);
+        console.log("Making request to:", `/contacts/${id}`);
         console.log("Request configuration:", {
-            method: "PUT",
+            method: "PATCH",
             baseURL: outreachClient.defaults.baseURL,
             headers: outreachClient.defaults.headers,
         });
 
         const response = await outreachClient.request({
-            method: "PUT",
-            url: `/contacts/${numericId}`,
+            method: "PATCH",
+            url: `/contacts/${id}`,
             data: contactDto,
             headers: {
                 "Content-Type": "application/json",
+                accept: "application/json",
             },
         });
 
