@@ -5,6 +5,8 @@ import {
     UpdateEmailDto,
 } from "../types/email.dto";
 import { outreachClient } from "../../../api/outreach-client";
+import axios from "axios";
+import { InterestedUserDto } from "../types/interested-users.dto";
 
 /**
  * Retrieves all contacts from the outreach service
@@ -22,7 +24,7 @@ export async function getContactById(contactId: string): Promise<ContactDto> {
     return (
         await outreachClient.request({
             method: "GET",
-            url: `contacts/${contactId}`,
+            url: `/contacts/${contactId}`,
         })
     ).data;
 }
@@ -32,7 +34,7 @@ export async function getContactById(contactId: string): Promise<ContactDto> {
  * @param contactDto - The contact data to create
  */
 export async function createContact(
-    contactDto: ContactDto
+    contactDto: Partial<ContactDto>
 ): Promise<ContactDto> {
     return (
         await outreachClient.request({
@@ -52,13 +54,47 @@ export async function updateContact(
     id: string,
     contactDto: UpdateContactDto
 ): Promise<ContactDto> {
-    return (
-        await outreachClient.request({
+    console.log("Updating contact:", { id, data: contactDto });
+    try {
+        // Convert string ID to number to match DTO type
+        const numericId = parseInt(id, 10);
+        if (isNaN(numericId)) {
+            throw new Error("Invalid contact ID");
+        }
+
+        // Debug logging
+        console.log("Making request to:", `/contacts/${numericId}`);
+        console.log("Request configuration:", {
             method: "PUT",
-            url: `contacts/${id}`,
+            baseURL: outreachClient.defaults.baseURL,
+            headers: outreachClient.defaults.headers,
+        });
+
+        const response = await outreachClient.request({
+            method: "PUT",
+            url: `/contacts/${numericId}`,
             data: contactDto,
-        })
-    ).data;
+            headers: {
+                "Content-Type": "application/json",
+            },
+        });
+
+        console.log("Update response:", response.data);
+        // Handle both nested and direct response formats
+        return response.data.data || response.data;
+    } catch (error) {
+        // Type guard for AxiosError
+        if (axios.isAxiosError(error)) {
+            console.error("Detailed error information:", {
+                error: error.message,
+                requestConfig: error.config,
+                response: error.response?.data,
+            });
+        } else {
+            console.error("Unexpected error:", error);
+        }
+        throw error;
+    }
 }
 
 /**
@@ -68,7 +104,7 @@ export async function updateContact(
 export async function deleteContact(id: string): Promise<void> {
     await outreachClient.request({
         method: "DELETE",
-        url: `contacts/${id}`,
+        url: `/contacts/${id}`,
     });
 }
 
@@ -88,7 +124,7 @@ export async function uploadContacts(file: File): Promise<ContactDto[]> {
     return (
         await outreachClient.request({
             method: "POST",
-            url: "contacts/upload",
+            url: "/contacts/upload",
             headers: {
                 "Content-Type": "multipart/form-data",
             },
@@ -162,4 +198,45 @@ export async function updateEmail(
             data: updateDto,
         })
     ).data;
+}
+
+/**
+ * Creates a new interested user record
+ * @param interestedUserDto - The interested user data containing email
+ * @throws {Error} If the request fails or user already exists
+ */
+export async function createInterestedUser(
+    interestedUserDto: InterestedUserDto
+): Promise<void> {
+    await outreachClient.request({
+        method: "POST",
+        url: "interested-users",
+        data: interestedUserDto,
+    });
+}
+
+/**
+ * Retrieves all interested users from the system
+ * @returns Array of interested user records containing email addresses
+ * @throws {Error} If the request fails
+ */
+export async function getInterestedUsers(): Promise<InterestedUserDto[]> {
+    return (
+        await outreachClient.request({
+            method: "GET",
+            url: "interested-users",
+        })
+    ).data;
+}
+
+/**
+ * Deletes an interested user record by ID
+ * @param id - The unique identifier of the interested user to delete
+ * @throws {Error} If the request fails or user is not found
+ */
+export async function deleteInterestedUser(id: string): Promise<void> {
+    await outreachClient.request({
+        method: "DELETE",
+        url: `interested-users/${id}`,
+    });
 }

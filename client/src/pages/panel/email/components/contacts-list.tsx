@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { useContact } from "@/hooks/use-contact";
 import type { ContactDto } from "@/features/outreach/types/contact.dto";
 import { cn } from "@/lib/utils";
-import EditContactModal from "./edit-contact-modal";
+import EditContactDrawer from "./edit-contact-drawer";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -132,7 +132,7 @@ export default function ContactsList({ contacts }: ContactsListProps) {
                 ))}
             </div>
             {editingContact && (
-                <EditContactModal
+                <EditContactDrawer
                     contact={editingContact}
                     open={!!editingContact}
                     onOpenChange={(open) => !open && setEditingContact(null)}

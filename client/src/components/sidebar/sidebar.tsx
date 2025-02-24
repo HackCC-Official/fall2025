@@ -15,9 +15,6 @@ import {
     Folders,
     Mail,
     QrCode,
-    Pen,
-    Users,
-    Inbox,
     LucideIcon,
 } from "lucide-react";
 import { LogoIcon } from "../logo-icon";
@@ -30,24 +27,6 @@ type MenuItem = {
     children?: MenuItem[];
 };
 
-const emailItems = [
-    {
-        title: "Compose",
-        url: "/panel/email/compose",
-        icon: Pen,
-    },
-    {
-        title: "Contacts",
-        url: "/panel/email/contacts",
-        icon: Users,
-    },
-    {
-        title: "Inbox",
-        url: "/panel/email/inbox",
-        icon: Inbox,
-    },
-];
-
 const items: MenuItem[] = [
     {
         title: "Application",
@@ -58,7 +37,6 @@ const items: MenuItem[] = [
         title: "Email",
         url: "/panel/email",
         icon: Mail,
-        children: emailItems,
     },
     {
         title: "Judging",
