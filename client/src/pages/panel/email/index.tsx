@@ -79,7 +79,10 @@ export default function EmailPage() {
 
     return (
         <div className="flex flex-col h-screen bg-background">
-            <Tabs defaultValue="company" className="flex flex-col h-full">
+            <Tabs
+                defaultValue="company"
+                className="flex flex-col h-full min-h-0"
+            >
                 <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
                     <div className="flex items-center px-4 h-14 gap-4 max-w-[1400px] mx-auto w-full">
                         <AccountSwitcher
@@ -108,7 +111,7 @@ export default function EmailPage() {
                     </div>
                 </header>
 
-                <main className="flex-1 overflow-hidden">
+                <main className="flex-1 min-h-0 overflow-hidden">
                     <TabsContent
                         value="company"
                         className="h-full m-0 outline-none"

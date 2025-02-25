@@ -25,6 +25,7 @@ export interface ContactDto {
     phone_number?: string;
     company_type?: string;
     industry?: string;
+    been_contacted?: boolean;
 }
 
 /**

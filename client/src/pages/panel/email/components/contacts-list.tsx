@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Search, MoreVertical, Pencil, Trash2 } from "lucide-react";
+import { Search, MoreVertical, Pencil, Trash2, Filter } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useContact } from "@/hooks/use-contact";
 import type { ContactDto } from "@/features/outreach/types/contact.dto";
@@ -12,6 +12,7 @@ import {
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuTrigger,
+    DropdownMenuCheckboxItem,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { deleteContact } from "@/features/outreach/api/outreach";
@@ -26,27 +27,52 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Badge } from "@/components/ui/badge";
 
 interface ContactsListProps {
     contacts: ContactDto[];
 }
+
+type FilterOptions = {
+    hasEmail: boolean;
+    hasName: boolean;
+};
 
 export default function ContactsList({ contacts }: ContactsListProps) {
     const [contact, setContact] = useContact();
     const [searchQuery, setSearchQuery] = React.useState("");
     const [editingContact, setEditingContact] =
         React.useState<ContactDto | null>(null);
+    const [filters, setFilters] = React.useState<FilterOptions>({
+        hasEmail: false,
+        hasName: false,
+    });
     const queryClient = useQueryClient();
     const [deleteId, setDeleteId] = React.useState<number | null>(null);
 
     const filteredContacts = React.useMemo(() => {
         const contactsArray = Array.isArray(contacts) ? contacts : [];
-        return contactsArray.filter(
-            (c) =>
-                c.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                c.email.toLowerCase().includes(searchQuery.toLowerCase())
-        );
-    }, [contacts, searchQuery]);
+        return contactsArray.filter((c) => {
+            // Apply search filter
+            const searchMatches = searchQuery
+                ? (c.first_name?.toLowerCase() || "").includes(
+                      searchQuery.toLowerCase()
+                  ) ||
+                  (c.last_name?.toLowerCase() || "").includes(
+                      searchQuery.toLowerCase()
+                  ) ||
+                  c.email.toLowerCase().includes(searchQuery.toLowerCase())
+                : true;
+
+            // Apply additional filters
+            const emailFilter = filters.hasEmail ? !!c.email : true;
+            const nameFilter = filters.hasName
+                ? !!(c.first_name || c.last_name)
+                : true;
+
+            return searchMatches && emailFilter && nameFilter;
+        });
+    }, [contacts, searchQuery, filters]);
 
     const handleDelete = async (contactId: number) => {
         try {
@@ -63,7 +89,7 @@ export default function ContactsList({ contacts }: ContactsListProps) {
                 <h1 className="text-xl font-bold">Contacts</h1>
             </div>
             <div className="bg-background/95 p-4 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-                <form>
+                <form className="space-y-2">
                     <div className="relative">
                         <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
                         <Input
@@ -73,9 +99,43 @@ export default function ContactsList({ contacts }: ContactsListProps) {
                             onChange={(e) => setSearchQuery(e.target.value)}
                         />
                     </div>
+                    <div className="flex justify-end">
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button variant="outline" size="sm">
+                                    <Filter className="h-4 w-4 mr-2" />
+                                    Filters
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="w-48">
+                                <DropdownMenuCheckboxItem
+                                    checked={filters.hasEmail}
+                                    onCheckedChange={(checked) =>
+                                        setFilters((prev) => ({
+                                            ...prev,
+                                            hasEmail: checked,
+                                        }))
+                                    }
+                                >
+                                    Has Email
+                                </DropdownMenuCheckboxItem>
+                                <DropdownMenuCheckboxItem
+                                    checked={filters.hasName}
+                                    onCheckedChange={(checked) =>
+                                        setFilters((prev) => ({
+                                            ...prev,
+                                            hasName: checked,
+                                        }))
+                                    }
+                                >
+                                    Has Name
+                                </DropdownMenuCheckboxItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                    </div>
                 </form>
             </div>
-            <div className="flex-1 overflow-auto">
+            <div className="flex-1 min-h-0 overflow-auto">
                 {filteredContacts.map((item) => (
                     <div
                         key={item.email}
@@ -103,6 +163,16 @@ export default function ContactsList({ contacts }: ContactsListProps) {
                                     <div className="text-sm text-muted-foreground">
                                         {item.email}
                                     </div>
+                                    {item.been_contacted && (
+                                        <div className="mt-1">
+                                            <Badge
+                                                variant="default"
+                                                className="text-xs"
+                                            >
+                                                Contacted
+                                            </Badge>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         </button>

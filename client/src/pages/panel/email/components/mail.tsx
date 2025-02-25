@@ -80,7 +80,7 @@ export default function Mail({
                 onAddContactClick={() => setIsAddContactModalOpen(true)}
             />
 
-            <div className="flex-1">
+            <div className="flex-1 min-h-0">
                 <TooltipProvider delayDuration={0}>
                     <ResizablePanelGroup
                         direction="horizontal"
@@ -151,7 +151,7 @@ export default function Mail({
                             minSize={30}
                         >
                             {activeView === "mail" ? (
-                                <div className="flex flex-col h-full">
+                                <div className="flex flex-col h-full min-h-0">
                                     <div className="flex items-center px-4 py-2">
                                         <h1 className="text-xl font-bold">
                                             Inbox

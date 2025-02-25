@@ -47,12 +47,14 @@ const contactFormSchema = z
         city: z.string().optional(),
         postal_code: z.string().optional(),
         street: z.string().optional(),
-        confidence_score: z.number().optional(),
+        confidence_score: z.number({
+            required_error: "Confidence score is required",
+        }),
         type: z.enum(["sponsor", "partner", "personal", "other"]).optional(),
         number_of_sources: z.number().optional(),
         pattern: z.string().optional(),
         department: z.string().optional(),
-        position: z.string().optional(),
+        position: z.string().min(1, "Position is required"),
         twitter_handle: z.string().optional(),
         linkedin_url: z
             .string()

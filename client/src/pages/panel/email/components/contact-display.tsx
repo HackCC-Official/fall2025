@@ -2,12 +2,19 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Building2, Globe, Mail, MapPin, Phone, User } from "lucide-react";
 import type { ContactDto } from "@/features/outreach/types/contact.dto";
+import { Button } from "@/components/ui/button";
 
 interface ContactDisplayProps {
     contact: ContactDto | null;
 }
 
 export default function ContactDisplay({ contact }: ContactDisplayProps) {
+    const handleSendEmail = () => {
+        if (contact?.email) {
+            window.location.href = `mailto:${contact.email}`;
+        }
+    };
+
     if (!contact) {
         return (
             <div className="h-full flex flex-col items-center justify-center text-muted-foreground p-8">
@@ -23,17 +30,36 @@ export default function ContactDisplay({ contact }: ContactDisplayProps) {
     }
 
     return (
-        <div className="flex flex-col h-full overflow-auto p-6">
-            <div className="flex items-center justify-between mb-6">
-                <div>
-                    <h2 className="text-2xl font-semibold">
-                        {contact.first_name} {contact.last_name}
-                    </h2>
-                    <p className="text-muted-foreground">{contact.position}</p>
+        <div className="flex flex-col h-full min-h-0 overflow-auto p-6">
+            <div className="flex flex-col gap-4 mb-6">
+                <div className="flex items-center justify-between">
+                    <div className="flex flex-col gap-1">
+                        <h2 className="text-2xl font-semibold">
+                            {contact.first_name} {contact.last_name}
+                        </h2>
+                        <div className="flex items-center gap-2">
+                            <p className="text-muted-foreground">
+                                {contact.position}
+                            </p>
+                            <div className="flex items-center gap-2">
+                                <Badge variant="outline" className="capitalize">
+                                    {contact.type}
+                                </Badge>
+                                {contact.been_contacted && (
+                                    <Badge variant="default">Contacted</Badge>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                    <Button
+                        onClick={handleSendEmail}
+                        size="sm"
+                        className="flex items-center gap-2"
+                    >
+                        <Mail className="h-4 w-4" />
+                        Send Email
+                    </Button>
                 </div>
-                <Badge variant="outline" className="capitalize">
-                    {contact.type}
-                </Badge>
             </div>
 
             <div className="grid gap-6">
@@ -106,44 +132,55 @@ export default function ContactDisplay({ contact }: ContactDisplayProps) {
                             </p>
                         </div>
                         <div className="grid grid-cols-2 gap-4">
-                            <div className="grid gap-1">
-                                <p className="text-sm font-medium">
-                                    Department
-                                </p>
-                                <p className="text-sm text-muted-foreground">
-                                    {contact.department}
-                                </p>
-                            </div>
-                            <div className="grid gap-1">
-                                <p className="text-sm font-medium">Industry</p>
-                                <p className="text-sm text-muted-foreground">
-                                    {contact.industry}
-                                </p>
-                            </div>
+                            {contact.department && (
+                                <div className="grid gap-1">
+                                    <p className="text-sm font-medium">
+                                        Department
+                                    </p>
+
+                                    <p className="text-sm text-muted-foreground">
+                                        {contact.department}
+                                    </p>
+                                </div>
+                            )}
+                            {contact.industry && (
+                                <div className="grid gap-1">
+                                    <p className="text-sm font-medium">
+                                        Industry
+                                    </p>
+                                    <p className="text-sm text-muted-foreground">
+                                        {contact.industry}
+                                    </p>
+                                </div>
+                            )}
                         </div>
                     </CardContent>
                 </Card>
 
-                <Card>
-                    <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                            <MapPin className="h-4 w-4" />
-                            Location
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent className="grid gap-4">
-                        <div className="grid gap-1">
-                            {contact.street && (
-                                <p className="text-sm">{contact.street}</p>
-                            )}
-                            <p className="text-sm">
-                                {contact.city}, {contact.state}{" "}
-                                {contact.postal_code}
-                            </p>
-                            <p className="text-sm">{contact.country}</p>
-                        </div>
-                    </CardContent>
-                </Card>
+                {contact.country && (
+                    <Card>
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2">
+                                <MapPin className="h-4 w-4" />
+                                Location
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent className="grid gap-4">
+                            <div className="grid gap-1">
+                                {contact.street && (
+                                    <p className="text-sm">{contact.street}</p>
+                                )}
+                                <p className="text-sm">
+                                    {contact.city &&
+                                        contact.state &&
+                                        contact.postal_code &&
+                                        `${contact.city}, ${contact.state} ${contact.postal_code}`}
+                                </p>
+                                <p className="text-sm">{contact.country}</p>
+                            </div>
+                        </CardContent>
+                    </Card>
+                )}
 
                 <Card>
                     <CardHeader>

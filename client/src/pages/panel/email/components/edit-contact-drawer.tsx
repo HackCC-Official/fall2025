@@ -36,61 +36,50 @@ interface EditContactDrawerProps {
     onOpenChange: (open: boolean) => void;
 }
 
-const contactFormSchema = z
-    .object({
-        first_name: z.string().min(1, "First name is required"),
-        last_name: z.string().min(1, "Last name is required"),
-        email: z.string().email("Invalid email address"),
-        domain_name: z.string().optional(),
-        organization: z.string().min(1, "Organization is required"),
-        country: z.string().optional(),
-        state: z.string().optional(),
-        city: z.string().optional(),
-        postal_code: z.string().optional(),
-        street: z.string().optional(),
-        confidence_score: z.number().optional(),
-        type: z.enum(["sponsor", "partner", "personal", "other"]).optional(),
-        number_of_sources: z.number().optional(),
-        pattern: z.string().optional(),
-        department: z.string().optional(),
-        position: z.string().optional(),
-        twitter_handle: z.string().optional(),
-        linkedin_url: z
-            .string()
-            .refine(
-                (val) => {
-                    if (!val) return true; // Empty string is valid
-                    try {
-                        new URL(val);
-                        return val.includes("linkedin.com");
-                    } catch {
-                        return false;
-                    }
-                },
-                {
-                    message:
-                        "Please enter a valid LinkedIn URL or leave it empty",
+const contactFormSchema = z.object({
+    first_name: z.string().min(1, "First name is required"),
+    last_name: z.string().min(1, "Last name is required"),
+    email: z.string().email("Invalid email address"),
+    domain_name: z.string().optional(),
+    organization: z.string().min(1, "Organization is required"),
+    country: z.string().optional(),
+    state: z.string().optional(),
+    city: z.string().optional(),
+    postal_code: z.string().optional(),
+    street: z.string().optional(),
+    confidence_score: z.number({
+        required_error: "Confidence score is required",
+    }),
+    type: z.enum(["sponsor", "partner", "personal", "other"]).optional(),
+    number_of_sources: z.number().optional(),
+    pattern: z.string().optional(),
+    department: z.string().optional(),
+    position: z.string().min(1, "Position is required"),
+    twitter_handle: z.string().optional(),
+    linkedin_url: z
+        .string()
+        .refine(
+            (val) => {
+                if (!val) return true; // Empty string is valid
+                try {
+                    new URL(val);
+                    return val.includes("linkedin.com");
+                } catch {
+                    return false;
                 }
-            )
-            .optional(),
-        phone_number: z.string().optional(),
-        company_type: z.string().optional(),
-        industry: z.string().optional(),
-    })
-    .transform((data) => {
-        const cleaned = { ...data } as unknown as Record<
-            string,
-            string | number
-        >;
-        Object.keys(cleaned).forEach((key) => {
-            if (cleaned[key] === "") {
-                delete cleaned[key];
+            },
+            {
+                message: "Please enter a valid LinkedIn URL or leave it empty",
             }
-        });
-        return cleaned;
-    });
+        )
+        .optional(),
+    phone_number: z.string().optional(),
+    company_type: z.string().optional(),
+    industry: z.string().optional(),
+    been_contacted: z.enum(["true", "false"]).default("false"),
+});
 
-type ContactFormValues = z.infer<typeof contactFormSchema>;
+type FormSchema = z.infer<typeof contactFormSchema>;
 
 export default function EditContactDrawer({
     contact,
@@ -101,7 +90,13 @@ export default function EditContactDrawer({
     const queryClient = useQueryClient();
     const [error, setError] = React.useState<string | null>(null);
 
-    const form = useForm<ContactFormValues>({
+    // Log when the component renders - moved before conditional return
+    React.useEffect(() => {
+        console.log("EditContactDrawer rendered, open:", open);
+    }, [open]);
+
+    // Create form with default values
+    const form = useForm<FormSchema>({
         resolver: zodResolver(contactFormSchema),
         defaultValues: {
             first_name: contact?.first_name || "",
@@ -115,7 +110,7 @@ export default function EditContactDrawer({
             postal_code: contact?.postal_code || "",
             street: contact?.street || "",
             confidence_score: contact?.confidence_score,
-            type: contact?.type || "other",
+            type: (contact?.type as FormSchema["type"]) || "other",
             number_of_sources: contact?.number_of_sources,
             pattern: contact?.pattern || "",
             department: contact?.department || "",
@@ -125,58 +120,37 @@ export default function EditContactDrawer({
             phone_number: contact?.phone_number || "",
             company_type: contact?.company_type || "",
             industry: contact?.industry || "",
+            been_contacted: contact?.been_contacted ? "true" : "false",
         },
     });
 
-    // Return early if no contact
+    // Return early if no contact - moved after all hooks are called
     if (!contact) {
         return null;
     }
 
-    const onSubmit = async (values: ContactFormValues) => {
+    // Define the submit handler
+    const handleSubmit = async (values: FormSchema) => {
+        console.log("Form submitted with values:", values);
         setIsSubmitting(true);
+        setError(null);
+
         try {
-            // Clean values and convert to ContactDto
-            const entries = Object.entries(values).filter(([, value]) => {
-                if (typeof value === "string") return value.trim() !== "";
-                if (typeof value === "number") return !isNaN(value);
-                return false;
-            });
-
-            const cleanedValues = entries.reduce(
-                (acc, [key, value]) => {
-                    if (typeof value === "string") {
-                        acc[key] = value.trim();
-                    } else if (typeof value === "number" && !isNaN(value)) {
-                        acc[key] = value;
-                    }
-                    return acc;
-                },
-                {} as Record<string, string | number>
-            );
-
-            // Extract domain from email if present
-            if (typeof cleanedValues.email === "string") {
-                cleanedValues.domain_name = cleanedValues.email.split("@")[1];
-            }
-
-            // Add required fields
             const contactData: Partial<ContactDto> = {
-                ...Object.fromEntries(
-                    Object.entries(cleanedValues).map(([key, value]) => [
-                        key,
-                        key === "confidence_score" ||
-                        key === "number_of_sources"
-                            ? Number(value)
-                            : String(value),
-                    ])
-                ),
-                type: (cleanedValues.type as string) || "other", // Default type if not provided
+                ...values,
+                been_contacted: values.been_contacted === "true",
+                confidence_score: values.confidence_score,
+                number_of_sources: values.number_of_sources,
+                type: values.type || "other",
             };
 
-            await updateContact(contact.id.toString(), contactData);
+            // Log the value being sent to ensure it's correct
+            console.log("Been contacted value:", contactData.been_contacted);
+
+            console.log("Updating contact with data:", contactData);
+            await updateContact(contact!.id.toString(), contactData);
+            console.log("Contact updated successfully");
             await queryClient.invalidateQueries({ queryKey: ["contacts"] });
-            form.reset(values);
             onOpenChange(false);
         } catch (err) {
             console.error("Failed to update contact:", err);
@@ -202,7 +176,13 @@ export default function EditContactDrawer({
 
                 <Form {...form}>
                     <form
-                        onSubmit={form.handleSubmit(onSubmit)}
+                        onSubmit={form.handleSubmit((values) => {
+                            console.log(
+                                "Form submit event triggered with values:",
+                                values
+                            );
+                            handleSubmit(values);
+                        })}
                         className="space-y-6 mt-6"
                     >
                         {error && (
@@ -331,6 +311,39 @@ export default function EditContactDrawer({
                                 )}
                             />
                         </div>
+
+                        <FormField
+                            control={form.control}
+                            name="been_contacted"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Been Contacted</FormLabel>
+                                    <Select
+                                        onValueChange={field.onChange}
+                                        value={field.value}
+                                    >
+                                        <FormControl>
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="Select status">
+                                                    {field.value === "true"
+                                                        ? "Yes"
+                                                        : "No"}
+                                                </SelectValue>
+                                            </SelectTrigger>
+                                        </FormControl>
+                                        <SelectContent>
+                                            <SelectItem value="true">
+                                                Yes
+                                            </SelectItem>
+                                            <SelectItem value="false">
+                                                No
+                                            </SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
 
                         <div className="grid grid-cols-2 gap-4">
                             <FormField
@@ -483,7 +496,11 @@ export default function EditContactDrawer({
                             >
                                 Cancel
                             </Button>
-                            <Button type="submit" disabled={isSubmitting}>
+                            <Button
+                                type="submit"
+                                disabled={isSubmitting}
+                                onClick={() => handleSubmit(form.getValues())}
+                            >
                                 {isSubmitting ? "Saving..." : "Save changes"}
                             </Button>
                         </div>
