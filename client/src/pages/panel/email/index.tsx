@@ -10,14 +10,9 @@ import AccountSwitcher from "./components/account-switcher";
 import { Separator } from "@/components/ui/separator";
 import MailComponent from "./components/mail";
 import { useContacts } from "@/hooks/use-contacts";
-
-const accounts = [
-    {
-        label: "HackCC",
-        email: "outreach@hackcc.dev",
-        icon: <CircleUser />,
-    },
-];
+import { useOutreachTeam } from "@/hooks/use-outreach-team";
+import type { OutreachTeamDto } from "@/features/outreach/types/outreach-team";
+import { LogoIcon } from "@/components/logo-icon";
 
 const mails: Mail[] = [];
 
@@ -67,12 +62,44 @@ export default function EmailPage() {
 
     const { data: contactsResponse, isLoading: isLoadingContacts } =
         useContacts();
+    const { data: outreachTeamResponse, isLoading: isLoadingOutreachTeam } =
+        useOutreachTeam();
     const contactsArray = contactsResponse?.data || [];
 
-    if (isLoadingContacts) {
+    console.log("Outreach Team Response:", outreachTeamResponse);
+
+    // Transform outreach team data into account format
+    const allAccounts = React.useMemo(() => {
+        const outreachTeamArray = outreachTeamResponse?.data?.data || [];
+        return outreachTeamArray.map((member: OutreachTeamDto) => ({
+            label: member.name,
+            email: member.email,
+            icon: <CircleUser />,
+        }));
+    }, [outreachTeamResponse]);
+
+    // Handle selected account persistence
+    const [selectedAccount, setSelectedAccount] = React.useState<string>(() => {
+        if (typeof window !== "undefined") {
+            return localStorage.getItem("selectedOutreachAccount") || "";
+        }
+        return "";
+    });
+
+    const handleAccountChange = React.useCallback((email: string) => {
+        setSelectedAccount(email);
+        localStorage.setItem("selectedOutreachAccount", email);
+    }, []);
+
+    if (isLoadingContacts || isLoadingOutreachTeam) {
         return (
-            <div className="flex items-center justify-center h-screen">
-                <p>Crunching Data....</p>
+            <div className="flex flex-col items-center justify-center h-screen gap-4 bg-background">
+                <div className="animate-spin">
+                    <LogoIcon className="w-16 h-16" />
+                </div>
+                <p className="text-lg text-muted-foreground">
+                    Crunching the latest data
+                </p>
             </div>
         );
     }
@@ -87,7 +114,9 @@ export default function EmailPage() {
                     <div className="flex items-center px-4 h-14 gap-4 max-w-[1400px] mx-auto w-full">
                         <AccountSwitcher
                             isCollapsed={false}
-                            accounts={accounts}
+                            accounts={allAccounts}
+                            onAccountChange={handleAccountChange}
+                            defaultEmail={selectedAccount}
                         />
                         <Separator orientation="vertical" className="h-6" />
                         <nav className="flex-1">
@@ -117,7 +146,7 @@ export default function EmailPage() {
                         className="h-full m-0 outline-none"
                     >
                         <MailComponent
-                            accounts={accounts}
+                            accounts={allAccounts}
                             mails={mails}
                             contacts={contactsArray}
                             defaultLayout={defaultLayout}

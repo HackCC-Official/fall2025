@@ -7,6 +7,16 @@ import {
 import { outreachClient } from "../../../api/outreach-client";
 import axios from "axios";
 import { InterestedUserDto } from "../types/interested-users.dto";
+import { OutreachTeamDto } from "../types/outreach-team";
+
+interface OutreachTeamApiResponse {
+    data: {
+        data: OutreachTeamDto[];
+        total: number;
+    };
+    status: number;
+    statusText: string;
+}
 
 /**
  * Retrieves all contacts from the outreach service
@@ -234,4 +244,73 @@ export async function deleteInterestedUser(id: string): Promise<void> {
         method: "DELETE",
         url: `interested-users/${id}`,
     });
+}
+
+/**
+ * Retrieves all outreach team members
+ * @returns Array of outreach team members wrapped in a response object
+ * @throws {Error} If the request fails
+ */
+export async function getOutreachTeam(): Promise<OutreachTeamApiResponse> {
+    return await outreachClient.request({
+        method: "GET",
+        url: "outreach-team",
+    });
+}
+
+/**
+ * Creates a new outreach team member
+ * @param outreachTeamDto - The outreach team member data to create
+ */
+export async function createOutreachTeamMember(
+    outreachTeamDto: OutreachTeamDto
+): Promise<void> {
+    await outreachClient.request({
+        method: "POST",
+        url: "outreach-team",
+        data: outreachTeamDto,
+    });
+}
+
+/**
+ * Deletes an outreach team member by ID
+ * @param id - The unique identifier of the outreach team member to delete
+ */
+export async function deleteOutreachTeamMember(id: string): Promise<void> {
+    await outreachClient.request({
+        method: "DELETE",
+        url: `outreach-team/${id}`,
+    });
+}
+
+/**
+ * Updates an existing outreach team member
+ * @param id - The unique identifier of the outreach team member to update
+ * @param outreachTeamDto - The partial outreach team member data to update
+ */
+export async function updateOutreachTeamMember(
+    id: string,
+    outreachTeamDto: Partial<OutreachTeamDto>
+): Promise<void> {
+    await outreachClient.request({
+        method: "PUT",
+        url: `outreach-team/${id}`,
+        data: outreachTeamDto,
+    });
+}
+
+/**
+ * Retrieves an outreach team member by ID
+ * @param id - The unique identifier of the outreach team member to retrieve
+ * @returns The outreach team member data
+ */
+export async function getOutreachTeamMemberById(
+    id: string
+): Promise<OutreachTeamDto> {
+    return (
+        await outreachClient.request({
+            method: "GET",
+            url: `outreach-team/${id}`,
+        })
+    ).data;
 }

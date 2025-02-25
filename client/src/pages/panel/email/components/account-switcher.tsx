@@ -17,15 +17,24 @@ interface AccountSwitcherProps {
         email: string;
         icon: React.ReactNode;
     }[];
+    onAccountChange?: (email: string) => void;
+    defaultEmail?: string;
 }
 
 export default function AccountSwitcher({
     isCollapsed,
     accounts = [],
+    onAccountChange,
+    defaultEmail,
 }: AccountSwitcherProps) {
     const [selectedAccount, setSelectedAccount] = React.useState<string>(
-        accounts?.[0]?.email || ""
+        defaultEmail || accounts?.[0]?.email || ""
     );
+
+    const handleAccountChange = (email: string) => {
+        setSelectedAccount(email);
+        onAccountChange?.(email);
+    };
 
     if (!accounts?.length) {
         return null;
@@ -34,7 +43,7 @@ export default function AccountSwitcher({
     return (
         <Select
             defaultValue={selectedAccount}
-            onValueChange={setSelectedAccount}
+            onValueChange={handleAccountChange}
         >
             <SelectTrigger
                 className={cn(
@@ -60,7 +69,7 @@ export default function AccountSwitcher({
                 </SelectValue>
             </SelectTrigger>
             <SelectContent>
-                {(accounts || []).map((account) => (
+                {accounts.map((account) => (
                     <SelectItem key={account.email} value={account.email}>
                         <div className="flex items-center gap-3 [&_svg]:h-4 [&_svg]:w-4 [&_svg]:shrink-0 [&_svg]:text-foreground">
                             {account.icon}
