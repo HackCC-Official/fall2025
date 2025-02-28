@@ -36,13 +36,13 @@ export const Interest = () => {
 
         if (error) {
             if (error.code === "23505") {
-                setStatus("You have already been added to the list to receive updated about the event!");
+                setStatus("You have already been added to the list to receive updates about the event!");
                 setSuccess(true)
             } else {
                 setStatus("Error: " + error.message);
             }
         } else {
-            setStatus("You have been added to the list to receive updated about the event!");
+            setStatus("You have been added to the list to receive updates about the event!");
             setEmail("");
             setSuccess(true)
         }
