@@ -3,11 +3,11 @@ import { faDiscord, faInstagram, faXTwitter, faTiktok } from '@fortawesome/free-
 
 export const Socials = () => {
     return (
-        <div className='flex [&>*]:h-8 [&>*]:flex [&>*]:align-center [&>*]:mx-3'>
+        <div className='flex [&>*]:h-8 [&>*]:flex [&>*]:align-center [&>*]:mx-3 z-50 text-white'>
             {/* <a target='_blank' href="https://www.tiktok.com/@hackcc24"><FontAwesomeIcon icon={faTiktok} /></a> */}
-            <a target='_blank' href="https://discord.gg/yRShGV7Py4"><FontAwesomeIcon icon={faDiscord} /></a>
-            <a target='_blank' href="https://x.com/hackcc_2024"><FontAwesomeIcon icon={faXTwitter} /></a>
-            <a target='_blank' href="https://www.instagram.com/hackcc.2024/"><FontAwesomeIcon icon={faInstagram} /></a>
+            <a className='hover:text-navyblue' target='_blank' href="https://discord.gg/yRShGV7Py4"><FontAwesomeIcon icon={faDiscord} /></a>
+            <a className='hover:text-navyblue' target='_blank' href="https://x.com/hackcc_2024"><FontAwesomeIcon icon={faXTwitter} /></a>
+            <a className='hover:text-navyblue' target='_blank' href="https://www.instagram.com/hackcc.2024/"><FontAwesomeIcon icon={faInstagram} /></a>
         </div>
     )
 }
