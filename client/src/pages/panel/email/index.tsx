@@ -1,125 +1,167 @@
-import PanelLayout from "../layout";
+"use client";
+
 import * as React from "react";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
-} from "@/components/ui/card";
+import PanelLayout from "../layout";
+import type { Mail } from "@/types/mail";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Building2, Users, CircleUser } from "lucide-react";
+import HackersMail from "./components/hackers-mail";
+import AccountSwitcher from "./components/account-switcher";
+import { Separator } from "@/components/ui/separator";
+import MailComponent from "./components/mail";
+import { useContacts } from "@/hooks/use-contacts";
+import { useOutreachTeam } from "@/hooks/use-outreach-team";
+import type { OutreachTeamDto } from "@/features/outreach/types/outreach-team";
+import { LogoIcon } from "@/components/logo-icon";
+
+const mails: Mail[] = [];
+
+const HACKER_SAMPLE_DATA: Mail[] = [
+    {
+        id: "h1",
+        from: "outreach@hackcc.dev",
+        to: [
+            {
+                email: "alice@university.edu",
+                name: "Alice Johnson",
+            },
+        ],
+        subject: "Registration Confirmation",
+        html: "Thank you for registering for HackCC! We're excited to have you join us...",
+        date: new Date().toISOString(),
+        read: true,
+        labels: ["registered"],
+    },
+    {
+        id: "h2",
+        from: "outreach@hackcc.dev",
+        to: [
+            {
+                email: "bob@college.edu",
+                name: "Bob Wilson",
+            },
+        ],
+        subject: "Dietary Requirements",
+        html: "I wanted to inform you about my dietary restrictions for the event...",
+        date: new Date(Date.now() - 172800000).toISOString(),
+        read: false,
+        labels: ["dietary"],
+    },
+];
 
 export default function EmailPage() {
-    return (
-        <div className="relative isolate">
-            {/* Background gradient */}
-            <div
-                className="absolute inset-x-0 -top-40 -z-10 transform-gpu overflow-hidden blur-3xl sm:-top-80 pointer-events-none"
-                aria-hidden="true"
-            >
-                <div
-                    className="relative left-[calc(50%-11rem)] aspect-[1155/678] w-[36.125rem] -translate-x-1/2 rotate-[30deg] bg-gradient-to-tr from-[#ff80b5] to-[#9089fc] opacity-30 sm:left-[calc(50%-30rem)] sm:w-[72.1875rem]"
-                    style={{
-                        clipPath:
-                            "polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)",
-                    }}
-                />
-            </div>
+    const [defaultLayout] = React.useState(() => {
+        if (typeof window !== "undefined") {
+            const layout = localStorage.getItem(
+                "react-resizable-panels:layout:mail"
+            );
+            return layout ? JSON.parse(layout) : [20, 32, 48];
+        }
+        return [20, 32, 48];
+    });
 
-            <div className="py-24 sm:py-32 relative z-10">
-                <div className="mx-auto max-w-7xl px-6 lg:px-8">
-                    <div className="mx-auto max-w-2xl text-center">
-                        <h1 className="text-4xl font-bold tracking-tight sm:text-6xl">
-                            HackCC Email System
-                        </h1>
-                        <p className="mt-6 text-lg leading-8 text-muted-foreground">
-                            Built for the Outreach Team
-                        </p>
-                    </div>
+    const { data: contactsResponse, isLoading: isLoadingContacts } =
+        useContacts();
+    const { data: outreachTeamResponse, isLoading: isLoadingOutreachTeam } =
+        useOutreachTeam();
+    const contactsArray = contactsResponse?.data || [];
 
-                    <div className="mx-auto mt-16 max-w-5xl sm:mt-20">
-                        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                            <Card className="relative overflow-hidden">
-                                <div className="absolute inset-0 bg-gradient-to-r from-blue-100 to-indigo-100 opacity-[0.03] pointer-events-none" />
-                                <div className="relative z-10">
-                                    <CardHeader>
-                                        <CardTitle>Manage Contacts</CardTitle>
-                                        <CardDescription>
-                                            Import or manually add contacts to
-                                            your database. Keep track of all
-                                            your professional connections.
-                                        </CardDescription>
-                                    </CardHeader>
-                                    <CardContent>
-                                        <Button asChild className="w-full">
-                                            <Link href="/contacts">
-                                                View Contacts
-                                            </Link>
-                                        </Button>
-                                    </CardContent>
-                                </div>
-                            </Card>
+    console.log("Outreach Team Response:", outreachTeamResponse);
 
-                            <Card className="relative overflow-hidden">
-                                <div className="absolute inset-0 bg-gradient-to-r from-purple-100 to-pink-100 opacity-[0.03] pointer-events-none" />
-                                <div className="relative z-10">
-                                    <CardHeader>
-                                        <CardTitle>Send Emails</CardTitle>
-                                        <CardDescription>
-                                            Compose and send professional emails
-                                            using our pre-built templates. Reach
-                                            out to multiple contacts at once.
-                                        </CardDescription>
-                                    </CardHeader>
-                                    <CardContent>
-                                        <Button asChild className="w-full">
-                                            <Link href="/compose">
-                                                Compose Email
-                                            </Link>
-                                        </Button>
-                                    </CardContent>
-                                </div>
-                            </Card>
+    // Transform outreach team data into account format
+    const allAccounts = React.useMemo(() => {
+        const outreachTeamArray = outreachTeamResponse?.data?.data || [];
+        return outreachTeamArray.map((member: OutreachTeamDto) => ({
+            label: member.name,
+            email: member.email,
+            icon: <CircleUser />,
+        }));
+    }, [outreachTeamResponse]);
 
-                            <Card className="relative overflow-hidden sm:col-span-2 lg:col-span-1">
-                                <div className="absolute inset-0 bg-gradient-to-r from-green-100 to-teal-100 opacity-[0.03] pointer-events-none" />
-                                <div className="relative z-10">
-                                    <CardHeader>
-                                        <CardTitle>Track Responses</CardTitle>
-                                        <CardDescription>
-                                            Monitor email delivery and response
-                                            status. Stay on top of your
-                                            communications.
-                                        </CardDescription>
-                                    </CardHeader>
-                                    <CardContent>
-                                        <Button asChild className="w-full">
-                                            <Link href="/panel/email/inbox">
-                                                View Inbox
-                                            </Link>
-                                        </Button>
-                                    </CardContent>
-                                </div>
-                            </Card>
-                        </div>
-                    </div>
+    // Handle selected account persistence
+    const [selectedAccount, setSelectedAccount] = React.useState<string>(() => {
+        if (typeof window !== "undefined") {
+            return localStorage.getItem("selectedOutreachAccount") || "";
+        }
+        return "";
+    });
+
+    const handleAccountChange = React.useCallback((email: string) => {
+        setSelectedAccount(email);
+        localStorage.setItem("selectedOutreachAccount", email);
+    }, []);
+
+    if (isLoadingContacts || isLoadingOutreachTeam) {
+        return (
+            <div className="flex flex-col items-center justify-center h-screen gap-4 bg-background">
+                <div className="animate-spin">
+                    <LogoIcon className="w-16 h-16" />
                 </div>
+                <p className="text-lg text-muted-foreground">
+                    Crunching the latest data
+                </p>
             </div>
+        );
+    }
 
-            {/* Background gradient */}
-            <div
-                className="absolute inset-x-0 top-[calc(100%-13rem)] -z-10 transform-gpu overflow-hidden blur-3xl sm:top-[calc(100%-30rem)] pointer-events-none"
-                aria-hidden="true"
+    return (
+        <div className="flex flex-col h-screen bg-background">
+            <Tabs
+                defaultValue="company"
+                className="flex flex-col h-full min-h-0"
             >
-                <div
-                    className="relative left-[calc(50%+3rem)] aspect-[1155/678] w-[36.125rem] -translate-x-1/2 bg-gradient-to-tr from-[#ff80b5] to-[#9089fc] opacity-30 sm:left-[calc(50%+36rem)] sm:w-[72.1875rem]"
-                    style={{
-                        clipPath:
-                            "polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)",
-                    }}
-                />
-            </div>
+                <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+                    <div className="flex items-center px-4 h-14 gap-4 max-w-[1400px] mx-auto w-full">
+                        <AccountSwitcher
+                            isCollapsed={false}
+                            accounts={allAccounts}
+                            onAccountChange={handleAccountChange}
+                            defaultEmail={selectedAccount}
+                        />
+                        <Separator orientation="vertical" className="h-6" />
+                        <nav className="flex-1">
+                            <TabsList className="inline-flex h-9 items-center justify-start rounded-lg bg-muted p-1">
+                                <TabsTrigger
+                                    value="company"
+                                    className="gap-2 px-3"
+                                >
+                                    <Building2 className="h-4 w-4" />
+                                    <span>Company Mail</span>
+                                </TabsTrigger>
+                                <TabsTrigger
+                                    value="hackers"
+                                    className="gap-2 px-3"
+                                >
+                                    <Users className="h-4 w-4" />
+                                    <span>Hackers List</span>
+                                </TabsTrigger>
+                            </TabsList>
+                        </nav>
+                    </div>
+                </header>
+
+                <main className="flex-1 min-h-0 overflow-hidden">
+                    <TabsContent
+                        value="company"
+                        className="h-full m-0 outline-none"
+                    >
+                        <MailComponent
+                            accounts={allAccounts}
+                            mails={mails}
+                            contacts={contactsArray}
+                            defaultLayout={defaultLayout}
+                            defaultCollapsed={false}
+                            navCollapsedSize={4}
+                        />
+                    </TabsContent>
+                    <TabsContent
+                        value="hackers"
+                        className="h-full m-0 outline-none"
+                    >
+                        <HackersMail mails={HACKER_SAMPLE_DATA} />
+                    </TabsContent>
+                </main>
+            </Tabs>
         </div>
     );
 }

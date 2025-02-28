@@ -2,7 +2,9 @@
  * Base interface for contact information
  */
 export interface ContactDto {
+    id: number;
     email: string;
+    name?: string;
     domain_name: string;
     organization: string;
     country?: string;
@@ -23,6 +25,7 @@ export interface ContactDto {
     phone_number?: string;
     company_type?: string;
     industry?: string;
+    been_contacted?: boolean;
 }
 
 /**
