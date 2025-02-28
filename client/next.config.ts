@@ -1,7 +1,6 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-    /* config options here */
     output: "standalone",
     reactStrictMode: true,
     swcMinify: true,
@@ -25,6 +24,12 @@ const nextConfig: NextConfig = {
             },
         ];
     },
+    images: {
+        domains: [
+          'hackcc.net',
+          'dev.hackcc.net'
+        ]
+      },
 };
 
 export default nextConfig;
