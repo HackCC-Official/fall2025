@@ -40,3 +40,4 @@ export interface UpdateEmailDto {
     subject?: string;
     html?: string;
 }
+

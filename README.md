@@ -42,6 +42,10 @@ MINIO_HOSTNAME=
 NEXT_PUBLIC_QR_SERVICE_URL=
 NEXT_PUBLIC_OUTREACH_SERVICE_URL=
 ```
+> [!IMPORTANT]
+> For any new environmental variables, add them to the:
+- Dockerfile build and runtime steps
+- Docker compose build context
 
 ### Running website locally
 First, run the development server:

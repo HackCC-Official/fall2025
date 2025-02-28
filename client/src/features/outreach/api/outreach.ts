@@ -5,17 +5,25 @@ import {
     UpdateEmailDto,
 } from "../types/email.dto";
 import { outreachClient } from "../../../api/outreach-client";
+import axios from "axios";
+import { InterestedUserDto } from "../types/interested-users.dto";
+import { OutreachTeamDto } from "../types/outreach-team";
+
+interface OutreachTeamApiResponse {
+    data: {
+        data: OutreachTeamDto[];
+        total: number;
+    };
+    status: number;
+    statusText: string;
+}
 
 /**
  * Retrieves all contacts from the outreach service
  */
 export async function getContacts(): Promise<ContactDto[]> {
-    return (
-        await outreachClient.request({
-            method: "GET",
-            url: "contacts",
-        })
-    ).data;
+    const response = await outreachClient.get("/contacts");
+    return response.data.data; // Extract the nested data array
 }
 
 /**
@@ -26,7 +34,7 @@ export async function getContactById(contactId: string): Promise<ContactDto> {
     return (
         await outreachClient.request({
             method: "GET",
-            url: `contacts/${contactId}`,
+            url: `/contacts/${contactId}`,
         })
     ).data;
 }
@@ -36,7 +44,7 @@ export async function getContactById(contactId: string): Promise<ContactDto> {
  * @param contactDto - The contact data to create
  */
 export async function createContact(
-    contactDto: ContactDto
+    contactDto: Partial<ContactDto>
 ): Promise<ContactDto> {
     return (
         await outreachClient.request({
@@ -56,13 +64,42 @@ export async function updateContact(
     id: string,
     contactDto: UpdateContactDto
 ): Promise<ContactDto> {
-    return (
-        await outreachClient.request({
-            method: "PUT",
-            url: `contacts/${id}`,
+    console.log("Updating contact:", { id, data: contactDto });
+    try {
+        // Debug logging
+        console.log("Making request to:", `/contacts/${id}`);
+        console.log("Request configuration:", {
+            method: "PATCH",
+            baseURL: outreachClient.defaults.baseURL,
+            headers: outreachClient.defaults.headers,
+        });
+
+        const response = await outreachClient.request({
+            method: "PATCH",
+            url: `/contacts/${id}`,
             data: contactDto,
-        })
-    ).data;
+            headers: {
+                "Content-Type": "application/json",
+                accept: "application/json",
+            },
+        });
+
+        console.log("Update response:", response.data);
+        // Handle both nested and direct response formats
+        return response.data.data || response.data;
+    } catch (error) {
+        // Type guard for AxiosError
+        if (axios.isAxiosError(error)) {
+            console.error("Detailed error information:", {
+                error: error.message,
+                requestConfig: error.config,
+                response: error.response?.data,
+            });
+        } else {
+            console.error("Unexpected error:", error);
+        }
+        throw error;
+    }
 }
 
 /**
@@ -72,7 +109,7 @@ export async function updateContact(
 export async function deleteContact(id: string): Promise<void> {
     await outreachClient.request({
         method: "DELETE",
-        url: `contacts/${id}`,
+        url: `/contacts/${id}`,
     });
 }
 
@@ -92,7 +129,7 @@ export async function uploadContacts(file: File): Promise<ContactDto[]> {
     return (
         await outreachClient.request({
             method: "POST",
-            url: "contacts/upload",
+            url: "/contacts/upload",
             headers: {
                 "Content-Type": "multipart/form-data",
             },
@@ -164,6 +201,116 @@ export async function updateEmail(
             method: "PUT",
             url: "emails/update",
             data: updateDto,
+        })
+    ).data;
+}
+
+/**
+ * Creates a new interested user record
+ * @param interestedUserDto - The interested user data containing email
+ * @throws {Error} If the request fails or user already exists
+ */
+export async function createInterestedUser(
+    interestedUserDto: InterestedUserDto
+): Promise<void> {
+    await outreachClient.request({
+        method: "POST",
+        url: "interested-users",
+        data: interestedUserDto,
+    });
+}
+
+/**
+ * Retrieves all interested users from the system
+ * @returns Array of interested user records containing email addresses
+ * @throws {Error} If the request fails
+ */
+export async function getInterestedUsers(): Promise<InterestedUserDto[]> {
+    return (
+        await outreachClient.request({
+            method: "GET",
+            url: "interested-users",
+        })
+    ).data;
+}
+
+/**
+ * Deletes an interested user record by ID
+ * @param id - The unique identifier of the interested user to delete
+ * @throws {Error} If the request fails or user is not found
+ */
+export async function deleteInterestedUser(id: string): Promise<void> {
+    await outreachClient.request({
+        method: "DELETE",
+        url: `interested-users/${id}`,
+    });
+}
+
+/**
+ * Retrieves all outreach team members
+ * @returns Array of outreach team members wrapped in a response object
+ * @throws {Error} If the request fails
+ */
+export async function getOutreachTeam(): Promise<OutreachTeamApiResponse> {
+    return await outreachClient.request({
+        method: "GET",
+        url: "outreach-team",
+    });
+}
+
+/**
+ * Creates a new outreach team member
+ * @param outreachTeamDto - The outreach team member data to create
+ */
+export async function createOutreachTeamMember(
+    outreachTeamDto: OutreachTeamDto
+): Promise<void> {
+    await outreachClient.request({
+        method: "POST",
+        url: "outreach-team",
+        data: outreachTeamDto,
+    });
+}
+
+/**
+ * Deletes an outreach team member by ID
+ * @param id - The unique identifier of the outreach team member to delete
+ */
+export async function deleteOutreachTeamMember(id: string): Promise<void> {
+    await outreachClient.request({
+        method: "DELETE",
+        url: `outreach-team/${id}`,
+    });
+}
+
+/**
+ * Updates an existing outreach team member
+ * @param id - The unique identifier of the outreach team member to update
+ * @param outreachTeamDto - The partial outreach team member data to update
+ */
+export async function updateOutreachTeamMember(
+    id: string,
+    outreachTeamDto: Partial<OutreachTeamDto>
+): Promise<void> {
+    await outreachClient.request({
+        method: "PUT",
+        url: `outreach-team/${id}`,
+        data: outreachTeamDto,
+    });
+}
+
+/**
+ * Retrieves an outreach team member by ID
+ * @param id - The unique identifier of the outreach team member to retrieve
+ * @returns The outreach team member data
+ */
+export async function getOutreachTeamMemberById(
+    id: string
+): Promise<OutreachTeamDto> {
+    return (
+        await outreachClient.request({
+            method: "GET",
+            url: `outreach-team/${id}`,
         })
     ).data;
 }

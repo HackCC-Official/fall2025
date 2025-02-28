@@ -15,13 +15,9 @@ import {
     Folders,
     Mail,
     QrCode,
-    Pen,
-    Users,
-    Inbox,
     LucideIcon,
 } from "lucide-react";
 import { LogoIcon } from "../logo-icon";
-import { SidebarDropdown } from "./sidebar-dropdown";
 
 // Updated menu items with nested structure
 type MenuItem = {
@@ -30,24 +26,6 @@ type MenuItem = {
     icon: LucideIcon;
     children?: MenuItem[];
 };
-
-const emailItems = [
-    {
-        title: "Compose",
-        url: "/panel/email/compose",
-        icon: Pen,
-    },
-    {
-        title: "Contacts",
-        url: "/panel/email/contacts",
-        icon: Users,
-    },
-    {
-        title: "Inbox",
-        url: "/panel/email/inbox",
-        icon: Inbox,
-    },
-];
 
 const items: MenuItem[] = [
     {
@@ -59,7 +37,6 @@ const items: MenuItem[] = [
         title: "Email",
         url: "/panel/email",
         icon: Mail,
-        children: emailItems,
     },
     {
         title: "Judging",
@@ -104,23 +81,15 @@ export function AppSidebar() {
                         <SidebarMenu>
                             {items.map((item) => (
                                 <SidebarMenuItem key={item.title}>
-                                    {item.children ? (
-                                        <SidebarDropdown
-                                            icon={item.icon}
-                                            title={item.title}
-                                            items={item.children}
-                                        />
-                                    ) : (
-                                        <SidebarMenuButton asChild>
-                                            <a
-                                                href={item.url}
-                                                className="flex items-center gap-2"
-                                            >
-                                                <item.icon className="size-4" />
-                                                <span>{item.title}</span>
-                                            </a>
-                                        </SidebarMenuButton>
-                                    )}
+                                    <SidebarMenuButton asChild>
+                                        <a
+                                            href={item.url}
+                                            className="flex items-center gap-2"
+                                        >
+                                            <item.icon className="size-4" />
+                                            <span>{item.title}</span>
+                                        </a>
+                                    </SidebarMenuButton>
                                 </SidebarMenuItem>
                             ))}
                         </SidebarMenu>
