@@ -15,21 +15,41 @@ theme: {
 	center: true,
 	},
 	extend: {
+		fontFamily:{
+			bagel: ["var(--font-bagel)"],
+			mont: ["var(--font-montserrat-alternates)"]
+		},
 		keyframes:{
 			bob:{
 				'0%': {transform: 'translateY(6px)'},
 				'50%': {transform: 'translateY(-6px)'},
 				'100%': {transform: 'translateY(6px)'},
+			},
+			sway:{
+				'0%': {transform: 'translateX(12px)'},
+				'50%': {transform: 'translateX(-12px)'},
+				'100%': {transform: 'translateX(12px)'},
+			},
+			inverseSway:{
+				'0%': {transform: 'translateX(-12px)'},
+				'50%': {transform: 'translateX(12px)'},
+				'100%': {transform: 'translateX(-12px)'},
 			}
 		},
 		animation: {
-			'bobbing': 'bob 3s linear infinite'
+			'bobbing': 'bob 8s linear infinite',
+			'swaying': 'sway 8s linear infinite',
+			'inverseswaying': 'inverseSway 8s linear infinite',
 		},
 		colors: {
 			background: 'hsl(var(--background))',
 			foreground: 'hsl(var(--foreground))',
-			royalpurple: '#302976',
+			royalpurple: '#2D18A8',
 			lightpurple: '#6950D5',
+			warmpink: '#A649E2',
+			navyblue: '#021442',
+			dullpurple: '#7F3ED0',
+			hoverpurple: '#4C27A0',
 			card: {
 				DEFAULT: 'hsl(var(--card))',
 				foreground: 'hsl(var(--card-foreground))'
