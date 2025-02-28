@@ -1,12 +1,11 @@
 import Image from "next/image";
-import Logo from "./assets/Logo.svg"
-import HotAirBalloon from "./assets/Hot Air Balloon.png"
-import CatCloudCluster from "./assets/Cat Cloud Cluster.png"
-import CloudBack from "./assets/Dark Purple Cloud Back.png"
-import CloudMid from "./assets/Dark Purple Cloud Mid.png"
-import CloudFront from "./assets/Medium Purple Cloud.png"
-import Moon from "./assets/Moon.png"
-import { Stars } from "./components/stars"
+import Logo from "../../../public/Logo.svg"
+import HotAirBalloon from "../../../public/Hot Air Balloon.png"
+import CatCloudCluster from "../../../public/Cat Cloud Cluster.png"
+import CloudBack from "../../../public/Dark Purple Cloud Back.png"
+import CloudMid from "../../../public/Dark Purple Cloud Mid.png"
+import CloudFront from "../../../public/Medium Purple Cloud.png"
+import Moon from "../../../public/Moon.png"
 import { Socials } from '../../components/socials'
 import { Interest } from "./components/interest";
 import { Sky } from "./components/sky";
@@ -15,7 +14,6 @@ export default function home() {
     return(
         <div className="relative flex text-white w-screen h-screen overflow-hidden">
             <Sky></Sky>
-            {/* <Stars></Stars> */}
             <div className="flex flex-col justify-center items-center mx-auto">
                 <div className="relative flex">
                     <Image className="lg:h-60 md:h-56 sm:h-48 h-40 w-auto ml-[5%] z-10" src={Logo} alt="HackCC Logo"></Image>
@@ -35,7 +33,7 @@ export default function home() {
                 <Image className="lg:-mt-[400px] md:-mt-[300px] -mt-[170px] ml-[75px]" src={CloudMid} alt="Mid CLoud"></Image>
                 <Image className="lg:-mt-[400px] md:-mt-[300px] -mt-[170px]" src={CloudFront} alt="Front CLoud"></Image>
             </div>
-            <Image className="lg:h-56 md:h-50 sm:h-44 h-40 w-auto absolute lg:top-10 lg:right-32 md:top-12 md:right-8 top-16 right-0"  src={Moon} alt="Moon"></Image>
+            <Image className="lg:h-56 md:h-50 sm:h-44 h-40 w-auto absolute lg:top-10 lg:right-32 md:top-12 md:right-8 top-6 right-0"  src={Moon} alt="Moon"></Image>
         </div>
     )
 }

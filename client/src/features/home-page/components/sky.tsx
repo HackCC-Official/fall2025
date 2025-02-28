@@ -1,6 +1,6 @@
 import React from 'react'
 import Image from "next/image";
-import skybg from '../assets/BG Image.png'
+import skybg from '../../../../public/BG Image.png'
 
 // width: 100vw;
 //     max-width: 100%;
