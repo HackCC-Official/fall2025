@@ -1,10 +1,15 @@
 import Image from "next/image";
-import QRScanner from "../components/qrscan"
+import FrontPage from "../features/home-page/home"
+import Stars from "../components/stars"
+import clouds from "../assets/temp_clouds.png"
 
-export default function Home() {
+export default function HomePage() {
   return (
-    <div className="bg-red-500 mt-8">
-      The HackCC Pre-deployment page. If you want to see admin panel see "/panel"
+    <div className="flex bg-gradient-to-b from-royalpurple to-lightpurple h-screen overflow-x-hidden">
+      <Stars></Stars>
+      <FrontPage></FrontPage>
+      <Image className="bottom-0 absolute w-screen" src={clouds} alt="Clouds"></Image>
+      {/* <Nav></Nav> */}
     </div>
-  );
+  )
 }
