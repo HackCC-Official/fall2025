@@ -1,10 +1,16 @@
-import Image from "next/image";
-import QRScanner from "../components/qrscan"
+//import Image from "next/image";
+//import QRScanner from "../components/qrscan"
 
+//<SectionHeader title="What past attendees have said"/>
+//<AttendeeContainer/>
+
+//import SectionHeader from "@/components/SectionHeader";
+//import AttendeeContainer from "@/components/AttendeeContainer";
+import OrganizerContainer from "@/components/OrganizerContainer";
 export default function Home() {
   return (
-    <div className="bg-red-500 mt-8">
-      The HackCC Pre-deployment page. If you want to see admin panel see "/panel"
+    <div className="">
+      <OrganizerContainer/>
     </div>
   );
 }
