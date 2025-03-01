@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Bagel_Fat_One, Montserrat_Alternates } from "next/font/google";
 import "./globals.css";
+import '@fortawesome/fontawesome-svg-core/styles.css'
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -11,6 +12,18 @@ const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
 });
+
+const bagelFont = Bagel_Fat_One({
+  subsets: ["latin"],
+  weight: "400",
+  variable: "--font-bagel"
+})
+
+const montserratFont = Montserrat_Alternates({
+  subsets: ["latin"],
+  weight: "400",
+  variable: "--font-montserrat-alternates"
+})
 
 export const metadata: Metadata = {
   title: "HackCC - Hack Your Life",
@@ -26,7 +39,7 @@ export default function RootLayout({
     <html lang="en">
       <body
         id="app"
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} ${montserratFont.variable} ${bagelFont.variable} antialiased bg-royalpurple`}
       >
         {children}
       </body>
