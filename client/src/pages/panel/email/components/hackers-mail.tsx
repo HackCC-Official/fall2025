@@ -18,11 +18,15 @@ import { useMail } from "@/hooks/use-mail";
 interface HackersMailProps {
     mails: Mail[];
     defaultLayout?: number[];
+    title?: string;
+    description?: string;
 }
 
 export default function HackersMail({
     mails = [],
     defaultLayout = [35, 65],
+    title = "Registered Hackers",
+    description = "Manage and communicate with registered participants",
 }: HackersMailProps) {
     const [mail, setMail] = useMail();
     const [searchQuery, setSearchQuery] = React.useState("");
@@ -45,16 +49,21 @@ export default function HackersMail({
                 <div className="flex items-center justify-between max-w-[1400px] mx-auto">
                     <div>
                         <h1 className="text-2xl font-semibold tracking-tight">
-                            Registered Hackers
+                            {title}
                         </h1>
                         <p className="text-muted-foreground mt-1">
-                            Manage and communicate with {mails.length}{" "}
-                            registered participants
+                            {description} ({mails.length})
                         </p>
                     </div>
-                    <Button size="sm" className="gap-2">
+                    <Button
+                        size="sm"
+                        className="gap-2"
+                        onClick={() =>
+                            (window.location.href = "/panel/email/compose/hackers")
+                        }
+                    >
                         <PenBox className="h-4 w-4" />
-                        Compose Mass Email
+                        Send Mass Email
                     </Button>
                 </div>
             </div>

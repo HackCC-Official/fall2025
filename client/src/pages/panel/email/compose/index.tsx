@@ -20,7 +20,6 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
-import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
     Dialog,
@@ -29,111 +28,123 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import type { Contact, EmailTemplate } from "@/lib/email/types";
+import type { EmailTemplate } from "@/lib/email/types";
+import type { ContactDto } from "@/features/outreach/types/contact.dto";
 import {
     renderEmailTemplate,
     type EmailTemplateType,
 } from "@/lib/email/email-renderer";
 import PanelLayout from "../../layout";
-
-const MOCK_CONTACTS: Contact[] = [
-    {
-        id: "1",
-        name: "John Doe",
-        email: "john@example.com",
-        company: "Acme Inc",
-        phone: "+1234567890",
-        linkedIn: "https://linkedin.com/in/johndoe",
-        createdAt: new Date(),
-        updatedAt: new Date(),
-    },
-    // Add more mock contacts as needed
-];
+import { useSearchParams } from "next/navigation";
+import { Badge } from "@/components/ui/badge";
+import { useContacts } from "@/hooks/use-contacts";
+import { sendEmail } from "@/features/outreach/api/outreach";
+import { toast } from "sonner";
+import AccountSwitcher from "../components/account-switcher";
+import { CircleUser, ChevronRight } from "lucide-react";
+import { useEffect } from "react";
+import { useOutreachTeam } from "@/hooks/use-outreach-team";
+import type { OutreachTeamDto } from "@/features/outreach/types/outreach-team";
+import Link from "next/link";
 
 const EMAIL_TEMPLATES: EmailTemplate[] = [
     {
         id: "1",
         name: "Sponsorship Confirmation",
-        subject: "Thank you for sponsoring [Event Name]",
-        content: "Dear [Name],\n\nThank you for your sponsorship...",
+        subject: "Sponsorship Opportunity with HackCC",
+        content: "Dear [Name],\n\nI hope this email finds you well...",
     },
     {
         id: "2",
-        name: "Follow-up Request",
-        subject: "Following up on our conversation",
-        content: "Hi [Name],\n\nI wanted to follow up on...",
-    },
-    {
-        id: "3",
-        name: "Invoice Email",
-        subject: "Invoice for [Service]",
-        content: "Dear [Name],\n\nPlease find attached the invoice for...",
+        name: "Follow-Up Email",
+        subject: "Re: Meet the best students in X town this May",
+        content: "Hi [Name],\n\nI hope this email finds you well...",
     },
 ];
 
-interface TemplateData {
-    // Sponsorship Confirmation
-    eventName: string;
-    sponsorshipTier: string;
-    eventDate: string;
-    nextSteps: string[];
-    organizerName: string;
-    organizerTitle: string;
-    // Follow-up Request
-    meetingDate: string;
-    discussionPoints: string[];
-    // Invoice Email
-    invoiceNumber: string;
-    amount: string;
-    dueDate: string;
-    serviceDescription: string;
-    paymentLink: string;
-}
+const STORAGE_KEY = "selectedOutreachAccount";
 
 export default function ComposePage() {
+    const searchParams = useSearchParams();
     const [selectedContacts, setSelectedContacts] = React.useState<Set<string>>(
         new Set()
     );
     const [companyFilter, setCompanyFilter] = React.useState("");
     const [selectedTemplate, setSelectedTemplate] =
         React.useState<EmailTemplate | null>(null);
-    const [emailContent, setEmailContent] = React.useState("");
     const [emailSubject, setEmailSubject] = React.useState("");
     const [previewHtml, setPreviewHtml] = React.useState<string>("");
-    const [templateData, setTemplateData] = React.useState<
-        Partial<TemplateData>
-    >({
-        eventName: "",
-        sponsorshipTier: "",
-        eventDate: "",
-        meetingDate: "",
-        discussionPoints: [],
-        nextSteps: [],
-        invoiceNumber: "",
-        amount: "",
-        dueDate: "",
-        serviceDescription: "",
-        paymentLink: "",
-        organizerName: "",
-        organizerTitle: "",
-    });
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [selectedContact, setSelectedContact] =
-        React.useState<Contact | null>(null);
+        React.useState<ContactDto | null>(null);
+    const [senderEmail, setSenderEmail] = React.useState<string>(() => {
+        if (typeof window !== "undefined") {
+            return localStorage.getItem(STORAGE_KEY) || "";
+        }
+        return "";
+    });
+
+    // Fetch outreach team data
+    const { data: outreachTeamResponse } = useOutreachTeam();
+
+    // Fetch contacts data
+    const { data: contactsResponse } = useContacts();
+    const contacts = React.useMemo(
+        () => contactsResponse?.data || [],
+        [contactsResponse?.data]
+    );
+
+    // Transform outreach team data into account format
+    const emailAccounts = React.useMemo(() => {
+        const outreachTeamArray = outreachTeamResponse?.data?.data || [];
+        return outreachTeamArray.map((member: OutreachTeamDto) => ({
+            label: member.name,
+            email: member.email,
+            icon: <CircleUser className="h-4 w-4" />,
+        }));
+    }, [outreachTeamResponse]);
+
+    // Load the saved email account from local storage
+    useEffect(() => {
+        if (typeof window !== "undefined" && emailAccounts.length > 0) {
+            // Only set email if current email is empty or not in the accounts list
+            if (
+                !senderEmail ||
+                !emailAccounts.some((account) => account.email === senderEmail)
+            ) {
+                const newEmail = emailAccounts[0].email;
+                setSenderEmail(newEmail);
+                localStorage.setItem(STORAGE_KEY, newEmail);
+            }
+        }
+    }, [emailAccounts, senderEmail]);
+
+    // Handle auto-selection of contact from URL parameter
+    React.useEffect(() => {
+        if (!searchParams) return;
+
+        const contactId = searchParams.get("contactId");
+        if (contactId) {
+            setSelectedContacts(new Set([contactId]));
+            const contact = contacts.find((c) => c.id.toString() === contactId);
+            if (contact) {
+                setSelectedContact(contact);
+            }
+        }
+    }, [searchParams, contacts]);
 
     const filteredContacts = React.useMemo(() => {
-        return MOCK_CONTACTS.filter((contact) =>
-            contact.company.toLowerCase().includes(companyFilter.toLowerCase())
+        return contacts.filter((contact) =>
+            contact.organization
+                .toLowerCase()
+                .includes(companyFilter.toLowerCase())
         );
-    }, [companyFilter]);
+    }, [contacts, companyFilter]);
 
     const handleTemplateChange = (templateId: string) => {
         const template = EMAIL_TEMPLATES.find((t) => t.id === templateId);
         if (template) {
             setSelectedTemplate(template);
             setEmailSubject(template.subject);
-            setEmailContent(template.content);
         }
     };
 
@@ -147,517 +158,243 @@ export default function ComposePage() {
         setSelectedContacts(newSelected);
     };
 
-    const handleTemplateDataChange = (
-        field: keyof TemplateData,
-        value: string | string[]
-    ) => {
-        setTemplateData((prev) => ({
-            ...prev,
-            [field]: value,
-        }));
+    const handleAccountChange = (email: string) => {
+        setSenderEmail(email);
+        localStorage.setItem(STORAGE_KEY, email);
     };
 
-    const isTemplateDataValid = React.useMemo(() => {
-        if (!selectedTemplate) return false;
-
-        switch (selectedTemplate.name as EmailTemplateType) {
-            case "Sponsorship Confirmation":
-                return !!(
-                    templateData.eventName &&
-                    templateData.sponsorshipTier &&
-                    templateData.eventDate &&
-                    templateData.nextSteps?.length &&
-                    templateData.organizerName &&
-                    templateData.organizerTitle
-                );
-
-            case "Follow-up Request":
-                return !!(
-                    templateData.meetingDate &&
-                    templateData.discussionPoints?.length &&
-                    templateData.nextSteps?.length &&
-                    templateData.organizerName &&
-                    templateData.organizerTitle
-                );
-
-            case "Invoice Email":
-                return !!(
-                    templateData.invoiceNumber &&
-                    templateData.amount &&
-                    templateData.dueDate &&
-                    templateData.serviceDescription &&
-                    templateData.paymentLink &&
-                    templateData.organizerName &&
-                    templateData.organizerTitle
-                );
-
-            default:
-                return false;
-        }
-    }, [selectedTemplate, templateData]);
-
     const handlePreview = async () => {
-        if (
-            !selectedTemplate ||
-            selectedContacts.size === 0 ||
-            !isTemplateDataValid
-        )
-            return;
+        if (!selectedTemplate || selectedContacts.size === 0) return;
 
-        const selectedContactDetails = MOCK_CONTACTS.filter((contact) =>
-            selectedContacts.has(contact.id)
+        const selectedContactDetails = contacts.filter((contact) =>
+            selectedContacts.has(contact.id.toString())
         );
+
+        // Get the selected outreach team member
+        const selectedTeamMember = outreachTeamResponse?.data?.data.find(
+            (member: OutreachTeamDto) => member.email === senderEmail
+        );
+
+        if (!selectedTeamMember) {
+            toast.error("Could not find selected team member information");
+            return;
+        }
 
         try {
             const renderedEmails = await renderEmailTemplate({
                 templateType: selectedTemplate.name as EmailTemplateType,
                 recipients: selectedContactDetails,
                 templateData: {
-                    ...templateData,
-                    organizerName: templateData.organizerName,
-                    organizerTitle: templateData.organizerTitle,
+                    sender: selectedTeamMember,
                 },
                 contactInfo: {
-                    email: "your.email@example.com",
+                    email: senderEmail,
                     phone: "+1234567890",
                 },
             });
 
-            // Show preview for the first recipient
-            setPreviewHtml(renderedEmails[0]);
+            // Ensure we're getting a string from the rendered email
+            if (renderedEmails && renderedEmails.length > 0) {
+                const htmlContent = await renderedEmails[0];
+                setPreviewHtml(htmlContent);
+            } else {
+                setPreviewHtml("No preview available");
+            }
         } catch (error) {
             console.error("Error rendering email preview:", error);
-            setPreviewHtml(""); // Clear preview on error
+            setPreviewHtml("Error generating preview");
         }
     };
 
-    const handleSendEmail = () => {
-        // TODO: Implement email sending functionality
-        const selectedContactDetails = MOCK_CONTACTS.filter((contact) =>
-            selectedContacts.has(contact.id)
+    const handleSendEmail = async () => {
+        if (!selectedTemplate || selectedContacts.size === 0) {
+            toast.error("Please select a template and at least one recipient");
+            return;
+        }
+
+        const selectedContactDetails = contacts.filter((contact) =>
+            selectedContacts.has(contact.id.toString())
         );
-        console.log({
-            recipients: selectedContactDetails,
-            subject: emailSubject,
-            content: emailContent,
-            template: selectedTemplate,
-            templateData,
-        });
-    };
 
-    const renderTemplateFields = () => {
-        if (!selectedTemplate) return null;
+        // Get the selected outreach team member
+        const selectedTeamMember = outreachTeamResponse?.data?.data.find(
+            (member: OutreachTeamDto) => member.email === senderEmail
+        );
 
-        switch (selectedTemplate.name as EmailTemplateType) {
-            case "Sponsorship Confirmation":
-                return (
-                    <div className="space-y-4">
-                        <div>
-                            <Label htmlFor="eventName">Event Name</Label>
-                            <Input
-                                id="eventName"
-                                value={templateData.eventName || ""}
-                                onChange={(e) =>
-                                    handleTemplateDataChange(
-                                        "eventName",
-                                        e.target.value
-                                    )
-                                }
-                            />
-                        </div>
-                        <div>
-                            <Label htmlFor="sponsorshipTier">
-                                Sponsorship Tier
-                            </Label>
-                            <Input
-                                id="sponsorshipTier"
-                                value={templateData.sponsorshipTier || ""}
-                                onChange={(e) =>
-                                    handleTemplateDataChange(
-                                        "sponsorshipTier",
-                                        e.target.value
-                                    )
-                                }
-                            />
-                        </div>
-                        <div>
-                            <Label htmlFor="eventDate">Event Date</Label>
-                            <Input
-                                id="eventDate"
-                                type="date"
-                                value={templateData.eventDate || ""}
-                                onChange={(e) =>
-                                    handleTemplateDataChange(
-                                        "eventDate",
-                                        e.target.value
-                                    )
-                                }
-                            />
-                        </div>
-                        <div>
-                            <Label htmlFor="nextSteps">
-                                Next Steps (one per line)
-                            </Label>
-                            <Textarea
-                                id="nextSteps"
-                                value={templateData.nextSteps?.join("\n") || ""}
-                                onChange={(e) =>
-                                    handleTemplateDataChange(
-                                        "nextSteps",
-                                        e.target.value
-                                            .split("\n")
-                                            .filter(Boolean)
-                                    )
-                                }
-                                style={{
-                                    whiteSpace: "pre-wrap",
-                                    minHeight: "120px",
-                                }}
-                                rows={4}
-                                placeholder="Enter next steps, one per line..."
-                            />
-                        </div>
-                        <div>
-                            <Label htmlFor="organizerName">
-                                Organizer Name
-                            </Label>
-                            <Input
-                                id="organizerName"
-                                value={templateData.organizerName || ""}
-                                onChange={(e) =>
-                                    handleTemplateDataChange(
-                                        "organizerName",
-                                        e.target.value
-                                    )
-                                }
-                            />
-                        </div>
-                        <div>
-                            <Label htmlFor="organizerTitle">
-                                Organizer Title
-                            </Label>
-                            <Input
-                                id="organizerTitle"
-                                value={templateData.organizerTitle || ""}
-                                onChange={(e) =>
-                                    handleTemplateDataChange(
-                                        "organizerTitle",
-                                        e.target.value
-                                    )
-                                }
-                            />
-                        </div>
-                    </div>
-                );
-
-            case "Follow-up Request":
-                return (
-                    <div className="space-y-4">
-                        <div>
-                            <Label htmlFor="meetingDate">Meeting Date</Label>
-                            <Input
-                                id="meetingDate"
-                                type="date"
-                                value={templateData.meetingDate || ""}
-                                onChange={(e) =>
-                                    handleTemplateDataChange(
-                                        "meetingDate",
-                                        e.target.value
-                                    )
-                                }
-                            />
-                        </div>
-                        <div>
-                            <Label htmlFor="discussionPoints">
-                                Discussion Points
-                            </Label>
-                            <Textarea
-                                id="discussionPoints"
-                                value={
-                                    (templateData.discussionPoints || []).join(
-                                        "\n"
-                                    ) || ""
-                                }
-                                onChange={(e) =>
-                                    handleTemplateDataChange(
-                                        "discussionPoints",
-                                        e.target.value.split("\n")
-                                    )
-                                }
-                                style={{
-                                    whiteSpace: "pre-wrap",
-                                    minHeight: "120px",
-                                }}
-                                rows={4}
-                                placeholder="Enter discussion points (one per line)..."
-                            />
-                        </div>
-                        <div>
-                            <Label htmlFor="nextSteps">Next Steps</Label>
-                            <Textarea
-                                id="nextSteps"
-                                value={
-                                    (templateData.nextSteps || []).join("\n") ||
-                                    ""
-                                }
-                                onChange={(e) =>
-                                    handleTemplateDataChange(
-                                        "nextSteps",
-                                        e.target.value.split("\n")
-                                    )
-                                }
-                                style={{
-                                    whiteSpace: "pre-wrap",
-                                    minHeight: "120px",
-                                }}
-                                rows={4}
-                                placeholder="Enter next steps, one per line..."
-                            />
-                        </div>
-                        <div>
-                            <Label htmlFor="organizerName">
-                                Organizer Name
-                            </Label>
-                            <Input
-                                id="organizerName"
-                                value={templateData.organizerName || ""}
-                                onChange={(e) =>
-                                    handleTemplateDataChange(
-                                        "organizerName",
-                                        e.target.value
-                                    )
-                                }
-                                placeholder="Enter organizer name..."
-                            />
-                        </div>
-                        <div>
-                            <Label htmlFor="organizerTitle">
-                                Organizer Title
-                            </Label>
-                            <Input
-                                id="organizerTitle"
-                                value={templateData.organizerTitle || ""}
-                                onChange={(e) =>
-                                    handleTemplateDataChange(
-                                        "organizerTitle",
-                                        e.target.value
-                                    )
-                                }
-                                placeholder="Enter organizer title..."
-                            />
-                        </div>
-                    </div>
-                );
-
-            case "Invoice Email":
-                return (
-                    <div className="space-y-4">
-                        <div>
-                            <Label htmlFor="invoiceNumber">
-                                Invoice Number
-                            </Label>
-                            <Input
-                                id="invoiceNumber"
-                                value={templateData.invoiceNumber || ""}
-                                onChange={(e) =>
-                                    handleTemplateDataChange(
-                                        "invoiceNumber",
-                                        e.target.value
-                                    )
-                                }
-                                placeholder="Enter invoice number..."
-                            />
-                        </div>
-                        <div>
-                            <Label htmlFor="amount">Amount</Label>
-                            <Input
-                                id="amount"
-                                value={templateData.amount || ""}
-                                onChange={(e) =>
-                                    handleTemplateDataChange(
-                                        "amount",
-                                        e.target.value
-                                    )
-                                }
-                                placeholder="Enter amount..."
-                            />
-                        </div>
-                        <div>
-                            <Label htmlFor="dueDate">Due Date</Label>
-                            <Input
-                                id="dueDate"
-                                type="date"
-                                value={templateData.dueDate || ""}
-                                onChange={(e) =>
-                                    handleTemplateDataChange(
-                                        "dueDate",
-                                        e.target.value
-                                    )
-                                }
-                            />
-                        </div>
-                        <div>
-                            <Label htmlFor="serviceDescription">
-                                Service Description
-                            </Label>
-                            <Textarea
-                                id="serviceDescription"
-                                value={templateData.serviceDescription || ""}
-                                onChange={(e) =>
-                                    handleTemplateDataChange(
-                                        "serviceDescription",
-                                        e.target.value
-                                    )
-                                }
-                                style={{
-                                    whiteSpace: "pre-wrap",
-                                    minHeight: "120px",
-                                }}
-                                rows={4}
-                                placeholder="Enter service description..."
-                            />
-                        </div>
-                        <div>
-                            <Label htmlFor="paymentLink">Payment Link</Label>
-                            <Input
-                                id="paymentLink"
-                                value={templateData.paymentLink || ""}
-                                onChange={(e) =>
-                                    handleTemplateDataChange(
-                                        "paymentLink",
-                                        e.target.value
-                                    )
-                                }
-                                placeholder="Enter payment link..."
-                            />
-                        </div>
-                        <div>
-                            <Label htmlFor="organizerName">
-                                Organizer Name
-                            </Label>
-                            <Input
-                                id="organizerName"
-                                value={templateData.organizerName || ""}
-                                onChange={(e) =>
-                                    handleTemplateDataChange(
-                                        "organizerName",
-                                        e.target.value
-                                    )
-                                }
-                                placeholder="Enter organizer name..."
-                            />
-                        </div>
-                        <div>
-                            <Label htmlFor="organizerTitle">
-                                Organizer Title
-                            </Label>
-                            <Input
-                                id="organizerTitle"
-                                value={templateData.organizerTitle || ""}
-                                onChange={(e) =>
-                                    handleTemplateDataChange(
-                                        "organizerTitle",
-                                        e.target.value
-                                    )
-                                }
-                                placeholder="Enter organizer title..."
-                            />
-                        </div>
-                    </div>
-                );
-
-            default:
-                return null;
+        if (!selectedTeamMember) {
+            toast.error("Could not find selected team member information");
+            return;
         }
-    };
 
-    const formatDate = (date: Date) => {
-        return new Date(date).toLocaleDateString("en-US", {
-            year: "numeric",
-            month: "long",
-            day: "numeric",
-        });
+        try {
+            const renderedEmails = await renderEmailTemplate({
+                templateType: selectedTemplate.name as EmailTemplateType,
+                recipients: selectedContactDetails,
+                templateData: {
+                    sender: selectedTeamMember,
+                },
+                contactInfo: {
+                    email: senderEmail,
+                    phone: "+1234567890",
+                },
+            });
+
+            if (!renderedEmails || renderedEmails.length === 0) {
+                throw new Error("Failed to generate email content");
+            }
+
+            const htmlContent = await renderedEmails[0];
+
+            // Create the email data object
+            const emailData = {
+                from: senderEmail,
+                to: selectedContactDetails.map((contact) => ({
+                    email: contact.email,
+                    name: `${contact.first_name} ${contact.last_name}`,
+                })),
+                subject: emailSubject,
+                html: htmlContent,
+            };
+
+            // Send the email using the outreach API
+            await sendEmail(emailData);
+
+            toast.success("Email sent successfully!");
+
+            // Reset form
+            setSelectedContacts(new Set());
+            setSelectedTemplate(null);
+            setEmailSubject("");
+            setPreviewHtml("");
+        } catch (error) {
+            console.error("Error sending email:", error);
+            toast.error("Failed to send email. Please try again.");
+        }
     };
 
     return (
-        <div className="mx-auto py-10">
-            <h1 className="mb-8 font-bold text-4xl">Compose Email</h1>
+        <div className="container mx-auto py-10 max-w-7xl">
+            {/* Breadcrumb Navigation */}
+            <div className="flex items-center gap-2 mb-6 text-sm">
+                <Link
+                    href="/panel/email"
+                    className="text-muted-foreground hover:text-primary transition-colors"
+                >
+                    Email
+                </Link>
+                <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                <span className="font-medium">Compose</span>
+            </div>
 
-            <Tabs defaultValue="compose" className="space-y-6">
-                <TabsList className="grid grid-cols-2 w-full max-w-[400px]">
-                    <TabsTrigger value="compose">Compose</TabsTrigger>
-                    <TabsTrigger
-                        value="preview"
-                        onClick={handlePreview}
-                        disabled={
-                            !selectedTemplate ||
-                            selectedContacts.size === 0 ||
-                            !isTemplateDataValid
-                        }
-                    >
-                        Preview
-                    </TabsTrigger>
-                </TabsList>
+            <div className="flex items-center justify-between mb-8">
+                <h1 className="font-bold text-3xl">Send email to Employers</h1>
+                <div className="flex items-center gap-4">
+                    <AccountSwitcher
+                        isCollapsed={false}
+                        accounts={emailAccounts}
+                        onAccountChange={handleAccountChange}
+                        defaultEmail={senderEmail}
+                    />
+                    <div className="flex gap-2">
+                        <Button
+                            variant="outline"
+                            onClick={handlePreview}
+                            disabled={
+                                !selectedTemplate || selectedContacts.size === 0
+                            }
+                        >
+                            Preview Email
+                        </Button>
+                        <Button
+                            onClick={handleSendEmail}
+                            disabled={
+                                !selectedTemplate || selectedContacts.size === 0
+                            }
+                        >
+                            Send Email
+                        </Button>
+                    </div>
+                </div>
+            </div>
 
-                <TabsContent value="compose">
-                    <div className="gap-6 grid grid-cols-1 md:grid-cols-2">
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>Select Recipients</CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <div className="space-y-4">
-                                    <div>
-                                        <Label htmlFor="company-filter">
-                                            Filter by Company
-                                        </Label>
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                {/* Left Column - Recipients */}
+                <div className="lg:col-span-5">
+                    <Card>
+                        <CardHeader className="border-b">
+                            <CardTitle>Recipients</CardTitle>
+                        </CardHeader>
+                        <CardContent className="p-6">
+                            <div className="space-y-4">
+                                <div>
+                                    <Label
+                                        htmlFor="company-filter"
+                                        className="text-sm font-semibold"
+                                    >
+                                        Search Organizations
+                                    </Label>
+                                    <div className="relative mt-1 mb-4">
                                         <Input
                                             id="company-filter"
                                             value={companyFilter}
                                             onChange={(e) =>
                                                 setCompanyFilter(e.target.value)
                                             }
-                                            placeholder="Enter company name..."
+                                            placeholder="Type to filter organizations..."
+                                            className="pl-3 pr-10 py-2 w-full border rounded-md shadow-sm focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
                                         />
                                     </div>
+                                </div>
 
+                                <div className="border rounded-lg overflow-hidden shadow-sm bg-card">
                                     <Table>
                                         <TableHeader>
-                                            <TableRow>
-                                                <TableHead className="w-12">
-                                                    Select
+                                            <TableRow className="bg-muted/50">
+                                                <TableHead className="w-12 py-3"></TableHead>
+                                                <TableHead className="py-3 font-semibold">
+                                                    Name
                                                 </TableHead>
-                                                <TableHead>Name</TableHead>
-                                                <TableHead>Company</TableHead>
-                                                <TableHead>Email</TableHead>
-                                                <TableHead>Actions</TableHead>
+                                                <TableHead className="py-3 font-semibold">
+                                                    Organization
+                                                </TableHead>
+                                                <TableHead className="hidden md:table-cell py-3 font-semibold">
+                                                    Email
+                                                </TableHead>
+                                                <TableHead className="w-20 py-3"></TableHead>
                                             </TableRow>
                                         </TableHeader>
                                         <TableBody>
                                             {filteredContacts.map((contact) => (
-                                                <TableRow key={contact.id}>
-                                                    <TableCell>
+                                                <TableRow
+                                                    key={contact.id}
+                                                    className={`
+                                                        transition-colors duration-200
+                                                        ${contact.been_contacted ? "bg-purple-100 dark:bg-purple-900/20" : "hover:bg-muted/50"}
+                                                    `}
+                                                >
+                                                    <TableCell className="py-3">
                                                         <Checkbox
                                                             checked={selectedContacts.has(
-                                                                contact.id
+                                                                contact.id.toString()
                                                             )}
                                                             onCheckedChange={() =>
                                                                 handleContactToggle(
-                                                                    contact.id
+                                                                    contact.id.toString()
                                                                 )
                                                             }
+                                                            className="ml-2"
                                                         />
                                                     </TableCell>
-                                                    <TableCell>
-                                                        {contact.name}
+                                                    <TableCell className="py-3 font-medium">
+                                                        {`${contact.first_name} ${contact.last_name}`}
                                                     </TableCell>
-                                                    <TableCell>
-                                                        {contact.company}
+                                                    <TableCell className="py-3">
+                                                        {contact.organization}
                                                     </TableCell>
-                                                    <TableCell>
+                                                    <TableCell className="hidden md:table-cell py-3 text-muted-foreground">
                                                         {contact.email}
                                                     </TableCell>
-                                                    <TableCell>
+                                                    <TableCell className="py-3">
                                                         <Dialog>
                                                             <DialogTrigger
                                                                 asChild
@@ -671,7 +408,7 @@ export default function ComposePage() {
                                                                         )
                                                                     }
                                                                 >
-                                                                    More Info
+                                                                    Details
                                                                 </Button>
                                                             </DialogTrigger>
                                                             <DialogContent className="max-w-md">
@@ -687,9 +424,8 @@ export default function ComposePage() {
                                                                             Name:
                                                                         </div>
                                                                         <div>
-                                                                            {
-                                                                                contact.name
-                                                                            }
+                                                                            {selectedContact &&
+                                                                                `${selectedContact.first_name} ${selectedContact.last_name}`}
                                                                         </div>
 
                                                                         <div className="font-semibold">
@@ -697,46 +433,46 @@ export default function ComposePage() {
                                                                         </div>
                                                                         <div>
                                                                             {
-                                                                                contact.email
+                                                                                selectedContact?.email
                                                                             }
                                                                         </div>
 
                                                                         <div className="font-semibold">
-                                                                            Company:
+                                                                            Organization:
                                                                         </div>
                                                                         <div>
                                                                             {
-                                                                                contact.company
+                                                                                selectedContact?.organization
                                                                             }
                                                                         </div>
 
-                                                                        {contact.role && (
+                                                                        {selectedContact?.position && (
                                                                             <>
                                                                                 <div className="font-semibold">
-                                                                                    Role:
+                                                                                    Position:
                                                                                 </div>
                                                                                 <div>
                                                                                     {
-                                                                                        contact.role
+                                                                                        selectedContact.position
                                                                                     }
                                                                                 </div>
                                                                             </>
                                                                         )}
 
-                                                                        {contact.phone && (
+                                                                        {selectedContact?.phone_number && (
                                                                             <>
                                                                                 <div className="font-semibold">
                                                                                     Phone:
                                                                                 </div>
                                                                                 <div>
                                                                                     {
-                                                                                        contact.phone
+                                                                                        selectedContact.phone_number
                                                                                     }
                                                                                 </div>
                                                                             </>
                                                                         )}
 
-                                                                        {contact.linkedIn && (
+                                                                        {selectedContact?.linkedin_url && (
                                                                             <>
                                                                                 <div className="font-semibold">
                                                                                     LinkedIn:
@@ -744,7 +480,7 @@ export default function ComposePage() {
                                                                                 <div>
                                                                                     <a
                                                                                         href={
-                                                                                            contact.linkedIn
+                                                                                            selectedContact.linkedin_url
                                                                                         }
                                                                                         target="_blank"
                                                                                         rel="noopener noreferrer"
@@ -757,37 +493,31 @@ export default function ComposePage() {
                                                                             </>
                                                                         )}
 
-                                                                        {contact.notes && (
+                                                                        {selectedContact?.industry && (
                                                                             <>
                                                                                 <div className="font-semibold">
-                                                                                    Notes:
+                                                                                    Industry:
                                                                                 </div>
                                                                                 <div>
                                                                                     {
-                                                                                        contact.notes
+                                                                                        selectedContact.industry
                                                                                     }
                                                                                 </div>
                                                                             </>
                                                                         )}
 
-                                                                        <div className="font-semibold">
-                                                                            Created:
-                                                                        </div>
-                                                                        <div>
-                                                                            {formatDate(
-                                                                                contact.createdAt
-                                                                            )}
-                                                                        </div>
-
-                                                                        <div className="font-semibold">
-                                                                            Last
-                                                                            Updated:
-                                                                        </div>
-                                                                        <div>
-                                                                            {formatDate(
-                                                                                contact.updatedAt
-                                                                            )}
-                                                                        </div>
+                                                                        {selectedContact?.been_contacted && (
+                                                                            <>
+                                                                                <div className="font-semibold">
+                                                                                    Status:
+                                                                                </div>
+                                                                                <div>
+                                                                                    <Badge variant="default">
+                                                                                        Contacted
+                                                                                    </Badge>
+                                                                                </div>
+                                                                            </>
+                                                                        )}
                                                                     </div>
                                                                 </div>
                                                             </DialogContent>
@@ -798,96 +528,72 @@ export default function ComposePage() {
                                         </TableBody>
                                     </Table>
                                 </div>
-                            </CardContent>
-                        </Card>
+                            </div>
+                        </CardContent>
+                    </Card>
+                </div>
 
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>Compose Email</CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <div className="space-y-4">
-                                    <div>
-                                        <Label htmlFor="template">
-                                            Email Template
-                                        </Label>
-                                        <Select
-                                            onValueChange={handleTemplateChange}
-                                        >
-                                            <SelectTrigger>
-                                                <SelectValue placeholder="Select a template" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                {EMAIL_TEMPLATES.map(
-                                                    (template) => (
-                                                        <SelectItem
-                                                            key={template.id}
-                                                            value={template.id}
-                                                        >
-                                                            {template.name}
-                                                        </SelectItem>
-                                                    )
-                                                )}
-                                            </SelectContent>
-                                        </Select>
-                                    </div>
-
-                                    {renderTemplateFields()}
-
-                                    <div className="flex justify-end space-x-2">
-                                        <Button
-                                            variant="outline"
-                                            onClick={handlePreview}
-                                            disabled={
-                                                !selectedTemplate ||
-                                                selectedContacts.size === 0
-                                            }
-                                        >
-                                            Preview
-                                        </Button>
-                                        <Button
-                                            onClick={handleSendEmail}
-                                            disabled={
-                                                selectedContacts.size === 0
-                                            }
-                                        >
-                                            Send Email
-                                        </Button>
-                                    </div>
-                                </div>
-                            </CardContent>
-                        </Card>
-                    </div>
-                </TabsContent>
-
-                <TabsContent value="preview">
+                {/* Right Column - Email Composition */}
+                <div className="lg:col-span-7">
                     <Card>
-                        <CardHeader>
-                            <CardTitle>Email Preview</CardTitle>
+                        <CardHeader className="border-b">
+                            <CardTitle>Email Content</CardTitle>
                         </CardHeader>
-                        <CardContent>
-                            {previewHtml ? (
+                        <CardContent className="p-6">
+                            <div className="space-y-6">
+                                <div>
+                                    <Label htmlFor="template">
+                                        Email Template
+                                    </Label>
+                                    <Select
+                                        onValueChange={handleTemplateChange}
+                                    >
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Select a template" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {EMAIL_TEMPLATES.map((template) => (
+                                                <SelectItem
+                                                    key={template.id}
+                                                    value={template.id}
+                                                >
+                                                    {template.name}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+
+                                {selectedTemplate && (
+                                    <div className="space-y-6 pt-4">
+                                        <div className="text-sm text-muted-foreground">
+                                            Email will be sent using your
+                                            outreach team member information.
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    {/* Preview Section */}
+                    {previewHtml && (
+                        <Card className="mt-6">
+                            <CardHeader className="border-b">
+                                <CardTitle>Email Preview</CardTitle>
+                            </CardHeader>
+                            <CardContent className="p-6">
                                 <div
-                                    className="dark:prose-invert max-w-none prose"
+                                    className="prose dark:prose-invert max-w-none"
                                     dangerouslySetInnerHTML={{
                                         __html: previewHtml,
                                     }}
                                 />
-                            ) : (
-                                <div className="py-8 text-muted-foreground text-center">
-                                    {!selectedTemplate
-                                        ? "Select a template to preview the email."
-                                        : !selectedContacts.size
-                                          ? "Select at least one recipient to preview the email."
-                                          : !isTemplateDataValid
-                                            ? "Fill in all required fields to preview the email."
-                                            : "Click Preview to see the email."}
-                                </div>
-                            )}
-                        </CardContent>
-                    </Card>
-                </TabsContent>
-            </Tabs>
+                            </CardContent>
+                        </Card>
+                    )}
+                </div>
+            </div>
         </div>
     );
 }

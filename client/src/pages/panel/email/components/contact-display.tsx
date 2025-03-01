@@ -10,8 +10,8 @@ interface ContactDisplayProps {
 
 export default function ContactDisplay({ contact }: ContactDisplayProps) {
     const handleSendEmail = () => {
-        if (contact?.email) {
-            window.location.href = `mailto:${contact.email}`;
+        if (contact?.id) {
+            window.location.href = `/panel/email/compose?contactId=${contact.id}`;
         }
     };
 
@@ -54,6 +54,7 @@ export default function ContactDisplay({ contact }: ContactDisplayProps) {
                     <Button
                         onClick={handleSendEmail}
                         size="sm"
+                        variant="outline"
                         className="flex items-center gap-2"
                     >
                         <Mail className="h-4 w-4" />

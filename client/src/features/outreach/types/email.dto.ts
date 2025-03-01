@@ -19,25 +19,54 @@ export interface EmailRecipient {
  */
 export interface SendEmailDto {
     from: string;
-    to: EmailRecipient[];
+    to: Array<{
+        email: string;
+        name: string;
+    }>;
     subject: string;
     html: string;
-    attachments?: EmailAttachment[];
+    templateData?: {
+        sender: {
+            name: string;
+            email: string;
+            major: string;
+            year: string;
+            school: string;
+        };
+    };
 }
 
 /**
- * Data transfer object for sending multiple emails in batch
+ * Data transfer object for sending batch emails
  */
 export interface SendBatchEmailsDto {
-    emails: SendEmailDto[];
+    emails: Array<{
+        from: string;
+        to: Array<{
+            email: string;
+            name: string;
+        }>;
+        subject: string;
+        html: string;
+        templateData?: {
+            sender: {
+                name: string;
+                email: string;
+                major: string;
+                year: string;
+                school: string;
+            };
+        };
+    }>;
 }
 
 /**
- * Data transfer object for updating an existing email
+ * Data transfer object for updating an email
  */
 export interface UpdateEmailDto {
     id: string;
     subject?: string;
-    html?: string;
+    content?: string;
+    status?: "sent" | "delivered" | "failed";
+    replyStatus?: "pending" | "replied" | "no-reply";
 }
-

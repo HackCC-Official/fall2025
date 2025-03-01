@@ -2,25 +2,23 @@
  * Types for the email system
  */
 
-export type Contact = {
+export interface Contact {
     id: string;
     name: string;
     email: string;
     company: string;
-    role?: string;
-    phone?: string;
-    linkedIn?: string;
-    notes?: string;
+    phone: string;
+    linkedIn: string;
     createdAt: Date;
     updatedAt: Date;
-};
+}
 
-export type EmailTemplate = {
+export interface EmailTemplate {
     id: string;
-    name: "Sponsorship Confirmation" | "Follow-up Request" | "Invoice Email";
+    name: string;
     subject: string;
     content: string;
-};
+}
 
 export type Email = {
     id: string;

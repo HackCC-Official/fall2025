@@ -13,41 +13,12 @@ import { useContacts } from "@/hooks/use-contacts";
 import { useOutreachTeam } from "@/hooks/use-outreach-team";
 import type { OutreachTeamDto } from "@/features/outreach/types/outreach-team";
 import { LogoIcon } from "@/components/logo-icon";
+import { useInterestedUsers } from "@/hooks/use-interested.user";
+import type { InterestedUserDto } from "@/features/outreach/types/interested-users.dto";
 
 const mails: Mail[] = [];
 
-const HACKER_SAMPLE_DATA: Mail[] = [
-    {
-        id: "h1",
-        from: "outreach@hackcc.dev",
-        to: [
-            {
-                email: "alice@university.edu",
-                name: "Alice Johnson",
-            },
-        ],
-        subject: "Registration Confirmation",
-        html: "Thank you for registering for HackCC! We're excited to have you join us...",
-        date: new Date().toISOString(),
-        read: true,
-        labels: ["registered"],
-    },
-    {
-        id: "h2",
-        from: "outreach@hackcc.dev",
-        to: [
-            {
-                email: "bob@college.edu",
-                name: "Bob Wilson",
-            },
-        ],
-        subject: "Dietary Requirements",
-        html: "I wanted to inform you about my dietary restrictions for the event...",
-        date: new Date(Date.now() - 172800000).toISOString(),
-        read: false,
-        labels: ["dietary"],
-    },
-];
+const HACKER_SAMPLE_DATA: Mail[] = [];
 
 export default function EmailPage() {
     const [defaultLayout] = React.useState(() => {
@@ -64,9 +35,14 @@ export default function EmailPage() {
         useContacts();
     const { data: outreachTeamResponse, isLoading: isLoadingOutreachTeam } =
         useOutreachTeam();
+    const {
+        data: interestedUsersResponse,
+        isLoading: isLoadingInterestedUsers,
+    } = useInterestedUsers();
     const contactsArray = contactsResponse?.data || [];
 
     console.log("Outreach Team Response:", outreachTeamResponse);
+    console.log("Interested Users Response:", interestedUsersResponse);
 
     // Transform outreach team data into account format
     const allAccounts = React.useMemo(() => {
@@ -77,6 +53,31 @@ export default function EmailPage() {
             icon: <CircleUser />,
         }));
     }, [outreachTeamResponse]);
+
+    // Transform interested users into Mail format
+    const interestedUsersMails = React.useMemo(() => {
+        const interestedUsers = interestedUsersResponse || [];
+        console.log("Interested Users being transformed:", interestedUsers);
+        const mails = interestedUsers.map(
+            (user: InterestedUserDto): Mail => ({
+                id: user.email,
+                from: user.email,
+                to: [
+                    {
+                        email: user.email,
+                        name: user.email,
+                    },
+                ],
+                subject: user.email,
+                html: user.email,
+                date: user.created_at,
+                read: false,
+                labels: ["interested"],
+            })
+        );
+        console.log("Transformed mails:", mails);
+        return mails;
+    }, [interestedUsersResponse]);
 
     // Handle selected account persistence
     const [selectedAccount, setSelectedAccount] = React.useState<string>(() => {
@@ -91,7 +92,11 @@ export default function EmailPage() {
         localStorage.setItem("selectedOutreachAccount", email);
     }, []);
 
-    if (isLoadingContacts || isLoadingOutreachTeam) {
+    if (
+        isLoadingContacts ||
+        isLoadingOutreachTeam ||
+        isLoadingInterestedUsers
+    ) {
         return (
             <div className="flex flex-col items-center justify-center h-screen gap-4 bg-background">
                 <div className="animate-spin">
@@ -135,6 +140,13 @@ export default function EmailPage() {
                                     <Users className="h-4 w-4" />
                                     <span>Hackers List</span>
                                 </TabsTrigger>
+                                <TabsTrigger
+                                    value="interested"
+                                    className="gap-2 px-3"
+                                >
+                                    <Users className="h-4 w-4" />
+                                    <span>Interested Hackers</span>
+                                </TabsTrigger>
                             </TabsList>
                         </nav>
                     </div>
@@ -158,7 +170,21 @@ export default function EmailPage() {
                         value="hackers"
                         className="h-full m-0 outline-none"
                     >
-                        <HackersMail mails={HACKER_SAMPLE_DATA} />
+                        <HackersMail
+                            mails={HACKER_SAMPLE_DATA}
+                            title="Registered Hackers"
+                            description="Manage and communicate with registered participants"
+                        />
+                    </TabsContent>
+                    <TabsContent
+                        value="interested"
+                        className="h-full m-0 outline-none"
+                    >
+                        <HackersMail
+                            mails={interestedUsersMails}
+                            title="Interested Hackers"
+                            description="Manage and communicate with interested participants"
+                        />
                     </TabsContent>
                 </main>
             </Tabs>

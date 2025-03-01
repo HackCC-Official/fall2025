@@ -16,9 +16,9 @@ import {
 import { OutreachTeamDto } from "../features/outreach/types/outreach-team";
 
 /**
- * Props for the follow-up email template
+ * Props for the sponsorship email template
  */
-interface FollowUpEmailProps {
+interface SponsorshipEmailProps {
     /**
      * The name of the company being contacted
      */
@@ -45,23 +45,23 @@ interface FollowUpEmailProps {
     positionAtHackCC: string;
 
     /**
-     * The town/city where the event will be held
-     */
-    location: string;
-
-    /**
-     * Organization's logo URL
-     */
-    organizationLogo?: string;
-
-    /**
      * Social media links to include in the signature
      */
     socialLinks: {
         /**
-         * URLs to various social media profiles
+         * URL to the LinkedIn profile
          */
-        [key: string]: string;
+        linkedin?: string;
+
+        /**
+         * URL to the Twitter/X profile
+         */
+        twitter?: string;
+
+        /**
+         * URL to the GitHub profile
+         */
+        github?: string;
     };
 }
 
@@ -70,28 +70,30 @@ const baseUrl = process.env.VERCEL_URL
     : "";
 
 /**
- * FollowUpEmail component for HackCC outreach
+ * SponsorshipEmail component for HackCC outreach
  *
- * This template is designed for sending follow-up emails to potential sponsors
- * who were previously contacted about sponsorship opportunities.
+ * This template is designed for sending cold emails to potential sponsors
+ * based on the OutreachTeamDto format.
  */
-export const FollowUpEmail = ({
+export const SponsorshipEmail = ({
     companyName,
     recipientName,
     venue,
     sender,
     positionAtHackCC,
-    location,
-    organizationLogo,
     socialLinks,
-}: FollowUpEmailProps) => {
+}: SponsorshipEmailProps) => {
     // Format the sender's year and major for better readability
     const formattedYearAndMajor = `${sender.year} ${sender.major}`;
+
+    // Get today's date
+    const today = new Date();
+    const isCurrentDayTuesday = today.getDay() === 2; // 0 is Sunday, 2 is Tuesday
 
     return (
         <Html>
             <Head />
-            <Preview>Meet the best students in {location} this May</Preview>
+            <Preview>{companyName} and HackCC Sponsorship</Preview>
             <Body style={main}>
                 <Container style={container}>
                     {/* Header */}
@@ -103,16 +105,19 @@ export const FollowUpEmail = ({
                             alt="HackCC Logo"
                             style={logo}
                         />
+                        {isCurrentDayTuesday && (
+                            <Text style={scheduleNote}>Sent on Tuesday</Text>
+                        )}
                     </Section>
 
                     <Section style={content}>
                         {/* Email Subject */}
                         <Heading style={subjectLine}>
-                            Re: Meet the best students in {location} this May
+                            {companyName} and HackCC Sponsorship
                         </Heading>
 
                         {/* Email Body */}
-                        <Text style={paragraph}>Hi {recipientName},</Text>
+                        <Text style={paragraph}>Hello {recipientName},</Text>
 
                         <Text style={paragraph}>
                             I hope this email finds you well. My name is{" "}
@@ -126,7 +131,7 @@ export const FollowUpEmail = ({
                         </Text>
 
                         <Text style={paragraph}>
-                            I reached out to you on Tuesday about getting{" "}
+                            I am reaching out to inquire about getting{" "}
                             {companyName} on board as a sponsor for one (or
                             more!) of our hackathons. I was wondering if{" "}
                             {companyName} has any interest in sponsoring
@@ -142,38 +147,51 @@ export const FollowUpEmail = ({
                                     <Text style={signatureName}>
                                         {sender.name}
                                     </Text>
-                                    {organizationLogo && (
-                                        <Img
-                                            src={organizationLogo}
-                                            width={100}
-                                            height={30}
-                                            alt="Organization Logo"
-                                            style={orgLogo}
-                                        />
-                                    )}
                                     <Text style={signaturePosition}>
                                         {positionAtHackCC}
+                                    </Text>
+                                </Column>
+                                <Column>
+                                    <Text style={signatureSchool}>
+                                        {sender.school}
                                     </Text>
                                 </Column>
                             </Row>
 
                             {/* Social Media Links */}
-                            {Object.keys(socialLinks).length > 0 && (
+                            {(socialLinks.linkedin ||
+                                socialLinks.twitter ||
+                                socialLinks.github) && (
                                 <Row style={socialLinksContainer}>
-                                    {Object.entries(socialLinks).map(
-                                        ([platform, url]) => (
-                                            <Column
-                                                key={platform}
-                                                style={socialLinkColumn}
+                                    {socialLinks.linkedin && (
+                                        <Column style={socialLinkColumn}>
+                                            <Link
+                                                href={socialLinks.linkedin}
+                                                style={socialLink}
                                             >
-                                                <Link
-                                                    href={url}
-                                                    style={socialLink}
-                                                >
-                                                    {platform}
-                                                </Link>
-                                            </Column>
-                                        )
+                                                LinkedIn
+                                            </Link>
+                                        </Column>
+                                    )}
+                                    {socialLinks.twitter && (
+                                        <Column style={socialLinkColumn}>
+                                            <Link
+                                                href={socialLinks.twitter}
+                                                style={socialLink}
+                                            >
+                                                Twitter
+                                            </Link>
+                                        </Column>
+                                    )}
+                                    {socialLinks.github && (
+                                        <Column style={socialLinkColumn}>
+                                            <Link
+                                                href={socialLinks.github}
+                                                style={socialLink}
+                                            >
+                                                GitHub
+                                            </Link>
+                                        </Column>
                                     )}
                                 </Row>
                             )}
@@ -192,7 +210,7 @@ export const FollowUpEmail = ({
     );
 };
 
-export default FollowUpEmail;
+export default SponsorshipEmail;
 
 // Styles
 const main = {
@@ -223,8 +241,14 @@ const logo = {
     margin: "0",
 };
 
-const orgLogo = {
-    margin: "8px 0",
+const scheduleNote = {
+    color: "#ffffff",
+    fontSize: "14px",
+    fontWeight: "500",
+    margin: "0",
+    padding: "4px 8px",
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    borderRadius: "4px",
 };
 
 const content = {
@@ -263,6 +287,13 @@ const signaturePosition = {
     fontSize: "14px",
     color: "#4b5563",
     margin: "0 0 8px",
+};
+
+const signatureSchool = {
+    fontSize: "14px",
+    color: "#4b5563",
+    margin: "0",
+    textAlign: "right" as const,
 };
 
 const socialLinksContainer = {

@@ -1,4 +1,4 @@
-import { Mail as MailIcon, PenBox, Upload, UserPlus } from "lucide-react";
+import { PenBox, Upload, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { Mail } from "@/types/mail";
 
@@ -10,7 +10,6 @@ interface MailHeaderProps {
 }
 
 export default function MailHeader({
-    selectedMail,
     activeView = "mail",
     onUploadClick,
     onAddContactClick,
@@ -32,32 +31,7 @@ export default function MailHeader({
                         </p>
                     </div>
                     <div className="flex items-center gap-2">
-                        {activeView === "mail" ? (
-                            <>
-                                <Button
-                                    variant="outline"
-                                    className="gap-2"
-                                    onClick={() =>
-                                        (window.location.href = "/compose")
-                                    }
-                                >
-                                    <PenBox className="h-4 w-4" />
-                                    Compose
-                                </Button>
-                                {selectedMail && (
-                                    <Button
-                                        variant="outline"
-                                        className="gap-2"
-                                        onClick={() =>
-                                            (window.location.href = `/compose?to=${selectedMail.to[0]?.email}`)
-                                        }
-                                    >
-                                        <MailIcon className="h-4 w-4" />
-                                        Reply
-                                    </Button>
-                                )}
-                            </>
-                        ) : (
+                        {activeView !== "mail" && (
                             <>
                                 <Button
                                     variant="outline"
@@ -77,6 +51,16 @@ export default function MailHeader({
                                 </Button>
                             </>
                         )}
+                        <Button
+                            variant="default"
+                            className="gap-2"
+                            onClick={() =>
+                                (window.location.href = "/panel/email/compose")
+                            }
+                        >
+                            <PenBox className="h-4 w-4" />
+                            Compose
+                        </Button>
                     </div>
                 </div>
             </div>

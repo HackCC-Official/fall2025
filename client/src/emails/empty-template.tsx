@@ -16,38 +16,23 @@ import {
 import { OutreachTeamDto } from "../features/outreach/types/outreach-team";
 
 /**
- * Props for the follow-up email template
+ * Props for the empty email template
  */
-interface FollowUpEmailProps {
+interface EmptyEmailProps {
     /**
-     * The name of the company being contacted
-     */
-    companyName: string;
-
-    /**
-     * The name of the person being contacted at the company
+     * The name of the recipient
      */
     recipientName: string;
 
     /**
-     * The venue where the hackathon will take place
+     * The custom email content
      */
-    venue: string;
+    emailContent: string;
 
     /**
      * Information about the outreach team member sending the email
      */
     sender: OutreachTeamDto;
-
-    /**
-     * The position of the sender at HackCC
-     */
-    positionAtHackCC: string;
-
-    /**
-     * The town/city where the event will be held
-     */
-    location: string;
 
     /**
      * Organization's logo URL
@@ -57,7 +42,7 @@ interface FollowUpEmailProps {
     /**
      * Social media links to include in the signature
      */
-    socialLinks: {
+    socialLinks?: {
         /**
          * URLs to various social media profiles
          */
@@ -70,28 +55,25 @@ const baseUrl = process.env.VERCEL_URL
     : "";
 
 /**
- * FollowUpEmail component for HackCC outreach
+ * EmptyEmail component for HackCC outreach
  *
- * This template is designed for sending follow-up emails to potential sponsors
- * who were previously contacted about sponsorship opportunities.
+ * This template is designed as a general-purpose email template that can be used
+ * for various types of communication with custom content.
  */
-export const FollowUpEmail = ({
-    companyName,
+export const EmptyEmail = ({
     recipientName,
-    venue,
+    emailContent,
     sender,
-    positionAtHackCC,
-    location,
     organizationLogo,
-    socialLinks,
-}: FollowUpEmailProps) => {
+    socialLinks = {},
+}: EmptyEmailProps) => {
     // Format the sender's year and major for better readability
     const formattedYearAndMajor = `${sender.year} ${sender.major}`;
 
     return (
         <Html>
             <Head />
-            <Preview>Meet the best students in {location} this May</Preview>
+            <Preview>Message from HackCC</Preview>
             <Body style={main}>
                 <Container style={container}>
                     {/* Header */}
@@ -106,32 +88,14 @@ export const FollowUpEmail = ({
                     </Section>
 
                     <Section style={content}>
-                        {/* Email Subject */}
-                        <Heading style={subjectLine}>
-                            Re: Meet the best students in {location} this May
-                        </Heading>
-
                         {/* Email Body */}
                         <Text style={paragraph}>Hi {recipientName},</Text>
 
-                        <Text style={paragraph}>
-                            I hope this email finds you well. My name is{" "}
-                            {sender.name}, and I am a {formattedYearAndMajor}{" "}
-                            student at {sender.school}. I am also a sponsorship
-                            coordinator with HackCC, a student-led initiative
-                            providing California community college students with
-                            the opportunity to compete in weekend-long invention
-                            marathons. Taking place May 2nd-4th at {venue},
-                            we&apos;re expecting 250 hackers this year!
-                        </Text>
-
-                        <Text style={paragraph}>
-                            I reached out to you on Tuesday about getting{" "}
-                            {companyName} on board as a sponsor for one (or
-                            more!) of our hackathons. I was wondering if{" "}
-                            {companyName} has any interest in sponsoring
-                            hackathons at this time?
-                        </Text>
+                        {/* Render the custom email content */}
+                        <div
+                            style={paragraph}
+                            dangerouslySetInnerHTML={{ __html: emailContent }}
+                        />
 
                         <Text style={paragraph}>Best regards,</Text>
 
@@ -142,6 +106,10 @@ export const FollowUpEmail = ({
                                     <Text style={signatureName}>
                                         {sender.name}
                                     </Text>
+                                    <Text style={signatureDetails}>
+                                        {formattedYearAndMajor} •{" "}
+                                        {sender.school}
+                                    </Text>
                                     {organizationLogo && (
                                         <Img
                                             src={organizationLogo}
@@ -151,9 +119,6 @@ export const FollowUpEmail = ({
                                             style={orgLogo}
                                         />
                                     )}
-                                    <Text style={signaturePosition}>
-                                        {positionAtHackCC}
-                                    </Text>
                                 </Column>
                             </Row>
 
@@ -192,7 +157,7 @@ export const FollowUpEmail = ({
     );
 };
 
-export default FollowUpEmail;
+export default EmptyEmail;
 
 // Styles
 const main = {
@@ -231,14 +196,6 @@ const content = {
     padding: "30px",
 };
 
-const subjectLine = {
-    fontSize: "24px",
-    lineHeight: "1.3",
-    fontWeight: "700",
-    color: "#1e40af", // Matching header color
-    margin: "0 0 24px",
-};
-
 const paragraph = {
     fontSize: "16px",
     lineHeight: "1.5",
@@ -259,7 +216,7 @@ const signatureName = {
     margin: "0 0 4px",
 };
 
-const signaturePosition = {
+const signatureDetails = {
     fontSize: "14px",
     color: "#4b5563",
     margin: "0 0 8px",
