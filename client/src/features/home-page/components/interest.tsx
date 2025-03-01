@@ -50,7 +50,7 @@ export const Interest = () => {
 
     
     return (
-        <div className="lg:w-[550px] md:w-[450px] sm:w-[400px] w-[300px] font-mont bg-black bg-opacity-20 px-7 py-7 rounded-3xl relative lg:text-lg md:text-md text-sm flex flex-col text-center z-10">
+        <div className="2xl:w-[550px] md:w-[450px] sm:w-[400px] w-[300px] font-mont bg-black bg-opacity-20 px-7 py-7 rounded-3xl relative 2xl:text-lg md:text-md text-sm flex flex-col text-center z-10">
             {
                 !success &&
                 <form onSubmit={handleSubmit} className="">
