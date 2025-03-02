@@ -9,3 +9,12 @@ export async function getAttendances(query?: AttendanceQueryParamDTO): Promise<A
     params: query
   })).data
 }
+
+export async function takeAttendance(attendanceDTO : { event_id: string, account_id: string }): Promise<AttendanceDTO[]> {
+  return (await qrClient.request({
+    method: 'POST',
+    url: 'attendances',
+    data: attendanceDTO
+  })).data
+}
+
