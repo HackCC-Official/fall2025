@@ -20,7 +20,7 @@ jobs:
         run: |
           touch .env
           echo "${{ secrets.DEV_ENV_FILE }}" > .env
-          docker compose -f docker-compose.yaml build --no-cache --build-arg NEXT_PUBLIC_QR_SERVICE_URL=${{ secrets.NEXT_PUBLIC_QR_SERVICE_URL }}
+          docker compose -f docker-compose.yaml build --no-cache
           docker compose -f docker-compose.yaml push
   deployment:
     needs: build-and-publish
