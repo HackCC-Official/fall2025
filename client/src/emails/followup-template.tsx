@@ -183,7 +183,7 @@ export const FollowUpEmail = ({
                     {/* Footer */}
                     <Section style={footer}>
                         <Text style={footerText}>
-                            HackCC • California Community Colleges • 2024
+                            HackCC • California Community Colleges • 2025
                         </Text>
                     </Section>
                 </Container>

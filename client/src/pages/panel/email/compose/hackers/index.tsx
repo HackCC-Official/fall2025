@@ -194,7 +194,7 @@ export default function MassEmailCompose({
                     emailContent={emailContent}
                     sender={selectedTeamMember}
                     socialLinks={{
-                        Website: "https://hackcc.dev",
+                        HackCC: "https://hackcc.net",
                         LinkedIn: "https://linkedin.com/company/hackcc",
                     }}
                 />
@@ -247,7 +247,7 @@ export default function MassEmailCompose({
                             emailContent={emailContent}
                             sender={selectedTeamMember}
                             socialLinks={{
-                                Website: "https://hackcc.dev",
+                                HackCC: "https://hackcc.net",
                                 LinkedIn: "https://linkedin.com/company/hackcc",
                             }}
                         />

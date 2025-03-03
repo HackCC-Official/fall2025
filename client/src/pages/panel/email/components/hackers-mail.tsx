@@ -14,12 +14,14 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import type { Mail } from "@/types/mail";
 import { useMail } from "@/hooks/use-mail";
+import { useRouter } from "next/navigation";
 
 interface HackersMailProps {
     mails: Mail[];
     defaultLayout?: number[];
     title?: string;
     description?: string;
+    type: "registered" | "interested";
 }
 
 export default function HackersMail({
@@ -27,7 +29,9 @@ export default function HackersMail({
     defaultLayout = [35, 65],
     title = "Registered Hackers",
     description = "Manage and communicate with registered participants",
+    type = "registered",
 }: HackersMailProps) {
+    const router = useRouter();
     const [mail, setMail] = useMail();
     const [searchQuery, setSearchQuery] = React.useState("");
 
@@ -42,6 +46,14 @@ export default function HackersMail({
     );
 
     const selectedHacker = mails.find((m) => m.id === mail.selected);
+
+    const handleSendMassEmail = () => {
+        router.push(`/panel/email/compose?recipientType=${type}`);
+    };
+
+    const handleSendIndividualEmail = (email: string) => {
+        router.push(`/panel/email/compose?recipientType=${type}&to=${email}`);
+    };
 
     return (
         <div className="flex flex-col h-full bg-muted/5">
@@ -58,9 +70,7 @@ export default function HackersMail({
                     <Button
                         size="sm"
                         className="gap-2"
-                        onClick={() =>
-                            (window.location.href = "/panel/email/compose/hackers")
-                        }
+                        onClick={handleSendMassEmail}
                     >
                         <PenBox className="h-4 w-4" />
                         Send Mass Email
@@ -140,7 +150,10 @@ export default function HackersMail({
                                         variant="outline"
                                         className="gap-2"
                                         onClick={() =>
-                                            (window.location.href = `/compose?to=${selectedHacker.to?.[0]?.email}`)
+                                            handleSendIndividualEmail(
+                                                selectedHacker.to?.[0]?.email ||
+                                                    ""
+                                            )
                                         }
                                     >
                                         <MailIcon className="h-4 w-4" />

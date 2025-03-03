@@ -80,7 +80,7 @@ export const SponsorshipEmail = ({
     recipientName,
     venue,
     sender,
-    positionAtHackCC,
+    // positionAtHackCC,
     socialLinks,
 }: SponsorshipEmailProps) => {
     // Format the sender's year and major for better readability
@@ -148,7 +148,7 @@ export const SponsorshipEmail = ({
                                         {sender.name}
                                     </Text>
                                     <Text style={signaturePosition}>
-                                        {positionAtHackCC}
+                                        {formattedYearAndMajor}
                                     </Text>
                                 </Column>
                                 <Column>
@@ -201,7 +201,7 @@ export const SponsorshipEmail = ({
                     {/* Footer */}
                     <Section style={footer}>
                         <Text style={footerText}>
-                            HackCC • California Community Colleges • 2024
+                            HackCC • California Community Colleges • 2025
                         </Text>
                     </Section>
                 </Container>

@@ -4,7 +4,6 @@ import {
     Container,
     Column,
     Head,
-    Heading,
     Html,
     Img,
     Link,
@@ -148,7 +147,7 @@ export const EmptyEmail = ({
                     {/* Footer */}
                     <Section style={footer}>
                         <Text style={footerText}>
-                            HackCC • California Community Colleges • 2024
+                            HackCC • California Community Colleges • 2025
                         </Text>
                     </Section>
                 </Container>
