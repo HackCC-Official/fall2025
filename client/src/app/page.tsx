@@ -6,11 +6,11 @@
 
 //import SectionHeader from "@/components/SectionHeader";
 //import AttendeeContainer from "@/components/AttendeeContainer";
-import OrganizerContainer from "@/components/OrganizerContainer";
+import OrganizerSlider from "@/components/OrganizerSlider";
 export default function Home() {
   return (
     <div className="">
-      <OrganizerContainer/>
+      <OrganizerSlider/>
     </div>
   );
 }
