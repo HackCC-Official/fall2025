@@ -8,7 +8,7 @@ import AttendeeContainer from "@/components/AttendeeContainer";
 import OrganizerSlider from "@/components/OrganizerSlider";
 export default function Home() {
   return (
-    <div className="">
+    <div className="bg-[#E5E8EC]">
       <SectionHeader title="What past attendees have said"/>
       <AttendeeContainer/>
       <SectionHeader title="2025 Organizers"/>
