@@ -23,8 +23,11 @@ body {
 .embla__viewport {
 
   overflow: hidden;
+  
 }
 .embla {
+  
+
 
   overflow: hidden;
   max-width: 1430px;

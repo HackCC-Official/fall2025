@@ -1,5 +1,5 @@
 
-import AttendeeCard from "@/components/AttendeeCard";
+import AttendeeCard from "@/components/ui/AttendeeCard";
 export default function AttendeeContainer() {
     return(
         //md:tablet breakpoint

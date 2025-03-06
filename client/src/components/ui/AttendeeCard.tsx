@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { montserrat_Alternates } from './styles/fonts'
+import { montserrat_Alternates } from '../styles/fonts'
 
 interface AttendeeCardProps {
   imgPath: string;
@@ -12,15 +12,16 @@ export default function AttendeeCard({ imgPath = "/headshotPlaceholder.png", nam
     <div className="flex md:flex-1 my-5">
         <div className="justify-items-center mr-4 md:mr-8 text-center basis-2/5">
             <Image 
+            quality={100}
             src={imgPath}
-            className="md:w-[300px] md:h-auto"
-            width={100} 
-            height={100} 
+            className="md:w-[300px] h-auto"
+            width={201} 
+            height={200} 
             alt="Person" 
-            sizes="100px"/>
+            sizes="(min-width: 2500px) 300px, (min-width: 1280px) calc(12.67vw - 14px), (min-width: 1040px) calc(15.91vw - 30px), (min-width: 780px) calc(20vw - 31px), (min-width: 580px) 201px, calc(38.46vw - 14px)"/>
             <h2 className={`${montserrat_Alternates.className} font-semibold py-3 md:text-[1.2rem] lg:text-[1.3rem] xl:text-[1.5rem]`}>{name}</h2>
         </div>
-        <div className="overflow-hidden text-[0.75rem] basis-3/5">
+        <div className="h-auto overflow-hidden text-[0.75rem] basis-3/5">
             <Image
             src="/Quote.png"
             className="md:w-[40px] h-auto"

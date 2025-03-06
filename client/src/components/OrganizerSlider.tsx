@@ -1,7 +1,8 @@
 'use client'
 import React, { useCallback } from 'react'
 import useEmblaCarousel from 'embla-carousel-react'
-import CardGroup from './CardGroup'
+import CardGroup from './ui/CardGroup'
+import {PrevButton, NextButton} from './ui/Prev&NextButtons'
 
 export default function OrganizerSlider() {
   const [emblaRef, emblaApi] = useEmblaCarousel({loop:true})
@@ -95,12 +96,17 @@ export default function OrganizerSlider() {
           </div>
         </div>
       </div>
-      <button className="embla__prev" onClick={scrollPrev}>
-        Prev
-      </button>
-      <button className="embla__next" onClick={scrollNext}>
-        Next
-      </button>
+      <div className="flex justify-around mx-auto mt-4 w-[150px] sm:w-[250px]">
+
+        <PrevButton className="relative w-[50px] h-[50px]" onClick={scrollPrev}></PrevButton >
+        <NextButton className="relative w-[50px] h-[50px]" onClick={scrollNext}></NextButton>
+      </div>
     </div>
   )
 }
+//<button className="embla__prev" onClick={scrollPrev}>
+//<PrevButton></PrevButton>
+//</button>
+//<button className="embla__next" onClick={scrollNext}>
+//  <NextButton></NextButton>
+//</button>
