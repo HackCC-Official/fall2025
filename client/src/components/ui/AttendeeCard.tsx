@@ -9,7 +9,7 @@ interface AttendeeCardProps {
 
 export default function AttendeeCard({ imgPath = "/headshotPlaceholder.png", name = "first last", subText="Lorem ipsum dolor sit, amet consectetur adipisicing elit. Exercitationem voluptatibus voluptate porro sapiente est laborum magni? Quidem inventore delectus labore sed odit ad, iusto, earum expedita ratione libero debitis nostrum."}: AttendeeCardProps) {
   return (
-    <div className="flex md:flex-1 my-5">
+    <div className="text-black flex md:flex-1 my-5">
         <div className="justify-items-center mr-4 md:mr-8 text-center basis-2/5">
             <Image 
             quality={100}

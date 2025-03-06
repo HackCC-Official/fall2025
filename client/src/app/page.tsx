@@ -7,6 +7,7 @@ import SectionHeader from "@/components/ui/SectionHeader";
 import AttendeeContainer from "@/components/AttendeeContainer";
 import OrganizerSlider from "@/components/OrganizerSlider";
 import VenueContainer from "@/components/VenueContainer";
+import Footer from "@/components/Footer";
 export default function Home() {
   return (
     <div className="bg-[#E5E8EC]">
@@ -15,6 +16,7 @@ export default function Home() {
       <SectionHeader title="2025 Organizers"/>
       <OrganizerSlider/>
       <VenueContainer></VenueContainer>
+      <Footer></Footer>
     </div>
   );
 }
