@@ -30,7 +30,7 @@ export default function AttendeeCard({ imgPath = "/headshotPlaceholder.png", nam
             alt="quotes"
             sizes="30px"
             />
-            <p className={`${montserrat_Alternates.className} font-medium md:text-[0.8rem] lg:text-[0.9rem] xl:text-[1.1rem] `}>{subText}</p>
+            <p className={`${montserrat_Alternates.className} text-black  font-medium md:text-[0.8rem] lg:text-[0.9rem] xl:text-[1.1rem] `}>{subText}</p>
         </div>
     </div>
   );

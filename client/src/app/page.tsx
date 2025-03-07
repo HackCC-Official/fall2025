@@ -9,6 +9,7 @@ import OrganizerSlider from "@/components/OrganizerSlider";
 import VenueContainer from "@/components/VenueContainer";
 import Footer from "@/components/Footer";
 import SectionSubHeading from "@/components/ui/SectionSubHeading";
+import ApplicationContainer from "@/components/ApplicationContainer";
 export default function Home() {
   return (
     <div className="bg-[#E5E8EC]">
@@ -19,6 +20,7 @@ export default function Home() {
       <VenueContainer></VenueContainer>
       <SectionHeader title="Get Involved"></SectionHeader>
       <SectionSubHeading subtext="Interested in judging or being a volunteer?"></SectionSubHeading>
+      <ApplicationContainer/>
       <Footer></Footer>
     </div>
   );
