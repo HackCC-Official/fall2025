@@ -14,7 +14,7 @@ export default function LoginPage() {
     const { data, error } = await signInWithEmailAndPassword({ email, password });
 
     if (error) {
-      console.error('Error logging in:', error);
+      console.log('Error logging in:', error);
     } else {
       console.log('Logged in successfully:', data);
       router.push('/');

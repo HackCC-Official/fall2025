@@ -13,6 +13,7 @@ qrClient.interceptors.request.use(
   async (config: InternalAxiosRequestConfig) => {
     const { data: session } = await supabase.auth.getSession();
     const accessToken = session?.session?.access_token;
+    console.log(accessToken)
 
     if (accessToken && !config.headers.get('Authorization')) {
       config.headers.set('Authorization', `Bearer ${accessToken}`);
