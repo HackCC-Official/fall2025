@@ -13,12 +13,12 @@ import {
     Section,
     Text,
 } from "@react-email/components";
-import { OutreachTeamDto } from "../features/outreach/types/outreach-team";
+import { OutreachTeamDto } from "../../features/outreach/types/outreach-team";
 
 /**
- * Props for the sponsorship email template
+ * Props for the follow-up email template
  */
-interface SponsorshipEmailProps {
+interface FollowUpEmailProps {
     /**
      * The name of the company being contacted
      */
@@ -45,23 +45,23 @@ interface SponsorshipEmailProps {
     positionAtHackCC: string;
 
     /**
+     * The town/city where the event will be held
+     */
+    location: string;
+
+    /**
+     * Organization's logo URL
+     */
+    organizationLogo?: string;
+
+    /**
      * Social media links to include in the signature
      */
     socialLinks: {
         /**
-         * URL to the LinkedIn profile
+         * URLs to various social media profiles
          */
-        linkedin?: string;
-
-        /**
-         * URL to the Twitter/X profile
-         */
-        twitter?: string;
-
-        /**
-         * URL to the GitHub profile
-         */
-        github?: string;
+        [key: string]: string;
     };
 }
 
@@ -70,30 +70,28 @@ const baseUrl = process.env.VERCEL_URL
     : "";
 
 /**
- * SponsorshipEmail component for HackCC outreach
+ * FollowUpEmail component for HackCC outreach
  *
- * This template is designed for sending cold emails to potential sponsors
- * based on the OutreachTeamDto format.
+ * This template is designed for sending follow-up emails to potential sponsors
+ * who were previously contacted about sponsorship opportunities.
  */
-export const SponsorshipEmail = ({
+export const FollowUpEmail = ({
     companyName,
     recipientName,
     venue,
     sender,
     positionAtHackCC,
+    location,
+    organizationLogo,
     socialLinks,
-}: SponsorshipEmailProps) => {
+}: FollowUpEmailProps) => {
     // Format the sender's year and major for better readability
     const formattedYearAndMajor = `${sender.year} ${sender.major}`;
-
-    // Get today's date
-    const today = new Date();
-    const isCurrentDayTuesday = today.getDay() === 2; // 0 is Sunday, 2 is Tuesday
 
     return (
         <Html>
             <Head />
-            <Preview>{companyName} and HackCC Sponsorship</Preview>
+            <Preview>Meet the best students in {location} this May</Preview>
             <Body style={main}>
                 <Container style={container}>
                     {/* Header */}
@@ -105,19 +103,16 @@ export const SponsorshipEmail = ({
                             alt="HackCC Logo"
                             style={logo}
                         />
-                        {isCurrentDayTuesday && (
-                            <Text style={scheduleNote}>Sent on Tuesday</Text>
-                        )}
                     </Section>
 
                     <Section style={content}>
                         {/* Email Subject */}
                         <Heading style={subjectLine}>
-                            {companyName} and HackCC Sponsorship
+                            Re: Meet the best students in {location} this May
                         </Heading>
 
                         {/* Email Body */}
-                        <Text style={paragraph}>Hello {recipientName},</Text>
+                        <Text style={paragraph}>Hi {recipientName},</Text>
 
                         <Text style={paragraph}>
                             I hope this email finds you well. My name is{" "}
@@ -131,7 +126,7 @@ export const SponsorshipEmail = ({
                         </Text>
 
                         <Text style={paragraph}>
-                            I am reaching out to inquire about getting{" "}
+                            I reached out to you on Tuesday about getting{" "}
                             {companyName} on board as a sponsor for one (or
                             more!) of our hackathons. I was wondering if{" "}
                             {companyName} has any interest in sponsoring
@@ -147,51 +142,38 @@ export const SponsorshipEmail = ({
                                     <Text style={signatureName}>
                                         {sender.name}
                                     </Text>
+                                    {organizationLogo && (
+                                        <Img
+                                            src={organizationLogo}
+                                            width={100}
+                                            height={30}
+                                            alt="Organization Logo"
+                                            style={orgLogo}
+                                        />
+                                    )}
                                     <Text style={signaturePosition}>
                                         {positionAtHackCC}
-                                    </Text>
-                                </Column>
-                                <Column>
-                                    <Text style={signatureSchool}>
-                                        {sender.school}
                                     </Text>
                                 </Column>
                             </Row>
 
                             {/* Social Media Links */}
-                            {(socialLinks.linkedin ||
-                                socialLinks.twitter ||
-                                socialLinks.github) && (
+                            {Object.keys(socialLinks).length > 0 && (
                                 <Row style={socialLinksContainer}>
-                                    {socialLinks.linkedin && (
-                                        <Column style={socialLinkColumn}>
-                                            <Link
-                                                href={socialLinks.linkedin}
-                                                style={socialLink}
+                                    {Object.entries(socialLinks).map(
+                                        ([platform, url]) => (
+                                            <Column
+                                                key={platform}
+                                                style={socialLinkColumn}
                                             >
-                                                LinkedIn
-                                            </Link>
-                                        </Column>
-                                    )}
-                                    {socialLinks.twitter && (
-                                        <Column style={socialLinkColumn}>
-                                            <Link
-                                                href={socialLinks.twitter}
-                                                style={socialLink}
-                                            >
-                                                Twitter
-                                            </Link>
-                                        </Column>
-                                    )}
-                                    {socialLinks.github && (
-                                        <Column style={socialLinkColumn}>
-                                            <Link
-                                                href={socialLinks.github}
-                                                style={socialLink}
-                                            >
-                                                GitHub
-                                            </Link>
-                                        </Column>
+                                                <Link
+                                                    href={url}
+                                                    style={socialLink}
+                                                >
+                                                    {platform}
+                                                </Link>
+                                            </Column>
+                                        )
                                     )}
                                 </Row>
                             )}
@@ -201,7 +183,7 @@ export const SponsorshipEmail = ({
                     {/* Footer */}
                     <Section style={footer}>
                         <Text style={footerText}>
-                            HackCC • California Community Colleges • 2024
+                            HackCC • California Community Colleges • 2025
                         </Text>
                     </Section>
                 </Container>
@@ -210,7 +192,7 @@ export const SponsorshipEmail = ({
     );
 };
 
-export default SponsorshipEmail;
+export default FollowUpEmail;
 
 // Styles
 const main = {
@@ -241,14 +223,8 @@ const logo = {
     margin: "0",
 };
 
-const scheduleNote = {
-    color: "#ffffff",
-    fontSize: "14px",
-    fontWeight: "500",
-    margin: "0",
-    padding: "4px 8px",
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
-    borderRadius: "4px",
+const orgLogo = {
+    margin: "8px 0",
 };
 
 const content = {
@@ -287,13 +263,6 @@ const signaturePosition = {
     fontSize: "14px",
     color: "#4b5563",
     margin: "0 0 8px",
-};
-
-const signatureSchool = {
-    fontSize: "14px",
-    color: "#4b5563",
-    margin: "0",
-    textAlign: "right" as const,
 };
 
 const socialLinksContainer = {

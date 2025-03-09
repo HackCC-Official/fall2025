@@ -1,7 +1,7 @@
 import { render } from "@react-email/render";
 import type { ContactDto } from "@/features/outreach/types/contact.dto";
-import { SponsorshipEmail } from "@/emails/sponsorship-template";
-import { FollowUpEmail } from "@/emails/followup-template";
+import { SponsorshipEmail } from "@/emails/employers/sponsorship-template";
+import { FollowUpEmail } from "@/emails/employers/followup-template";
 import * as React from "react";
 import type { OutreachTeamDto } from "@/features/outreach/types/outreach-team";
 import { Html, Head, Body, Container, Text } from "@react-email/components";

@@ -152,7 +152,22 @@ export async function sendEmail(emailDto: SendEmailDto): Promise<void> {
 
 /**
  * Sends multiple emails in batch
- * @param batchDto - The batch of emails to send
+ * @param batchDto - The batch of emails to send with format:
+ * {
+ *   "emails": [
+ *     {
+ *       "from": "Company <notifications@example.com>",
+ *       "to": [
+ *         {
+ *           "email": "recipient@example.com"
+ *         }
+ *       ],
+ *       "subject": "Email Subject",
+ *       "html": "<h1>Hello</h1><p>Email content.</p>"
+ *     }
+ *   ]
+ * }
+ * @returns Promise that resolves when emails are sent
  */
 export async function sendBatchEmails(
     batchDto: SendBatchEmailsDto
