@@ -17,7 +17,7 @@ export default function LoginPage() {
       console.error('Error logging in:', error);
     } else {
       console.log('Logged in successfully:', data);
-      router.push('/dashboard');
+      router.push('/');
     }
     console.log('Login attempt with:', { email, password });
   };

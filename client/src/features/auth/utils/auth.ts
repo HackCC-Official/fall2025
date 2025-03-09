@@ -8,7 +8,6 @@ export async function signInWithEmailAndPassword(data: {
 }) {
     const supabase = await getServerClient();
     const result = await supabase.auth.signInWithPassword({ email: data.email, password: data.password});
-
     return result;
 }
 
