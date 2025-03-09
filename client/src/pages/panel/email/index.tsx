@@ -15,8 +15,8 @@ import type { OutreachTeamDto } from "@/features/outreach/types/outreach-team";
 import { LogoIcon } from "@/components/logo-icon";
 import { useInterestedUsers } from "@/hooks/use-interested.user";
 import type { InterestedUserDto } from "@/features/outreach/types/interested-users.dto";
-
-const mails: Mail[] = [];
+import { getEmails } from "@/features/outreach/api/outreach";
+import type { SendEmailDto } from "@/features/outreach/types/email.dto";
 
 const HACKER_SAMPLE_DATA: Mail[] = [];
 
@@ -31,6 +31,7 @@ export default function EmailPage() {
         return [20, 32, 48];
     });
 
+    // Fetch contacts, outreach team, and interested users data
     const { data: contactsResponse, isLoading: isLoadingContacts } =
         useContacts();
     const { data: outreachTeamResponse, isLoading: isLoadingOutreachTeam } =
@@ -40,6 +41,26 @@ export default function EmailPage() {
         isLoading: isLoadingInterestedUsers,
     } = useInterestedUsers();
     const contactsArray = contactsResponse?.data || [];
+
+    // Fetch emails
+    const [emails, setEmails] = React.useState<SendEmailDto[]>([]);
+    const [isLoadingEmails, setIsLoadingEmails] = React.useState<boolean>(true);
+
+    React.useEffect(() => {
+        const fetchEmails = async () => {
+            try {
+                const response = await getEmails();
+                console.log("Emails loaded from index:", response);
+                setEmails(response);
+            } catch (error) {
+                console.error("Error fetching emails:", error);
+            } finally {
+                setIsLoadingEmails(false);
+            }
+        };
+
+        fetchEmails();
+    }, []);
 
     console.log("Outreach Team Response:", outreachTeamResponse);
     console.log("Interested Users Response:", interestedUsersResponse);
@@ -92,10 +113,18 @@ export default function EmailPage() {
         localStorage.setItem("selectedOutreachAccount", email);
     }, []);
 
+    // Filter emails based on selected account
+    const filteredEmails = React.useMemo(() => {
+        return emails.filter((email) => {
+            return selectedAccount ? email.from === selectedAccount : true;
+        });
+    }, [emails, selectedAccount]);
+
     if (
         isLoadingContacts ||
         isLoadingOutreachTeam ||
-        isLoadingInterestedUsers
+        isLoadingInterestedUsers ||
+        isLoadingEmails
     ) {
         return (
             <div className="flex flex-col items-center justify-center h-screen gap-4 bg-background">
@@ -159,11 +188,13 @@ export default function EmailPage() {
                     >
                         <MailComponent
                             accounts={allAccounts}
-                            mails={mails}
+                            mails={[]}
                             contacts={contactsArray}
                             defaultLayout={defaultLayout}
                             defaultCollapsed={false}
                             navCollapsedSize={4}
+                            emails={filteredEmails}
+                            emailsCount={emails.length}
                         />
                     </TabsContent>
                     <TabsContent
@@ -174,6 +205,7 @@ export default function EmailPage() {
                             mails={HACKER_SAMPLE_DATA}
                             title="Registered Hackers"
                             description="Manage and communicate with registered participants"
+                            type="registered"
                         />
                     </TabsContent>
                     <TabsContent
@@ -184,6 +216,7 @@ export default function EmailPage() {
                             mails={interestedUsersMails}
                             title="Interested Hackers"
                             description="Manage and communicate with interested participants"
+                            type="interested"
                         />
                     </TabsContent>
                 </main>

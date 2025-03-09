@@ -13,7 +13,7 @@ import {
     Section,
     Text,
 } from "@react-email/components";
-import { OutreachTeamDto } from "../features/outreach/types/outreach-team";
+import { OutreachTeamDto } from "../../features/outreach/types/outreach-team";
 
 /**
  * Props for the follow-up email template

@@ -1,5 +1,5 @@
 import { OutreachTeamDto } from "../features/outreach/types/outreach-team";
-import { SponsorshipEmail } from "../emails/sponsorship-template";
+import { SponsorshipEmail } from "../emails/employers/sponsorship-template";
 import { render } from "@react-email/render";
 
 /**

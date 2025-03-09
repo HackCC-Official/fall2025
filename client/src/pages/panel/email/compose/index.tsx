@@ -28,7 +28,11 @@ import { CircleUser, ChevronRight, MinusCircle } from "lucide-react";
 import Link from "next/link";
 import { useOutreachTeam } from "@/hooks/use-outreach-team";
 import type { OutreachTeamDto } from "@/features/outreach/types/outreach-team";
-import { sendBatchEmails, sendEmail } from "@/features/outreach/api/outreach";
+import {
+    sendBatchEmails,
+    sendEmail,
+    updateContact,
+} from "@/features/outreach/api/outreach";
 import type {
     EmailRecipient,
     SendBatchEmailsDto,
@@ -102,6 +106,8 @@ interface ComposePageProps {
 
 export default function ComposePage({ mails = [] }: ComposePageProps) {
     const searchParams = useSearchParams();
+    // Add a ref to track if URL params have been processed
+    const paramsProcessedRef = React.useRef(false);
 
     // State for recipient selection
     const [selectedRecipients, setSelectedRecipients] = React.useState<
@@ -401,6 +407,27 @@ export default function ComposePage({ mails = [] }: ComposePageProps) {
                 await sendBatchEmails(emailData);
             }
 
+            // Update been_contacted flag for employers
+            if (recipientType === "employers") {
+                try {
+                    // Process in parallel for better performance
+                    await Promise.all(
+                        selectedRecipientsData.map(async (recipient) => {
+                            await updateContact(recipient.id, {
+                                been_contacted: true,
+                            });
+                        })
+                    );
+                    console.log("Successfully marked employers as contacted");
+                } catch (error) {
+                    console.error(
+                        "Error updating employer contact status:",
+                        error
+                    );
+                    // Don't show error toast here as emails were still sent successfully
+                }
+            }
+
             toast.success("Emails sent successfully!");
 
             // Reset form
@@ -426,35 +453,45 @@ export default function ComposePage({ mails = [] }: ComposePageProps) {
 
     // Handle auto-selection from URL parameters
     React.useEffect(() => {
-        if (!searchParams) return;
+        // Skip if we've already processed the params
+        if (paramsProcessedRef.current) {
+            return;
+        }
+
+        const contactId = searchParams?.get("contactId");
+        const recipientTypeParam = searchParams?.get("recipientType");
+        const toEmail = searchParams?.get("to");
+
+        // Skip if no params are present
+        if (!searchParams || (!contactId && !recipientTypeParam && !toEmail)) {
+            return;
+        }
 
         // Handle contact selection
-        const contactId = searchParams.get("contactId");
         if (contactId) {
             setSelectedRecipients(new Set([contactId]));
             setRecipientType("employers");
+            paramsProcessedRef.current = true;
             return;
         }
 
         // Handle hacker selection
-        const recipientType = searchParams.get("recipientType");
-        const toEmail = searchParams.get("to");
-
         if (
-            recipientType &&
-            (recipientType === "registered" || recipientType === "interested")
+            recipientTypeParam &&
+            (recipientTypeParam === "registered" ||
+                recipientTypeParam === "interested")
         ) {
-            setRecipientType(recipientType);
+            setRecipientType(recipientTypeParam as RecipientType);
 
             if (toEmail) {
-                if (recipientType === "registered") {
+                if (recipientTypeParam === "registered") {
                     const registeredHacker = mails.find(
                         (mail) => mail.to?.[0]?.email === toEmail
                     );
                     if (registeredHacker) {
                         setSelectedRecipients(new Set([registeredHacker.id]));
                     }
-                } else if (recipientType === "interested") {
+                } else if (recipientTypeParam === "interested") {
                     const interestedUser = interestedUsers?.find(
                         (user) => user.email === toEmail
                     );
@@ -463,8 +500,9 @@ export default function ComposePage({ mails = [] }: ComposePageProps) {
                     }
                 }
             }
+            paramsProcessedRef.current = true;
         }
-    }, [searchParams, mails, interestedUsers]);
+    }, [mails, interestedUsers, searchParams]);
 
     if (isInterestedLoading) {
         return (

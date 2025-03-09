@@ -21,12 +21,12 @@ export default function MailHeader({
                     <div>
                         <h2 className="text-2xl font-semibold tracking-tight">
                             {activeView === "mail"
-                                ? "Company Communications"
+                                ? "Inbox"
                                 : "Contact Management"}
                         </h2>
                         <p className="text-muted-foreground mt-1">
                             {activeView === "mail"
-                                ? "Manage correspondence with potential sponsors and partners"
+                                ? "Manage your email communications and outreach campaigns"
                                 : "Manage and organize your contacts database"}
                         </p>
                     </div>

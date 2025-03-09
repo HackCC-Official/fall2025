@@ -1,14 +1,11 @@
 "use client";
 
 import * as React from "react";
-import { Search, Send, Users } from "lucide-react";
+import { Send, Users } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { Separator } from "@radix-ui/react-separator";
 import { TooltipProvider } from "@radix-ui/react-tooltip";
-import { Input } from "@/components/ui/input";
-import MailDisplay from "./mail-display";
-import MailList from "./mail-list";
 import type { Mail } from "@/types/mail";
 import {
     ResizablePanelGroup,
@@ -24,6 +21,9 @@ import ContactDisplay from "./contact-display";
 import type { ContactDto } from "@/features/outreach/types/contact.dto";
 import UploadContactsModal from "./upload-contacts-modal";
 import AddContactDrawer from "./add-contact-drawer";
+import Inbox from "./inbox";
+import type { SendEmailDto } from "@/features/outreach/types/email.dto";
+import SentDisplay from "./sent-display";
 
 interface MailProps {
     accounts: {
@@ -36,6 +36,8 @@ interface MailProps {
     defaultLayout: number[] | undefined;
     defaultCollapsed?: boolean;
     navCollapsedSize: number;
+    emails: SendEmailDto[];
+    emailsCount: number;
 }
 
 export default function Mail({
@@ -44,9 +46,12 @@ export default function Mail({
     defaultLayout = [20, 32, 48],
     defaultCollapsed = false,
     navCollapsedSize,
+    emails = [],
+    emailsCount = 0,
 }: MailProps) {
     // Debug log
     console.log("Mail component received contacts:", contacts);
+    console.log("Mail component received emails:", emails);
 
     const [isCollapsed, setIsCollapsed] = React.useState(defaultCollapsed);
     const [mail] = useMail();
@@ -59,6 +64,8 @@ export default function Mail({
         mails?.find((item) => item.id === mail.selected) || null;
     const selectedContact =
         contacts?.find((item) => item.email === contact.selected) || null;
+    const selectedEmail =
+        emails?.find((item) => item.id === mail.selected) || null;
 
     const [activeView, setActiveView] = React.useState<"mail" | "contacts">(
         "mail"
@@ -121,7 +128,7 @@ export default function Mail({
                                 links={[
                                     {
                                         title: "Sent",
-                                        label: "",
+                                        label: emailsCount.toString(),
                                         icon: Send,
                                         variant:
                                             activeView === "mail"
@@ -151,26 +158,7 @@ export default function Mail({
                             minSize={30}
                         >
                             {activeView === "mail" ? (
-                                <div className="flex flex-col h-full min-h-0">
-                                    <div className="flex items-center px-4 py-2">
-                                        <h1 className="text-xl font-bold">
-                                            Inbox
-                                        </h1>
-                                    </div>
-                                    <Separator />
-                                    <div className="bg-background/95 p-4 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-                                        <form>
-                                            <div className="relative">
-                                                <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                                                <Input
-                                                    placeholder="Search"
-                                                    className="pl-8"
-                                                />
-                                            </div>
-                                        </form>
-                                    </div>
-                                    <MailList items={mails} />
-                                </div>
+                                <Inbox emails={emails} className="" />
                             ) : (
                                 <ContactsList contacts={contacts} />
                             )}
@@ -181,7 +169,7 @@ export default function Mail({
                             minSize={30}
                         >
                             {activeView === "mail" ? (
-                                <MailDisplay mail={selectedMail} />
+                                <SentDisplay email={selectedEmail} />
                             ) : (
                                 <ContactDisplay contact={selectedContact} />
                             )}
