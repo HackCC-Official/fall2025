@@ -1,6 +1,7 @@
 import {
     Sidebar,
     SidebarContent,
+    SidebarFooter,
     SidebarGroup,
     SidebarGroupContent,
     SidebarGroupLabel,
@@ -18,6 +19,12 @@ import {
     LucideIcon,
 } from "lucide-react";
 import { LogoIcon } from "../logo-icon";
+import { NavUser } from "./nav-user";
+import { getBrowserClient } from "@/features/auth/lib/supabase-client";
+import defaultPic from '../../../public/default.jpg'
+import { useEffect, useState } from "react";
+import { User } from "@supabase/supabase-js";
+import { useRouter } from "next/router";
 
 // Updated menu items with nested structure
 type MenuItem = {
@@ -56,13 +63,39 @@ const items: MenuItem[] = [
 ];
 
 export function AppSidebar() {
+    const [user, setUser] = useState<User | null>(null);
+    const supabase = getBrowserClient()
+    const router = useRouter();
+
+    useEffect(() => {
+      const fetchUser = async () => {
+        // Fetch the user's session
+        const { data: { session } } = await supabase.auth.getSession();
+  
+        if (session) {
+          // Fetch the user object
+          const { data: { user } } = await supabase.auth.getUser();
+          setUser(user);
+        }
+      };
+  
+      fetchUser();
+    }, [supabase]);
+
+    async function signOut() {
+        const { error } = await supabase.auth.signOut()
+        console.log(error)
+        router.push('/')
+      }
+
+
     return (
         <Sidebar collapsible="icon">
             <SidebarHeader>
                 <SidebarMenu>
                     <SidebarMenuItem>
                         <SidebarMenuButton>
-                            <div className="flex justify-center items-center bg-sidebar-primary rounded-lg text-sidebar-primary-foreground aspect-square size-4">
+                            <div className="flex justify-center items-center bg-sidebar-primary rounded-lg size-4 aspect-square text-sidebar-primary-foreground">
                                 <LogoIcon className="h-full size-4" />
                             </div>
                             <div className="flex-1 font-semibold truncate">
@@ -96,6 +129,16 @@ export function AppSidebar() {
                     </SidebarGroupContent>
                 </SidebarGroup>
             </SidebarContent>
+            <SidebarFooter>
+                <NavUser 
+                    user={{
+                        name: 'Test',
+                        email: user?.email || '',
+                        avatar: defaultPic.src
+                    }} 
+                    signOut={signOut}
+                />
+            </SidebarFooter>
         </Sidebar>
     );
 }
