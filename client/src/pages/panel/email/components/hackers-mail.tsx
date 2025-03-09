@@ -14,16 +14,24 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import type { Mail } from "@/types/mail";
 import { useMail } from "@/hooks/use-mail";
+import { useRouter } from "next/navigation";
 
 interface HackersMailProps {
     mails: Mail[];
     defaultLayout?: number[];
+    title?: string;
+    description?: string;
+    type: "registered" | "interested";
 }
 
 export default function HackersMail({
     mails = [],
     defaultLayout = [35, 65],
+    title = "Registered Hackers",
+    description = "Manage and communicate with registered participants",
+    type = "registered",
 }: HackersMailProps) {
+    const router = useRouter();
     const [mail, setMail] = useMail();
     const [searchQuery, setSearchQuery] = React.useState("");
 
@@ -39,22 +47,33 @@ export default function HackersMail({
 
     const selectedHacker = mails.find((m) => m.id === mail.selected);
 
+    const handleSendMassEmail = () => {
+        router.push(`/panel/email/compose?recipientType=${type}`);
+    };
+
+    const handleSendIndividualEmail = (email: string) => {
+        router.push(`/panel/email/compose?recipientType=${type}&to=${email}`);
+    };
+
     return (
         <div className="flex flex-col h-full bg-muted/5">
             <div className="border-b bg-background p-6">
                 <div className="flex items-center justify-between max-w-[1400px] mx-auto">
                     <div>
                         <h1 className="text-2xl font-semibold tracking-tight">
-                            Registered Hackers
+                            {title}
                         </h1>
                         <p className="text-muted-foreground mt-1">
-                            Manage and communicate with {mails.length}{" "}
-                            registered participants
+                            {description} ({mails.length})
                         </p>
                     </div>
-                    <Button size="sm" className="gap-2">
+                    <Button
+                        size="sm"
+                        className="gap-2"
+                        onClick={handleSendMassEmail}
+                    >
                         <PenBox className="h-4 w-4" />
-                        Compose Mass Email
+                        Send Mass Email
                     </Button>
                 </div>
             </div>
@@ -131,7 +150,10 @@ export default function HackersMail({
                                         variant="outline"
                                         className="gap-2"
                                         onClick={() =>
-                                            (window.location.href = `/compose?to=${selectedHacker.to?.[0]?.email}`)
+                                            handleSendIndividualEmail(
+                                                selectedHacker.to?.[0]?.email ||
+                                                    ""
+                                            )
                                         }
                                     >
                                         <MailIcon className="h-4 w-4" />

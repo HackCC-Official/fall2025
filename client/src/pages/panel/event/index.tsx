@@ -1,23 +1,17 @@
 import { EventTable } from "@/features/event/components/event-table"
 import PanelLayout from "../layout"
 import { getEvents } from "@/features/event/api/event";
-import { EventDTO } from "@/features/event/types/event-dto";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { useRouter } from "next/router";
-
-export const getServerSideProps = (async () => {
-  try {
-    const events = await getEvents();
-    return { props: { events } }
-  } catch (error) {
-    console.error('Error fetching data during build:', error);
-    return { props: { events: [] } };
-  }
-})
-
-export default function EventPage({ events } : { events: EventDTO[] }) {
+import { useQuery } from "@tanstack/react-query";
+export default function EventPage() {
   const router = useRouter()
+  const { isLoading, data } = useQuery({
+    queryKey: ['events'],
+    queryFn: () => getEvents(),
+  })
+
   return (
     <div className="py-10">
       <h1 className="font-bold text-3xl">Event</h1>
@@ -27,7 +21,7 @@ export default function EventPage({ events } : { events: EventDTO[] }) {
           Create Event
         </Button>
       </div>
-      <EventTable events={events} />
+      <EventTable isLoading={isLoading} events={data || []} />
     </div>
   )
 }
