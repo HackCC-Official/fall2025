@@ -92,6 +92,20 @@ const EMAIL_TEMPLATES: ExtendedEmailTemplate[] = [
         type: "employers",
     },
     {
+        id: "4",
+        name: "Post-Call Follow-Up",
+        subject: "HackCC Sponsorship Next Steps",
+        content: "Hi [Name],\n\nThank you for your time on our call...",
+        type: "employers",
+    },
+    {
+        id: "5",
+        name: "Sponsorship Agreement",
+        subject: "HackCC x [Company] Sponsorship Confirmation!",
+        content: "Hi [Name],\n\nThank you for confirming your sponsorship...",
+        type: "employers",
+    },
+    {
         id: "3",
         name: "FollowUpEmail",
         subject: "Follow Up from HackCC",
@@ -103,6 +117,16 @@ const EMAIL_TEMPLATES: ExtendedEmailTemplate[] = [
 interface ComposePageProps {
     mails?: Mail[];
 }
+
+// Helper function to extract variables from email content
+const extractVariable = (content: string, variableName: string): string => {
+    const regex = new RegExp(`\\[${variableName}\\]\\s*(?:\\n|$)`, "i");
+    const match = content.match(regex);
+    if (match) {
+        return match[0].replace(/[\[\]]/g, "").trim();
+    }
+    return "";
+};
 
 export default function ComposePage({ mails = [] }: ComposePageProps) {
     const searchParams = useSearchParams();
@@ -287,6 +311,22 @@ export default function ComposePage({ mails = [] }: ComposePageProps) {
                     ),
                     templateData: {
                         sender: selectedTeamMember,
+                        emailContent: emailContent,
+                        // Add additional data for Post-Call template
+                        ...(selectedTemplate.name === "Post-Call Follow-Up" && {
+                            followupDate: extractVariable(
+                                emailContent,
+                                "followup_date"
+                            ),
+                            followupTime: extractVariable(
+                                emailContent,
+                                "followup_time"
+                            ),
+                            requestedMaterials: extractVariable(
+                                emailContent,
+                                "requested_materials"
+                            ),
+                        }),
                     },
                     contactInfo: {
                         email: senderEmail,
@@ -349,6 +389,23 @@ export default function ComposePage({ mails = [] }: ComposePageProps) {
                     ),
                     templateData: {
                         sender: selectedTeamMember,
+                        emailContent: emailContent,
+                        // Add additional data for Post-Call template
+                        ...(selectedTemplate?.name ===
+                            "Post-Call Follow-Up" && {
+                            followupDate: extractVariable(
+                                emailContent,
+                                "followup_date"
+                            ),
+                            followupTime: extractVariable(
+                                emailContent,
+                                "followup_time"
+                            ),
+                            requestedMaterials: extractVariable(
+                                emailContent,
+                                "requested_materials"
+                            ),
+                        }),
                     },
                     contactInfo: {
                         email: senderEmail,
@@ -447,7 +504,47 @@ export default function ComposePage({ mails = [] }: ComposePageProps) {
         if (template) {
             setSelectedTemplate(template);
             setEmailSubject(template.subject);
-            setEmailContent(template.content);
+
+            // Set default content for email templates
+            if (template.name === "Sponsorship Confirmation") {
+                setEmailContent(
+                    "Hello [recipient_name],\n\n" +
+                        "I hope this email finds you well. My name is [sender_name], and I am a [sender_year_and_major] student at [sender_school]. I am also a sponsorship coordinator with HackCC, a student-led initiative providing California community college students with the opportunity to compete in weekend-long invention marathons. Taking place May 2nd-4th at [venue], we're expecting 250 hackers this year!\n\n" +
+                        "I am reaching out to inquire about getting [company_name] on board as a sponsor for one (or more!) of our hackathons. I was wondering if [company_name] has any interest in sponsoring hackathons at this time?\n\n" +
+                        "Best regards,"
+                );
+            } else if (template.name === "Follow-Up Email") {
+                setEmailContent(
+                    "Hi [recipient_name],\n\n" +
+                        "I hope this email finds you well. My name is [sender_name], and I am a [sender_year_and_major] student at [sender_school]. I am also a sponsorship coordinator with HackCC, a student-led initiative providing California community college students with the opportunity to compete in weekend-long invention marathons. Taking place May 2nd-4th at [venue], we're expecting 250 hackers this year!\n\n" +
+                        "I reached out to you on Tuesday about getting [company_name] on board as a sponsor for one (or more!) of our hackathons. I was wondering if [company_name] has any interest in sponsoring hackathons at this time?\n\n" +
+                        "Best regards,"
+                );
+            } else if (template.name === "Post-Call Follow-Up") {
+                setEmailContent(
+                    "Hi [recipient_name],\n\n" +
+                        "It was a pleasure speaking with you today about HackCC and how [company_name] can get involved. I appreciate your time and insights!\n\n" +
+                        "Recap from Our Call:\n\n" +
+                        "• Key points discussed\n" +
+                        "• Benefits [company_name] expressed interest in\n" +
+                        "• Any additional concerns raised and how they were addressed\n\n" +
+                        "Just confirming our follow-up call on [followup_date] at [followup_time]. In the meantime, I've attached the [requested_materials] for your review. If you have any questions or need further information, feel free to reach out. Looking forward to hearing your thoughts!\n\n" +
+                        "Best,"
+                );
+            } else if (template.name === "Sponsorship Agreement") {
+                setEmailContent(
+                    "Hi [recipient_name],\n\n" +
+                        "Thank you for confirming your sponsorship for HackCC! We're thrilled to have [company_name] supporting our hackathon and can't wait to collaborate with you.\n\n" +
+                        "Next Steps:\n\n" +
+                        "• Sponsorship Agreement & Invoice: [Attach any necessary documents]\n" +
+                        "• Logistics & Branding: Please send over your logo and any promotional materials you'd like us to feature.\n" +
+                        "• Engagement Opportunities: Let us know if your team would like to host a workshop, provide mentors, or have a booth at the event.\n\n" +
+                        "If there's anything else we can do to make this partnership a success, please don't hesitate to reach out. Looking forward to working together!\n\n" +
+                        "Best,"
+                );
+            } else {
+                setEmailContent(template.content);
+            }
         }
     };
 
@@ -792,6 +889,37 @@ export default function ComposePage({ mails = [] }: ComposePageProps) {
                                         />
                                     </div>
                                 )}
+
+                                {recipientType === "employers" &&
+                                    selectedTemplate && (
+                                        <div>
+                                            <div className="flex items-center justify-between mb-2">
+                                                <Label htmlFor="content">
+                                                    Template Content
+                                                </Label>
+                                                <div className="text-xs text-muted-foreground">
+                                                    You can use these variables:
+                                                    [recipient_name],
+                                                    [company_name],
+                                                    [sender_name],
+                                                    [sender_year_and_major],
+                                                    [sender_school], [venue],
+                                                    [location]
+                                                </div>
+                                            </div>
+                                            <Textarea
+                                                id="content"
+                                                value={emailContent}
+                                                onChange={(e) =>
+                                                    setEmailContent(
+                                                        e.target.value
+                                                    )
+                                                }
+                                                placeholder="Enter email content with variables..."
+                                                className="mt-1 min-h-[300px] font-mono text-sm"
+                                            />
+                                        </div>
+                                    )}
 
                                 <div className="text-sm text-muted-foreground">
                                     Email will be sent using your outreach team

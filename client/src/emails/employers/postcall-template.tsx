@@ -16,9 +16,9 @@ import {
 import { OutreachTeamDto } from "../../features/outreach/types/outreach-team";
 
 /**
- * Props for the follow-up email template
+ * Props for the post-call follow-up email template
  */
-interface FollowUpEmailProps {
+interface PostCallEmailProps {
     /**
      * The name of the company being contacted
      */
@@ -28,11 +28,6 @@ interface FollowUpEmailProps {
      * The name of the person being contacted at the company
      */
     recipientName: string;
-
-    /**
-     * The venue where the hackathon will take place
-     */
-    venue: string;
 
     /**
      * Information about the outreach team member sending the email
@@ -45,14 +40,24 @@ interface FollowUpEmailProps {
     positionAtHackCC: string;
 
     /**
-     * The town/city where the event will be held
-     */
-    location: string;
-
-    /**
      * Organization's logo URL
      */
     organizationLogo?: string;
+
+    /**
+     * Date of the scheduled follow-up call
+     */
+    followupDate?: string;
+
+    /**
+     * Time of the scheduled follow-up call
+     */
+    followupTime?: string;
+
+    /**
+     * Materials that were requested by the sponsor
+     */
+    requestedMaterials?: string;
 
     /**
      * Social media links to include in the signature
@@ -76,22 +81,23 @@ const baseUrl = process.env.VERCEL_URL
     : "";
 
 /**
- * FollowUpEmail component for HackCC outreach
+ * PostCallEmail component for HackCC outreach
  *
- * This template is designed for sending follow-up emails to potential sponsors
- * who were previously contacted about sponsorship opportunities.
+ * This template is designed for sending follow-up emails after a call with potential sponsors
+ * to summarize the discussion and confirm next steps.
  */
-export const FollowUpEmail = ({
+export const PostCallEmail = ({
     companyName,
     recipientName,
-    venue,
     sender,
     positionAtHackCC,
-    location,
     organizationLogo,
+    followupDate,
+    followupTime,
+    requestedMaterials,
     socialLinks,
     customEmailBody,
-}: FollowUpEmailProps) => {
+}: PostCallEmailProps) => {
     // Format the sender's year and major for better readability
     const formattedYearAndMajor = `${sender.year} ${sender.major}`;
 
@@ -106,21 +112,78 @@ export const FollowUpEmail = ({
             .replace(/\[sender_name\]/g, sender.name)
             .replace(/\[sender_year_and_major\]/g, formattedYearAndMajor)
             .replace(/\[sender_school\]/g, sender.school)
-            .replace(/\[venue\]/g, venue)
-            .replace(/\[location\]/g, location);
+            .replace(/\[followup_date\]/g, followupDate || "[Date]")
+            .replace(/\[followup_time\]/g, followupTime || "[Time]")
+            .replace(
+                /\[requested_materials\]/g,
+                requestedMaterials || "requested materials"
+            );
 
-        // Split paragraphs and render them
-        return parsedContent.split("\n\n").map((paragraphText, index) => (
-            <Text key={index} style={paragraph}>
-                {paragraphText}
-            </Text>
-        ));
+        // Split the content into sections
+        const sections = parsedContent.split("\n\n");
+
+        return sections.map((section, index) => {
+            // Check if this is a section header (like "Recap from Our Call:")
+            if (section.endsWith(":")) {
+                return (
+                    <Text key={`header-${index}`} style={paragraphBold}>
+                        {section}
+                    </Text>
+                );
+            }
+
+            // Check if this section contains bullet points
+            if (section.includes("•") || section.includes("-")) {
+                // Split by lines to handle each bullet point separately
+                const lines = section.split("\n");
+                return (
+                    <React.Fragment key={`bullets-${index}`}>
+                        {lines.map((line, lineIndex) => {
+                            // Skip empty lines
+                            if (!line.trim()) return null;
+
+                            // If this is a bullet point (starts with • or -), use bullet point styling
+                            if (
+                                line.trim().startsWith("•") ||
+                                line.trim().startsWith("-")
+                            ) {
+                                return (
+                                    <Text
+                                        key={`bullet-${index}-${lineIndex}`}
+                                        style={paragraphList}
+                                    >
+                                        {line.trim()}
+                                    </Text>
+                                );
+                            }
+
+                            // Otherwise, treat as regular paragraph
+                            return (
+                                <Text
+                                    key={`line-${index}-${lineIndex}`}
+                                    style={paragraph}
+                                >
+                                    {line.trim()}
+                                </Text>
+                            );
+                        })}
+                    </React.Fragment>
+                );
+            }
+
+            // Regular paragraph
+            return (
+                <Text key={`para-${index}`} style={paragraph}>
+                    {section}
+                </Text>
+            );
+        });
     };
 
     return (
         <Html>
             <Head />
-            <Preview>Meet the best students in {location} this May</Preview>
+            <Preview>HackCC Sponsorship Next Steps</Preview>
             <Body style={main}>
                 <Container style={container}>
                     {/* Header */}
@@ -137,7 +200,7 @@ export const FollowUpEmail = ({
                     <Section style={content}>
                         {/* Email Subject */}
                         <Heading style={subjectLine}>
-                            Re: Meet the best students in {location} this May
+                            HackCC Sponsorship Next Steps
                         </Heading>
 
                         {/* Email Body */}
@@ -150,29 +213,43 @@ export const FollowUpEmail = ({
                                 </Text>
 
                                 <Text style={paragraph}>
-                                    I hope this email finds you well. My name is{" "}
-                                    {sender.name}, and I am a{" "}
-                                    {formattedYearAndMajor} student at{" "}
-                                    {sender.school}. I am also a sponsorship
-                                    coordinator with HackCC, a student-led
-                                    initiative providing California community
-                                    college students with the opportunity to
-                                    compete in weekend-long invention marathons.
-                                    Taking place May 2nd-4th at {venue},
-                                    we&apos;re expecting 250 hackers this year!
+                                    It was a pleasure speaking with you today
+                                    about HackCC and how {companyName} can get
+                                    involved. I appreciate your time and
+                                    insights!
+                                </Text>
+
+                                <Text style={paragraphBold}>
+                                    Recap from Our Call:
+                                </Text>
+                                <Text style={paragraphList}>
+                                    • Key points discussed
+                                </Text>
+                                <Text style={paragraphList}>
+                                    • Benefits {companyName} expressed interest
+                                    in
+                                </Text>
+                                <Text style={paragraphList}>
+                                    • Any additional concerns raised and how
+                                    they were addressed
                                 </Text>
 
                                 <Text style={paragraph}>
-                                    I reached out to you on Tuesday about
-                                    getting {companyName} on board as a sponsor
-                                    for one (or more!) of our hackathons. I was
-                                    wondering if {companyName} has any interest
-                                    in sponsoring hackathons at this time?
+                                    Just confirming our follow-up call on{" "}
+                                    {followupDate || "[Date]"} at{" "}
+                                    {followupTime || "[Time]"}. In the meantime,
+                                    I've attached the{" "}
+                                    {requestedMaterials ||
+                                        "requested materials"}{" "}
+                                    for your review. If you have any questions
+                                    or need further information, feel free to
+                                    reach out. Looking forward to hearing your
+                                    thoughts!
                                 </Text>
+
+                                <Text style={paragraph}>Best,</Text>
                             </>
                         )}
-
-                        <Text style={paragraph}>Best regards,</Text>
 
                         {/* Signature */}
                         <Section style={signatureContainer}>
@@ -190,6 +267,8 @@ export const FollowUpEmail = ({
                                             style={orgLogo}
                                         />
                                     )}
+                                </Column>
+                                <Column>
                                     <Text style={signaturePosition}>
                                         {positionAtHackCC}
                                     </Text>
@@ -231,7 +310,7 @@ export const FollowUpEmail = ({
     );
 };
 
-export default FollowUpEmail;
+export default PostCallEmail;
 
 // Styles
 const main = {
@@ -285,6 +364,21 @@ const paragraph = {
     margin: "16px 0",
 };
 
+const paragraphBold = {
+    fontSize: "16px",
+    lineHeight: "1.5",
+    color: "#1e293b",
+    fontWeight: "700",
+    margin: "20px 0 8px",
+};
+
+const paragraphList = {
+    fontSize: "16px",
+    lineHeight: "1.5",
+    color: "#374151",
+    margin: "4px 0 4px 16px",
+};
+
 const signatureContainer = {
     marginTop: "30px",
     borderTop: "1px solid #e5e7eb",
@@ -302,6 +396,7 @@ const signaturePosition = {
     fontSize: "14px",
     color: "#4b5563",
     margin: "0 0 8px",
+    textAlign: "right" as const,
 };
 
 const socialLinksContainer = {

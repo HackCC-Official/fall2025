@@ -16,9 +16,9 @@ import {
 import { OutreachTeamDto } from "../../features/outreach/types/outreach-team";
 
 /**
- * Props for the follow-up email template
+ * Props for the sponsorship confirmation email template
  */
-interface FollowUpEmailProps {
+interface ConfirmationEmailProps {
     /**
      * The name of the company being contacted
      */
@@ -30,11 +30,6 @@ interface FollowUpEmailProps {
     recipientName: string;
 
     /**
-     * The venue where the hackathon will take place
-     */
-    venue: string;
-
-    /**
      * Information about the outreach team member sending the email
      */
     sender: OutreachTeamDto;
@@ -43,11 +38,6 @@ interface FollowUpEmailProps {
      * The position of the sender at HackCC
      */
     positionAtHackCC: string;
-
-    /**
-     * The town/city where the event will be held
-     */
-    location: string;
 
     /**
      * Organization's logo URL
@@ -76,22 +66,20 @@ const baseUrl = process.env.VERCEL_URL
     : "";
 
 /**
- * FollowUpEmail component for HackCC outreach
+ * ConfirmationEmail component for HackCC outreach
  *
- * This template is designed for sending follow-up emails to potential sponsors
- * who were previously contacted about sponsorship opportunities.
+ * This template is designed for sending confirmation emails to sponsors
+ * who have agreed to sponsor a HackCC event.
  */
-export const FollowUpEmail = ({
+export const ConfirmationEmail = ({
     companyName,
     recipientName,
-    venue,
     sender,
     positionAtHackCC,
-    location,
     organizationLogo,
     socialLinks,
     customEmailBody,
-}: FollowUpEmailProps) => {
+}: ConfirmationEmailProps) => {
     // Format the sender's year and major for better readability
     const formattedYearAndMajor = `${sender.year} ${sender.major}`;
 
@@ -105,22 +93,73 @@ export const FollowUpEmail = ({
             .replace(/\[company_name\]/g, companyName)
             .replace(/\[sender_name\]/g, sender.name)
             .replace(/\[sender_year_and_major\]/g, formattedYearAndMajor)
-            .replace(/\[sender_school\]/g, sender.school)
-            .replace(/\[venue\]/g, venue)
-            .replace(/\[location\]/g, location);
+            .replace(/\[sender_school\]/g, sender.school);
 
-        // Split paragraphs and render them
-        return parsedContent.split("\n\n").map((paragraphText, index) => (
-            <Text key={index} style={paragraph}>
-                {paragraphText}
-            </Text>
-        ));
+        // Split the content into sections
+        const sections = parsedContent.split("\n\n");
+
+        return sections.map((section, index) => {
+            // Check if this is a section header (like "Next Steps:")
+            if (section.endsWith(":")) {
+                return (
+                    <Text key={`header-${index}`} style={paragraphBold}>
+                        {section}
+                    </Text>
+                );
+            }
+
+            // Check if this section contains bullet points
+            if (section.includes("•") || section.includes("-")) {
+                // Split by lines to handle each bullet point separately
+                const lines = section.split("\n");
+                return (
+                    <React.Fragment key={`bullets-${index}`}>
+                        {lines.map((line, lineIndex) => {
+                            // Skip empty lines
+                            if (!line.trim()) return null;
+
+                            // If this is a bullet point (starts with • or -), use bullet point styling
+                            if (
+                                line.trim().startsWith("•") ||
+                                line.trim().startsWith("-")
+                            ) {
+                                return (
+                                    <Text
+                                        key={`bullet-${index}-${lineIndex}`}
+                                        style={paragraphList}
+                                    >
+                                        {line.trim()}
+                                    </Text>
+                                );
+                            }
+
+                            // Otherwise, treat as regular paragraph
+                            return (
+                                <Text
+                                    key={`line-${index}-${lineIndex}`}
+                                    style={paragraph}
+                                >
+                                    {line.trim()}
+                                </Text>
+                            );
+                        })}
+                    </React.Fragment>
+                );
+            }
+
+            // Regular paragraph
+            return (
+                <Text key={`para-${index}`} style={paragraph}>
+                    {section}
+                </Text>
+            );
+        });
     };
 
     return (
         <Html>
             <Head />
-            <Preview>Meet the best students in {location} this May</Preview>
+            <Preview>HackCC x {companyName} Sponsorship Confirmation!</Preview>
             <Body style={main}>
                 <Container style={container}>
                     {/* Header */}
@@ -137,7 +176,7 @@ export const FollowUpEmail = ({
                     <Section style={content}>
                         {/* Email Subject */}
                         <Heading style={subjectLine}>
-                            Re: Meet the best students in {location} this May
+                            HackCC x {companyName} Sponsorship Confirmation!
                         </Heading>
 
                         {/* Email Body */}
@@ -150,29 +189,39 @@ export const FollowUpEmail = ({
                                 </Text>
 
                                 <Text style={paragraph}>
-                                    I hope this email finds you well. My name is{" "}
-                                    {sender.name}, and I am a{" "}
-                                    {formattedYearAndMajor} student at{" "}
-                                    {sender.school}. I am also a sponsorship
-                                    coordinator with HackCC, a student-led
-                                    initiative providing California community
-                                    college students with the opportunity to
-                                    compete in weekend-long invention marathons.
-                                    Taking place May 2nd-4th at {venue},
-                                    we&apos;re expecting 250 hackers this year!
+                                    Thank you for confirming your sponsorship
+                                    for HackCC! We're thrilled to have{" "}
+                                    {companyName} supporting our hackathon and
+                                    can't wait to collaborate with you.
+                                </Text>
+
+                                <Text style={paragraphBold}>Next Steps:</Text>
+                                <Text style={paragraphList}>
+                                    • Sponsorship Agreement & Invoice: [Attach
+                                    any necessary documents]
+                                </Text>
+                                <Text style={paragraphList}>
+                                    • Logistics & Branding: Please send over
+                                    your logo and any promotional materials
+                                    you'd like us to feature.
+                                </Text>
+                                <Text style={paragraphList}>
+                                    • Engagement Opportunities: Let us know if
+                                    your team would like to host a workshop,
+                                    provide mentors, or have a booth at the
+                                    event.
                                 </Text>
 
                                 <Text style={paragraph}>
-                                    I reached out to you on Tuesday about
-                                    getting {companyName} on board as a sponsor
-                                    for one (or more!) of our hackathons. I was
-                                    wondering if {companyName} has any interest
-                                    in sponsoring hackathons at this time?
+                                    If there's anything else we can do to make
+                                    this partnership a success, please don't
+                                    hesitate to reach out. Looking forward to
+                                    working together!
                                 </Text>
+
+                                <Text style={paragraph}>Best,</Text>
                             </>
                         )}
-
-                        <Text style={paragraph}>Best regards,</Text>
 
                         {/* Signature */}
                         <Section style={signatureContainer}>
@@ -190,6 +239,8 @@ export const FollowUpEmail = ({
                                             style={orgLogo}
                                         />
                                     )}
+                                </Column>
+                                <Column>
                                     <Text style={signaturePosition}>
                                         {positionAtHackCC}
                                     </Text>
@@ -231,7 +282,7 @@ export const FollowUpEmail = ({
     );
 };
 
-export default FollowUpEmail;
+export default ConfirmationEmail;
 
 // Styles
 const main = {
@@ -285,6 +336,21 @@ const paragraph = {
     margin: "16px 0",
 };
 
+const paragraphBold = {
+    fontSize: "16px",
+    lineHeight: "1.5",
+    color: "#1e293b",
+    fontWeight: "700",
+    margin: "20px 0 8px",
+};
+
+const paragraphList = {
+    fontSize: "16px",
+    lineHeight: "1.5",
+    color: "#374151",
+    margin: "4px 0 4px 16px",
+};
+
 const signatureContainer = {
     marginTop: "30px",
     borderTop: "1px solid #e5e7eb",
@@ -302,6 +368,7 @@ const signaturePosition = {
     fontSize: "14px",
     color: "#4b5563",
     margin: "0 0 8px",
+    textAlign: "right" as const,
 };
 
 const socialLinksContainer = {
