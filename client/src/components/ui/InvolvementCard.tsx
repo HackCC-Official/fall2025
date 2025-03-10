@@ -1,4 +1,4 @@
-import { inter } from "../styles/fonts"
+import { inter } from "../../app/styles/fonts"
 import Image from "next/image"
 interface InvolvementCardProps {
     imagePath : string;

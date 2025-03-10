@@ -10,8 +10,8 @@ export default {
     extend: {
       screens: {
         'xs': '465px', // custom breakpoint for 470px
-        'layoutchange': '650px'
-        ,
+        'layoutchange': '650px',
+        
       },
       colors: {
         background: "var(--background)",

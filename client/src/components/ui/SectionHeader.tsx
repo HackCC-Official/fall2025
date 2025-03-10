@@ -1,4 +1,4 @@
-import { bagel_Fat_One } from '../styles/fonts'
+import { bagel_Fat_One } from '../../app/styles/fonts'
  
 interface SectionHeaderProps {
     title: string;

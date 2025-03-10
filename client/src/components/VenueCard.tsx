@@ -1,4 +1,4 @@
-import { bagel_Fat_One, montserrat_Alternates } from './styles/fonts'
+import { bagel_Fat_One, montserrat_Alternates } from '../app/styles/fonts'
 import Image from 'next/image'
 export default function VenueCard() {
     return (

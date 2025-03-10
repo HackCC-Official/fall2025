@@ -1,0 +1,48 @@
+services:
+  next-app:
+    image: "ghcr.io/hackcc-official/spring2025/next-app"
+    container_name: next-app
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_QR_SERVICE_URL: ${NEXT_PUBLIC_QR_SERVICE_URL}
+        NEXT_PUBLIC_OUTREACH_SERVICE_URL: ${NEXT_PUBLIC_OUTREACH_SERVICE_URL}
+        NEXT_PUBLIC_SUPABASE_ANON_KEY: ${NEXT_PUBLIC_SUPABASE_ANON_KEY}
+        NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL}
+        NEXT_PUBLIC_PRODUCTION: ${NEXT_PUBLIC_PRODUCTION}
+    restart: always
+    env_file:
+      - .env
+    ports:
+      - 4000:3000
+    networks:
+      - hackcc-network
+  nginx:
+    image: "ghcr.io/hackcc-official/spring2025/nginx"
+    depends_on:
+      - next-app
+    build:
+      context: .
+      dockerfile: nginx.Dockerfile
+    env_file:
+      - .env
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./certbot/www/:/var/www/certbot/:rw
+      - ./certbot/conf/:/etc/letsencrypt/:rw
+    networks:
+      - hackcc-network
+  certbot:
+    image: certbot/certbot:latest
+    volumes:
+      - ./certbot/www/:/var/www/certbot/:rw
+      - ./certbot/conf/:/etc/letsencrypt/:rw
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
+    env_file:
+      - .env
+networks:
+  hackcc-network:
+    external: true

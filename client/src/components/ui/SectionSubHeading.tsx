@@ -1,4 +1,4 @@
-import { montserrat_Alternates } from "../styles/fonts"
+import { montserrat_Alternates } from "../../app/styles/fonts"
 interface SectionSubHeadingProps {
     subtext : string;
 }

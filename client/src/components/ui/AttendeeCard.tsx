@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { montserrat_Alternates } from '../styles/fonts'
+import { montserrat_Alternates } from '../../app/styles/fonts'
 
 interface AttendeeCardProps {
   imgPath: string;
