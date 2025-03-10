@@ -14,12 +14,14 @@ import {
     FiCheckCircle,
     FiAlertCircle,
     FiLoader,
+    FiInfo,
 } from "react-icons/fi";
 
 export const Interest = () => {
     const [email, setEmail] = useState("");
     const [status, setStatus] = useState("");
     const [success, setSuccess] = useState(false);
+    const [isDuplicate, setIsDuplicate] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [hovered, setHovered] = useState(false);
 
@@ -103,6 +105,10 @@ export const Interest = () => {
     const handleSubmitEmail = async () => {
         console.log("handleSubmitEmail called");
 
+        // Reset states
+        setIsDuplicate(false);
+        setSuccess(false);
+
         // Don't allow multiple submissions
         if (isSubmitting) {
             console.log("Already submitting, ignoring click");
@@ -153,11 +159,14 @@ export const Interest = () => {
                 }>;
 
                 // Check for 409 Conflict (email already registered)
-                if (axiosError.response?.status === 409) {
-                    setStatus(
-                        "You have already been added to the list to receive updates about the event!"
-                    );
-                    setSuccess(true);
+                if (
+                    axiosError.response?.status === 409 ||
+                    (axiosError.response?.data &&
+                        axiosError.response.data.statusCode === 409)
+                ) {
+                    console.log("Duplicate email detected:", email);
+                    setStatus("");
+                    setIsDuplicate(true);
                 } else {
                     setStatus(
                         `Error: ${axiosError.response?.data?.message || axiosError.message}`
@@ -182,6 +191,12 @@ export const Interest = () => {
             e.preventDefault(); // Prevent form submission
             handleSubmitEmail();
         }
+    };
+
+    // Try again after duplicate detection
+    const handleTryAgain = () => {
+        setIsDuplicate(false);
+        setEmail("");
     };
 
     // Loading spinner animation
@@ -213,6 +228,44 @@ export const Interest = () => {
         </div>
     );
 
+    // Duplicate email component
+    const DuplicateEmail = () => {
+        const [buttonHovered, setButtonHovered] = useState(false);
+
+        return (
+            <div className="animate-fadeIn flex flex-col items-center py-4 relative">
+                <div className="text-yellow-400 text-4xl mb-3 animate-pulse">
+                    <FiInfo />
+                </div>
+                <p className="text-white font-medium">
+                    This email is already registered!
+                </p>
+                <p className="text-white/80 text-sm mt-1 mb-4">
+                    You&apos;ll receive updates about the event at {email}
+                </p>
+
+                <button
+                    onClick={handleTryAgain}
+                    onMouseEnter={() => setButtonHovered(true)}
+                    onMouseLeave={() => setButtonHovered(false)}
+                    className={`mt-2 px-6 py-3 rounded-lg flex items-center justify-center font-medium transition-all duration-300 ${
+                        buttonHovered
+                            ? "bg-hoverpurple scale-105"
+                            : "bg-navyblue"
+                    } text-white shadow-lg border border-white/10 backdrop-blur-sm`}
+                >
+                    <span>Use a different email</span>
+                    <span className="ml-2">
+                        {buttonHovered ? <FiMail /> : <FiMail />}
+                    </span>
+                    <span
+                        className={`absolute inset-0 rounded-lg bg-white/10 ${buttonHovered ? "opacity-20" : "opacity-0"} transition-opacity duration-300`}
+                    ></span>
+                </button>
+            </div>
+        );
+    };
+
     return (
         <div
             ref={containerRef}
@@ -233,7 +286,9 @@ export const Interest = () => {
 
             {isSubmitting && <LoadingSpinner />}
 
-            {!isSubmitting && !success && (
+            {isDuplicate && !isSubmitting && <DuplicateEmail />}
+
+            {!isSubmitting && !success && !isDuplicate && (
                 <div className="animate-fadeIn relative">
                     <p className="font-semibold text-white/90 mb-3">
                         Sign up to receive updates{" "}
@@ -279,7 +334,7 @@ export const Interest = () => {
                     </div>
                 </div>
             )}
-            {!isSubmitting && success && (
+            {!isSubmitting && success && !isDuplicate && (
                 <div className="animate-fadeIn flex flex-col items-center py-4 relative">
                     <div className="text-green-400 text-4xl mb-3">
                         <FiCheckCircle />
@@ -292,7 +347,7 @@ export const Interest = () => {
                     </p>
                 </div>
             )}
-            {status && !success && !isSubmitting && (
+            {status && !success && !isSubmitting && !isDuplicate && (
                 <div
                     className={`mt-4 flex flex-col md:text-md text-sm lg:text-base text-center relative ${status.includes("Error") ? "text-red-300" : "text-white/80"}`}
                 >
