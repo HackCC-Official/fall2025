@@ -6,7 +6,7 @@ import {
 } from "../types/email.dto";
 import { outreachClient } from "../../../api/outreach-client";
 import axios from "axios";
-import { InterestedUserDto } from "../types/interested-users.dto";
+import { AddInterestedUser, InterestedUserDto } from "../types/interested-users.dto";
 import { OutreachTeamDto } from "../types/outreach-team";
 
 interface OutreachTeamApiResponse {
@@ -152,7 +152,22 @@ export async function sendEmail(emailDto: SendEmailDto): Promise<void> {
 
 /**
  * Sends multiple emails in batch
- * @param batchDto - The batch of emails to send
+ * @param batchDto - The batch of emails to send with format:
+ * {
+ *   "emails": [
+ *     {
+ *       "from": "Company <notifications@example.com>",
+ *       "to": [
+ *         {
+ *           "email": "recipient@example.com"
+ *         }
+ *       ],
+ *       "subject": "Email Subject",
+ *       "html": "<h1>Hello</h1><p>Email content.</p>"
+ *     }
+ *   ]
+ * }
+ * @returns Promise that resolves when emails are sent
  */
 export async function sendBatchEmails(
     batchDto: SendBatchEmailsDto
@@ -211,7 +226,7 @@ export async function updateEmail(
  * @throws {Error} If the request fails or user already exists
  */
 export async function createInterestedUser(
-    interestedUserDto: InterestedUserDto
+    interestedUserDto: AddInterestedUser
 ): Promise<void> {
     await outreachClient.request({
         method: "POST",
