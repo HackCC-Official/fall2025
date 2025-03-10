@@ -17,7 +17,6 @@ import {
     Mail,
     QrCode,
     LucideIcon,
-    Users,
 } from "lucide-react";
 import { LogoIcon } from "../logo-icon";
 import { NavUser } from "./nav-user";
@@ -60,11 +59,6 @@ const items: MenuItem[] = [
         title: "Attendance",
         url: "/panel/attendance",
         icon: QrCode,
-    },
-    {
-        title: "Account",
-        url: "/panel/account",
-        icon: Users,
     },
 ];
 
