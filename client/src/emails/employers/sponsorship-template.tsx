@@ -63,6 +63,12 @@ interface SponsorshipEmailProps {
          */
         github?: string;
     };
+
+    /**
+     * Optional custom email body content
+     * When provided, will replace the default email body while preserving variable replacements
+     */
+    customEmailBody?: string;
 }
 
 const baseUrl = process.env.VERCEL_URL
@@ -82,6 +88,7 @@ export const SponsorshipEmail = ({
     sender,
     // positionAtHackCC,
     socialLinks,
+    customEmailBody,
 }: SponsorshipEmailProps) => {
     // Format the sender's year and major for better readability
     const formattedYearAndMajor = `${sender.year} ${sender.major}`;
@@ -89,6 +96,27 @@ export const SponsorshipEmail = ({
     // Get today's date
     const today = new Date();
     const isCurrentDayTuesday = today.getDay() === 2; // 0 is Sunday, 2 is Tuesday
+
+    // Parse custom email body if provided
+    const renderCustomEmailBody = () => {
+        if (!customEmailBody) return null;
+
+        // Replace variable placeholders with actual values
+        const parsedContent = customEmailBody
+            .replace(/\[recipient_name\]/g, recipientName)
+            .replace(/\[company_name\]/g, companyName)
+            .replace(/\[sender_name\]/g, sender.name)
+            .replace(/\[sender_year_and_major\]/g, formattedYearAndMajor)
+            .replace(/\[sender_school\]/g, sender.school)
+            .replace(/\[venue\]/g, venue);
+
+        // Split paragraphs and render them
+        return parsedContent.split("\n\n").map((paragraphText, index) => (
+            <Text key={index} style={paragraph}>
+                {paragraphText}
+            </Text>
+        ));
+    };
 
     return (
         <Html>
@@ -117,28 +145,38 @@ export const SponsorshipEmail = ({
                         </Heading>
 
                         {/* Email Body */}
-                        <Text style={paragraph}>Hello {recipientName},</Text>
+                        {customEmailBody ? (
+                            renderCustomEmailBody()
+                        ) : (
+                            <>
+                                <Text style={paragraph}>
+                                    Hello {recipientName},
+                                </Text>
 
-                        <Text style={paragraph}>
-                            I hope this email finds you well. My name is{" "}
-                            {sender.name}, and I am a {formattedYearAndMajor}{" "}
-                            student at {sender.school}. I am also a sponsorship
-                            coordinator with HackCC, a student-led initiative
-                            providing California community college students with
-                            the opportunity to compete in weekend-long invention
-                            marathons. Taking place May 2nd-4th at {venue},
-                            we&apos;re expecting 250 hackers this year!
-                        </Text>
+                                <Text style={paragraph}>
+                                    I hope this email finds you well. My name is{" "}
+                                    {sender.name}, and I am a{" "}
+                                    {formattedYearAndMajor} student at{" "}
+                                    {sender.school}. I am also a sponsorship
+                                    coordinator with HackCC, a student-led
+                                    initiative providing California community
+                                    college students with the opportunity to
+                                    compete in weekend-long invention marathons.
+                                    Taking place May 2nd-4th at {venue},
+                                    we&apos;re expecting 250 hackers this year!
+                                </Text>
 
-                        <Text style={paragraph}>
-                            I am reaching out to inquire about getting{" "}
-                            {companyName} on board as a sponsor for one (or
-                            more!) of our hackathons. I was wondering if{" "}
-                            {companyName} has any interest in sponsoring
-                            hackathons at this time?
-                        </Text>
+                                <Text style={paragraph}>
+                                    I am reaching out to inquire about getting{" "}
+                                    {companyName} on board as a sponsor for one
+                                    (or more!) of our hackathons. I was
+                                    wondering if {companyName} has any interest
+                                    in sponsoring hackathons at this time?
+                                </Text>
 
-                        <Text style={paragraph}>Best regards,</Text>
+                                <Text style={paragraph}>Best regards,</Text>
+                            </>
+                        )}
 
                         {/* Signature */}
                         <Section style={signatureContainer}>
