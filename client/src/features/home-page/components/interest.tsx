@@ -1,13 +1,8 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
-import {
-    createInterestedUser,
-    sendEmail,
-} from "@/features/outreach/api/outreach";
+import { createInterestedUser } from "@/features/outreach/api/outreach";
 import type { AddInterestedUser } from "@/features/outreach/types/interested-users.dto";
-import type { SendEmailDto } from "@/features/outreach/types/email.dto";
 import axios, { AxiosError } from "axios";
-import { renderThankYouEmail } from "@/emails/render-thank-you-email";
 import {
     FiMail,
     FiSend,
@@ -75,33 +70,6 @@ export const Interest = () => {
         return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
     };
 
-    /**
-     * Sends a thank you email to the user
-     * @param recipientEmail - The email address of the user
-     */
-    const sendThankYouEmail = async (recipientEmail: string): Promise<void> => {
-        try {
-            // Render the thank you email HTML
-            const emailHtml = await renderThankYouEmail({
-                recipientEmail,
-            });
-
-            // Create the email DTO
-            const emailDto: SendEmailDto = {
-                from: "tiffanyn@hackcc.net",
-                to: [{ email: recipientEmail }],
-                subject: "Thank you for your interest in HackCC!",
-                html: emailHtml,
-            };
-
-            // Send the email
-            await sendEmail(emailDto);
-        } catch (error) {
-            // Just log the error but don't show to user as the interest registration was successful
-            console.error("Failed to send thank you email:", error);
-        }
-    };
-
     const handleSubmitEmail = async () => {
         console.log("handleSubmitEmail called");
 
@@ -144,10 +112,6 @@ export const Interest = () => {
             );
             setEmail("");
             setSuccess(true);
-
-            // Send thank you email
-            console.log("Sending thank you email");
-            await sendThankYouEmail(addInterestedUserDto.email);
         } catch (error) {
             console.error("Error during submission:", error);
             // Handle API errors
