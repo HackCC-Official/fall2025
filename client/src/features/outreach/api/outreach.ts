@@ -6,7 +6,7 @@ import {
 } from "../types/email.dto";
 import { outreachClient } from "../../../api/outreach-client";
 import axios from "axios";
-import { InterestedUserDto } from "../types/interested-users.dto";
+import { AddInterestedUser, InterestedUserDto } from "../types/interested-users.dto";
 import { OutreachTeamDto } from "../types/outreach-team";
 
 interface OutreachTeamApiResponse {
@@ -226,7 +226,7 @@ export async function updateEmail(
  * @throws {Error} If the request fails or user already exists
  */
 export async function createInterestedUser(
-    interestedUserDto: InterestedUserDto
+    interestedUserDto: AddInterestedUser
 ): Promise<void> {
     await outreachClient.request({
         method: "POST",
