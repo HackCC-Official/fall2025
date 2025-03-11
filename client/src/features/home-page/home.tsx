@@ -8,7 +8,6 @@ import CloudFront from "../../../public/Medium Purple Cloud.png"
 import Moon from "../../../public/Moon.png"
 import { Socials } from '../../components/socials'
 import { Interest } from "./components/interest";
-import { Sky } from "@/components/sky";
 import { Homebg } from "./components/homebg";
 
 export default function home() {
@@ -21,7 +20,7 @@ export default function home() {
                     <Image className="2xl:h-40 md:h-36 sm:h-32 h-28 w-auto absolute 2xl:-right-80 md:-right-40 sm:-right-32 -right-12 bottom-1/4 animate-bobbing ease-linear" src={HotAirBalloon} alt="Hot Air Balloon"></Image>
                 </div>
                 <div className="font-bagel mt-4 mb-16 text-center md:text-4xl sm:text-3xl text-2xl z-10">
-                    <p>May 2-4, 2025 <span className="font-mono font-thin">|</span> California</p>
+                    <p>April 25-27, 2025 <span className="font-mono font-thin">|</span> Los Altos, CA</p>
                 </div>
                 <Interest></Interest>
             </div>
