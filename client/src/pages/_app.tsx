@@ -16,15 +16,10 @@ const queryClient = new QueryClient()
 export default function MyApp({ Component, pageProps }: AppPropsWithLayout) {
   // Use the layout defined at the page level, if available
   const getLayout = Component.getLayout ?? ((page) => page)
-  const isProduction = process.env.NEXT_PUBLIC_PRODUCTION === 'true'
 
   return (
     <QueryClientProvider client={queryClient}>
-      {isProduction ? 
-        <div></div>
-        :
-        getLayout(<Component {...pageProps} />)
-      }
+      {getLayout(<Component {...pageProps} />)}
     </QueryClientProvider>
   )
 }
