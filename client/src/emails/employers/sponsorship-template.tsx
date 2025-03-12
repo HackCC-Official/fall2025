@@ -179,7 +179,9 @@ export const SponsorshipEmail = ({
                             <Row>
                                 <Column>
                                     <Text style={signatureName}>
-                                        {sender.name}
+                                        {sender.name}{" "}
+                                        {sender.position &&
+                                            `- ${sender.position}`}
                                     </Text>
                                     <Text style={signaturePosition}>
                                         {formattedYearAndMajor}

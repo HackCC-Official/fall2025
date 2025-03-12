@@ -86,8 +86,6 @@ export const PostCallEmail = ({
     companyName,
     recipientName,
     sender,
-    positionAtHackCC,
-    organizationLogo,
     followupDate,
     followupTime,
     requestedMaterials,
@@ -252,21 +250,17 @@ export const PostCallEmail = ({
                             <Row>
                                 <Column>
                                     <Text style={signatureName}>
-                                        {sender.name}
+                                        {sender.name}{" "}
+                                        {sender.position &&
+                                            `- ${sender.position}`}
                                     </Text>
-                                    {organizationLogo && (
-                                        <Img
-                                            src={organizationLogo}
-                                            width={100}
-                                            height={30}
-                                            alt="Organization Logo"
-                                            style={orgLogo}
-                                        />
-                                    )}
+                                    <Text style={signaturePosition}>
+                                        {formattedYearAndMajor}
+                                    </Text>
                                 </Column>
                                 <Column>
-                                    <Text style={signaturePosition}>
-                                        {positionAtHackCC}
+                                    <Text style={signatureSchool}>
+                                        {sender.school}
                                     </Text>
                                 </Column>
                             </Row>
@@ -337,10 +331,6 @@ const logo = {
     margin: "0",
 };
 
-const orgLogo = {
-    margin: "8px 0",
-};
-
 const content = {
     padding: "30px",
 };
@@ -351,6 +341,13 @@ const subjectLine = {
     fontWeight: "700",
     color: "#1e40af", // Matching header color
     margin: "0 0 24px",
+};
+
+const signatureSchool = {
+    fontSize: "14px",
+    color: "#4b5563",
+    margin: "0",
+    textAlign: "right" as const,
 };
 
 const paragraph = {

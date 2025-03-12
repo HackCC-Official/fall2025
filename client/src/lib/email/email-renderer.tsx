@@ -88,7 +88,7 @@ export async function renderEmailTemplate({
                         requestedMaterials={templateData.requestedMaterials}
                         socialLinks={{
                             linkedin: recipient.linkedin_url || "",
-                            HackCC: "https://hackcc.dev",
+                            HackCC: "https://hackcc.net",
                         }}
                         customEmailBody={templateData.emailContent}
                     />
@@ -104,7 +104,7 @@ export async function renderEmailTemplate({
                         organizationLogo=""
                         socialLinks={{
                             linkedin: recipient.linkedin_url || "",
-                            HackCC: "https://hackcc.dev",
+                            HackCC: "https://hackcc.net",
                         }}
                         customEmailBody={templateData.emailContent}
                     />

@@ -75,8 +75,6 @@ export const ConfirmationEmail = ({
     companyName,
     recipientName,
     sender,
-    positionAtHackCC,
-    organizationLogo,
     socialLinks,
     customEmailBody,
 }: ConfirmationEmailProps) => {
@@ -228,21 +226,17 @@ export const ConfirmationEmail = ({
                             <Row>
                                 <Column>
                                     <Text style={signatureName}>
-                                        {sender.name}
+                                        {sender.name}{" "}
+                                        {sender.position &&
+                                            `- ${sender.position}`}
                                     </Text>
-                                    {organizationLogo && (
-                                        <Img
-                                            src={organizationLogo}
-                                            width={100}
-                                            height={30}
-                                            alt="Organization Logo"
-                                            style={orgLogo}
-                                        />
-                                    )}
+                                    <Text style={signaturePosition}>
+                                        {formattedYearAndMajor}
+                                    </Text>
                                 </Column>
                                 <Column>
-                                    <Text style={signaturePosition}>
-                                        {positionAtHackCC}
+                                    <Text style={signatureSchool}>
+                                        {sender.school}
                                     </Text>
                                 </Column>
                             </Row>
@@ -313,10 +307,6 @@ const logo = {
     margin: "0",
 };
 
-const orgLogo = {
-    margin: "8px 0",
-};
-
 const content = {
     padding: "30px",
 };
@@ -334,6 +324,13 @@ const paragraph = {
     lineHeight: "1.5",
     color: "#374151",
     margin: "16px 0",
+};
+
+const signatureSchool = {
+    fontSize: "14px",
+    color: "#4b5563",
+    margin: "0",
+    textAlign: "right" as const,
 };
 
 const paragraphBold = {

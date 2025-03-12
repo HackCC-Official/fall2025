@@ -435,7 +435,7 @@ export default function ComposePage({ mails = [] }: ComposePageProps) {
                                 emailContent={emailContent}
                                 sender={selectedTeamMember}
                                 socialLinks={{
-                                    HackCC: "https://hackcc.dev",
+                                    HackCC: "https://hackcc.net",
                                     LinkedIn:
                                         "https://linkedin.com/company/hackcc",
                                 }}
