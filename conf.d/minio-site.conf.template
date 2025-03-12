@@ -46,9 +46,6 @@ server {
     add_header Referrer-Policy "no-referrer-when-downgrade";
     add_header Strict-Transport-Security "max-age=31536000; includeSubDomains; preload";
 
-    # Rate limiting
-    limit_req_zone $binary_remote_addr zone=one:10m rate=10r/s;
-
     # Allow special characters in headers
     ignore_invalid_headers off;
     # Allow any size file to be uploaded.
@@ -57,8 +54,6 @@ server {
     # Disable buffering
     proxy_buffering off;
     proxy_request_buffering off;
-
-    resolver 127.0.0.11 valid=30s;
 
     set $upstream "minio";
 
