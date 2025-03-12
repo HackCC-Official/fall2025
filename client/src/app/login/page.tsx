@@ -4,27 +4,10 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { signInWithEmailAndPassword } from "@/features/auth/utils/auth";
-import { LogoIcon } from "@/components/logo-icon";
-import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardFooter,
-    CardHeader,
-    CardTitle,
-} from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
 import { AlertCircle } from "lucide-react";
-import { Sky } from "@/components/sky";
-import Logo from "../../../public/Logo.svg"
-import HotAirBalloon from "../../../public/Hot Air Balloon.png"
+import Logo from "../../../public/Logo.svg";
+import HotAirBalloon from "../../../public/Hot Air Balloon.png";
 import { Homebg } from "@/features/home-page/components/homebg";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faArrowRight } from '@fortawesome/free-solid-svg-icons';
-
-
 
 export default function LoginPage() {
     const [email, setEmail] = useState("");
@@ -72,23 +55,39 @@ export default function LoginPage() {
             <Homebg></Homebg>
             <div className="flex justify-center items-center p-4 min-h-screen">
                 <div className="w-full max-w-md flex flex-col items-center justify-center">
-                <div className="flex flex-col justify-center items-center mx-auto">
-                <div className="relative flex">
-                    <Image className="2xl:h-56 lg:h-48 md:h-48 sm:h-48 h-40 w-auto ml-[5%] z-10" src={Logo} alt="HackCC Logo"></Image>
-                    <Image className="2xl:h-40 md:h-36 sm:h-32 h-28 w-auto absolute 2xl:-right-80 md:-right-40 sm:-right-32 -right-12 bottom-1/4 animate-bobbing ease-linear" src={HotAirBalloon} alt="Hot Air Balloon"></Image>
-                </div>
-                <div className="font-bagel mt-4 mb-16 text-center md:text-4xl text-3xl text-white z-10">
-                    <p>Sign In</p>
-                    <p className="md:text-xl text-lg mt-4 font-mont">Don't have an account? <a className="underline hover:no-underline" href="/register">Register→</a></p>
-                </div>
-                </div>
-                <div className="sm:w-[350px] w-[275px] font-mont bg-black bg-opacity-20 px-7 py-7 rounded-3xl relative text-xl flex flex-col text-center">
-                    {error && (
-                        <div className="flex items-center gap-2 bg-red-50 mb-4 p-3 border border-red-200 rounded-md text-red-600 text-sm">
-                            <AlertCircle className="w-4 h-4" />
-                            <span>{error}</span>
+                    <div className="flex flex-col justify-center items-center mx-auto">
+                        <div className="relative flex">
+                            <Image
+                                className="2xl:h-56 lg:h-48 md:h-48 sm:h-48 h-40 w-auto ml-[5%] z-10"
+                                src={Logo}
+                                alt="HackCC Logo"
+                            ></Image>
+                            <Image
+                                className="2xl:h-40 md:h-36 sm:h-32 h-28 w-auto absolute 2xl:-right-80 md:-right-40 sm:-right-32 -right-12 bottom-1/4 animate-bobbing ease-linear"
+                                src={HotAirBalloon}
+                                alt="Hot Air Balloon"
+                            ></Image>
                         </div>
-                    )}
+                        <div className="font-bagel mt-4 mb-16 text-center md:text-4xl text-3xl text-white z-10">
+                            <p>Sign In</p>
+                            <p className="md:text-xl text-lg mt-4 font-mont">
+                                Don&apos;t have an account?{" "}
+                                <a
+                                    className="underline hover:no-underline"
+                                    href="/register"
+                                >
+                                    Register→
+                                </a>
+                            </p>
+                        </div>
+                    </div>
+                    <div className="sm:w-[350px] w-[275px] font-mont bg-black bg-opacity-20 px-7 py-7 rounded-3xl relative text-xl flex flex-col text-center">
+                        {error && (
+                            <div className="flex items-center gap-2 bg-red-50 mb-4 p-3 border border-red-200 rounded-md text-red-600 text-sm">
+                                <AlertCircle className="w-4 h-4" />
+                                <span>{error}</span>
+                            </div>
+                        )}
                         {isClient ? (
                             <form onSubmit={handleSubmit} className="space-y-4">
                                 <div className="space-y-2">
@@ -156,9 +155,9 @@ export default function LoginPage() {
     );
 }
 
-                            // <div className="w-full text-gray-500 text-xs text-center">
-                            //     <p>
-                            //         © {new Date().getFullYear()} HackCC. All rights
-                            //         reserved.
-                            //     </p>
-                            // </div>
+// <div className="w-full text-gray-500 text-xs text-center">
+//     <p>
+//         © {new Date().getFullYear()} HackCC. All rights
+//         reserved.
+//     </p>
+// </div>
