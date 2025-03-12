@@ -1,76 +1,21 @@
-import * as React from "react"
+import { montserrat_Alternates } from '../styles/fonts'
+import Image from "next/image";
+//xs:p-[60px]
 
-import { cn } from "@/lib/utils"
+interface CardProps {
+    name: string;
+    role: string;
+    imgPath: string;
+}
 
-const Card = React.forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
->(({ className, ...props }, ref) => (
-  <div
-    ref={ref}
-    className={cn(
-      "rounded-xl border bg-card text-card-foreground shadow",
-      className
-    )}
-    {...props}
-  />
-))
-Card.displayName = "Card"
-
-const CardHeader = React.forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
->(({ className, ...props }, ref) => (
-  <div
-    ref={ref}
-    className={cn("flex flex-col space-y-1.5 p-6", className)}
-    {...props}
-  />
-))
-CardHeader.displayName = "CardHeader"
-
-const CardTitle = React.forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
->(({ className, ...props }, ref) => (
-  <div
-    ref={ref}
-    className={cn("font-semibold leading-none tracking-tight", className)}
-    {...props}
-  />
-))
-CardTitle.displayName = "CardTitle"
-
-const CardDescription = React.forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
->(({ className, ...props }, ref) => (
-  <div
-    ref={ref}
-    className={cn("text-sm text-muted-foreground", className)}
-    {...props}
-  />
-))
-CardDescription.displayName = "CardDescription"
-
-const CardContent = React.forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
->(({ className, ...props }, ref) => (
-  <div ref={ref} className={cn("p-6 pt-0", className)} {...props} />
-))
-CardContent.displayName = "CardContent"
-
-const CardFooter = React.forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
->(({ className, ...props }, ref) => (
-  <div
-    ref={ref}
-    className={cn("flex items-center p-6 pt-0", className)}
-    {...props}
-  />
-))
-CardFooter.displayName = "CardFooter"
-
-export { Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent }
+export default function Card({name="N/A", role="role/team", imgPath="/headshotPlaceholder.png"} : CardProps) {
+    return (
+        <div className='text-black flex flex-col justify-center items-center bg-white hover:shadow-md my-4 rounded-xl h-auto basis-[40%]'>
+            <Image alt="error" src={imgPath} width={201} height={200} quality={80} className="pt-4 md:pt-6 xl:pt-8 w-[70%] h-auto" sizes="(min-width: 2500px) 300px, (min-width: 1280px) calc(12.67vw - 14px), (min-width: 1040px) calc(15.91vw - 30px), (min-width: 780px) calc(20vw - 31px), 100px"></Image>
+            <h2 className={`${montserrat_Alternates.className}  text-xs pt-2 lg:pt-4 layoutchange:text-[0.7rem] md:text-sm lg:text-lg`}>{name}</h2>
+            <h3 className={`${montserrat_Alternates.className}  text-[#696E75] text-[0.6rem] pb-4 lg:pb-7 layoutchange:text-[0.6rem] md:text-xs lg:text-base`}>{role}</h3>
+        </div>
+    )
+}
+//6
+//9
