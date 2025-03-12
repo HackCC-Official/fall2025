@@ -3,7 +3,7 @@ import { AccountRoles } from "../types/account-dto";
 
 export function AdminBadge() {
   return (
-    <Badge className="bg-indigo-600 border-indigo-400 rounded-full font-medium text-white">
+    <Badge className="bg-amber-500 hover:bg-amber-400 border-amber-300 rounded-full font-medium text-white">
       Admin
     </Badge>
   )
@@ -11,7 +11,7 @@ export function AdminBadge() {
 
 export function OrganizerBadge() {
   return (
-    <Badge className="bg-rose-600 border-rose-400 rounded-full font-medium text-white">
+    <Badge className="bg-rose-600 hover:bg-rose-500 border-rose-400 rounded-full font-medium text-white">
       Organizer
     </Badge>
   )
@@ -19,7 +19,7 @@ export function OrganizerBadge() {
 
 export function JudgeBadge() {
   return (
-    <Badge className="bg-green-600 border-green-400 rounded-full text-white">
+    <Badge className="bg-green-600 hover:bg-green-500 border-green-400 rounded-full font-medium text-white">
       Judge
     </Badge>
   )
@@ -27,7 +27,7 @@ export function JudgeBadge() {
 
 export function UserBadge() {
   return (
-    <Badge className="bg-indigo-200 border-indigo-500 text-white">
+    <Badge className="bg-indigo-600 hover:bg-indigo-500 border-indigo-400 rounded-full font-medium text-white">
       User
     </Badge>
   )
