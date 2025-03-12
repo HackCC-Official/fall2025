@@ -97,3 +97,34 @@ body {
     @apply bg-background text-foreground;
   }
 }
+
+.embla__viewport {
+
+  overflow: hidden;
+  
+}
+.embla {
+  
+
+
+  overflow: hidden;
+  max-width: 1430px;
+}
+.embla__container {
+  display: flex;
+  
+}
+.embla__slide {
+  flex: 0 0 100%;
+  min-width: 0;
+}
+
+@media only screen and (min-width: 650px) {
+
+  .embla__slide {
+    flex: 0 0 50%;
+    min-width: 0;
+    margin-right: -30px;
+  }
+}
+
