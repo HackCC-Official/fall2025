@@ -163,28 +163,28 @@ export default function UnsubscribePage({
                     exit="exit"
                     className="w-full"
                 >
-                    <Card className="bg-opacity-80 backdrop-blur-sm border-purple-300 border-2 shadow-xl rounded-xl overflow-hidden">
-                        <div className="absolute inset-0 bg-gradient-to-br from-purple-400/20 to-transparent pointer-events-none rounded-xl" />
+                    <Card className="bg-opacity-80 shadow-xl backdrop-blur-sm border-2 border-purple-300 rounded-xl overflow-hidden">
+                        <div className="absolute inset-0 bg-gradient-to-br from-purple-400/20 to-transparent rounded-xl pointer-events-none" />
                         <CardHeader className="pb-3 sm:pb-4">
                             <motion.div
                                 className="flex justify-center mb-2 sm:mb-3"
                                 variants={iconVariants}
                             >
-                                <AlertTriangle className="h-10 w-10 sm:h-12 sm:w-12 text-red-400" />
+                                <AlertTriangle className="w-10 sm:w-12 h-10 sm:h-12 text-red-400" />
                             </motion.div>
                             <motion.div variants={itemVariants}>
-                                <CardTitle className="text-center text-red-400 font-bagel text-xl sm:text-2xl">
+                                <CardTitle className="font-bagel text-red-400 text-xl sm:text-2xl text-center">
                                     Invalid Request
                                 </CardTitle>
                             </motion.div>
                             <motion.div variants={itemVariants}>
-                                <CardDescription className="text-center text-white/80 text-sm sm:text-base mt-1">
+                                <CardDescription className="mt-1 text-white/80 text-sm sm:text-base text-center">
                                     We couldn&apos;t process your unsubscribe
                                     request
                                 </CardDescription>
                             </motion.div>
                         </CardHeader>
-                        <CardContent className="text-center px-4 sm:px-6">
+                        <CardContent className="px-4 sm:px-6 text-center">
                             <motion.p
                                 className="mb-4 text-white text-base sm:text-lg"
                                 variants={itemVariants}
@@ -205,9 +205,9 @@ export default function UnsubscribePage({
                                             <Button
                                                 onClick={() => router.push("/")}
                                                 variant="outline"
-                                                className="bg-purple-700 hover:bg-purple-800 text-white border-purple-500 font-medium px-5 py-2 h-auto"
+                                                className="bg-purple-700 hover:bg-purple-800 px-5 py-2 border-purple-500 h-auto font-medium text-white"
                                             >
-                                                <Home className="mr-2 h-4 w-4" />
+                                                <Home className="mr-2 w-4 h-4" />
                                                 Return to Homepage
                                             </Button>
                                         </motion.div>
@@ -231,8 +231,8 @@ export default function UnsubscribePage({
                 exit="exit"
                 className="w-full"
             >
-                <Card className="bg-opacity-80 backdrop-blur-sm border-purple-300 border-2 shadow-xl rounded-xl overflow-hidden">
-                    <div className="absolute inset-0 bg-gradient-to-br from-purple-400/20 to-transparent pointer-events-none rounded-xl" />
+                <Card className="bg-opacity-80 shadow-xl backdrop-blur-sm border-2 border-purple-300 rounded-xl overflow-hidden">
+                    <div className="absolute inset-0 bg-gradient-to-br from-purple-400/20 to-transparent rounded-xl pointer-events-none" />
                     <CardHeader className="pb-3 sm:pb-4">
                         <motion.div
                             className="flex justify-center mb-2 sm:mb-3"
@@ -254,7 +254,7 @@ export default function UnsubscribePage({
                                         }}
                                         exit={{ scale: 0, opacity: 0 }}
                                     >
-                                        <CheckCircle2 className="h-10 w-10 sm:h-12 sm:w-12 text-green-400" />
+                                        <CheckCircle2 className="w-10 sm:w-12 h-10 sm:h-12 text-green-400" />
                                     </motion.div>
                                 ) : (
                                     <motion.div
@@ -271,27 +271,27 @@ export default function UnsubscribePage({
                                         }}
                                         exit={{ scale: 0, opacity: 0 }}
                                     >
-                                        <MailIcon className="h-10 w-10 sm:h-12 sm:w-12 text-purple-300" />
+                                        <MailIcon className="w-10 sm:w-12 h-10 sm:h-12 text-purple-300" />
                                     </motion.div>
                                 )}
                             </AnimatePresence>
                         </motion.div>
                         <motion.div variants={itemVariants}>
-                            <CardTitle className="text-center font-bagel text-xl sm:text-2xl text-white">
+                            <CardTitle className="font-bagel text-white text-xl sm:text-2xl text-center">
                                 {isUnsubscribed
                                     ? "Successfully Unsubscribed"
                                     : "Unsubscribe from Mailing List"}
                             </CardTitle>
                         </motion.div>
                         <motion.div variants={itemVariants}>
-                            <CardDescription className="text-center text-purple-200 text-sm sm:text-base mt-1">
+                            <CardDescription className="mt-1 text-purple-200 text-sm sm:text-base text-center">
                                 {isUnsubscribed
                                     ? "You won't receive any more emails from us"
                                     : "Please confirm your unsubscribe request"}
                             </CardDescription>
                         </motion.div>
                     </CardHeader>
-                    <CardContent className="text-center px-4 sm:px-6">
+                    <CardContent className="px-4 sm:px-6 text-center">
                         <AnimatePresence mode="wait">
                             {isUnsubscribed ? (
                                 <motion.div
@@ -309,16 +309,16 @@ export default function UnsubscribePage({
                                         from our mailing list.
                                     </motion.p>
                                     <motion.div
-                                        className="flex items-center justify-center bg-purple-800/50 rounded-md py-2 px-4 mb-4 sm:mb-6 max-w-[90%] sm:max-w-xs mx-auto"
+                                        className="flex justify-center items-center bg-purple-800/50 mx-auto mb-4 sm:mb-6 px-4 py-2 rounded-md max-w-[90%] sm:max-w-xs"
                                         variants={itemVariants}
                                     >
-                                        <MailIcon className="h-4 w-4 mr-2 text-purple-200 flex-shrink-0" />
-                                        <p className="text-sm text-purple-200 truncate">
+                                        <MailIcon className="flex-shrink-0 mr-2 w-4 h-4 text-purple-200" />
+                                        <p className="text-purple-200 text-sm truncate">
                                             {email}
                                         </p>
                                     </motion.div>
                                     <motion.p
-                                        className="text-white/70 text-sm max-w-xs mx-auto"
+                                        className="mx-auto max-w-xs text-white/70 text-sm"
                                         variants={itemVariants}
                                         initial={{ opacity: 0 }}
                                         animate={{ opacity: 1 }}
@@ -344,16 +344,16 @@ export default function UnsubscribePage({
                                         from our mailing list?
                                     </motion.p>
                                     <motion.div
-                                        className="flex items-center justify-center bg-purple-800/50 rounded-md py-2 px-4 mb-4 sm:mb-6 max-w-[90%] sm:max-w-xs mx-auto"
+                                        className="flex justify-center items-center bg-purple-800/50 mx-auto mb-4 sm:mb-6 px-4 py-2 rounded-md max-w-[90%] sm:max-w-xs"
                                         variants={itemVariants}
                                     >
-                                        <MailIcon className="h-4 w-4 mr-2 text-purple-200 flex-shrink-0" />
-                                        <p className="text-sm text-purple-200 truncate">
+                                        <MailIcon className="flex-shrink-0 mr-2 w-4 h-4 text-purple-200" />
+                                        <p className="text-purple-200 text-sm truncate">
                                             {email}
                                         </p>
                                     </motion.div>
                                     <motion.p
-                                        className="text-sm text-white/70 mb-4 max-w-xs mx-auto"
+                                        className="mx-auto mb-4 max-w-xs text-white/70 text-sm"
                                         variants={itemVariants}
                                     >
                                         You will no longer receive updates about
@@ -361,17 +361,17 @@ export default function UnsubscribePage({
                                     </motion.p>
                                     {error && (
                                         <motion.div
-                                            className="bg-red-500/20 rounded-md py-2 px-3 mb-4 max-w-xs mx-auto"
+                                            className="bg-red-500/20 mx-auto mb-4 px-3 py-2 rounded-md max-w-xs"
                                             initial={{ opacity: 0, y: 5 }}
                                             animate={{ opacity: 1, y: 0 }}
                                             transition={{ duration: 0.3 }}
                                         >
                                             <motion.p
-                                                className="text-sm text-red-200 flex items-center justify-center"
+                                                className="flex justify-center items-center text-red-200 text-sm"
                                                 initial={{ opacity: 0 }}
                                                 animate={{ opacity: 1 }}
                                             >
-                                                <AlertTriangle className="h-4 w-4 mr-2 text-red-200" />
+                                                <AlertTriangle className="mr-2 w-4 h-4 text-red-200" />
                                                 {error}
                                             </motion.p>
                                         </motion.div>
@@ -400,9 +400,9 @@ export default function UnsubscribePage({
                                     <Button
                                         onClick={() => router.push("/")}
                                         variant="outline"
-                                        className="bg-purple-700 hover:bg-purple-800 text-white border-purple-500 w-full sm:w-auto font-medium px-5 py-2 h-auto"
+                                        className="bg-purple-700 hover:bg-purple-800 px-5 py-2 border-purple-500 w-full sm:w-auto h-auto font-medium text-white"
                                     >
-                                        <Home className="mr-2 h-4 w-4" />
+                                        <Home className="mr-2 w-4 h-4" />
                                         Return to Homepage
                                     </Button>
                                 </motion.div>
@@ -414,15 +414,15 @@ export default function UnsubscribePage({
                                         initial="initial"
                                         whileHover="hover"
                                         whileTap="tap"
-                                        className="w-full sm:w-auto order-2 sm:order-1"
+                                        className="order-2 sm:order-1 w-full sm:w-auto"
                                     >
                                         <Button
                                             onClick={() => router.push("/")}
                                             variant="secondary"
                                             disabled={isLoading}
-                                            className="bg-purple-600/30 hover:bg-purple-700/50 text-white border border-purple-500 w-full sm:w-auto font-medium px-5 py-2 h-auto"
+                                            className="bg-purple-600/30 hover:bg-purple-700/50 px-5 py-2 border border-purple-500 w-full sm:w-auto h-auto font-medium text-white"
                                         >
-                                            <XCircle className="mr-2 h-4 w-4" />
+                                            <XCircle className="mr-2 w-4 h-4" />
                                             Cancel
                                         </Button>
                                     </motion.div>
@@ -432,15 +432,15 @@ export default function UnsubscribePage({
                                         initial="initial"
                                         whileHover="hover"
                                         whileTap="tap"
-                                        className="w-full sm:w-auto order-1 sm:order-2"
+                                        className="order-1 sm:order-2 w-full sm:w-auto"
                                     >
                                         <Button
                                             onClick={handleUnsubscribe}
                                             disabled={isLoading}
-                                            className="bg-purple-700 hover:bg-purple-800 text-white w-full sm:w-auto font-medium px-5 py-2 h-auto"
+                                            className="bg-purple-700 hover:bg-purple-800 px-5 py-2 w-full sm:w-auto h-auto font-medium text-white"
                                         >
                                             {isLoading ? (
-                                                <div className="flex items-center justify-center">
+                                                <div className="flex justify-center items-center">
                                                     <motion.div
                                                         animate={{
                                                             rotate: 360,
@@ -450,14 +450,14 @@ export default function UnsubscribePage({
                                                             repeat: Infinity,
                                                             ease: "linear",
                                                         }}
-                                                        className="mr-2 h-4 w-4 border-t-2 border-b-2 border-white rounded-full"
+                                                        className="mr-2 border-white border-t-2 border-b-2 rounded-full w-4 h-4"
                                                     ></motion.div>
                                                     Unsubscribing...
                                                 </div>
                                             ) : (
                                                 <>
                                                     Confirm Unsubscribe
-                                                    <ChevronRight className="ml-2 h-4 w-4" />
+                                                    <ChevronRight className="ml-2 w-4 h-4" />
                                                 </>
                                             )}
                                         </Button>
@@ -472,9 +472,9 @@ export default function UnsubscribePage({
     };
 
     return (
-        <div className="relative flex text-white min-h-screen w-full overflow-hidden bg-royalpurple">
+        <div className="relative flex bg-royalpurple w-full min-h-screen overflow-hidden text-white">
             {/* Background Image */}
-            <div className="absolute inset-0 z-0">
+            <div className="z-0 absolute inset-0">
                 <Image
                     src={BGImage}
                     alt="Background Image"
@@ -492,19 +492,19 @@ export default function UnsubscribePage({
                 <motion.div
                     variants={floatingElementVariants}
                     animate="animate"
-                    className="absolute top-1/4 right-1/4 w-24 sm:w-32 h-24 sm:h-32 rounded-full bg-purple-500/10 blur-3xl"
+                    className="top-1/4 right-1/4 absolute bg-purple-500/10 blur-3xl rounded-full w-24 sm:w-32 h-24 sm:h-32"
                 ></motion.div>
                 <motion.div
                     variants={floatingElementVariants}
                     animate="animate"
                     transition={{ delay: 0.5 }}
-                    className="absolute bottom-1/3 left-1/3 w-32 sm:w-40 h-32 sm:h-40 rounded-full bg-indigo-500/10 blur-3xl"
+                    className="bottom-1/3 left-1/3 absolute bg-indigo-500/10 blur-3xl rounded-full w-32 sm:w-40 h-32 sm:h-40"
                 ></motion.div>
                 <motion.div
                     variants={floatingElementVariants}
                     animate="animate"
                     transition={{ delay: 1 }}
-                    className="absolute top-1/3 left-1/4 w-20 sm:w-24 h-20 sm:h-24 rounded-full bg-pink-500/10 blur-3xl"
+                    className="top-1/3 left-1/4 absolute bg-pink-500/10 blur-3xl rounded-full w-20 sm:w-24 h-20 sm:h-24"
                 ></motion.div>
 
                 {/* Additional floating elements for more visual interest */}
@@ -519,7 +519,7 @@ export default function UnsubscribePage({
                         duration: 7,
                         ease: "easeInOut",
                     }}
-                    className="absolute top-2/3 right-1/3 w-16 sm:w-20 h-16 sm:h-20 rounded-full bg-blue-500/10 blur-3xl"
+                    className="top-2/3 right-1/3 absolute bg-blue-500/10 blur-3xl rounded-full w-16 sm:w-20 h-16 sm:h-20"
                 ></motion.div>
                 <motion.div
                     animate={{
@@ -531,12 +531,12 @@ export default function UnsubscribePage({
                         duration: 8,
                         ease: "easeInOut",
                     }}
-                    className="absolute bottom-1/4 right-1/5 w-24 sm:w-28 h-24 sm:h-28 rounded-full bg-violet-500/10 blur-3xl"
+                    className="right-1/5 bottom-1/4 absolute bg-violet-500/10 blur-3xl rounded-full w-24 sm:w-28 h-24 sm:h-28"
                 ></motion.div>
             </div>
 
             {/* Main Content */}
-            <div className="flex flex-col justify-center items-center mx-auto z-10 w-full max-w-md px-4 py-8 sm:py-0">
+            <div className="z-10 flex flex-col justify-center items-center mx-auto px-4 py-8 sm:py-0 w-full max-w-md">
                 {/* Logo */}
                 <motion.div
                     initial={{ y: -50, opacity: 0 }}
@@ -559,7 +559,7 @@ export default function UnsubscribePage({
                         }}
                     >
                         <Image
-                            className="h-16 sm:h-20 md:h-24 lg:h-28 xl:h-32 w-auto drop-shadow-lg"
+                            className="drop-shadow-lg w-auto h-16 sm:h-20 md:h-24 lg:h-28 xl:h-32"
                             src={Logo}
                             alt="HackCC Logo"
                             onClick={() => router.push("/")}
@@ -583,10 +583,10 @@ export default function UnsubscribePage({
                     damping: 20,
                     delay: 0.5,
                 }}
-                className="absolute bottom-4 sm:bottom-5 mx-auto inset-x-0 flex flex-col justify-center items-center z-10"
+                className="bottom-4 sm:bottom-5 z-10 absolute inset-x-0 flex flex-col justify-center items-center mx-auto"
             >
-                <Socials />
-                <div className="text-xs sm:text-sm text-white/80 mt-2">
+                <Socials baseColor={""} hoverColor={""}  />
+                <div className="mt-2 text-white/80 text-xs sm:text-sm">
                     <p>© 2025 HackCC</p>
                 </div>
             </motion.div>

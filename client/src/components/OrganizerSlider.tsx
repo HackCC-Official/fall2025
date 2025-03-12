@@ -90,9 +90,9 @@ export default function OrganizerSlider() {
             />
           </div>
           <div className="embla__slide">
-            <CardGroup 
+            {/* <CardGroup 
               name1='Gabriel Flores' role1='Website' imgPath1='/yasir.png'
-            />
+            /> */}
           </div>
         </div>
       </div>
