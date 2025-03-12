@@ -17,7 +17,7 @@ export default function home() {
                 <div className="font-bagel mt-4 mb-16 text-center md:text-4xl sm:text-3xl text-2xl z-10 flex sm:flex-row flex-col">
                     <p>April 25-27, 2025 </p> <span className="font-mono font-thin sm:inline hidden">|</span> <p> Los Altos Hills, CA</p>
                 </div>
-                <Interest></Interest>``
+                <Interest></Interest>
             </div>
             <div className="bottom-5 z-10 absolute inset-x-0 flex flex-col justify-center items-center mx-auto">
                 <Socials baseColor="text-white" hoverColor="hover:text-navyblue"></Socials>
