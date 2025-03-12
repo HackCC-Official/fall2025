@@ -1,17 +1,10 @@
 //import Image from "next/image";
 //import QRScanner from "../components/qrscan"
-
-import Image from "next/image";
 import FrontPage from "../features/home-page/home"
-import Stars from "../components/stars"
-
-import SectionHeader from "@/components/ui/SectionHeader";
-import AttendeeContainer from "@/components/AttendeeContainer";
-import OrganizerSlider from "@/components/OrganizerSlider";
-import VenueContainer from "@/components/VenueContainer";
+import AttendeeContainer from "@/features/attendee/AttendeeContainer";
+import Venue from "../features/venue/map";
 import Footer from "@/features/footer/apply-page/Footer";
-import SectionSubHeading from "@/components/ui/SectionSubHeading";
-import VolunteerJudgeContainer from "@/components/VolunteerJudgeContainer";
+import VolunteerJudgeContainer from "../features/volunteer-judge/VolunteerJudgeContainer";
 export default function Home() {
   return (
 
@@ -19,13 +12,8 @@ export default function Home() {
       <FrontPage></FrontPage>
       {/* <Nav></Nav> */}
     
-      <SectionHeader title="What past attendees have said"/>
       <AttendeeContainer/>
-      <SectionHeader title="2025 Organizers"/>
-      <OrganizerSlider/>
-      <VenueContainer></VenueContainer>
-      <SectionHeader title="Get Involved"></SectionHeader>
-      <SectionSubHeading subtext="Interested in judging or being a volunteer?"></SectionSubHeading>
+      <Venue></Venue>
       <VolunteerJudgeContainer></VolunteerJudgeContainer>
       <Footer></Footer>
     </div>

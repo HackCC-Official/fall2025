@@ -52,6 +52,7 @@ theme: {
 			hoverpurple: '#4C27A0',
 			richpurple: '#251884',
 			vibrantyellow: '#FBFA74',
+			glass: 'rgba(46, 24, 138, .50)',
 			
 			card: {
 				DEFAULT: 'hsl(var(--card))',

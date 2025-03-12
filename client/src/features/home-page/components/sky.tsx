@@ -1,6 +1,6 @@
 import React from 'react'
 import Image from "next/image";
-import skybg from '../../../../public/BG Image.png'
+import skybg from '../../../../public/BG.png'
 
 // width: 100vw;
 //     max-width: 100%;
@@ -11,8 +11,8 @@ import skybg from '../../../../public/BG Image.png'
 
 export const Sky = () => {
     return (
-        <div>
-            <Image className='absolute max-w-full w-screen h-screen t-0 object-cover' src={skybg} alt='Sky Background'></Image>
+        <div className='bg-[#9947DC]'>
+            <Image className='absolute w-screen max-w-full h-screen object-cover 2xl:object-fill t-0' src={skybg} alt='Sky Background' quality={100} priority></Image>
         </div>
     )
 }
