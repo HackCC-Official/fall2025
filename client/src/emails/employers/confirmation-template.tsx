@@ -190,9 +190,9 @@ export const ConfirmationEmail = ({
 
                                 <Text style={paragraph}>
                                     Thank you for confirming your sponsorship
-                                    for HackCC! We're thrilled to have{" "}
+                                    for HackCC! We&apos;re thrilled to have{" "}
                                     {companyName} supporting our hackathon and
-                                    can't wait to collaborate with you.
+                                    can&apos;t wait to collaborate with you.
                                 </Text>
 
                                 <Text style={paragraphBold}>Next Steps:</Text>
@@ -203,7 +203,7 @@ export const ConfirmationEmail = ({
                                 <Text style={paragraphList}>
                                     • Logistics & Branding: Please send over
                                     your logo and any promotional materials
-                                    you'd like us to feature.
+                                    you&apos;d like us to feature.
                                 </Text>
                                 <Text style={paragraphList}>
                                     • Engagement Opportunities: Let us know if
@@ -213,10 +213,10 @@ export const ConfirmationEmail = ({
                                 </Text>
 
                                 <Text style={paragraph}>
-                                    If there's anything else we can do to make
-                                    this partnership a success, please don't
-                                    hesitate to reach out. Looking forward to
-                                    working together!
+                                    If there&apos;s anything else we can do to
+                                    make this partnership a success, please
+                                    don&apos;t hesitate to reach out. Looking
+                                    forward to working together!
                                 </Text>
 
                                 <Text style={paragraph}>Best,</Text>

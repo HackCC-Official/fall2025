@@ -76,10 +76,6 @@ interface PostCallEmailProps {
     customEmailBody?: string;
 }
 
-const baseUrl = process.env.VERCEL_URL
-    ? `https://${process.env.VERCEL_URL}`
-    : "";
-
 /**
  * PostCallEmail component for HackCC outreach
  *
@@ -189,7 +185,7 @@ export const PostCallEmail = ({
                     {/* Header */}
                     <Section style={header}>
                         <Img
-                            src={`${baseUrl}/static/hackcc-logo.png`}
+                            src={`https://minio.hackcc.net/public-bucket/logo.svg`}
                             width={120}
                             height={45}
                             alt="HackCC Logo"
@@ -238,7 +234,7 @@ export const PostCallEmail = ({
                                     Just confirming our follow-up call on{" "}
                                     {followupDate || "[Date]"} at{" "}
                                     {followupTime || "[Time]"}. In the meantime,
-                                    I've attached the{" "}
+                                    I&apos;ve attached the{" "}
                                     {requestedMaterials ||
                                         "requested materials"}{" "}
                                     for your review. If you have any questions

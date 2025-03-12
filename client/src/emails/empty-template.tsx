@@ -49,10 +49,6 @@ interface EmptyEmailProps {
     };
 }
 
-const baseUrl = process.env.VERCEL_URL
-    ? `https://${process.env.VERCEL_URL}`
-    : "";
-
 /**
  * EmptyEmail component for HackCC outreach
  *
@@ -78,7 +74,7 @@ export const EmptyEmail = ({
                     {/* Header */}
                     <Section style={header}>
                         <Img
-                            src={`${baseUrl}/static/hackcc-logo.png`}
+                            src={`https://minio.hackcc.net/public-bucket/logo.svg`}
                             width={120}
                             height={45}
                             alt="HackCC Logo"
