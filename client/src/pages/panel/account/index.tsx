@@ -2,9 +2,17 @@ import { Button } from "@/components/ui/button"
 import PanelLayout from "../layout"
 import { Plus } from "lucide-react"
 import { useRouter } from "next/router"
+import { DataTable } from "@/components/data-table";
+import { columns } from "@/features/account/components/account-table/columns";
+import { useQuery } from "@tanstack/react-query";
+import { getAccounts } from "@/features/account/api/account";
 
 export default function AccountPage() {
   const router = useRouter();
+  const { isLoading, data } = useQuery({
+    queryKey: ['accounts'],
+    queryFn: () => getAccounts()
+  })
   return (
     <div>
     <div className="py-10">
@@ -15,6 +23,7 @@ export default function AccountPage() {
           Create User
         </Button>
       </div>
+      <DataTable isLoading={isLoading} data={data || []} columns={columns} />
     </div>
     </div>
   )
