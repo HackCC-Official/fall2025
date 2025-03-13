@@ -92,7 +92,7 @@ export default function LoginPage() {
                             <form onSubmit={handleSubmit} className="space-y-4">
                                 <div className="space-y-2">
                                     <input
-                                        className="w-full bg-white sm:mb-0 mb-3 sm:mr-3 md:mr-5 px-4 py-2 rounded-md text-center text-black"
+                                        className="bg-white sm:mr-3 md:mr-5 mb-3 sm:mb-0 px-4 py-2 rounded-md w-full text-black text-center"
                                         id="email"
                                         type="email"
                                         placeholder="Email Address"
@@ -106,7 +106,7 @@ export default function LoginPage() {
 
                                 <div className="space-y-2">
                                     <input
-                                        className="w-full bg-white sm:mb-0 mb-3 sm:mr-3 md:mr-5 px-4 py-2 rounded-md text-center text-black"
+                                        className="bg-white sm:mr-3 md:mr-5 mb-3 sm:mb-0 px-4 py-2 rounded-md w-full text-black text-center"
                                         id="password"
                                         type="password"
                                         placeholder="Password"
@@ -116,7 +116,7 @@ export default function LoginPage() {
                                         }
                                         required
                                     />
-                                    <div className="flex w-full justify-end items-center">
+                                    <div className="flex justify-end items-center w-full">
                                         <a
                                             href="#"
                                             className="text-white hover:text-royalpurple text-xs transition"
@@ -128,7 +128,7 @@ export default function LoginPage() {
 
                                 <button
                                     type="submit"
-                                    className="w-full text-nowrap text-center bg-navyblue hover:bg-hoverpurple cursor-pointer text-white py-2 rounded-md"
+                                    className="bg-navyblue hover:bg-hoverpurple py-2 rounded-md w-full text-white text-center text-nowrap cursor-pointer"
                                     disabled={isLoading}
                                 >
                                     {isLoading ? "Signing In..." : "Sign In"}
