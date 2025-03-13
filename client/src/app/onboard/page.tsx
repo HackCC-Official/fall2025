@@ -4,7 +4,7 @@
 import { getBrowserClient } from '@/features/auth/lib/supabase-client';
 import { Homebg } from '@/features/home-page/components/homebg';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import Logo from "../../../public/Logo.svg"
 import HotAirBalloon from "../../../public/Hot Air Balloon.png"
 import Image from 'next/image';
@@ -19,7 +19,7 @@ interface TokenParams {
   type?: string;
 }
 
-export default function OnboardPage() {
+export function OnboardPageContent() {
   const searchParams = useSearchParams();
   const router = useRouter()
   const [error, setError] = useState('')
@@ -171,5 +171,13 @@ export default function OnboardPage() {
           </div>
       </div>
     </div>
-  );
+  );  
+}
+
+export default function OnboardPage() {
+  return (
+    <Suspense>
+      <OnboardPageContent />
+    </Suspense>
+  )
 }
