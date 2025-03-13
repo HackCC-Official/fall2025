@@ -6,7 +6,10 @@ import {
 } from "../types/email.dto";
 import { outreachClient } from "../../../api/outreach-client";
 import axios from "axios";
-import { AddInterestedUser, InterestedUserDto } from "../types/interested-users.dto";
+import {
+    AddInterestedUser,
+    InterestedUserDto,
+} from "../types/interested-users.dto";
 import { OutreachTeamDto } from "../types/outreach-team";
 
 interface OutreachTeamApiResponse {
@@ -250,14 +253,14 @@ export async function getInterestedUsers(): Promise<InterestedUserDto[]> {
 }
 
 /**
- * Deletes an interested user record by ID
- * @param id - The unique identifier of the interested user to delete
+ * Deletes an interested user record by EMAIL
+ * @param email - The email of the interested user to delete
  * @throws {Error} If the request fails or user is not found
  */
-export async function deleteInterestedUser(id: string): Promise<void> {
+export async function deleteInterestedUser(email: string): Promise<void> {
     await outreachClient.request({
         method: "DELETE",
-        url: `interested-users/${id}`,
+        url: `interested-users/${email}`,
     });
 }
 

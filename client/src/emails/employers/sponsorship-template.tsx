@@ -71,10 +71,6 @@ interface SponsorshipEmailProps {
     customEmailBody?: string;
 }
 
-const baseUrl = process.env.VERCEL_URL
-    ? `https://${process.env.VERCEL_URL}`
-    : "";
-
 /**
  * SponsorshipEmail component for HackCC outreach
  *
@@ -127,7 +123,7 @@ export const SponsorshipEmail = ({
                     {/* Header */}
                     <Section style={header}>
                         <Img
-                            src={`${baseUrl}/static/hackcc-logo.png`}
+                            src={`https://minio.hackcc.net/public-bucket/logo.svg`}
                             width={120}
                             height={45}
                             alt="HackCC Logo"
@@ -183,7 +179,9 @@ export const SponsorshipEmail = ({
                             <Row>
                                 <Column>
                                     <Text style={signatureName}>
-                                        {sender.name}
+                                        {sender.name}{" "}
+                                        {sender.position &&
+                                            `- ${sender.position}`}
                                     </Text>
                                     <Text style={signaturePosition}>
                                         {formattedYearAndMajor}

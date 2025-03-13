@@ -7,4 +7,5 @@ export type OutreachTeamDto = {
     major: string;
     year: "Freshman" | "Sophomore" | "Junior" | "Senior" | "Graduate";
     school: string;
+    position: string;
 };

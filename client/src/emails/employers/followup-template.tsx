@@ -71,10 +71,6 @@ interface FollowUpEmailProps {
     customEmailBody?: string;
 }
 
-const baseUrl = process.env.VERCEL_URL
-    ? `https://${process.env.VERCEL_URL}`
-    : "";
-
 /**
  * FollowUpEmail component for HackCC outreach
  *
@@ -86,9 +82,7 @@ export const FollowUpEmail = ({
     recipientName,
     venue,
     sender,
-    positionAtHackCC,
     location,
-    organizationLogo,
     socialLinks,
     customEmailBody,
 }: FollowUpEmailProps) => {
@@ -126,7 +120,7 @@ export const FollowUpEmail = ({
                     {/* Header */}
                     <Section style={header}>
                         <Img
-                            src={`${baseUrl}/static/hackcc-logo.png`}
+                            src={`https://minio.hackcc.net/public-bucket/logo.svg`}
                             width={120}
                             height={45}
                             alt="HackCC Logo"
@@ -179,19 +173,17 @@ export const FollowUpEmail = ({
                             <Row>
                                 <Column>
                                     <Text style={signatureName}>
-                                        {sender.name}
+                                        {sender.name}{" "}
+                                        {sender.position &&
+                                            `- ${sender.position}`}
                                     </Text>
-                                    {organizationLogo && (
-                                        <Img
-                                            src={organizationLogo}
-                                            width={100}
-                                            height={30}
-                                            alt="Organization Logo"
-                                            style={orgLogo}
-                                        />
-                                    )}
                                     <Text style={signaturePosition}>
-                                        {positionAtHackCC}
+                                        {formattedYearAndMajor}
+                                    </Text>
+                                </Column>
+                                <Column>
+                                    <Text style={signatureSchool}>
+                                        {sender.school}
                                     </Text>
                                 </Column>
                             </Row>
@@ -262,10 +254,6 @@ const logo = {
     margin: "0",
 };
 
-const orgLogo = {
-    margin: "8px 0",
-};
-
 const content = {
     padding: "30px",
 };
@@ -289,6 +277,13 @@ const signatureContainer = {
     marginTop: "30px",
     borderTop: "1px solid #e5e7eb",
     paddingTop: "20px",
+};
+
+const signatureSchool = {
+    fontSize: "14px",
+    color: "#4b5563",
+    margin: "0",
+    textAlign: "right" as const,
 };
 
 const signatureName = {

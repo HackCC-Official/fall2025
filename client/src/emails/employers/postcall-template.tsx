@@ -76,10 +76,6 @@ interface PostCallEmailProps {
     customEmailBody?: string;
 }
 
-const baseUrl = process.env.VERCEL_URL
-    ? `https://${process.env.VERCEL_URL}`
-    : "";
-
 /**
  * PostCallEmail component for HackCC outreach
  *
@@ -90,8 +86,6 @@ export const PostCallEmail = ({
     companyName,
     recipientName,
     sender,
-    positionAtHackCC,
-    organizationLogo,
     followupDate,
     followupTime,
     requestedMaterials,
@@ -189,7 +183,7 @@ export const PostCallEmail = ({
                     {/* Header */}
                     <Section style={header}>
                         <Img
-                            src={`${baseUrl}/static/hackcc-logo.png`}
+                            src={`https://minio.hackcc.net/public-bucket/logo.svg`}
                             width={120}
                             height={45}
                             alt="HackCC Logo"
@@ -238,7 +232,7 @@ export const PostCallEmail = ({
                                     Just confirming our follow-up call on{" "}
                                     {followupDate || "[Date]"} at{" "}
                                     {followupTime || "[Time]"}. In the meantime,
-                                    I've attached the{" "}
+                                    I&apos;ve attached the{" "}
                                     {requestedMaterials ||
                                         "requested materials"}{" "}
                                     for your review. If you have any questions
@@ -256,21 +250,17 @@ export const PostCallEmail = ({
                             <Row>
                                 <Column>
                                     <Text style={signatureName}>
-                                        {sender.name}
+                                        {sender.name}{" "}
+                                        {sender.position &&
+                                            `- ${sender.position}`}
                                     </Text>
-                                    {organizationLogo && (
-                                        <Img
-                                            src={organizationLogo}
-                                            width={100}
-                                            height={30}
-                                            alt="Organization Logo"
-                                            style={orgLogo}
-                                        />
-                                    )}
+                                    <Text style={signaturePosition}>
+                                        {formattedYearAndMajor}
+                                    </Text>
                                 </Column>
                                 <Column>
-                                    <Text style={signaturePosition}>
-                                        {positionAtHackCC}
+                                    <Text style={signatureSchool}>
+                                        {sender.school}
                                     </Text>
                                 </Column>
                             </Row>
@@ -341,10 +331,6 @@ const logo = {
     margin: "0",
 };
 
-const orgLogo = {
-    margin: "8px 0",
-};
-
 const content = {
     padding: "30px",
 };
@@ -355,6 +341,13 @@ const subjectLine = {
     fontWeight: "700",
     color: "#1e40af", // Matching header color
     margin: "0 0 24px",
+};
+
+const signatureSchool = {
+    fontSize: "14px",
+    color: "#4b5563",
+    margin: "0",
+    textAlign: "right" as const,
 };
 
 const paragraph = {

@@ -75,8 +75,6 @@ export const ConfirmationEmail = ({
     companyName,
     recipientName,
     sender,
-    positionAtHackCC,
-    organizationLogo,
     socialLinks,
     customEmailBody,
 }: ConfirmationEmailProps) => {
@@ -190,9 +188,9 @@ export const ConfirmationEmail = ({
 
                                 <Text style={paragraph}>
                                     Thank you for confirming your sponsorship
-                                    for HackCC! We're thrilled to have{" "}
+                                    for HackCC! We&apos;re thrilled to have{" "}
                                     {companyName} supporting our hackathon and
-                                    can't wait to collaborate with you.
+                                    can&apos;t wait to collaborate with you.
                                 </Text>
 
                                 <Text style={paragraphBold}>Next Steps:</Text>
@@ -203,7 +201,7 @@ export const ConfirmationEmail = ({
                                 <Text style={paragraphList}>
                                     • Logistics & Branding: Please send over
                                     your logo and any promotional materials
-                                    you'd like us to feature.
+                                    you&apos;d like us to feature.
                                 </Text>
                                 <Text style={paragraphList}>
                                     • Engagement Opportunities: Let us know if
@@ -213,10 +211,10 @@ export const ConfirmationEmail = ({
                                 </Text>
 
                                 <Text style={paragraph}>
-                                    If there's anything else we can do to make
-                                    this partnership a success, please don't
-                                    hesitate to reach out. Looking forward to
-                                    working together!
+                                    If there&apos;s anything else we can do to
+                                    make this partnership a success, please
+                                    don&apos;t hesitate to reach out. Looking
+                                    forward to working together!
                                 </Text>
 
                                 <Text style={paragraph}>Best,</Text>
@@ -228,21 +226,17 @@ export const ConfirmationEmail = ({
                             <Row>
                                 <Column>
                                     <Text style={signatureName}>
-                                        {sender.name}
+                                        {sender.name}{" "}
+                                        {sender.position &&
+                                            `- ${sender.position}`}
                                     </Text>
-                                    {organizationLogo && (
-                                        <Img
-                                            src={organizationLogo}
-                                            width={100}
-                                            height={30}
-                                            alt="Organization Logo"
-                                            style={orgLogo}
-                                        />
-                                    )}
+                                    <Text style={signaturePosition}>
+                                        {formattedYearAndMajor}
+                                    </Text>
                                 </Column>
                                 <Column>
-                                    <Text style={signaturePosition}>
-                                        {positionAtHackCC}
+                                    <Text style={signatureSchool}>
+                                        {sender.school}
                                     </Text>
                                 </Column>
                             </Row>
@@ -313,10 +307,6 @@ const logo = {
     margin: "0",
 };
 
-const orgLogo = {
-    margin: "8px 0",
-};
-
 const content = {
     padding: "30px",
 };
@@ -334,6 +324,13 @@ const paragraph = {
     lineHeight: "1.5",
     color: "#374151",
     margin: "16px 0",
+};
+
+const signatureSchool = {
+    fontSize: "14px",
+    color: "#4b5563",
+    margin: "0",
+    textAlign: "right" as const,
 };
 
 const paragraphBold = {
