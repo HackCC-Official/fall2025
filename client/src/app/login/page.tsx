@@ -51,7 +51,8 @@ export default function LoginPage() {
     };
 
     return (
-        <div className="relative w-screen h-screen overflow-hidden">
+        <div className="relative flex flex-col w-screen h-screen overflow-hidden">
+            <div className="absolute w-screen h-screen bg-bgpurple -z-20"></div>
             <Homebg></Homebg>
             <div className="flex justify-center items-center p-4 min-h-screen">
                 <div className="w-full max-w-md flex flex-col items-center justify-center">
@@ -63,7 +64,7 @@ export default function LoginPage() {
                                 alt="HackCC Logo"
                             ></Image>
                             <Image
-                                className="2xl:h-40 md:h-36 sm:h-32 h-28 w-auto absolute 2xl:-right-80 md:-right-40 sm:-right-32 -right-12 bottom-1/4 animate-bobbing ease-linear"
+                                className="2xl:h-40 md:h-36 sm:h-32 h-28 w-auto absolute 2xl:-right-80 md:-right-40 sm:-right-32 -right-12 bottom-1/4 animate-bobbing ease-linear z-10"
                                 src={HotAirBalloon}
                                 alt="Hot Air Balloon"
                             ></Image>
@@ -81,7 +82,7 @@ export default function LoginPage() {
                             </p>
                         </div>
                     </div>
-                    <div className="sm:w-[350px] w-[275px] font-mont bg-black bg-opacity-20 px-7 py-7 rounded-3xl relative text-xl flex flex-col text-center">
+                    <div className="sm:w-[350px] w-[275px] font-mont bg-black bg-opacity-20 px-7 py-7 rounded-3xl relative text-xl flex flex-col text-center z-10">
                         {error && (
                             <div className="flex items-center gap-2 bg-red-50 mb-4 p-3 border border-red-200 rounded-md text-red-600 text-sm">
                                 <AlertCircle className="w-4 h-4" />
