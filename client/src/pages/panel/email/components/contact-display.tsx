@@ -3,15 +3,18 @@ import { Badge } from "@/components/ui/badge";
 import { Building2, Globe, Mail, MapPin, Phone, User } from "lucide-react";
 import type { ContactDto } from "@/features/outreach/types/contact.dto";
 import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
 
 interface ContactDisplayProps {
     contact: ContactDto | null;
 }
 
 export default function ContactDisplay({ contact }: ContactDisplayProps) {
+    const router = useRouter();
+
     const handleSendEmail = () => {
-        if (contact?.email) {
-            window.location.href = `mailto:${contact.email}`;
+        if (contact?.id) {
+            router.push(`/panel/email/compose?contactId=${contact.id}`);
         }
     };
 
@@ -54,6 +57,7 @@ export default function ContactDisplay({ contact }: ContactDisplayProps) {
                     <Button
                         onClick={handleSendEmail}
                         size="sm"
+                        variant="outline"
                         className="flex items-center gap-2"
                     >
                         <Mail className="h-4 w-4" />

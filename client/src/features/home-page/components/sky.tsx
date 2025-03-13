@@ -11,7 +11,7 @@ import skybg from '../../../../public/BG.png'
 
 export const Sky = () => {
     return (
-        <div className='bg-[#9947DC]'>
+        <div className='z-20'>
             <Image className='absolute w-screen max-w-full h-screen object-cover 2xl:object-fill t-0' src={skybg} alt='Sky Background' quality={100} priority></Image>
         </div>
     )

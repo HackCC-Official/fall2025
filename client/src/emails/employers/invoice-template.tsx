@@ -29,10 +29,6 @@ interface InvoiceEmailProps {
     contactPhone: string;
 }
 
-const baseUrl = process.env.VERCEL_URL
-    ? `https://${process.env.VERCEL_URL}`
-    : "";
-
 export const InvoiceEmail = ({
     recipientName,
     companyName,
@@ -57,7 +53,7 @@ export const InvoiceEmail = ({
                     <Row>
                         <Column>
                             <Img
-                                src={`${baseUrl}/static/logo.png`}
+                                src={`https://minio.hackcc.net/public-bucket/logo.svg`}
                                 width={40}
                                 height={40}
                                 alt="Logo"

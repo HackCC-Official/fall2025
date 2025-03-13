@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import {
     Select,
     SelectContent,
@@ -20,793 +21,819 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
-import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner";
+import { CircleUser, ChevronRight, MinusCircle } from "lucide-react";
+import Link from "next/link";
+import { useOutreachTeam } from "@/hooks/use-outreach-team";
+import type { OutreachTeamDto } from "@/features/outreach/types/outreach-team";
+import {
+    sendBatchEmails,
+    sendEmail,
+    updateContact,
+} from "@/features/outreach/api/outreach";
+import type {
+    EmailRecipient,
+    SendBatchEmailsDto,
+} from "@/features/outreach/types/email.dto";
+import type { Mail } from "@/types/mail";
+import AccountSwitcher from "../components/account-switcher";
+import PanelLayout from "../../layout";
+import { useInterestedUsers } from "@/hooks/use-interested.user";
 import {
     Dialog,
     DialogContent,
     DialogHeader,
     DialogTitle,
-    DialogTrigger,
 } from "@/components/ui/dialog";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import type { Contact, EmailTemplate } from "@/lib/email/types";
+import { EmptyEmail } from "@/emails/empty-template";
+import { render } from "@react-email/render";
+import { useContacts } from "@/hooks/use-contacts";
+import type { EmailTemplate } from "@/lib/email/types";
 import {
     renderEmailTemplate,
     type EmailTemplateType,
 } from "@/lib/email/email-renderer";
-import PanelLayout from "../../layout";
+import { useSearchParams } from "next/navigation";
 
-const MOCK_CONTACTS: Contact[] = [
-    {
-        id: "1",
-        name: "John Doe",
-        email: "john@example.com",
-        company: "Acme Inc",
-        phone: "+1234567890",
-        linkedIn: "https://linkedin.com/in/johndoe",
-        createdAt: new Date(),
-        updatedAt: new Date(),
-    },
-    // Add more mock contacts as needed
-];
+const STORAGE_KEY = "selectedOutreachAccount";
 
-const EMAIL_TEMPLATES: EmailTemplate[] = [
+type RecipientType = "employers" | "registered" | "interested";
+
+// Update EmailTemplate interface to include type
+interface ExtendedEmailTemplate extends EmailTemplate {
+    type: "employers" | "hackers";
+}
+
+// Update recipient interface to include organization and been_contacted
+interface Recipient {
+    id: string;
+    to: EmailRecipient[];
+    labels: string[];
+    organization?: string;
+    been_contacted?: boolean;
+}
+
+// Update EMAIL_TEMPLATES type annotation
+const EMAIL_TEMPLATES: ExtendedEmailTemplate[] = [
     {
         id: "1",
         name: "Sponsorship Confirmation",
-        subject: "Thank you for sponsoring [Event Name]",
-        content: "Dear [Name],\n\nThank you for your sponsorship...",
+        subject: "Sponsorship Opportunity with HackCC",
+        content: "Dear [Name],\n\nI hope this email finds you well...",
+        type: "employers",
     },
     {
         id: "2",
-        name: "Follow-up Request",
-        subject: "Following up on our conversation",
-        content: "Hi [Name],\n\nI wanted to follow up on...",
+        name: "Follow-Up Email",
+        subject: "Re: Meet the best students in X town this May",
+        content: "Hi [Name],\n\nI hope this email finds you well...",
+        type: "employers",
+    },
+    {
+        id: "4",
+        name: "Post-Call Follow-Up",
+        subject: "HackCC Sponsorship Next Steps",
+        content: "Hi [Name],\n\nThank you for your time on our call...",
+        type: "employers",
+    },
+    {
+        id: "5",
+        name: "Sponsorship Agreement",
+        subject: "HackCC x [Company] Sponsorship Confirmation!",
+        content: "Hi [Name],\n\nThank you for confirming your sponsorship...",
+        type: "employers",
     },
     {
         id: "3",
-        name: "Invoice Email",
-        subject: "Invoice for [Service]",
-        content: "Dear [Name],\n\nPlease find attached the invoice for...",
+        name: "FollowUpEmail",
+        subject: "Follow Up from HackCC",
+        content: "Hi [Name],\n\nThank you for your interest in HackCC...",
+        type: "hackers",
     },
 ];
 
-interface TemplateData {
-    // Sponsorship Confirmation
-    eventName: string;
-    sponsorshipTier: string;
-    eventDate: string;
-    nextSteps: string[];
-    organizerName: string;
-    organizerTitle: string;
-    // Follow-up Request
-    meetingDate: string;
-    discussionPoints: string[];
-    // Invoice Email
-    invoiceNumber: string;
-    amount: string;
-    dueDate: string;
-    serviceDescription: string;
-    paymentLink: string;
+interface ComposePageProps {
+    mails?: Mail[];
 }
 
-export default function ComposePage() {
-    const [selectedContacts, setSelectedContacts] = React.useState<Set<string>>(
-        new Set()
-    );
-    const [companyFilter, setCompanyFilter] = React.useState("");
-    const [selectedTemplate, setSelectedTemplate] =
-        React.useState<EmailTemplate | null>(null);
-    const [emailContent, setEmailContent] = React.useState("");
-    const [emailSubject, setEmailSubject] = React.useState("");
-    const [previewHtml, setPreviewHtml] = React.useState<string>("");
-    const [templateData, setTemplateData] = React.useState<
-        Partial<TemplateData>
-    >({
-        eventName: "",
-        sponsorshipTier: "",
-        eventDate: "",
-        meetingDate: "",
-        discussionPoints: [],
-        nextSteps: [],
-        invoiceNumber: "",
-        amount: "",
-        dueDate: "",
-        serviceDescription: "",
-        paymentLink: "",
-        organizerName: "",
-        organizerTitle: "",
-    });
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const [selectedContact, setSelectedContact] =
-        React.useState<Contact | null>(null);
+// Helper function to extract variables from email content
+const extractVariable = (content: string, variableName: string): string => {
+    const regex = new RegExp(`\\[${variableName}\\]\\s*(?:\\n|$)`, "i");
+    const match = content.match(regex);
+    if (match) {
+        return match[0].replace(/[\[\]]/g, "").trim();
+    }
+    return "";
+};
 
-    const filteredContacts = React.useMemo(() => {
-        return MOCK_CONTACTS.filter((contact) =>
-            contact.company.toLowerCase().includes(companyFilter.toLowerCase())
+export default function ComposePage({ mails = [] }: ComposePageProps) {
+    const searchParams = useSearchParams();
+    // Add a ref to track if URL params have been processed
+    const paramsProcessedRef = React.useRef(false);
+
+    // State for recipient selection
+    const [selectedRecipients, setSelectedRecipients] = React.useState<
+        Set<string>
+    >(new Set());
+    const [searchQuery, setSearchQuery] = React.useState("");
+    const [recipientType, setRecipientType] =
+        React.useState<RecipientType>("employers");
+
+    // State for email content
+    const [selectedTemplate, setSelectedTemplate] =
+        React.useState<ExtendedEmailTemplate | null>(null);
+    const [emailSubject, setEmailSubject] = React.useState("");
+    const [emailContent, setEmailContent] = React.useState("");
+    const [previewHtml, setPreviewHtml] = React.useState("");
+    const [isPreviewOpen, setIsPreviewOpen] = React.useState(false);
+
+    // State for sender account
+    const [senderEmail, setSenderEmail] = React.useState<string>(() => {
+        if (typeof window !== "undefined") {
+            return localStorage.getItem(STORAGE_KEY) || "";
+        }
+        return "";
+    });
+
+    // Fetch necessary data
+    const { data: outreachTeamResponse } = useOutreachTeam();
+    const { data: interestedUsers, isLoading: isInterestedLoading } =
+        useInterestedUsers();
+    const { data: contactsResponse } = useContacts();
+    const contacts = React.useMemo(
+        () => contactsResponse?.data || [],
+        [contactsResponse?.data]
+    );
+
+    // Transform outreach team data into account format
+    const emailAccounts = React.useMemo(() => {
+        const outreachTeamArray = outreachTeamResponse?.data?.data || [];
+        return outreachTeamArray.map((member: OutreachTeamDto) => ({
+            label: member.name,
+            email: member.email,
+            icon: <CircleUser className="h-4 w-4" />,
+        }));
+    }, [outreachTeamResponse]);
+
+    // Update recipientLists type annotation
+    const recipientLists = React.useMemo(() => {
+        const employerContacts = contacts.map((contact) => ({
+            id: contact.id.toString(),
+            to: [
+                {
+                    name: `${contact.first_name} ${contact.last_name}`,
+                    email: contact.email,
+                },
+            ],
+            organization: contact.organization,
+            labels: ["Employer"],
+            been_contacted: contact.been_contacted,
+        }));
+
+        const registeredHackers = mails.map((hacker) => ({
+            id: hacker.id,
+            to: hacker.to.map((recipient) => ({
+                name: recipient.name || recipient.email.split("@")[0],
+                email: recipient.email,
+            })),
+            labels: [...(hacker.labels || []), "Registered"],
+        }));
+
+        const interestedHackers = (interestedUsers || []).map((user) => ({
+            id: user.email,
+            to: [
+                {
+                    name: user.email.split("@")[0],
+                    email: user.email,
+                },
+            ],
+            labels: ["Interested"],
+        }));
+
+        return {
+            employers: employerContacts,
+            registered: registeredHackers,
+            interested: interestedHackers,
+        } as Record<RecipientType, Recipient[]>;
+    }, [contacts, mails, interestedUsers]);
+
+    // Filter recipients based on type and search query
+    const filteredRecipients = React.useMemo(() => {
+        const currentList = recipientLists[recipientType];
+        return currentList.filter(
+            (recipient) =>
+                recipient.to?.[0]?.name
+                    ?.toLowerCase()
+                    .includes(searchQuery.toLowerCase()) ||
+                recipient.to?.[0]?.email
+                    ?.toLowerCase()
+                    .includes(searchQuery.toLowerCase()) ||
+                recipient.organization
+                    ?.toLowerCase()
+                    .includes(searchQuery.toLowerCase())
         );
-    }, [companyFilter]);
+    }, [recipientLists, recipientType, searchQuery]);
+
+    // Calculate selection states
+    const areAllFilteredSelected = React.useMemo(() => {
+        return (
+            filteredRecipients.length > 0 &&
+            filteredRecipients.every((recipient) =>
+                selectedRecipients.has(recipient.id)
+            )
+        );
+    }, [filteredRecipients, selectedRecipients]);
+
+    const areSomeFilteredSelected = React.useMemo(() => {
+        return (
+            filteredRecipients.some((recipient) =>
+                selectedRecipients.has(recipient.id)
+            ) && !areAllFilteredSelected
+        );
+    }, [filteredRecipients, selectedRecipients, areAllFilteredSelected]);
+
+    // Handlers
+    const handleSelectAll = React.useCallback(
+        (checked: boolean) => {
+            const newSelected = new Set(selectedRecipients);
+            filteredRecipients.forEach((recipient) => {
+                if (checked) {
+                    newSelected.add(recipient.id);
+                } else {
+                    newSelected.delete(recipient.id);
+                }
+            });
+            setSelectedRecipients(newSelected);
+        },
+        [filteredRecipients, selectedRecipients]
+    );
+
+    const handleRecipientToggle = (recipientId: string) => {
+        const newSelected = new Set(selectedRecipients);
+        if (newSelected.has(recipientId)) {
+            newSelected.delete(recipientId);
+        } else {
+            newSelected.add(recipientId);
+        }
+        setSelectedRecipients(newSelected);
+    };
+
+    const handleAccountChange = (email: string) => {
+        setSenderEmail(email);
+        localStorage.setItem(STORAGE_KEY, email);
+    };
+
+    const handlePreview = async () => {
+        if (selectedRecipients.size === 0) {
+            toast.error("Please select at least one recipient");
+            return;
+        }
+
+        const selectedTeamMember = outreachTeamResponse?.data?.data.find(
+            (member: OutreachTeamDto) => member.email === senderEmail
+        );
+
+        if (!selectedTeamMember) {
+            toast.error("Please select a sender account");
+            return;
+        }
+
+        try {
+            let previewContent;
+            if (recipientType === "employers" && selectedTemplate) {
+                // Use email template renderer for employer emails
+                const renderedEmails = await renderEmailTemplate({
+                    templateType: selectedTemplate.name as EmailTemplateType,
+                    recipients: contacts.filter((contact) =>
+                        selectedRecipients.has(contact.id.toString())
+                    ),
+                    templateData: {
+                        sender: selectedTeamMember,
+                        emailContent: emailContent,
+                        // Add additional data for Post-Call template
+                        ...(selectedTemplate.name === "Post-Call Follow-Up" && {
+                            followupDate: extractVariable(
+                                emailContent,
+                                "followup_date"
+                            ),
+                            followupTime: extractVariable(
+                                emailContent,
+                                "followup_time"
+                            ),
+                            requestedMaterials: extractVariable(
+                                emailContent,
+                                "requested_materials"
+                            ),
+                        }),
+                    },
+                    contactInfo: {
+                        email: senderEmail,
+                        phone: "+1234567890",
+                    },
+                });
+                previewContent = renderedEmails[0];
+            } else {
+                // Use EmptyEmail template for hacker emails
+                previewContent = await render(
+                    <EmptyEmail
+                        recipientName="Preview User"
+                        emailContent={emailContent}
+                        sender={selectedTeamMember}
+                        socialLinks={{
+                            HackCC: "https://hackcc.net",
+                            LinkedIn: "https://linkedin.com/company/hackcc",
+                        }}
+                    />
+                );
+            }
+
+            setPreviewHtml(previewContent);
+            setIsPreviewOpen(true);
+        } catch (error) {
+            console.error("Error generating preview:", error);
+            toast.error("Failed to generate preview");
+        }
+    };
+
+    const handleSendEmails = async () => {
+        if (selectedRecipients.size === 0) {
+            toast.error("Please select at least one recipient");
+            return;
+        }
+
+        const selectedTeamMember = outreachTeamResponse?.data?.data.find(
+            (member: OutreachTeamDto) => member.email === senderEmail
+        );
+
+        if (!selectedTeamMember) {
+            toast.error("Could not find selected team member information");
+            return;
+        }
+
+        try {
+            const allRecipients = recipientLists[recipientType];
+            const selectedRecipientsData = allRecipients.filter((recipient) =>
+                selectedRecipients.has(recipient.id)
+            );
+
+            let emailData: SendBatchEmailsDto;
+
+            if (recipientType === "employers") {
+                // Handle employer emails
+                const renderedEmails = await renderEmailTemplate({
+                    templateType: selectedTemplate?.name as EmailTemplateType,
+                    recipients: contacts.filter((contact) =>
+                        selectedRecipients.has(contact.id.toString())
+                    ),
+                    templateData: {
+                        sender: selectedTeamMember,
+                        emailContent: emailContent,
+                        // Add additional data for Post-Call template
+                        ...(selectedTemplate?.name ===
+                            "Post-Call Follow-Up" && {
+                            followupDate: extractVariable(
+                                emailContent,
+                                "followup_date"
+                            ),
+                            followupTime: extractVariable(
+                                emailContent,
+                                "followup_time"
+                            ),
+                            requestedMaterials: extractVariable(
+                                emailContent,
+                                "requested_materials"
+                            ),
+                        }),
+                    },
+                    contactInfo: {
+                        email: senderEmail,
+                        phone: "+1234567890",
+                    },
+                });
+
+                emailData = {
+                    emails: selectedRecipientsData.map((recipient, index) => ({
+                        from: senderEmail,
+                        to: recipient.to.map((to) => ({
+                            email: to.email,
+                            name: to.name || to.email.split("@")[0],
+                        })),
+                        subject: emailSubject,
+                        html: renderedEmails[index],
+                    })),
+                };
+            } else {
+                // Handle hacker emails
+                const renderedEmails = await Promise.all(
+                    selectedRecipientsData.map(async (recipient) => {
+                        const recipientName = recipient.to[0]?.name || "Hacker";
+                        return render(
+                            <EmptyEmail
+                                recipientName={recipientName}
+                                emailContent={emailContent}
+                                sender={selectedTeamMember}
+                                socialLinks={{
+                                    HackCC: "https://hackcc.net",
+                                    LinkedIn:
+                                        "https://linkedin.com/company/hackcc",
+                                }}
+                            />
+                        );
+                    })
+                );
+
+                emailData = {
+                    emails: selectedRecipientsData.map((recipient, index) => ({
+                        from: senderEmail,
+                        to: recipient.to.map((to) => ({
+                            email: to.email,
+                            name: to.name || to.email.split("@")[0],
+                        })),
+                        subject: emailSubject,
+                        html: renderedEmails[index],
+                    })),
+                };
+            }
+
+            // Send emails
+            if (selectedRecipientsData.length === 1) {
+                await sendEmail(emailData.emails[0]);
+            } else {
+                await sendBatchEmails(emailData);
+            }
+
+            // Update been_contacted flag for employers
+            if (recipientType === "employers") {
+                try {
+                    // Process in parallel for better performance
+                    await Promise.all(
+                        selectedRecipientsData.map(async (recipient) => {
+                            await updateContact(recipient.id, {
+                                been_contacted: true,
+                            });
+                        })
+                    );
+                    console.log("Successfully marked employers as contacted");
+                } catch (error) {
+                    console.error(
+                        "Error updating employer contact status:",
+                        error
+                    );
+                    // Don't show error toast here as emails were still sent successfully
+                }
+            }
+
+            toast.success("Emails sent successfully!");
+
+            // Reset form
+            setSelectedRecipients(new Set());
+            setSelectedTemplate(null);
+            setEmailSubject("");
+            setEmailContent("");
+            setPreviewHtml("");
+        } catch (error) {
+            console.error("Error sending emails:", error);
+            toast.error("Failed to send emails. Please try again.");
+        }
+    };
 
     const handleTemplateChange = (templateId: string) => {
         const template = EMAIL_TEMPLATES.find((t) => t.id === templateId);
         if (template) {
             setSelectedTemplate(template);
             setEmailSubject(template.subject);
-            setEmailContent(template.content);
+
+            // Set default content for email templates
+            if (template.name === "Sponsorship Confirmation") {
+                setEmailContent(
+                    "Hello [recipient_name],\n\n" +
+                        "I hope this email finds you well. My name is [sender_name], and I am a [sender_year_and_major] student at [sender_school]. I am also a sponsorship coordinator with HackCC, a student-led initiative providing California community college students with the opportunity to compete in weekend-long invention marathons. Taking place May 2nd-4th at [venue], we're expecting 250 hackers this year!\n\n" +
+                        "I am reaching out to inquire about getting [company_name] on board as a sponsor for one (or more!) of our hackathons. I was wondering if [company_name] has any interest in sponsoring hackathons at this time?\n\n" +
+                        "Best regards,"
+                );
+            } else if (template.name === "Follow-Up Email") {
+                setEmailContent(
+                    "Hi [recipient_name],\n\n" +
+                        "I hope this email finds you well. My name is [sender_name], and I am a [sender_year_and_major] student at [sender_school]. I am also a sponsorship coordinator with HackCC, a student-led initiative providing California community college students with the opportunity to compete in weekend-long invention marathons. Taking place May 2nd-4th at [venue], we're expecting 250 hackers this year!\n\n" +
+                        "I reached out to you on Tuesday about getting [company_name] on board as a sponsor for one (or more!) of our hackathons. I was wondering if [company_name] has any interest in sponsoring hackathons at this time?\n\n" +
+                        "Best regards,"
+                );
+            } else if (template.name === "Post-Call Follow-Up") {
+                setEmailContent(
+                    "Hi [recipient_name],\n\n" +
+                        "It was a pleasure speaking with you today about HackCC and how [company_name] can get involved. I appreciate your time and insights!\n\n" +
+                        "Recap from Our Call:\n\n" +
+                        "• Key points discussed\n" +
+                        "• Benefits [company_name] expressed interest in\n" +
+                        "• Any additional concerns raised and how they were addressed\n\n" +
+                        "Just confirming our follow-up call on [followup_date] at [followup_time]. In the meantime, I've attached the [requested_materials] for your review. If you have any questions or need further information, feel free to reach out. Looking forward to hearing your thoughts!\n\n" +
+                        "Best,"
+                );
+            } else if (template.name === "Sponsorship Agreement") {
+                setEmailContent(
+                    "Hi [recipient_name],\n\n" +
+                        "Thank you for confirming your sponsorship for HackCC! We're thrilled to have [company_name] supporting our hackathon and can't wait to collaborate with you.\n\n" +
+                        "Next Steps:\n\n" +
+                        "• Sponsorship Agreement & Invoice: [Attach any necessary documents]\n" +
+                        "• Logistics & Branding: Please send over your logo and any promotional materials you'd like us to feature.\n" +
+                        "• Engagement Opportunities: Let us know if your team would like to host a workshop, provide mentors, or have a booth at the event.\n\n" +
+                        "If there's anything else we can do to make this partnership a success, please don't hesitate to reach out. Looking forward to working together!\n\n" +
+                        "Best,"
+                );
+            } else {
+                setEmailContent(template.content);
+            }
         }
     };
 
-    const handleContactToggle = (contactId: string) => {
-        const newSelected = new Set(selectedContacts);
-        if (newSelected.has(contactId)) {
-            newSelected.delete(contactId);
-        } else {
-            newSelected.add(contactId);
-        }
-        setSelectedContacts(newSelected);
-    };
-
-    const handleTemplateDataChange = (
-        field: keyof TemplateData,
-        value: string | string[]
-    ) => {
-        setTemplateData((prev) => ({
-            ...prev,
-            [field]: value,
-        }));
-    };
-
-    const isTemplateDataValid = React.useMemo(() => {
-        if (!selectedTemplate) return false;
-
-        switch (selectedTemplate.name as EmailTemplateType) {
-            case "Sponsorship Confirmation":
-                return !!(
-                    templateData.eventName &&
-                    templateData.sponsorshipTier &&
-                    templateData.eventDate &&
-                    templateData.nextSteps?.length &&
-                    templateData.organizerName &&
-                    templateData.organizerTitle
-                );
-
-            case "Follow-up Request":
-                return !!(
-                    templateData.meetingDate &&
-                    templateData.discussionPoints?.length &&
-                    templateData.nextSteps?.length &&
-                    templateData.organizerName &&
-                    templateData.organizerTitle
-                );
-
-            case "Invoice Email":
-                return !!(
-                    templateData.invoiceNumber &&
-                    templateData.amount &&
-                    templateData.dueDate &&
-                    templateData.serviceDescription &&
-                    templateData.paymentLink &&
-                    templateData.organizerName &&
-                    templateData.organizerTitle
-                );
-
-            default:
-                return false;
-        }
-    }, [selectedTemplate, templateData]);
-
-    const handlePreview = async () => {
-        if (
-            !selectedTemplate ||
-            selectedContacts.size === 0 ||
-            !isTemplateDataValid
-        )
+    // Handle auto-selection from URL parameters
+    React.useEffect(() => {
+        // Skip if we've already processed the params
+        if (paramsProcessedRef.current) {
             return;
-
-        const selectedContactDetails = MOCK_CONTACTS.filter((contact) =>
-            selectedContacts.has(contact.id)
-        );
-
-        try {
-            const renderedEmails = await renderEmailTemplate({
-                templateType: selectedTemplate.name as EmailTemplateType,
-                recipients: selectedContactDetails,
-                templateData: {
-                    ...templateData,
-                    organizerName: templateData.organizerName,
-                    organizerTitle: templateData.organizerTitle,
-                },
-                contactInfo: {
-                    email: "your.email@example.com",
-                    phone: "+1234567890",
-                },
-            });
-
-            // Show preview for the first recipient
-            setPreviewHtml(renderedEmails[0]);
-        } catch (error) {
-            console.error("Error rendering email preview:", error);
-            setPreviewHtml(""); // Clear preview on error
         }
-    };
 
-    const handleSendEmail = () => {
-        // TODO: Implement email sending functionality
-        const selectedContactDetails = MOCK_CONTACTS.filter((contact) =>
-            selectedContacts.has(contact.id)
-        );
-        console.log({
-            recipients: selectedContactDetails,
-            subject: emailSubject,
-            content: emailContent,
-            template: selectedTemplate,
-            templateData,
-        });
-    };
+        const contactId = searchParams?.get("contactId");
+        const recipientTypeParam = searchParams?.get("recipientType");
+        const toEmail = searchParams?.get("to");
 
-    const renderTemplateFields = () => {
-        if (!selectedTemplate) return null;
-
-        switch (selectedTemplate.name as EmailTemplateType) {
-            case "Sponsorship Confirmation":
-                return (
-                    <div className="space-y-4">
-                        <div>
-                            <Label htmlFor="eventName">Event Name</Label>
-                            <Input
-                                id="eventName"
-                                value={templateData.eventName || ""}
-                                onChange={(e) =>
-                                    handleTemplateDataChange(
-                                        "eventName",
-                                        e.target.value
-                                    )
-                                }
-                            />
-                        </div>
-                        <div>
-                            <Label htmlFor="sponsorshipTier">
-                                Sponsorship Tier
-                            </Label>
-                            <Input
-                                id="sponsorshipTier"
-                                value={templateData.sponsorshipTier || ""}
-                                onChange={(e) =>
-                                    handleTemplateDataChange(
-                                        "sponsorshipTier",
-                                        e.target.value
-                                    )
-                                }
-                            />
-                        </div>
-                        <div>
-                            <Label htmlFor="eventDate">Event Date</Label>
-                            <Input
-                                id="eventDate"
-                                type="date"
-                                value={templateData.eventDate || ""}
-                                onChange={(e) =>
-                                    handleTemplateDataChange(
-                                        "eventDate",
-                                        e.target.value
-                                    )
-                                }
-                            />
-                        </div>
-                        <div>
-                            <Label htmlFor="nextSteps">
-                                Next Steps (one per line)
-                            </Label>
-                            <Textarea
-                                id="nextSteps"
-                                value={templateData.nextSteps?.join("\n") || ""}
-                                onChange={(e) =>
-                                    handleTemplateDataChange(
-                                        "nextSteps",
-                                        e.target.value
-                                            .split("\n")
-                                            .filter(Boolean)
-                                    )
-                                }
-                                style={{
-                                    whiteSpace: "pre-wrap",
-                                    minHeight: "120px",
-                                }}
-                                rows={4}
-                                placeholder="Enter next steps, one per line..."
-                            />
-                        </div>
-                        <div>
-                            <Label htmlFor="organizerName">
-                                Organizer Name
-                            </Label>
-                            <Input
-                                id="organizerName"
-                                value={templateData.organizerName || ""}
-                                onChange={(e) =>
-                                    handleTemplateDataChange(
-                                        "organizerName",
-                                        e.target.value
-                                    )
-                                }
-                            />
-                        </div>
-                        <div>
-                            <Label htmlFor="organizerTitle">
-                                Organizer Title
-                            </Label>
-                            <Input
-                                id="organizerTitle"
-                                value={templateData.organizerTitle || ""}
-                                onChange={(e) =>
-                                    handleTemplateDataChange(
-                                        "organizerTitle",
-                                        e.target.value
-                                    )
-                                }
-                            />
-                        </div>
-                    </div>
-                );
-
-            case "Follow-up Request":
-                return (
-                    <div className="space-y-4">
-                        <div>
-                            <Label htmlFor="meetingDate">Meeting Date</Label>
-                            <Input
-                                id="meetingDate"
-                                type="date"
-                                value={templateData.meetingDate || ""}
-                                onChange={(e) =>
-                                    handleTemplateDataChange(
-                                        "meetingDate",
-                                        e.target.value
-                                    )
-                                }
-                            />
-                        </div>
-                        <div>
-                            <Label htmlFor="discussionPoints">
-                                Discussion Points
-                            </Label>
-                            <Textarea
-                                id="discussionPoints"
-                                value={
-                                    (templateData.discussionPoints || []).join(
-                                        "\n"
-                                    ) || ""
-                                }
-                                onChange={(e) =>
-                                    handleTemplateDataChange(
-                                        "discussionPoints",
-                                        e.target.value.split("\n")
-                                    )
-                                }
-                                style={{
-                                    whiteSpace: "pre-wrap",
-                                    minHeight: "120px",
-                                }}
-                                rows={4}
-                                placeholder="Enter discussion points (one per line)..."
-                            />
-                        </div>
-                        <div>
-                            <Label htmlFor="nextSteps">Next Steps</Label>
-                            <Textarea
-                                id="nextSteps"
-                                value={
-                                    (templateData.nextSteps || []).join("\n") ||
-                                    ""
-                                }
-                                onChange={(e) =>
-                                    handleTemplateDataChange(
-                                        "nextSteps",
-                                        e.target.value.split("\n")
-                                    )
-                                }
-                                style={{
-                                    whiteSpace: "pre-wrap",
-                                    minHeight: "120px",
-                                }}
-                                rows={4}
-                                placeholder="Enter next steps, one per line..."
-                            />
-                        </div>
-                        <div>
-                            <Label htmlFor="organizerName">
-                                Organizer Name
-                            </Label>
-                            <Input
-                                id="organizerName"
-                                value={templateData.organizerName || ""}
-                                onChange={(e) =>
-                                    handleTemplateDataChange(
-                                        "organizerName",
-                                        e.target.value
-                                    )
-                                }
-                                placeholder="Enter organizer name..."
-                            />
-                        </div>
-                        <div>
-                            <Label htmlFor="organizerTitle">
-                                Organizer Title
-                            </Label>
-                            <Input
-                                id="organizerTitle"
-                                value={templateData.organizerTitle || ""}
-                                onChange={(e) =>
-                                    handleTemplateDataChange(
-                                        "organizerTitle",
-                                        e.target.value
-                                    )
-                                }
-                                placeholder="Enter organizer title..."
-                            />
-                        </div>
-                    </div>
-                );
-
-            case "Invoice Email":
-                return (
-                    <div className="space-y-4">
-                        <div>
-                            <Label htmlFor="invoiceNumber">
-                                Invoice Number
-                            </Label>
-                            <Input
-                                id="invoiceNumber"
-                                value={templateData.invoiceNumber || ""}
-                                onChange={(e) =>
-                                    handleTemplateDataChange(
-                                        "invoiceNumber",
-                                        e.target.value
-                                    )
-                                }
-                                placeholder="Enter invoice number..."
-                            />
-                        </div>
-                        <div>
-                            <Label htmlFor="amount">Amount</Label>
-                            <Input
-                                id="amount"
-                                value={templateData.amount || ""}
-                                onChange={(e) =>
-                                    handleTemplateDataChange(
-                                        "amount",
-                                        e.target.value
-                                    )
-                                }
-                                placeholder="Enter amount..."
-                            />
-                        </div>
-                        <div>
-                            <Label htmlFor="dueDate">Due Date</Label>
-                            <Input
-                                id="dueDate"
-                                type="date"
-                                value={templateData.dueDate || ""}
-                                onChange={(e) =>
-                                    handleTemplateDataChange(
-                                        "dueDate",
-                                        e.target.value
-                                    )
-                                }
-                            />
-                        </div>
-                        <div>
-                            <Label htmlFor="serviceDescription">
-                                Service Description
-                            </Label>
-                            <Textarea
-                                id="serviceDescription"
-                                value={templateData.serviceDescription || ""}
-                                onChange={(e) =>
-                                    handleTemplateDataChange(
-                                        "serviceDescription",
-                                        e.target.value
-                                    )
-                                }
-                                style={{
-                                    whiteSpace: "pre-wrap",
-                                    minHeight: "120px",
-                                }}
-                                rows={4}
-                                placeholder="Enter service description..."
-                            />
-                        </div>
-                        <div>
-                            <Label htmlFor="paymentLink">Payment Link</Label>
-                            <Input
-                                id="paymentLink"
-                                value={templateData.paymentLink || ""}
-                                onChange={(e) =>
-                                    handleTemplateDataChange(
-                                        "paymentLink",
-                                        e.target.value
-                                    )
-                                }
-                                placeholder="Enter payment link..."
-                            />
-                        </div>
-                        <div>
-                            <Label htmlFor="organizerName">
-                                Organizer Name
-                            </Label>
-                            <Input
-                                id="organizerName"
-                                value={templateData.organizerName || ""}
-                                onChange={(e) =>
-                                    handleTemplateDataChange(
-                                        "organizerName",
-                                        e.target.value
-                                    )
-                                }
-                                placeholder="Enter organizer name..."
-                            />
-                        </div>
-                        <div>
-                            <Label htmlFor="organizerTitle">
-                                Organizer Title
-                            </Label>
-                            <Input
-                                id="organizerTitle"
-                                value={templateData.organizerTitle || ""}
-                                onChange={(e) =>
-                                    handleTemplateDataChange(
-                                        "organizerTitle",
-                                        e.target.value
-                                    )
-                                }
-                                placeholder="Enter organizer title..."
-                            />
-                        </div>
-                    </div>
-                );
-
-            default:
-                return null;
+        // Skip if no params are present
+        if (!searchParams || (!contactId && !recipientTypeParam && !toEmail)) {
+            return;
         }
-    };
 
-    const formatDate = (date: Date) => {
-        return new Date(date).toLocaleDateString("en-US", {
-            year: "numeric",
-            month: "long",
-            day: "numeric",
-        });
-    };
+        // Handle contact selection
+        if (contactId) {
+            setSelectedRecipients(new Set([contactId]));
+            setRecipientType("employers");
+            paramsProcessedRef.current = true;
+            return;
+        }
+
+        // Handle hacker selection
+        if (
+            recipientTypeParam &&
+            (recipientTypeParam === "registered" ||
+                recipientTypeParam === "interested")
+        ) {
+            setRecipientType(recipientTypeParam as RecipientType);
+
+            if (toEmail) {
+                if (recipientTypeParam === "registered") {
+                    const registeredHacker = mails.find(
+                        (mail) => mail.to?.[0]?.email === toEmail
+                    );
+                    if (registeredHacker) {
+                        setSelectedRecipients(new Set([registeredHacker.id]));
+                    }
+                } else if (recipientTypeParam === "interested") {
+                    const interestedUser = interestedUsers?.find(
+                        (user) => user.email === toEmail
+                    );
+                    if (interestedUser) {
+                        setSelectedRecipients(new Set([interestedUser.email]));
+                    }
+                }
+            }
+            paramsProcessedRef.current = true;
+        }
+    }, [mails, interestedUsers, searchParams]);
+
+    if (isInterestedLoading) {
+        return (
+            <div className="flex items-center justify-center h-full">
+                Loading...
+            </div>
+        );
+    }
 
     return (
-        <div className="mx-auto py-10">
-            <h1 className="mb-8 font-bold text-4xl">Compose Email</h1>
+        <div className="container mx-auto py-10 max-w-7xl">
+            {/* Breadcrumb Navigation */}
+            <div className="flex items-center gap-2 mb-6 text-sm">
+                <Link
+                    href="/panel/email"
+                    className="text-muted-foreground hover:text-primary transition-colors"
+                >
+                    Email
+                </Link>
+                <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                <span className="font-medium">Compose</span>
+            </div>
 
-            <Tabs defaultValue="compose" className="space-y-6">
-                <TabsList className="grid grid-cols-2 w-full max-w-[400px]">
-                    <TabsTrigger value="compose">Compose</TabsTrigger>
-                    <TabsTrigger
-                        value="preview"
-                        onClick={handlePreview}
-                        disabled={
-                            !selectedTemplate ||
-                            selectedContacts.size === 0 ||
-                            !isTemplateDataValid
-                        }
-                    >
-                        Preview
-                    </TabsTrigger>
-                </TabsList>
+            <div className="flex items-center justify-between mb-8">
+                <h1 className="font-bold text-3xl">Compose Email</h1>
+                <div className="flex items-center gap-4">
+                    <AccountSwitcher
+                        isCollapsed={false}
+                        accounts={emailAccounts}
+                        onAccountChange={handleAccountChange}
+                        defaultEmail={senderEmail}
+                    />
+                    <div className="flex gap-2">
+                        <Button
+                            variant="outline"
+                            onClick={handlePreview}
+                            disabled={selectedRecipients.size === 0}
+                        >
+                            Preview Email
+                        </Button>
+                        <Button
+                            onClick={handleSendEmails}
+                            disabled={selectedRecipients.size === 0}
+                        >
+                            Send Emails ({selectedRecipients.size})
+                        </Button>
+                    </div>
+                </div>
+            </div>
 
-                <TabsContent value="compose">
-                    <div className="gap-6 grid grid-cols-1 md:grid-cols-2">
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>Select Recipients</CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <div className="space-y-4">
-                                    <div>
-                                        <Label htmlFor="company-filter">
-                                            Filter by Company
-                                        </Label>
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                {/* Left Column - Recipients */}
+                <div className="lg:col-span-5">
+                    <Card>
+                        <CardHeader className="border-b">
+                            <div className="flex items-center justify-between">
+                                <CardTitle>
+                                    Recipients ({filteredRecipients.length})
+                                </CardTitle>
+                                <Select
+                                    value={recipientType}
+                                    onValueChange={(value: RecipientType) => {
+                                        setRecipientType(value);
+                                        setSelectedRecipients(new Set());
+                                        setSelectedTemplate(null);
+                                        setEmailSubject("");
+                                        setEmailContent("");
+                                    }}
+                                >
+                                    <SelectTrigger className="w-[200px]">
+                                        <SelectValue placeholder="Select recipient type" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="employers">
+                                            Employers (
+                                            {recipientLists.employers.length})
+                                        </SelectItem>
+                                        <SelectItem value="registered">
+                                            Registered Hackers (
+                                            {recipientLists.registered.length})
+                                        </SelectItem>
+                                        <SelectItem value="interested">
+                                            Interested Users (
+                                            {recipientLists.interested.length})
+                                        </SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        </CardHeader>
+                        <CardContent className="p-6">
+                            <div className="space-y-4">
+                                <div>
+                                    <Label
+                                        htmlFor="recipient-filter"
+                                        className="text-sm font-semibold"
+                                    >
+                                        Search Recipients
+                                    </Label>
+                                    <div className="relative mt-1 mb-4">
                                         <Input
-                                            id="company-filter"
-                                            value={companyFilter}
+                                            id="recipient-filter"
+                                            value={searchQuery}
                                             onChange={(e) =>
-                                                setCompanyFilter(e.target.value)
+                                                setSearchQuery(e.target.value)
                                             }
-                                            placeholder="Enter company name..."
+                                            placeholder={
+                                                recipientType === "employers"
+                                                    ? "Search by name, email, or organization..."
+                                                    : "Search by name or email..."
+                                            }
+                                            className="pl-3 pr-10 py-2 w-full border rounded-md shadow-sm focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
                                         />
                                     </div>
+                                </div>
 
+                                <div className="border rounded-lg overflow-hidden shadow-sm bg-card">
                                     <Table>
                                         <TableHeader>
-                                            <TableRow>
-                                                <TableHead className="w-12">
-                                                    Select
+                                            <TableRow className="bg-muted/50">
+                                                <TableHead className="w-12 py-3">
+                                                    <div className="flex items-center justify-center">
+                                                        <Checkbox
+                                                            checked={
+                                                                areAllFilteredSelected
+                                                            }
+                                                            onCheckedChange={
+                                                                handleSelectAll
+                                                            }
+                                                            aria-label="Select all recipients"
+                                                        />
+                                                        {areSomeFilteredSelected && (
+                                                            <MinusCircle className="h-4 w-4 text-muted-foreground absolute" />
+                                                        )}
+                                                    </div>
                                                 </TableHead>
-                                                <TableHead>Name</TableHead>
-                                                <TableHead>Company</TableHead>
-                                                <TableHead>Email</TableHead>
-                                                <TableHead>Actions</TableHead>
+                                                <TableHead className="py-3 font-semibold">
+                                                    Name
+                                                </TableHead>
+                                                <TableHead className="py-3 font-semibold">
+                                                    Email
+                                                </TableHead>
+                                                {recipientType ===
+                                                    "employers" && (
+                                                    <TableHead className="py-3 font-semibold">
+                                                        Organization
+                                                    </TableHead>
+                                                )}
+                                                <TableHead className="w-20 py-3">
+                                                    Status
+                                                </TableHead>
                                             </TableRow>
                                         </TableHeader>
                                         <TableBody>
-                                            {filteredContacts.map((contact) => (
-                                                <TableRow key={contact.id}>
-                                                    <TableCell>
-                                                        <Checkbox
-                                                            checked={selectedContacts.has(
-                                                                contact.id
-                                                            )}
-                                                            onCheckedChange={() =>
-                                                                handleContactToggle(
-                                                                    contact.id
-                                                                )
+                                            {filteredRecipients.map(
+                                                (recipient) => (
+                                                    <TableRow
+                                                        key={recipient.id}
+                                                        className={
+                                                            recipientType ===
+                                                                "employers" &&
+                                                            recipient.been_contacted
+                                                                ? "bg-purple-100 dark:bg-purple-900/20"
+                                                                : "hover:bg-muted/50"
+                                                        }
+                                                    >
+                                                        <TableCell>
+                                                            <Checkbox
+                                                                checked={selectedRecipients.has(
+                                                                    recipient.id
+                                                                )}
+                                                                onCheckedChange={() =>
+                                                                    handleRecipientToggle(
+                                                                        recipient.id
+                                                                    )
+                                                                }
+                                                            />
+                                                        </TableCell>
+                                                        <TableCell className="font-medium">
+                                                            {
+                                                                recipient
+                                                                    .to?.[0]
+                                                                    ?.name
                                                             }
-                                                        />
-                                                    </TableCell>
-                                                    <TableCell>
-                                                        {contact.name}
-                                                    </TableCell>
-                                                    <TableCell>
-                                                        {contact.company}
-                                                    </TableCell>
-                                                    <TableCell>
-                                                        {contact.email}
-                                                    </TableCell>
-                                                    <TableCell>
-                                                        <Dialog>
-                                                            <DialogTrigger
-                                                                asChild
-                                                            >
-                                                                <Button
-                                                                    variant="ghost"
-                                                                    size="sm"
-                                                                    onClick={() =>
-                                                                        setSelectedContact(
-                                                                            contact
-                                                                        )
-                                                                    }
-                                                                >
-                                                                    More Info
-                                                                </Button>
-                                                            </DialogTrigger>
-                                                            <DialogContent className="max-w-md">
-                                                                <DialogHeader>
-                                                                    <DialogTitle>
-                                                                        Contact
-                                                                        Details
-                                                                    </DialogTitle>
-                                                                </DialogHeader>
-                                                                <div className="space-y-4">
-                                                                    <div className="gap-2 grid grid-cols-2">
-                                                                        <div className="font-semibold">
-                                                                            Name:
-                                                                        </div>
-                                                                        <div>
-                                                                            {
-                                                                                contact.name
-                                                                            }
-                                                                        </div>
-
-                                                                        <div className="font-semibold">
-                                                                            Email:
-                                                                        </div>
-                                                                        <div>
-                                                                            {
-                                                                                contact.email
-                                                                            }
-                                                                        </div>
-
-                                                                        <div className="font-semibold">
-                                                                            Company:
-                                                                        </div>
-                                                                        <div>
-                                                                            {
-                                                                                contact.company
-                                                                            }
-                                                                        </div>
-
-                                                                        {contact.role && (
-                                                                            <>
-                                                                                <div className="font-semibold">
-                                                                                    Role:
-                                                                                </div>
-                                                                                <div>
-                                                                                    {
-                                                                                        contact.role
-                                                                                    }
-                                                                                </div>
-                                                                            </>
-                                                                        )}
-
-                                                                        {contact.phone && (
-                                                                            <>
-                                                                                <div className="font-semibold">
-                                                                                    Phone:
-                                                                                </div>
-                                                                                <div>
-                                                                                    {
-                                                                                        contact.phone
-                                                                                    }
-                                                                                </div>
-                                                                            </>
-                                                                        )}
-
-                                                                        {contact.linkedIn && (
-                                                                            <>
-                                                                                <div className="font-semibold">
-                                                                                    LinkedIn:
-                                                                                </div>
-                                                                                <div>
-                                                                                    <a
-                                                                                        href={
-                                                                                            contact.linkedIn
-                                                                                        }
-                                                                                        target="_blank"
-                                                                                        rel="noopener noreferrer"
-                                                                                        className="text-blue-500 hover:underline"
-                                                                                    >
-                                                                                        View
-                                                                                        Profile
-                                                                                    </a>
-                                                                                </div>
-                                                                            </>
-                                                                        )}
-
-                                                                        {contact.notes && (
-                                                                            <>
-                                                                                <div className="font-semibold">
-                                                                                    Notes:
-                                                                                </div>
-                                                                                <div>
-                                                                                    {
-                                                                                        contact.notes
-                                                                                    }
-                                                                                </div>
-                                                                            </>
-                                                                        )}
-
-                                                                        <div className="font-semibold">
-                                                                            Created:
-                                                                        </div>
-                                                                        <div>
-                                                                            {formatDate(
-                                                                                contact.createdAt
-                                                                            )}
-                                                                        </div>
-
-                                                                        <div className="font-semibold">
-                                                                            Last
-                                                                            Updated:
-                                                                        </div>
-                                                                        <div>
-                                                                            {formatDate(
-                                                                                contact.updatedAt
-                                                                            )}
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
-                                                            </DialogContent>
-                                                        </Dialog>
-                                                    </TableCell>
-                                                </TableRow>
-                                            ))}
+                                                        </TableCell>
+                                                        <TableCell className="text-muted-foreground">
+                                                            {
+                                                                recipient
+                                                                    .to?.[0]
+                                                                    ?.email
+                                                            }
+                                                        </TableCell>
+                                                        {recipientType ===
+                                                            "employers" && (
+                                                            <TableCell>
+                                                                {
+                                                                    recipient.organization
+                                                                }
+                                                            </TableCell>
+                                                        )}
+                                                        <TableCell>
+                                                            {recipient.labels.map(
+                                                                (label) => (
+                                                                    <Badge
+                                                                        key={
+                                                                            label
+                                                                        }
+                                                                        variant="secondary"
+                                                                        className="mr-1"
+                                                                    >
+                                                                        {label}
+                                                                    </Badge>
+                                                                )
+                                                            )}
+                                                        </TableCell>
+                                                    </TableRow>
+                                                )
+                                            )}
                                         </TableBody>
                                     </Table>
                                 </div>
-                            </CardContent>
-                        </Card>
+                            </div>
+                        </CardContent>
+                    </Card>
+                </div>
 
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>Compose Email</CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <div className="space-y-4">
+                {/* Right Column - Email Content */}
+                <div className="lg:col-span-7">
+                    <Card>
+                        <CardHeader className="border-b">
+                            <CardTitle>Email Content</CardTitle>
+                        </CardHeader>
+                        <CardContent className="p-6">
+                            <div className="space-y-6">
+                                {recipientType === "employers" && (
                                     <div>
                                         <Label htmlFor="template">
                                             Email Template
@@ -818,76 +845,109 @@ export default function ComposePage() {
                                                 <SelectValue placeholder="Select a template" />
                                             </SelectTrigger>
                                             <SelectContent>
-                                                {EMAIL_TEMPLATES.map(
-                                                    (template) => (
-                                                        <SelectItem
-                                                            key={template.id}
-                                                            value={template.id}
-                                                        >
-                                                            {template.name}
-                                                        </SelectItem>
-                                                    )
-                                                )}
+                                                {EMAIL_TEMPLATES.filter(
+                                                    (template) =>
+                                                        template.type ===
+                                                        "employers"
+                                                ).map((template) => (
+                                                    <SelectItem
+                                                        key={template.id}
+                                                        value={template.id}
+                                                    >
+                                                        {template.name}
+                                                    </SelectItem>
+                                                ))}
                                             </SelectContent>
                                         </Select>
                                     </div>
+                                )}
 
-                                    {renderTemplateFields()}
+                                <div>
+                                    <Label htmlFor="subject">Subject</Label>
+                                    <Input
+                                        id="subject"
+                                        value={emailSubject}
+                                        onChange={(e) =>
+                                            setEmailSubject(e.target.value)
+                                        }
+                                        placeholder="Enter email subject..."
+                                        className="mt-1"
+                                    />
+                                </div>
 
-                                    <div className="flex justify-end space-x-2">
-                                        <Button
-                                            variant="outline"
-                                            onClick={handlePreview}
-                                            disabled={
-                                                !selectedTemplate ||
-                                                selectedContacts.size === 0
+                                {recipientType !== "employers" && (
+                                    <div>
+                                        <Label htmlFor="content">Content</Label>
+                                        <Textarea
+                                            id="content"
+                                            value={emailContent}
+                                            onChange={(e) =>
+                                                setEmailContent(e.target.value)
                                             }
-                                        >
-                                            Preview
-                                        </Button>
-                                        <Button
-                                            onClick={handleSendEmail}
-                                            disabled={
-                                                selectedContacts.size === 0
-                                            }
-                                        >
-                                            Send Email
-                                        </Button>
+                                            placeholder="Enter email content..."
+                                            className="mt-1 min-h-[300px]"
+                                        />
                                     </div>
-                                </div>
-                            </CardContent>
-                        </Card>
-                    </div>
-                </TabsContent>
+                                )}
 
-                <TabsContent value="preview">
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Email Preview</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            {previewHtml ? (
-                                <div
-                                    className="dark:prose-invert max-w-none prose"
-                                    dangerouslySetInnerHTML={{
-                                        __html: previewHtml,
-                                    }}
-                                />
-                            ) : (
-                                <div className="py-8 text-muted-foreground text-center">
-                                    {!selectedTemplate
-                                        ? "Select a template to preview the email."
-                                        : !selectedContacts.size
-                                          ? "Select at least one recipient to preview the email."
-                                          : !isTemplateDataValid
-                                            ? "Fill in all required fields to preview the email."
-                                            : "Click Preview to see the email."}
+                                {recipientType === "employers" &&
+                                    selectedTemplate && (
+                                        <div>
+                                            <div className="flex items-center justify-between mb-2">
+                                                <Label htmlFor="content">
+                                                    Template Content
+                                                </Label>
+                                                <div className="text-xs text-muted-foreground">
+                                                    You can use these variables:
+                                                    [recipient_name],
+                                                    [company_name],
+                                                    [sender_name],
+                                                    [sender_year_and_major],
+                                                    [sender_school], [venue],
+                                                    [location]
+                                                </div>
+                                            </div>
+                                            <Textarea
+                                                id="content"
+                                                value={emailContent}
+                                                onChange={(e) =>
+                                                    setEmailContent(
+                                                        e.target.value
+                                                    )
+                                                }
+                                                placeholder="Enter email content with variables..."
+                                                className="mt-1 min-h-[300px] font-mono text-sm"
+                                            />
+                                        </div>
+                                    )}
+
+                                <div className="text-sm text-muted-foreground">
+                                    Email will be sent using your outreach team
+                                    member information.
                                 </div>
-                            )}
+                            </div>
                         </CardContent>
                     </Card>
-                </TabsContent>
-            </Tabs>
+
+                    {/* Preview Dialog */}
+                    <Dialog
+                        open={isPreviewOpen}
+                        onOpenChange={setIsPreviewOpen}
+                    >
+                        <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+                            <DialogHeader>
+                                <DialogTitle>Email Preview</DialogTitle>
+                            </DialogHeader>
+                            <div
+                                className="prose dark:prose-invert max-w-none mt-4"
+                                dangerouslySetInnerHTML={{
+                                    __html: previewHtml,
+                                }}
+                            />
+                        </DialogContent>
+                    </Dialog>
+                </div>
+            </div>
         </div>
     );
 }

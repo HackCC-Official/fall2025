@@ -21,10 +21,10 @@ export default function OrganizerCard({name1="N/A", imgPath1="/headshotPlacehold
 }:OrganizerCardProps) {
     return (
         <div className="flex flex-wrap place-content-evenly card-wrapper">
-            <Card2 name={name1} imgPath={imgPath1} role={role1}></Card2>
+            {/* <Card2 name={name1} imgPath={imgPath1} role={role1}></Card2>
             <Card2 name={name2} imgPath={imgPath2} role={role2}></Card2>
             <Card2 name={name3} imgPath={imgPath3} role={role3}></Card2>
-            <Card2 name={name4} imgPath={imgPath4} role={role4}></Card2>
+            <Card2 name={name4} imgPath={imgPath4} role={role4}></Card2> */}
         </div>
     );
 }

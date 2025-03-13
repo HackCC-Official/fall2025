@@ -6,7 +6,10 @@ import {
 } from "../types/email.dto";
 import { outreachClient } from "../../../api/outreach-client";
 import axios from "axios";
-import { InterestedUserDto } from "../types/interested-users.dto";
+import {
+    AddInterestedUser,
+    InterestedUserDto,
+} from "../types/interested-users.dto";
 import { OutreachTeamDto } from "../types/outreach-team";
 
 interface OutreachTeamApiResponse {
@@ -152,7 +155,22 @@ export async function sendEmail(emailDto: SendEmailDto): Promise<void> {
 
 /**
  * Sends multiple emails in batch
- * @param batchDto - The batch of emails to send
+ * @param batchDto - The batch of emails to send with format:
+ * {
+ *   "emails": [
+ *     {
+ *       "from": "Company <notifications@example.com>",
+ *       "to": [
+ *         {
+ *           "email": "recipient@example.com"
+ *         }
+ *       ],
+ *       "subject": "Email Subject",
+ *       "html": "<h1>Hello</h1><p>Email content.</p>"
+ *     }
+ *   ]
+ * }
+ * @returns Promise that resolves when emails are sent
  */
 export async function sendBatchEmails(
     batchDto: SendBatchEmailsDto
@@ -211,7 +229,7 @@ export async function updateEmail(
  * @throws {Error} If the request fails or user already exists
  */
 export async function createInterestedUser(
-    interestedUserDto: InterestedUserDto
+    interestedUserDto: AddInterestedUser
 ): Promise<void> {
     await outreachClient.request({
         method: "POST",
@@ -235,14 +253,14 @@ export async function getInterestedUsers(): Promise<InterestedUserDto[]> {
 }
 
 /**
- * Deletes an interested user record by ID
- * @param id - The unique identifier of the interested user to delete
+ * Deletes an interested user record by EMAIL
+ * @param email - The email of the interested user to delete
  * @throws {Error} If the request fails or user is not found
  */
-export async function deleteInterestedUser(id: string): Promise<void> {
+export async function deleteInterestedUser(email: string): Promise<void> {
     await outreachClient.request({
         method: "DELETE",
-        url: `interested-users/${id}`,
+        url: `interested-users/${email}`,
     });
 }
 
