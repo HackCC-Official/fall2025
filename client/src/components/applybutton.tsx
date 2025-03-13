@@ -14,7 +14,7 @@ export const ApplyButton = (props: any) => {
             sizing = 'py-3 px-6 md:px-10  lg:py-4 lg:px-14 text-[0.6rem] md:text-[0.8rem] lg:text-[1.2rem] xl:text-[1.3rem] mt-8'
             break;
         case "xl":
-            sizing = 'py-3 px-6 md:px-10  lg:py-4 lg:px-14 text-[0.6rem] md:text-[0.8rem] lg:text-[1.2rem] xl:text-[1.3rem] z-10'
+            sizing = 'py-3 px-10 lg:py-4 lg:px-14 text-lg sm:text-xl md:text-2xl z-10'
     }
     return (
         <button  className={` ${sizing} font-mont rounded-[30px] font-extrabold text-hoverpurple active:bg-activeyellow bg-vibrantyellow`}>
