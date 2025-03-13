@@ -39,7 +39,7 @@ export default function RootLayout({
     <html lang="en">
       <body
         id="app"
-        className={`${geistSans.variable} ${geistMono.variable} ${montserratFont.variable} ${bagelFont.variable} antialiased bg-royalpurple overflow-x-hidden`}
+        className={`${geistSans.variable} ${geistMono.variable} ${montserratFont.variable} ${bagelFont.variable} antialiased bg-royalpurple`}
       >
         {children}
       </body>

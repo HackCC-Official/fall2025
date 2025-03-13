@@ -259,13 +259,13 @@ export const Interest = () => {
                         <br className="sm:hidden inline" /> about the event
                     </p>
                     <div className="flex sm:flex-row flex-col items-center pt-3 md:pt-4 relative">
-                        <div className="sm:w-2/3 w-full relative group sm:mb-0 mb-3">
-                            <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-navyblue ">
+                        <div className="sm:w-2/3 w-full relative group">
+                            <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-navyblue">
                                 <FiMail />
                             </div>
                             <input
                                 name="email"
-                                className="w-full bg-white/90 px-10 py-3 rounded-lg text-black placeholder-gray-500 outline-none focus:ring-2 focus:ring-hoverpurple transition-all duration-300 shadow-sm"
+                                className="w-full bg-white/90 sm:mb-0 mb-3 px-10 py-3 rounded-lg text-black placeholder-gray-500 outline-none focus:ring-2 focus:ring-hoverpurple transition-all duration-300 shadow-sm"
                                 type="email"
                                 placeholder="Enter your email"
                                 value={email}
