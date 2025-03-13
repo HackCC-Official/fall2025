@@ -7,7 +7,7 @@ import { Homebg } from "./components/homebg";
 
 export default function home() {
     return(
-        <div className="relative flex bg-bgpurple w-screen h-screen overflow-hidden text-white">
+        <div className="relative flex bg-bgpurple w-screen h-screen overflow-x-clip text-white">
             <Homebg></Homebg>
             <div className="flex flex-col justify-center items-center mx-auto">
                 <div className="relative flex">
