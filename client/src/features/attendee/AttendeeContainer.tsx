@@ -9,7 +9,7 @@ export default function AttendeeContainer() {
         //initally scaled for mobile->tablet->desktop/laptop
         //IN ORDER FOR CONTAINERS TO WORK! NAME HAS TO BE first_full_name and last initial: example = Gabriel F.
         <div className="bg-deepsky py-20 2xl:py-60 w-full h-auto">
-            <div className="mx-auto w-full max-w-[1300px]">
+            <div className="mx-auto w-full">
                 <div className="flex md:flex-row flex-col items-center">
                     <AttendeeCard/>
                     <AttendeeCard/>

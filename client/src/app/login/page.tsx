@@ -54,23 +54,23 @@ export default function LoginPage() {
         <div className="relative w-screen h-screen overflow-hidden">
             <Homebg></Homebg>
             <div className="flex justify-center items-center p-4 min-h-screen">
-                <div className="w-full max-w-md flex flex-col items-center justify-center">
+                <div className="flex flex-col justify-center items-center w-full max-w-md">
                     <div className="flex flex-col justify-center items-center mx-auto">
                         <div className="relative flex">
                             <Image
-                                className="2xl:h-56 lg:h-48 md:h-48 sm:h-48 h-40 w-auto ml-[5%] z-10"
+                                className="z-10 ml-[5%] w-auto h-40 sm:h-48 md:h-48 lg:h-48 2xl:h-56"
                                 src={Logo}
                                 alt="HackCC Logo"
                             ></Image>
                             <Image
-                                className="2xl:h-40 md:h-36 sm:h-32 h-28 w-auto absolute 2xl:-right-80 md:-right-40 sm:-right-32 -right-12 bottom-1/4 animate-bobbing ease-linear"
+                                className="-right-12 sm:-right-32 md:-right-40 2xl:-right-80 bottom-1/4 absolute w-auto h-28 sm:h-32 md:h-36 2xl:h-40 animate-bobbing ease-linear"
                                 src={HotAirBalloon}
                                 alt="Hot Air Balloon"
                             ></Image>
                         </div>
-                        <div className="font-bagel mt-4 mb-16 text-center md:text-4xl text-3xl text-white z-10">
+                        <div className="z-10 mt-4 mb-16 font-bagel text-white text-3xl md:text-4xl text-center">
                             <p>Sign In</p>
-                            <p className="md:text-xl text-lg mt-4 font-mont">
+                            <p className="mt-4 font-mont text-lg md:text-xl">
                                 Don&apos;t have an account?{" "}
                                 <a
                                     className="underline hover:no-underline"
@@ -81,7 +81,7 @@ export default function LoginPage() {
                             </p>
                         </div>
                     </div>
-                    <div className="sm:w-[350px] w-[275px] font-mont bg-black bg-opacity-20 px-7 py-7 rounded-3xl relative text-xl flex flex-col text-center">
+                    <div className="relative flex flex-col bg-black bg-opacity-20 px-7 py-7 rounded-3xl w-[275px] sm:w-[350px] font-mont text-xl text-center">
                         {error && (
                             <div className="flex items-center gap-2 bg-red-50 mb-4 p-3 border border-red-200 rounded-md text-red-600 text-sm">
                                 <AlertCircle className="w-4 h-4" />
@@ -92,7 +92,7 @@ export default function LoginPage() {
                             <form onSubmit={handleSubmit} className="space-y-4">
                                 <div className="space-y-2">
                                     <input
-                                        className="w-full bg-white sm:mb-0 mb-3 sm:mr-3 md:mr-5 px-4 py-2 rounded-md text-center text-black"
+                                        className="bg-white sm:mr-3 md:mr-5 mb-3 sm:mb-0 px-4 py-2 rounded-md w-full text-black text-center"
                                         id="email"
                                         type="email"
                                         placeholder="Email Address"
@@ -106,7 +106,7 @@ export default function LoginPage() {
 
                                 <div className="space-y-2">
                                     <input
-                                        className="w-full bg-white sm:mb-0 mb-3 sm:mr-3 md:mr-5 px-4 py-2 rounded-md text-center text-black"
+                                        className="bg-white sm:mr-3 md:mr-5 mb-3 sm:mb-0 px-4 py-2 rounded-md w-full text-black text-center"
                                         id="password"
                                         type="password"
                                         placeholder="Password"
@@ -116,7 +116,7 @@ export default function LoginPage() {
                                         }
                                         required
                                     />
-                                    <div className="flex w-full justify-end items-center">
+                                    <div className="flex justify-end items-center w-full">
                                         <a
                                             href="#"
                                             className="text-white hover:text-royalpurple text-xs transition"
@@ -128,7 +128,7 @@ export default function LoginPage() {
 
                                 <button
                                     type="submit"
-                                    className="w-full text-nowrap text-center bg-navyblue hover:bg-hoverpurple cursor-pointer text-white py-2 rounded-md"
+                                    className="bg-navyblue hover:bg-hoverpurple py-2 rounded-md w-full text-white text-center text-nowrap cursor-pointer"
                                     disabled={isLoading}
                                 >
                                     {isLoading ? "Signing In..." : "Sign In"}
