@@ -7,7 +7,6 @@ import skybg from '../../../public/BG Image.png'
 
 
 export default function ApplyPage() {
-    
     return (
         <div className="relative w-screen h-screen overflow-x-hidden">
             <div>

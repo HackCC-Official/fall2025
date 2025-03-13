@@ -52,6 +52,7 @@ theme: {
 			hoverpurple: '#4C27A0',
 			richpurple: '#251884',
 			vibrantyellow: '#FBFA74',
+			activeyellow: '#e3e122',
 			deepsky: '#371EAE',
 			bgpurple: '#9947DC',
 			glass: 'rgba(46, 24, 138, .50)',
