@@ -6,6 +6,7 @@ import Venue from "../features/venue/map";
 import Footer from "@/features/footer/apply-page/Footer";
 import VolunteerJudgeContainer from "../features/volunteer-judge/VolunteerJudgeContainer";
 import { Navbar } from "@/components/navbar";
+import About from "@/features/about/about";
 
 
 export default function HomePage() {
@@ -14,7 +15,8 @@ export default function HomePage() {
     <div className="flex flex-wrap w-screen h-screen">
       <Navbar></Navbar>
       <FrontPage></FrontPage>
-      
+      <About></About>
+
       <AttendeeContainer/>
       <Venue></Venue>
       <VolunteerJudgeContainer></VolunteerJudgeContainer>
