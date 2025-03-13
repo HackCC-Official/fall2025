@@ -15,7 +15,7 @@ import { ApplyButton } from "@/components/applybutton"
 export default function VolunteerJudgeContainer() {
     return (
 
-        <div className="z-10 relative order-none bg-bgpurple outline-none w-screen">
+        <div className="z-10 relative order-none bg-bgpurple outline-none w-screen -mt-[5px]">
             <Image src={PinkClusterL} alt="clouds" className="top-0 left-0 z-30 absolute w-[500px] pointer-events-none"></Image>
             <Image src={PinkClusterR} alt="clouds" className="top-0 right-0 z-30 absolute w-[1000px] pointer-events-none"></Image>
             <Image src={CloudCluster} alt="clouds" className="-bottom-[150px] z-30 absolute w-[300px] pointer-events-none"></Image>
