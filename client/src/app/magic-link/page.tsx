@@ -15,7 +15,7 @@ export default function MagicLinkPage() {
     if (!code) return;
 
     handleMagicLink(code);
-  }, [params]);
+  }, []);
 
   const handleMagicLink = async (code: string) => {
     const supabase = getBrowserClient();
