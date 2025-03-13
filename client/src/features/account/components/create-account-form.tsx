@@ -1,23 +1,38 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
-import { AccountRoles } from "../types/account-dto"
+import { AccountDTO, AccountRoles } from "../types/account-dto"
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { MultiSelect } from "@/components/ui/multi-select"
 import { Gavel, Shield, User, Wrench } from "lucide-react"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { createAccountWithInviteLink } from "../api/account"
+import { Button } from "@/components/ui/button"
 
 const formSchema = z.object({
+  id: z.string(),
   firstName: z.string().min(2, { message: 'First name must be at least 2 characters long'}),
   lastName: z.string().min(2,  { message: 'Last name must be at least 2 characters long'}),
   email: z.string().email({ message: 'Email must be valid'}),
-  roles: z.array(z.string())
+  roles: z.array(z.nativeEnum(AccountRoles))
 })
 
-export function CreateAccountForm() {
+export function CreateAccountForm({ setOpen } : { setOpen: (o: boolean) => void }) {
+  const queryClient = useQueryClient()
+  const accountMutation = useMutation({
+    mutationFn: (accountDTO: AccountDTO) => createAccountWithInviteLink({ accountDTO }),
+    onSettled: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['accounts']
+      })
+    }
+  })
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      id: '',
       firstName: '',
       lastName: '',
       email: '',
@@ -50,9 +65,8 @@ export function CreateAccountForm() {
 
   // 2. Define a submit handler.
   function onSubmit(values: z.infer<typeof formSchema>) {
-    // Do something with the form values.
-    // ✅ This will be type-safe and validated.
-    console.log(values)
+    accountMutation.mutate(values)
+    setOpen(false)
   }
 
   return (
@@ -142,6 +156,7 @@ export function CreateAccountForm() {
             </FormItem>
           )}
         />
+        <Button type="submit">Create Account</Button>
       </form>
     </Form>
   )
