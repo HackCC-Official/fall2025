@@ -20,7 +20,7 @@ export default function home() {
                     <Image className="2xl:h-40 md:h-36 sm:h-32 h-28 w-auto absolute 2xl:-right-80 md:-right-40 sm:-right-32 -right-12 bottom-1/4 animate-bobbing ease-linear" src={HotAirBalloon} alt="Hot Air Balloon"></Image>
                 </div>
                 <div className="font-bagel mt-4 mb-16 text-center md:text-4xl sm:text-3xl text-2xl z-10">
-                    <p>April 25-27, 2025 <span className="font-mono font-thin">|</span> Los Altos, CA</p>
+                    <p>April 25-27, 2025 <span className="font-mono font-thin">|</span> California</p>
                 </div>
                 <Interest></Interest>
             </div>
