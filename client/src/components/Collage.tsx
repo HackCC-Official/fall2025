@@ -1,25 +1,32 @@
+// Collage.tsx
 import React from "react";
 
-/**
- * Collage section displaying event photos.
- */
+// Images (path>> public/assets)
+const images = [
+  "/public/BG Image.png",
+  "/public/Baloon Cat 4.png",
+  "/public/Hot Air Balloon.png",
+  "/public/Moon.png",
+  "/public/Pink Paw 2.png",
+];
+
 const Collage = () => {
-  // Array of image URLs (Path >>/public/assets/)
-  const images = [
-    "/assets/photo1.jpg",
-    "/assets/photo2.jpg",
-    "/assets/photo3.jpg",
-    "/assets/photo4.jpg",
-  ];
-
   return (
-    <section className="py-12 px-6">
-      <h2 className="text-4xl font-bold text-center text-white mb-6">Event Highlights</h2>
+    <section className="py-16 bg-[#240046] text-white text-center">
+      <h2 className="text-4xl md:text-5xl font-bold mb-6">
+        What Past Attendees Have Said
+      </h2>
 
-      {/* Grid layout for photos */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      {/* Image Grid */}
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 px-4 md:px-12">
         {images.map((src, index) => (
-          <img key={index} src={src} alt={`HackCC event ${index + 1}`} className="rounded-lg shadow-lg w-full h-auto object-cover" />
+          <div key={index} className="relative group">
+            <img
+              src={src}
+              alt={`Collage Image ${index + 1}`}
+              className="rounded-lg shadow-lg transition-transform duration-300 group-hover:scale-105"
+            />
+          </div>
         ))}
       </div>
     </section>
