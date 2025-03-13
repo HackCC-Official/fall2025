@@ -3,21 +3,20 @@
 
 import { getBrowserClient } from '@/features/auth/lib/supabase-client';
 import { Homebg } from '@/features/home-page/components/homebg';
-import { useSearchParams } from 'next/navigation';
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
 export default function MagicLinkPage() {
-  const searchParams = useSearchParams();
+  const params = new URLSearchParams(document.location.search);
   const router = useRouter()
 
   useEffect(() => {
     // Extract the magic link code from the URL query parameters
-    const code = searchParams ? searchParams.get('code') : null;
+    const code = params.get('code')
     if (!code) return;
 
     handleMagicLink(code);
-  }, [searchParams]);
+  }, [params]);
 
   const handleMagicLink = async (code: string) => {
     const supabase = getBrowserClient();
