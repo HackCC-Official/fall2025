@@ -4,6 +4,7 @@ import HotAirBalloon from "../../../public/Hot Air Balloon.png"
 import { Socials } from '../../components/socials'
 import { Interest } from "./components/interest";
 import { Homebg } from "./components/homebg";
+import { ApplyButton } from "@/components/applybutton";
 
 export default function home() {
     return(
@@ -17,7 +18,8 @@ export default function home() {
                 <div className="z-10 flex sm:flex-row flex-col mt-4 mb-16 font-bagel text-2xl sm:text-3xl md:text-4xl text-center">
                     <p>April 25-27, 2025 </p> <span className="hidden sm:inline font-mono font-thin">|</span> <p> Los Altos Hills, CA</p>
                 </div>
-                <Interest></Interest>
+                {/* <Interest></Interest> */}
+                <ApplyButton text="Apply to Attend" size="xl"></ApplyButton>
             </div>
             <div className="bottom-5 z-10 absolute inset-x-0 flex flex-col justify-center items-center mx-auto">
                 <Socials baseColor="text-white" hoverColor="hover:text-navyblue"></Socials>

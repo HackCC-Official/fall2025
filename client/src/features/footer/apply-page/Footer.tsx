@@ -6,6 +6,7 @@ import CatCloudCluster from "../../../../public/Cat Cloud Cluster.png"
 
 import BalloonCat from "../../../../public/Baloon Cat 4.png"
 import DarkCloud from "../../../../public/DarkCloudGroup.png"
+import { ApplyButton } from "@/components/applybutton"
 
 
 //<Image className="" src={BackgroundDarkCloud} alt="Back CLoud"></Image>
@@ -21,7 +22,7 @@ export default function Footer() {
                     <div className="flex flex-col items-center overflow-hidden" >
                         <h2 className={`text-white  text-[3rem] ${bagel_Fat_One.className}  z-10 md:text-[4rem] lg:text-[5rem] xl:text-[6rem]`}>Apply</h2>
                         <h3 className={`text-white text-[0.8rem] ${montserrat_Alternates.className} z-10 md:text-[1rem] lg:text-[1.4rem] xl:text-[1.6rem]`}>Apply to register as a participant</h3>
-                        <button className={`${montserrat_Alternates.className} py-3 px-6 md:px-10  lg:py-4 lg:px-14 z-10 rounded-[30px] font-extrabold text-hoverpurple active:bg-black text-[0.6rem] md:text-[0.8rem] lg:text-[1.2rem] xl:text-[1.3rem] bg-vibrantyellow mt-8`}>Apply now</button>
+                        <ApplyButton text="Apply now" size="lg"></ApplyButton>
                     </div>
                 </div>
             </div>

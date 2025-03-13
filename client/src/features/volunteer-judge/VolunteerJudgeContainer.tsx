@@ -9,6 +9,7 @@ import PinkPawR from "../../../public/Pink Paw 2.png"
 
 
 import { bagel_Fat_One, montserrat_Alternates } from "@/app/styles/fonts"
+import { ApplyButton } from "@/components/applybutton"
 
 
 export default function VolunteerJudgeContainer() {
@@ -33,13 +34,13 @@ export default function VolunteerJudgeContainer() {
                         <Image src={PinkPawL} alt="paw" className="mb-5 w-[75px] lg:w-[100px] h-auto pointer-events-none"></Image>
                         <h2 className={`${bagel_Fat_One.className} lg:text-[2rem] text-white`}>Volunteer</h2>
                         <h3 className={`${montserrat_Alternates.className} text-[0.7rem] lg:text-[1rem] text-white`}>Interested in helping at the event? Apply to be a volunteer<br/>and help ensure the event day runs smoothly.</h3>
-                        <button className={`${montserrat_Alternates.className} py-3 px-6 md:px-10  lg:py-2 lg:px-10 z-10 rounded-[30px] font-extrabold text-hoverpurple active:bg-black text-[0.6rem] md:text-[0.8rem] lg:text-[1.2rem] xl:text-[1rem] bg-vibrantyellow mt-8`}>Apply now</button>
+                        <ApplyButton text="Apply to Volunteer" size="md"></ApplyButton>
                     </div>
                     <div className="flex flex-col justify-center items-center bg-glass backdrop-blur-md mx-auto my-auto rounded-[20px] w-[90%] md:w-[50%] h-[375px] lg:h-[425px] text-center">
                         <Image src={PinkPawR} alt="paw" className="mb-5 w-[125px] lg:w-[150px] h-auto pointer-events-none"></Image>
                         <h2 className={`${bagel_Fat_One.className} lg:text-[2rem] text-white`}>Become a Judge</h2>
                         <h3 className={`${montserrat_Alternates.className} text-[0.7rem] lg:text-[1rem]  text-white`}>Help judge event submissions to determine<br/>the top projects from the event.</h3>
-                        <button className={`${montserrat_Alternates.className} py-3 px-6 md:px-10  lg:py-2 lg:px-10 z-10 rounded-[30px] font-extrabold text-hoverpurple active:bg-black text-[0.6rem] md:text-[0.8rem] lg:text-[1.2rem] xl:text-[1rem] bg-vibrantyellow mt-8`}>Apply now</button>
+                        <ApplyButton text="Apply to Judge" size="md"></ApplyButton>
                     </div> 
                 </div>
             </div>
