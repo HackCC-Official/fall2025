@@ -1,5 +1,7 @@
 //import Image from "next/image";
 //import QRScanner from "../components/qrscan"
+
+
 import FrontPage from "../features/home-page/home"
 import AttendeeContainer from "@/features/attendee/AttendeeContainer";
 import Venue from "../features/venue/map";
@@ -18,7 +20,7 @@ export default function HomePage() {
       <About></About>
 
       <AttendeeContainer/>
-      <Venue></Venue>
+      
       <VolunteerJudgeContainer></VolunteerJudgeContainer>
       <Footer></Footer>
     </div>
