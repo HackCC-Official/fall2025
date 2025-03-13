@@ -7,12 +7,11 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
 export default function MagicLinkPage() {
-  const params = new URLSearchParams(document.location.search);
   const router = useRouter()
 
   useEffect(() => {
     // Extract the magic link code from the URL query parameters
-    const code = params.get('code')
+    const code = ''
     if (!code) return;
 
     handleMagicLink(code);
