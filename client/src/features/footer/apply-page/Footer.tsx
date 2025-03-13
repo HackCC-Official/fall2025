@@ -12,7 +12,7 @@ import { ApplyButton } from "@/components/applybutton"
 //<Image className="" src={BackgroundDarkCloud} alt="Back CLoud"></Image>
 export default function Footer() {
     return (
-        <div className="relative bg-[#9947DC] w-full overflow-hidden">
+        <div className="relative bg-bgpurple w-full overflow-hidden -mt-[5px]">
             
             <Image src={"/footerbg.png"} className='z-0 absolute w-screen max-w-full object-cover 2xl:object-fill pointer-events-none' alt="bg" fill/>
             

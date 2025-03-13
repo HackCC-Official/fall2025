@@ -54,7 +54,7 @@ theme: {
 			vibrantyellow: '#FBFA74',
 			activeyellow: '#e3e122',
 			deepsky: '#371EAE',
-			bgpurple: '#9947DC',
+			bgpurple: '#9746db',
 			glass: 'rgba(46, 24, 138, .50)',
 			
 			card: {
