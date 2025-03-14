@@ -5,6 +5,7 @@ import CatCloudCluster from "../../../../public/Cat Cloud Cluster.png"
 import BalloonCat from "../../../../public/Baloon Cat 4.png"
 import DarkCloud from "../../../../public/DarkCloudGroup.png"
 import { ApplyButton } from "@/components/applybutton"
+import Logo from '../../../../public/Logo.svg'
 
 
 //<Image className="" src={BackgroundDarkCloud} alt="Back CLoud"></Image>
@@ -25,7 +26,7 @@ export default function Footer() {
             </div>
             <div className="bottom-10 absolute flex- w-full">
                 <div className="flex justify-around lg:justify-between">
-                    <Image src={"/logo.png"} width={68} height={48} alt='logo' className="z-10 lg:ml-20 w-[40px] sm:w-[60px] h-auto pointer-events-none"></Image> 
+                    <Image src={Logo} alt='logo' className="z-10 lg:ml-20 w-[40px] sm:w-[60px] h-auto pointer-events-none"></Image> 
                     <div className="flex items-center mr-5 lg:mr-20 xl:mr-40 2xl:mr-60">
                         <Socials baseColor="text-white" hoverColor="hover:text-navyblue"/>
                         <p className={`z-10 text-[0.6rem] lg:text-[0.8rem] font-mont`}>© 2025 HackCC</p>
