@@ -2,7 +2,6 @@
 
 import React from 'react'
 import Image from "next/image";
-import HotAirBalloon from "../../../../public/Hot Air Balloon.png"
 import CatCloudCluster from "../../../../public/Cat Cloud Cluster.png"
 import CloudBack from "../../../../public/Dark Purple Cloud Back.png"
 import CloudMid from "../../../../public/Dark Purple Cloud Mid.png"
