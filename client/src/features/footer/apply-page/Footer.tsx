@@ -19,7 +19,7 @@ export default function Footer() {
                     <div className="flex flex-col items-center overflow-hidden" >
                         <h2 className={`text-white  text-[3rem] font-bagel  z-10 md:text-[4rem] lg:text-[5rem] xl:text-[6rem]`}>Apply</h2>
                         <h3 className={`text-white text-[0.8rem] font-mont z-10 md:text-[1rem] lg:text-[1.4rem] xl:text-[1.6rem]`}>Apply to register as a participant</h3>
-                        <ApplyButton text="Apply now" size="lg"></ApplyButton>
+                        <ApplyButton text="Apply now" size="lg" directory="/register"></ApplyButton>
                     </div>
                 </div>
             </div>
