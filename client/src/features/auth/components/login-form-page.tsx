@@ -3,7 +3,7 @@ import { Logo } from "@/components/logo";
 import { Homebg } from "@/features/home-page/components/homebg";
 import { AlertCircle } from "lucide-react";
 import { useSearchParams } from "next/navigation";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { signInWithEmailAndPassword } from "../utils/auth";
 import { AuthButton } from "./auth-btn";
