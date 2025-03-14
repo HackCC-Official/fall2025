@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
-import { useParams, useRouter } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import { signInWithEmailAndPassword } from "@/features/auth/utils/auth";
 import { AlertCircle } from "lucide-react";
 import HotAirBalloon from "../../../public/Hot Air Balloon.png";
@@ -14,7 +14,7 @@ import { AuthCardSkeletonDefault } from "@/features/auth/components/auth-card-sk
 import { Logo } from "@/components/logo";
 
 export default function LoginPage() {
-    const params = useParams<{ redirect: string }>()
+    const searchParams = useSearchParams()
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
@@ -45,7 +45,10 @@ export default function LoginPage() {
                 console.error("Error logging in:", authError);
             } else {
                 console.log("Logged in successfully:", data);
-                router.push(params && params.redirect ? params.redirect : '/');
+                if (searchParams?.get('redirect')) {
+
+                }
+                router.push((searchParams && searchParams?.get('redirect')) ? (searchParams.get('redirect') || '') : '/');
             }
         } catch (err) {
             setError("An unexpected error occurred. Please try again.");
