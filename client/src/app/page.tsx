@@ -18,9 +18,9 @@ export default function HomePage() {
       <Navbar></Navbar>
       <FrontPage></FrontPage>
       <About></About>
-
+      
       <AttendeeContainer/>
-      {/* <Venue></Venue> */}
+      <Venue></Venue>
       <VolunteerJudgeContainer></VolunteerJudgeContainer>
       <Footer></Footer>
     </div>
