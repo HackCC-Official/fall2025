@@ -19,13 +19,7 @@ export default function home() {
                     <p>April 25-27, 2025 </p> <span className="hidden sm:inline font-mono font-thin">|</span> <p> Los Altos Hills, CA</p>
                 </div>
                 {/* <Interest></Interest> */}
-                <ApplyButton text="Apply to Attend" size="xl"></ApplyButton>
-            </div>
-            <div className="bottom-5 z-10 absolute inset-x-0 flex flex-col justify-center items-center mx-auto">
-                <Socials baseColor="text-white" hoverColor="hover:text-navyblue"></Socials>
-                <div className="mt-2 text-black sm:text-md text-sm">
-                    <p>© 2025 HackCC</p>
-                </div>
+                <ApplyButton text="Apply to Attend" size="xl" directory="/register"></ApplyButton>
             </div>
         </div>
     )

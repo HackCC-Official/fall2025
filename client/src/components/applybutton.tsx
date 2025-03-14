@@ -1,7 +1,8 @@
+import { a } from 'node_modules/framer-motion/dist/types.d-B50aGbjN';
 import React from 'react'
 
 export const ApplyButton = (props: any) => {
-    const { text, size } = props;
+    const { text, size, directory } = props;
     let sizing = ""
     switch (size) {
         case "sm":
@@ -17,8 +18,8 @@ export const ApplyButton = (props: any) => {
             sizing = 'py-3 px-10 lg:py-4 lg:px-14 text-lg sm:text-xl md:text-2xl z-10'
     }
     return (
-        <button  className={` ${sizing} font-mont rounded-[30px] font-extrabold text-hoverpurple active:bg-activeyellow bg-vibrantyellow`}>
+        <a href={directory} className={`${sizing} font-mont rounded-[30px] font-extrabold text-hoverpurple active:bg-activeyellow bg-vibrantyellow`}>
             {text}
-        </button>
+        </a>
     )
 }
