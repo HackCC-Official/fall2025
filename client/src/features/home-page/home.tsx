@@ -19,7 +19,7 @@ export default function home() {
                     <p>April 25-27, 2025 </p> <span className="hidden sm:inline font-mono font-thin">|</span> <p> Los Altos Hills, CA</p>
                 </div>
                 {/* <Interest></Interest> */}
-                <ApplyButton text="Apply to Attend" size="xl" directory="/register"></ApplyButton>
+                <ApplyButton text="Apply to Attend" size="xl" directory="/apply"></ApplyButton>
             </div>
         </div>
     )
