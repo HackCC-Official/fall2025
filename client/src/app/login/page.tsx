@@ -56,8 +56,7 @@ export default function LoginPage() {
     };
 
     return (
-        <div className="relative flex flex-col w-screen h-screen overflow-hidden">
-            <div className="-z-20 absolute bg-bgpurple w-screen h-screen"></div>
+        <div className="relative w-screen h-screen overflow-hidden">
             <Homebg></Homebg>
             <div className="flex justify-center items-center p-4 min-h-screen">
                 <div className="flex flex-col justify-center items-center w-full max-w-md">
