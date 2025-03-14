@@ -3,6 +3,10 @@ import Image from "next/image";
 import cloud from "../../../public/Dark Purple Cloud Mid.png"
 import cloud2 from "../../../public/Dark Purple Cloud Back2.png"
 import AttendeeCard from "./ui/AttendeeCard"
+import minh from "../../../public/minh.jpg"
+import placeholder from "../../../public/headshotPlaceholder.png"
+
+
 export default function AttendeeContainer() {
     return(
         //md:tablet breakpoint
@@ -15,8 +19,8 @@ export default function AttendeeContainer() {
             <div className="relative mx-auto w-full">
                 <h2 className="z-10 m-10 font-bagel text-[1.5rem] text-white lg:text-[3rem] text-center">What past attendees have said</h2>
                 <div className="flex md:flex-row flex-col items-center">
-                    <AttendeeCard/>
-                    <AttendeeCard/>
+                    <AttendeeCard name="Minh Truong" text="As a hackathon specifically centered around community college students, I thought it was awesome to see so many students who were just like me. Everyone came up with different and unique ideas and mentors cared about making sure we felt confident and engaged." imgPath={minh}/>
+                    <AttendeeCard name="Ethan Bonavida" text="I was a mentor, and later a judge. It was an awesome venue, had a great presentation and speakers to introduce the hackathon. It was such an honor to help out and share my knowledge with others so they could choose an idea" imgPath={placeholder}/>
                 </div>
             </div>
         </div>
