@@ -20,7 +20,7 @@ export default function HomePage() {
       <About></About>
       
       <AttendeeContainer/>
-      <Venue></Venue>
+      {/* <Venue></Venue> */}
       <VolunteerJudgeContainer></VolunteerJudgeContainer>
       <Footer></Footer>
     </div>

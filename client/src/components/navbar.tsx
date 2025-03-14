@@ -19,37 +19,37 @@ export const Navbar = () => {
 
     return (
         <div>
-            <div className={` sm:flex hidden z-50 font-mont text-white fixed flex justify-center items-center p-3  w-screen l-0 t-0 [&>*]:mx-6 bg-glass backdrop-blur-md`}>
+            <div className={`text-base 2xl:text-xl sm:flex hidden z-50 font-mont text-white fixed flex justify-center items-center p-3  w-screen l-0 t-0 [&>*]:mx-6 bg-glass backdrop-blur-md [&>*]:cursor-pointer`}>
                 <a onClick={() => {
                             smoothScroll("aboutTab");
                         }}>About</a>
-                <a onClick={() => {
+                {/* <a onClick={() => {
                             smoothScroll("venueTab");
-                        }}>About</a>
+                        }}>Venue</a> */}
                 <a onClick={() => {
                             smoothScroll("involvedTab");
-                        }}>GetInvolved</a>
+                        }}>Get Involved</a>
                 <ApplyButton text="Apply" size="sm" directory="/register"></ApplyButton>
             </div>
-            <h1 className={`${isMenuOpen? 'text-black' : 'text-white'} fixed z-50 top-4 right-4 text-3xl sm:hidden flex`} onClick={() => {toggleMenu()}}>{isMenuOpen ? 'X' : '☰'}</h1>
-            <div className={`${isMenuOpen? 'sm:hidden flex' : 'hidden'} font-mont top-0 left-0 fixed w-screen h-screen bg-white z-40 flex-col justify-center align-center items-center text-center [&>*]:my-2 [&>*]:whitespace-nowrap overflow-hidden`}>
+            <div className={`${isMenuOpen? 'sm:hidden flex' : 'hidden'} font-mont top-0 left-0 fixed w-screen h-screen bg-white z-50 flex-col justify-center align-center items-center text-center [&>*]:my-2 [&>*]:whitespace-nowrap overflow-hidden`}>
             <a onClick={() => {
-                        smoothScroll("aboutTab");
-                        toggleMenu()
-                    }}>About</a>
-            <div className="h-[1px] w-16 bg-activeyellow"></div>
-            <a onClick={() => {
+                smoothScroll("aboutTab");
+                toggleMenu()
+            }}>About</a>
+            <div className="bg-activeyellow w-16 h-[1px]"></div>
+            {/* <a onClick={() => {
                         smoothScroll("venueTab");
                         toggleMenu()
-                    }}>Venue</a>
-            <div className="h-[1px] w-16 bg-activeyellow"></div>
+                        }}>Venue</a>
+                        <div className="bg-activeyellow w-16 h-[1px]"></div> */}
             <a onClick={() => {
-                        smoothScroll("involvedTab");
-                        toggleMenu()
-                    }}>Get Involved</a>
+                smoothScroll("involvedTab");
+                toggleMenu()
+            }}>Get Involved</a>
             <div></div>
             <ApplyButton text="Apply" size="sm" directory="/register"></ApplyButton>
             </div>
+            <h1 className={`${isMenuOpen? 'text-black' : 'text-white'} fixed z-50 top-4 right-4 text-3xl sm:hidden flex`} onClick={() => {toggleMenu()}}>{isMenuOpen ? 'X' : '☰'}</h1>
         </div>
     )
 }
