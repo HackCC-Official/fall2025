@@ -24,12 +24,13 @@ export const ApplyButton = (props: any) => {
 
     return (
         <a 
+
             href={(isDisabled && !bypassDisable) ? '' : directory} 
             target={newWindow} 
             className={cn([
                 sizing,
                 'cursor-pointer font-mont rounded-[30px] font-extrabold text-hoverpurple active:bg-activeyellow bg-vibrantyellow',
-                (isDisabled && !bypassDisable ) && '!cursor-not-allowed opacity-80'
+                (isDisabled && !bypassDisable ) && '!cursor-not-allowed opacity-40 pointer-events-none'
             ])}
             >
             {text}
