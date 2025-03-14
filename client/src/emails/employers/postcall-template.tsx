@@ -15,73 +15,22 @@ import {
 } from "@react-email/components";
 import { OutreachTeamDto } from "../../features/outreach/types/outreach-team";
 
-/**
- * Props for the post-call follow-up email template
- */
 interface PostCallEmailProps {
-    /**
-     * The name of the company being contacted
-     */
     companyName: string;
-
-    /**
-     * The name of the person being contacted at the company
-     */
     recipientName: string;
-
-    /**
-     * Information about the outreach team member sending the email
-     */
     sender: OutreachTeamDto;
-
-    /**
-     * The position of the sender at HackCC
-     */
     positionAtHackCC: string;
-
-    /**
-     * Organization's logo URL
-     */
     organizationLogo?: string;
-
-    /**
-     * Date of the scheduled follow-up call
-     */
     followupDate?: string;
-
-    /**
-     * Time of the scheduled follow-up call
-     */
     followupTime?: string;
-
-    /**
-     * Materials that were requested by the sponsor
-     */
     requestedMaterials?: string;
-
-    /**
-     * Social media links to include in the signature
-     */
     socialLinks: {
-        /**
-         * URLs to various social media profiles
-         */
         [key: string]: string;
     };
 
-    /**
-     * Optional custom email body content
-     * When provided, will replace the default email body while preserving variable replacements
-     */
     customEmailBody?: string;
 }
 
-/**
- * PostCallEmail component for HackCC outreach
- *
- * This template is designed for sending follow-up emails after a call with potential sponsors
- * to summarize the discussion and confirm next steps.
- */
 export const PostCallEmail = ({
     companyName,
     recipientName,
