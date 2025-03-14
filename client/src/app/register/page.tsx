@@ -82,7 +82,7 @@ export default function RegisterPage() {
                         <div className="z-10 mt-4 mb-16 font-bagel text-white text-3xl md:text-4xl text-center">
                             <h1>Register for an Account</h1>
                             <p className="mt-4 font-mont text-lg md:text-xl">
-                                Already has an account?{' '}
+                                Already have an account?{' '}
                                 <a
                                     className="underline hover:no-underline"
                                     href="/login"
