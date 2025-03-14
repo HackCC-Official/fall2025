@@ -10,7 +10,7 @@ import { AuthButton } from "./auth-btn";
 import { AuthCardSkeletonDefault } from "./auth-card-skeleton";
 import { AuthInput } from "./auth-input";
 import Image from "next/image";
-import HotAirBalloon from "../../../public/Hot Air Balloon.png";
+import HotAirBalloon from "../../../../public/Hot Air Balloon.png";
 
 
 export function LoginFormPage() {
