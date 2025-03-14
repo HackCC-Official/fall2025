@@ -9,6 +9,7 @@ import Footer from "@/features/footer/apply-page/Footer";
 import VolunteerJudgeContainer from "../features/volunteer-judge/VolunteerJudgeContainer";
 import { Navbar } from "@/components/navbar";
 import About from "@/features/about/about";
+import Collage from "@/features/collage/Collage";
 
 
 export default function HomePage() {
@@ -18,7 +19,7 @@ export default function HomePage() {
       <Navbar></Navbar>
       <FrontPage></FrontPage>
       <About></About>
-      
+      <Collage></Collage>
       <AttendeeContainer/>
       {/* <Venue></Venue> */}
       <VolunteerJudgeContainer></VolunteerJudgeContainer>
