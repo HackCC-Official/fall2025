@@ -92,14 +92,11 @@ export const PostCallEmail = ({
     socialLinks,
     customEmailBody,
 }: PostCallEmailProps) => {
-    // Format the sender's year and major for better readability
     const formattedYearAndMajor = `${sender.year} ${sender.major}`;
 
-    // Parse custom email body if provided
     const renderCustomEmailBody = () => {
         if (!customEmailBody) return null;
 
-        // Replace variable placeholders with actual values
         const parsedContent = customEmailBody
             .replace(/\[recipient_name\]/g, recipientName)
             .replace(/\[company_name\]/g, companyName)
@@ -113,11 +110,9 @@ export const PostCallEmail = ({
                 requestedMaterials || "requested materials"
             );
 
-        // Split the content into sections
         const sections = parsedContent.split("\n\n");
 
         return sections.map((section, index) => {
-            // Check if this is a section header (like "Recap from Our Call:")
             if (section.endsWith(":")) {
                 return (
                     <Text key={`header-${index}`} style={paragraphBold}>
@@ -126,17 +121,13 @@ export const PostCallEmail = ({
                 );
             }
 
-            // Check if this section contains bullet points
             if (section.includes("•") || section.includes("-")) {
-                // Split by lines to handle each bullet point separately
                 const lines = section.split("\n");
                 return (
                     <React.Fragment key={`bullets-${index}`}>
                         {lines.map((line, lineIndex) => {
-                            // Skip empty lines
                             if (!line.trim()) return null;
 
-                            // If this is a bullet point (starts with • or -), use bullet point styling
                             if (
                                 line.trim().startsWith("•") ||
                                 line.trim().startsWith("-")
@@ -151,7 +142,6 @@ export const PostCallEmail = ({
                                 );
                             }
 
-                            // Otherwise, treat as regular paragraph
                             return (
                                 <Text
                                     key={`line-${index}-${lineIndex}`}
@@ -165,7 +155,6 @@ export const PostCallEmail = ({
                 );
             }
 
-            // Regular paragraph
             return (
                 <Text key={`para-${index}`} style={paragraph}>
                     {section}
@@ -320,7 +309,7 @@ const container = {
 };
 
 const header = {
-    backgroundColor: "#1e40af", // Deep blue header
+    backgroundColor: "#1e40af",
     padding: "20px 30px",
     display: "flex",
     justifyContent: "space-between",
@@ -339,7 +328,7 @@ const subjectLine = {
     fontSize: "24px",
     lineHeight: "1.3",
     fontWeight: "700",
-    color: "#1e40af", // Matching header color
+    color: "#1e40af",
     margin: "0 0 24px",
 };
 

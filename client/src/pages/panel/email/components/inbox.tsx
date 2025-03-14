@@ -41,11 +41,6 @@ interface InboxProps {
     emails: SendEmailDto[];
 }
 
-/**
- * Inbox Component - Displays emails filtered by the currently selected account
- * @param {InboxProps} props - Component properties
- * @returns {JSX.Element} Rendered inbox component
- */
 export default function Inbox({ className, emails = [] }: InboxProps) {
     const [mail, setMail] = useMail();
     const [filteredEmails, setFilteredEmails] = React.useState<Mail[]>([]);
@@ -101,14 +96,14 @@ export default function Inbox({ className, emails = [] }: InboxProps) {
                     : [];
 
                 return {
-                    id: emailId, // Preserve the original ID
+                    id: emailId,
                     from: email.from,
                     to: formattedRecipients,
                     subject: email.subject || "(No subject)",
                     html: email.html,
                     date: email.createdAt || new Date().toISOString(),
-                    read: false, // Assume unread
-                    labels: [email.status || "sent"], // Use status as label, default to "sent"
+                    read: false,
+                    labels: [email.status || "sent"],
                 };
             });
 
@@ -121,11 +116,6 @@ export default function Inbox({ className, emails = [] }: InboxProps) {
         }
     }, [emails]);
 
-    /**
-     * Updates a single filter value
-     * @param {keyof EmailFilters} key - The filter key to update
-     * @param {unknown} value - The new value for the filter
-     */
     const updateFilter = React.useCallback(
         (key: keyof EmailFilters, value: unknown) => {
             setFilters((prev) => ({
@@ -136,10 +126,6 @@ export default function Inbox({ className, emails = [] }: InboxProps) {
         []
     );
 
-    /**
-     * Toggles a status filter value
-     * @param {string} status - The status to toggle
-     */
     const toggleStatusFilter = React.useCallback((status: string) => {
         setFilters((prev) => {
             const newStatuses = prev.status.includes(status)
@@ -153,9 +139,6 @@ export default function Inbox({ className, emails = [] }: InboxProps) {
         });
     }, []);
 
-    /**
-     * Resets all filters to their default values
-     */
     const resetFilters = React.useCallback(() => {
         setFilters({
             status: [],
@@ -167,9 +150,6 @@ export default function Inbox({ className, emails = [] }: InboxProps) {
         });
     }, []);
 
-    /**
-     * Checks if any filters are currently active
-     */
     const hasActiveFilters = React.useMemo(() => {
         return (
             filters.status.length > 0 ||
@@ -179,11 +159,9 @@ export default function Inbox({ className, emails = [] }: InboxProps) {
         );
     }, [filters]);
 
-    // Filter emails by search query and other filters
     const displayedEmails = React.useMemo(() => {
         let result = filteredEmails;
 
-        // Apply search filter
         if (searchQuery.trim()) {
             result = result.filter(
                 (email) =>
@@ -202,7 +180,6 @@ export default function Inbox({ className, emails = [] }: InboxProps) {
             );
         }
 
-        // Apply status filters
         if (filters.status.length > 0) {
             result = result.filter((email) =>
                 email.labels?.some((label) =>
@@ -211,7 +188,6 @@ export default function Inbox({ className, emails = [] }: InboxProps) {
             );
         }
 
-        // Apply date range filter
         if (filters.dateRange.from || filters.dateRange.to) {
             result = result.filter((email) => {
                 const emailDate = new Date(email.date);
@@ -231,12 +207,10 @@ export default function Inbox({ className, emails = [] }: InboxProps) {
             });
         }
 
-        // Apply batch filter
         if (filters.showBatchOnly) {
             result = result.filter((email) => email.id.startsWith("batch-"));
         }
 
-        // Sort emails by date (newest first)
         return result.sort((a, b) => {
             const dateA = new Date(a.date).getTime();
             const dateB = new Date(b.date).getTime();
@@ -272,7 +246,6 @@ export default function Inbox({ className, emails = [] }: InboxProps) {
             {showFilters && (
                 <div className="bg-muted/40 p-4 md:p-6">
                     <div className="grid grid-cols-1 gap-6">
-                        {/* Status Filter */}
                         <div className="space-y-3">
                             <h3 className="text-sm font-medium">Status</h3>
                             <div className="flex flex-wrap gap-4">
@@ -301,7 +274,6 @@ export default function Inbox({ className, emails = [] }: InboxProps) {
                             </div>
                         </div>
 
-                        {/* Date Range Filter */}
                         <div className="space-y-3">
                             <h3 className="text-sm font-medium">Date Range</h3>
                             <div className="flex flex-wrap gap-4">
@@ -385,7 +357,6 @@ export default function Inbox({ className, emails = [] }: InboxProps) {
                             </div>
                         </div>
 
-                        {/* Other Filters */}
                         <div className="space-y-3">
                             <h3 className="text-sm font-medium">
                                 Other Filters
@@ -644,11 +615,6 @@ export default function Inbox({ className, emails = [] }: InboxProps) {
     );
 }
 
-/**
- * Determines the badge variant based on the label type
- * @param {string} label - The label to determine variant for
- * @returns {ComponentProps<typeof Badge>["variant"]} The badge variant to use
- */
 function getBadgeVariantFromLabel(
     label: string
 ): ComponentProps<typeof Badge>["variant"] {

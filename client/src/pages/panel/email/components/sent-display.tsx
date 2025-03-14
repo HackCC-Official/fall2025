@@ -21,17 +21,11 @@ interface SentDisplayProps {
     email: SendEmailDto | null;
 }
 
-/**
- * SentDisplay Component - Displays the contents and information of a sent email
- * @param {SentDisplayProps} props - Component properties containing the email to display
- * @returns {JSX.Element} Rendered sent email display component
- */
 export default function SentDisplay({ email }: SentDisplayProps) {
     return (
         <div className="flex h-full flex-col bg-background">
             {email ? (
                 <div className="flex flex-1 flex-col overflow-hidden">
-                    {/* Email Header Information */}
                     <div className="flex items-start p-4">
                         <div className="flex items-start gap-4 text-sm">
                             <Avatar>
@@ -77,7 +71,6 @@ export default function SentDisplay({ email }: SentDisplayProps) {
                                           email.to[0]?.email}
                                 </div>
 
-                                {/* Show delivery status badge */}
                                 <div className="flex items-center gap-2 mt-1">
                                     <Badge
                                         variant={getStatusVariant(email.status)}
@@ -95,7 +88,6 @@ export default function SentDisplay({ email }: SentDisplayProps) {
                                         {email.status || "sent"}
                                     </Badge>
 
-                                    {/* Show batch indicator if this is part of a batch email */}
                                     {email.id?.startsWith("batch-") && (
                                         <Badge
                                             variant="outline"
@@ -108,7 +100,6 @@ export default function SentDisplay({ email }: SentDisplayProps) {
                             </div>
                         </div>
 
-                        {/* Timestamp */}
                         {email.createdAt && (
                             <div className="ml-auto text-xs text-muted-foreground flex flex-col items-end gap-1">
                                 <div className="flex items-center gap-1">
@@ -131,7 +122,6 @@ export default function SentDisplay({ email }: SentDisplayProps) {
 
                     <Separator />
 
-                    {/* All Recipients Section */}
                     {email.to && email.to.length > 1 && (
                         <>
                             <div className="px-4 py-2">
@@ -193,11 +183,6 @@ export default function SentDisplay({ email }: SentDisplayProps) {
     );
 }
 
-/**
- * Gets the badge variant based on the email status
- * @param {string | undefined} status - The email status
- * @returns {string} Badge variant
- */
 function getStatusVariant(
     status: string | undefined
 ): "default" | "outline" | "destructive" | "secondary" {
@@ -213,7 +198,6 @@ function getStatusVariant(
     }
 }
 
-// Add some basic styling for email content
 const styles = `
 .email-content {
   max-width: 100%;
@@ -233,7 +217,6 @@ const styles = `
 }
 `;
 
-// Add the styles to the document
 if (typeof document !== "undefined") {
     const styleElement = document.createElement("style");
     styleElement.innerHTML = styles;
