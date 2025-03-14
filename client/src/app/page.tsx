@@ -19,7 +19,7 @@ export default function HomePage() {
       <FrontPage></FrontPage>
       <About></About>
       <AttendeeContainer/>
-      {/*<Venue></Venue>*/}
+      {/* <Venue></Venue> */}
       <VolunteerJudgeContainer></VolunteerJudgeContainer>
       <Footer></Footer>
     </div>
