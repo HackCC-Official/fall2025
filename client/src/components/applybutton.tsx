@@ -1,8 +1,10 @@
+import { cn } from '@/lib/utils';
 import { a } from 'node_modules/framer-motion/dist/types.d-B50aGbjN';
 import React from 'react'
 
 export const ApplyButton = (props: any) => {
-    const { text, size, directory } = props;
+    const { text, size, directory, bypassDisable = false } = props;
+    const isDisabled = process.env.NEXT_PUBLIC_PRODUCTION === 'true'
     let sizing = ""
     let newWindow = ''
     switch (size) {
@@ -19,8 +21,17 @@ export const ApplyButton = (props: any) => {
         case "xl":
             sizing = 'py-3 px-10 lg:py-4 lg:px-14 text-lg sm:text-xl md:text-2xl z-10'
     }
+
     return (
-        <a href={directory} target={newWindow} className={`${sizing} cursor-pointer font-mont rounded-[30px] font-extrabold text-hoverpurple active:bg-activeyellow bg-vibrantyellow`}>
+        <a 
+            href={(isDisabled && !bypassDisable) ? '' : directory} 
+            target={newWindow} 
+            className={cn([
+                sizing,
+                'cursor-pointer font-mont rounded-[30px] font-extrabold text-hoverpurple active:bg-activeyellow bg-vibrantyellow',
+                (isDisabled && !bypassDisable ) && '!cursor-not-allowed opacity-80'
+            ])}
+            >
             {text}
         </a>
     )
