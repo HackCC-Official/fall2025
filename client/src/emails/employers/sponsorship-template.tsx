@@ -15,68 +15,21 @@ import {
 } from "@react-email/components";
 import { OutreachTeamDto } from "../../features/outreach/types/outreach-team";
 
-/**
- * Props for the sponsorship email template
- */
 interface SponsorshipEmailProps {
-    /**
-     * The name of the company being contacted
-     */
     companyName: string;
-
-    /**
-     * The name of the person being contacted at the company
-     */
     recipientName: string;
-
-    /**
-     * The venue where the hackathon will take place
-     */
     venue: string;
-
-    /**
-     * Information about the outreach team member sending the email
-     */
     sender: OutreachTeamDto;
-
-    /**
-     * The position of the sender at HackCC
-     */
     positionAtHackCC: string;
-
-    /**
-     * Social media links to include in the signature
-     */
     socialLinks: {
-        /**
-         * URL to the LinkedIn profile
-         */
         linkedin?: string;
-
-        /**
-         * URL to the Twitter/X profile
-         */
         twitter?: string;
-
-        /**
-         * URL to the GitHub profile
-         */
         github?: string;
     };
 
-    /**
-     * Optional custom email body content
-     * When provided, will replace the default email body while preserving variable replacements
-     */
     customEmailBody?: string;
 }
 
-/**
- * SponsorshipEmail component for HackCC outreach
- *
- * This template is designed for sending cold emails to potential sponsors
- * based on the OutreachTeamDto format.
- */
 export const SponsorshipEmail = ({
     companyName,
     recipientName,
@@ -86,18 +39,14 @@ export const SponsorshipEmail = ({
     socialLinks,
     customEmailBody,
 }: SponsorshipEmailProps) => {
-    // Format the sender's year and major for better readability
     const formattedYearAndMajor = `${sender.year} ${sender.major}`;
 
-    // Get today's date
     const today = new Date();
-    const isCurrentDayTuesday = today.getDay() === 2; // 0 is Sunday, 2 is Tuesday
+    const isCurrentDayTuesday = today.getDay() === 2;
 
-    // Parse custom email body if provided
     const renderCustomEmailBody = () => {
         if (!customEmailBody) return null;
 
-        // Replace variable placeholders with actual values
         const parsedContent = customEmailBody
             .replace(/\[recipient_name\]/g, recipientName)
             .replace(/\[company_name\]/g, companyName)
@@ -106,7 +55,6 @@ export const SponsorshipEmail = ({
             .replace(/\[sender_school\]/g, sender.school)
             .replace(/\[venue\]/g, venue);
 
-        // Split paragraphs and render them
         return parsedContent.split("\n\n").map((paragraphText, index) => (
             <Text key={index} style={paragraph}>
                 {paragraphText}
@@ -266,7 +214,7 @@ const container = {
 };
 
 const header = {
-    backgroundColor: "#1e40af", // Deep blue header
+    backgroundColor: "#1e40af",
     padding: "20px 30px",
     display: "flex",
     justifyContent: "space-between",
@@ -295,7 +243,7 @@ const subjectLine = {
     fontSize: "24px",
     lineHeight: "1.3",
     fontWeight: "700",
-    color: "#1e40af", // Matching header color
+    color: "#1e40af",
     margin: "0 0 24px",
 };
 

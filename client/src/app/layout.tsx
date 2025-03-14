@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono, Bagel_Fat_One, Montserrat_Alternates } from "next/font/google";
 import "./globals.css";
 import '@fortawesome/fontawesome-svg-core/styles.css'
+import Providers from './providers'
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -41,7 +42,7 @@ export default function RootLayout({
         id="app"
         className={`${geistSans.variable} ${geistMono.variable} ${montserratFont.variable} ${bagelFont.variable} antialiased bg-royalpurple`}
       >
-        {children}
+        <Providers>{children}</Providers>
       </body>
     </html>
   );

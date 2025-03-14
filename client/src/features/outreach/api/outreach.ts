@@ -69,7 +69,6 @@ export async function updateContact(
 ): Promise<ContactDto> {
     console.log("Updating contact:", { id, data: contactDto });
     try {
-        // Debug logging
         console.log("Making request to:", `/contacts/${id}`);
         console.log("Request configuration:", {
             method: "PATCH",
@@ -88,10 +87,8 @@ export async function updateContact(
         });
 
         console.log("Update response:", response.data);
-        // Handle both nested and direct response formats
         return response.data.data || response.data;
     } catch (error) {
-        // Type guard for AxiosError
         if (axios.isAxiosError(error)) {
             console.error("Detailed error information:", {
                 error: error.message,

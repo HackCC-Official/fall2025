@@ -15,9 +15,6 @@ import {
 } from "@react-email/components";
 import { OutreachTeamDto } from "../../features/outreach/types/outreach-team";
 
-/**
- * Props for the sponsorship confirmation email template
- */
 interface ConfirmationEmailProps {
     /**
      * The name of the company being contacted

@@ -11,5 +11,6 @@ export interface AccountDTO {
   firstName: string;
   lastName: string;
   roles: AccountRoles[];
-  createdAt: string;
+  createdAt?: string;
+  password?: string;
 }

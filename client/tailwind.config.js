@@ -50,6 +50,13 @@ theme: {
 			navyblue: '#021442',
 			dullpurple: '#7F3ED0',
 			hoverpurple: '#4C27A0',
+			richpurple: '#251884',
+			vibrantyellow: '#FBFA74',
+			activeyellow: '#e3e122',
+			deepsky: '#371EAE',
+			bgpurple: '#9746db',
+			glass: 'rgba(46, 24, 138, .50)',
+			
 			card: {
 				DEFAULT: 'hsl(var(--card))',
 				foreground: 'hsl(var(--card-foreground))'
