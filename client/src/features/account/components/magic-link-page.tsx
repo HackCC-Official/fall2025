@@ -1,0 +1,47 @@
+import { getBrowserClient } from "@/features/auth/lib/supabase-client";
+import { Homebg } from "@/features/home-page/components/homebg";
+import { useSearchParams } from "next/navigation";
+import { useRouter } from "next/router";
+import { useEffect } from "react";
+
+export function MagicLinkPageContent() {
+  const searchParams = useSearchParams();
+  const router = useRouter()
+
+  useEffect(() => {
+    // Extract the magic link code from the URL query parameters
+    const code = searchParams ? searchParams.get('code') : null;
+    if (!code) return;
+
+    handleMagicLink(code);
+  }, [searchParams]);
+
+  const handleMagicLink = async (code: string) => {
+    const supabase = getBrowserClient();
+
+    // Verify the magic link code
+    const {
+      data: { session },
+      error,
+    } = await supabase.auth.verifyOtp({
+      type: 'email',
+      token_hash: code
+    });
+
+    if (error) {
+      console.error('Error verifying magic link:', error);
+      return;
+    }
+
+    if (session) {
+      // Redirect the user to a protected page or dashboard
+      router.push('/panel')
+    }
+  };
+
+  return (
+    <div className="relative w-screen h-screen overflow-hidden">
+      <Homebg />
+    </div>
+  );
+}
