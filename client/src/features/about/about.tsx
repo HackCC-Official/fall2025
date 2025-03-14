@@ -21,9 +21,6 @@ export default function About () {
                     </div>
                     <div className='relative px-8 py-0 sm:py-8 w-full sm:w-1/2 font-mont'>
                     <Image className='-top-1/4 sm:top-0 left-0 -z-10 absolute w-16 md:w-20 2xl:w-28 h-auto' src={Paw} alt='Paw'></Image>
-                    <h1 className='z-10 text-sm sm:text-lg md:text-xl'>Event Features</h1>
-                    <div className='relative px-8 py-0 sm:py-8 w-full sm:w-1/2 font-mont'>
-                    <Image className='-top-1/4 sm:top-0 left-0 -z-10 absolute w-16 md:w-20 2xl:w-28 h-auto' src={Paw} alt='Paw'></Image>
                     <h1 className='z-10 font-medium text-sm sm:text-lg md:text-xl'>Event Features</h1>
                         <ul className='z-10 text-xs md:text-base 2xl:text-lg [&>*]:my-2'>
                             <li>• Fun, collaborative, and supportive community of hackers</li>
