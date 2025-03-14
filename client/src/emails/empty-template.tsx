@@ -14,54 +14,22 @@ import {
 } from "@react-email/components";
 import { OutreachTeamDto } from "../features/outreach/types/outreach-team";
 
-/**
- * Props for the empty email template
- */
 interface EmptyEmailProps {
-    /**
-     * The name of the recipient
-     */
     recipientName: string;
-
-    /**
-     * The custom email content
-     */
     emailContent: string;
-
-    /**
-     * Information about the outreach team member sending the email
-     */
     sender: OutreachTeamDto;
-
-    /**
-     * Organization's logo URL
-     */
     organizationLogo?: string;
-
-    /**
-     * Social media links to include in the signature
-     */
     socialLinks?: {
-        /**
-         * URLs to various social media profiles
-         */
         [key: string]: string;
     };
 }
 
-/**
- * EmptyEmail component for HackCC outreach
- *
- * This template is designed as a general-purpose email template that can be used
- * for various types of communication with custom content.
- */
 export const EmptyEmail = ({
     recipientName,
     emailContent,
     sender,
     socialLinks = {},
 }: EmptyEmailProps) => {
-    // Format the sender's year and major for better readability
     const formattedYearAndMajor = `${sender.year} ${sender.major}`;
 
     return (
@@ -70,7 +38,6 @@ export const EmptyEmail = ({
             <Preview>Message from HackCC</Preview>
             <Body style={main}>
                 <Container style={container}>
-                    {/* Header */}
                     <Section style={header}>
                         <Img
                             src={`https://minio.hackcc.net/public-bucket/logo.svg`}
@@ -82,10 +49,8 @@ export const EmptyEmail = ({
                     </Section>
 
                     <Section style={content}>
-                        {/* Email Body */}
                         <Text style={paragraph}>Hi {recipientName},</Text>
 
-                        {/* Render the custom email content */}
                         <div
                             style={paragraph}
                             dangerouslySetInnerHTML={{ __html: emailContent }}

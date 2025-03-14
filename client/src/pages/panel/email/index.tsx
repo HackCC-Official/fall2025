@@ -65,7 +65,6 @@ export default function EmailPage() {
     console.log("Outreach Team Response:", outreachTeamResponse);
     console.log("Interested Users Response:", interestedUsersResponse);
 
-    // Transform outreach team data into account format
     const allAccounts = React.useMemo(() => {
         const outreachTeamArray = outreachTeamResponse?.data?.data || [];
         return outreachTeamArray.map((member: OutreachTeamDto) => ({
@@ -75,7 +74,6 @@ export default function EmailPage() {
         }));
     }, [outreachTeamResponse]);
 
-    // Transform interested users into Mail format
     const interestedUsersMails = React.useMemo(() => {
         const interestedUsers = interestedUsersResponse || [];
         console.log("Interested Users being transformed:", interestedUsers);
@@ -100,7 +98,6 @@ export default function EmailPage() {
         return mails;
     }, [interestedUsersResponse]);
 
-    // Handle selected account persistence
     const [selectedAccount, setSelectedAccount] = React.useState<string>(() => {
         if (typeof window !== "undefined") {
             return localStorage.getItem("selectedOutreachAccount") || "";
@@ -113,7 +110,6 @@ export default function EmailPage() {
         localStorage.setItem("selectedOutreachAccount", email);
     }, []);
 
-    // Filter emails based on selected account
     const filteredEmails = React.useMemo(() => {
         return emails.filter((email) => {
             return selectedAccount ? email.from === selectedAccount : true;

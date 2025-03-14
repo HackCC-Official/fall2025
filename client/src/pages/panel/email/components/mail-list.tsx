@@ -12,11 +12,6 @@ interface MailListProps {
     items: Mail[];
 }
 
-/**
- * MailList Component - Displays a scrollable list of email messages
- * @param {MailListProps} props - Component properties containing array of mail items
- * @returns {JSX.Element} Rendered mail list component
- */
 export default function MailList({ items = [] }: MailListProps) {
     const [mail, setMail] = useMail();
 
@@ -88,11 +83,6 @@ export default function MailList({ items = [] }: MailListProps) {
     );
 }
 
-/**
- * Determines the badge variant based on the label type
- * @param {string} label - The label to determine variant for
- * @returns {ComponentProps<typeof Badge>["variant"]} The badge variant to use
- */
 function getBadgeVariantFromLabel(
     label: string
 ): ComponentProps<typeof Badge>["variant"] {
