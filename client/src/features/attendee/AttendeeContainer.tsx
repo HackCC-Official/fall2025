@@ -24,7 +24,7 @@ export default function AttendeeContainer() {
             <Image src={pinkcloud1} className="-bottom-[35px] md:-bottom-[40px] 2xl:-bottom-[50px] -left-10 z-40 absolute w-[200px] sm:w-[250px] md:w-[300px] 2xl:w-[350px] h-auto pointer-events-none" alt="cloud"></Image>
             <Image src={pinkcloud2} className="-bottom-[50px] -left-10 z-0 absolute w-[150px] sm:w-[200px] md:w-[250px] 2xl:w-[300px] h-auto pointer-events-none" alt="cloud"></Image>
             <Image src={pinkcloud3} className="-right-10 -bottom-[60px] md:-bottom-[75px] 2xl:-bottom-[115px] z-40 absolute w-[200px] sm:w-[250px] md:w-[300px] 2xl:w-[450px] h-auto animate-swaying ease-linear pointer-events-none" alt="cloud"></Image>
-            <div className="relative mx-auto w-full max-w-[1200px] text-center">
+            <div className="relative mx-auto w-full max-w-[1400px] text-center">
                 <Title text="What past attendees have said"></Title>
                 <div className="flex md:flex-row flex-col justify-center items-center text-left">
                     <AttendeeCard name="Minh Truong" text="As a hackathon specifically centered around community college students, I thought it was awesome to see so many students who were just like me. Everyone came up with different and unique ideas and mentors cared about making sure we felt confident and engaged." imgPath={minh}/>
@@ -32,7 +32,5 @@ export default function AttendeeContainer() {
                 </div>
             </div>
         </div>
-
-
     );
 }

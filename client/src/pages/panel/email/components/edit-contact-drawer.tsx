@@ -90,12 +90,10 @@ export default function EditContactDrawer({
     const queryClient = useQueryClient();
     const [error, setError] = React.useState<string | null>(null);
 
-    // Log when the component renders - moved before conditional return
     React.useEffect(() => {
         console.log("EditContactDrawer rendered, open:", open);
     }, [open]);
 
-    // Create form with default values
     const form = useForm<FormSchema>({
         resolver: zodResolver(contactFormSchema),
         defaultValues: {
@@ -124,12 +122,10 @@ export default function EditContactDrawer({
         },
     });
 
-    // Return early if no contact - moved after all hooks are called
     if (!contact) {
         return null;
     }
 
-    // Define the submit handler
     const handleSubmit = async (values: FormSchema) => {
         console.log("Form submitted with values:", values);
         setIsSubmitting(true);
@@ -144,7 +140,6 @@ export default function EditContactDrawer({
                 type: values.type || "other",
             };
 
-            // Log the value being sent to ensure it's correct
             console.log("Been contacted value:", contactData.been_contacted);
 
             console.log("Updating contact with data:", contactData);

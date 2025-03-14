@@ -79,7 +79,6 @@ const contactFormSchema = z
         industry: z.string().optional(),
     })
     .transform((data) => {
-        // First cast to unknown to avoid direct type assertion errors
         const cleaned = { ...data } as unknown as Record<
             string,
             string | number
@@ -132,7 +131,6 @@ export default function AddContactDrawer({
     const onSubmit = async (values: ContactFormValues) => {
         setIsSubmitting(true);
         try {
-            // Clean values and convert to ContactDto
             const entries = Object.entries(values).filter(([, value]) => {
                 if (typeof value === "string") return value.trim() !== "";
                 if (typeof value === "number") return !isNaN(value);
@@ -151,12 +149,10 @@ export default function AddContactDrawer({
                 {} as Record<string, string | number>
             );
 
-            // Extract domain from email if present
             if (typeof cleanedValues.email === "string") {
                 cleanedValues.domain_name = cleanedValues.email.split("@")[1];
             }
 
-            // Add required fields
             const contactData: Partial<ContactDto> = {
                 ...Object.fromEntries(
                     Object.entries(cleanedValues).map(([key, value]) => [
@@ -166,7 +162,7 @@ export default function AddContactDrawer({
                             : String(value),
                     ])
                 ),
-                type: (cleanedValues.type as string) || "other", // Default type if not provided
+                type: (cleanedValues.type as string) || "other",
             };
 
             await createContact(contactData);

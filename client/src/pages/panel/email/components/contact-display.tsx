@@ -20,11 +20,11 @@ export default function ContactDisplay({ contact }: ContactDisplayProps) {
 
     if (!contact) {
         return (
-            <div className="h-full flex flex-col items-center justify-center text-muted-foreground p-8">
-                <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center mb-4">
-                    <User className="h-6 w-6" />
+            <div className="flex flex-col justify-center items-center p-8 h-full text-muted-foreground">
+                <div className="flex justify-center items-center bg-muted mb-4 rounded-full w-12 h-12">
+                    <User className="w-6 h-6" />
                 </div>
-                <h3 className="font-medium mb-1">No Contact Selected</h3>
+                <h3 className="mb-1 font-medium">No Contact Selected</h3>
                 <p className="text-sm text-center">
                     Select a contact from the list to view their details
                 </p>
@@ -33,11 +33,11 @@ export default function ContactDisplay({ contact }: ContactDisplayProps) {
     }
 
     return (
-        <div className="flex flex-col h-full min-h-0 overflow-auto p-6">
+        <div className="flex flex-col p-6 h-full min-h-0 overflow-auto">
             <div className="flex flex-col gap-4 mb-6">
-                <div className="flex items-center justify-between">
+                <div className="flex justify-between items-center">
                     <div className="flex flex-col gap-1">
-                        <h2 className="text-2xl font-semibold">
+                        <h2 className="font-semibold text-2xl">
                             {contact.first_name} {contact.last_name}
                         </h2>
                         <div className="flex items-center gap-2">
@@ -60,36 +60,36 @@ export default function ContactDisplay({ contact }: ContactDisplayProps) {
                         variant="outline"
                         className="flex items-center gap-2"
                     >
-                        <Mail className="h-4 w-4" />
+                        <Mail className="w-4 h-4" />
                         Send Email
                     </Button>
                 </div>
             </div>
 
-            <div className="grid gap-6">
+            <div className="gap-6 grid">
                 <Card>
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2">
-                            <User className="h-4 w-4" />
+                            <User className="w-4 h-4" />
                             Contact Information
                         </CardTitle>
                     </CardHeader>
-                    <CardContent className="grid gap-4">
-                        <div className="grid gap-1">
+                    <CardContent className="gap-4 grid">
+                        <div className="gap-1 grid">
                             <div className="flex items-center gap-2 text-sm">
-                                <Mail className="h-4 w-4 text-muted-foreground" />
+                                <Mail className="w-4 h-4 text-muted-foreground" />
                                 <span>{contact.email}</span>
                             </div>
                             {contact.phone_number && (
                                 <div className="flex items-center gap-2 text-sm">
-                                    <Phone className="h-4 w-4 text-muted-foreground" />
+                                    <Phone className="w-4 h-4 text-muted-foreground" />
                                     <span>{contact.phone_number}</span>
                                 </div>
                             )}
                             {contact.linkedin_url && (
                                 <div className="flex items-center gap-2 text-sm">
                                     <svg
-                                        className="h-4 w-4 text-muted-foreground"
+                                        className="w-4 h-4 text-muted-foreground"
                                         xmlns="http://www.w3.org/2000/svg"
                                         viewBox="0 0 24 24"
                                         fill="none"
@@ -124,35 +124,35 @@ export default function ContactDisplay({ contact }: ContactDisplayProps) {
                 <Card>
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2">
-                            <Building2 className="h-4 w-4" />
+                            <Building2 className="w-4 h-4" />
                             Organization Details
                         </CardTitle>
                     </CardHeader>
-                    <CardContent className="grid gap-4">
-                        <div className="grid gap-1">
-                            <p className="text-sm font-medium">Organization</p>
-                            <p className="text-sm text-muted-foreground">
+                    <CardContent className="gap-4 grid">
+                        <div className="gap-1 grid">
+                            <p className="font-medium text-sm">Organization</p>
+                            <p className="text-muted-foreground text-sm">
                                 {contact.organization}
                             </p>
                         </div>
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="gap-4 grid grid-cols-2">
                             {contact.department && (
-                                <div className="grid gap-1">
-                                    <p className="text-sm font-medium">
+                                <div className="gap-1 grid">
+                                    <p className="font-medium text-sm">
                                         Department
                                     </p>
 
-                                    <p className="text-sm text-muted-foreground">
+                                    <p className="text-muted-foreground text-sm">
                                         {contact.department}
                                     </p>
                                 </div>
                             )}
                             {contact.industry && (
-                                <div className="grid gap-1">
-                                    <p className="text-sm font-medium">
+                                <div className="gap-1 grid">
+                                    <p className="font-medium text-sm">
                                         Industry
                                     </p>
-                                    <p className="text-sm text-muted-foreground">
+                                    <p className="text-muted-foreground text-sm">
                                         {contact.industry}
                                     </p>
                                 </div>
@@ -165,12 +165,12 @@ export default function ContactDisplay({ contact }: ContactDisplayProps) {
                     <Card>
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2">
-                                <MapPin className="h-4 w-4" />
+                                <MapPin className="w-4 h-4" />
                                 Location
                             </CardTitle>
                         </CardHeader>
-                        <CardContent className="grid gap-4">
-                            <div className="grid gap-1">
+                        <CardContent className="gap-4 grid">
+                            <div className="gap-1 grid">
                                 {contact.street && (
                                     <p className="text-sm">{contact.street}</p>
                                 )}
@@ -189,14 +189,14 @@ export default function ContactDisplay({ contact }: ContactDisplayProps) {
                 <Card>
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2">
-                            <Globe className="h-4 w-4" />
+                            <Globe className="w-4 h-4" />
                             Additional Information
                         </CardTitle>
                     </CardHeader>
-                    <CardContent className="grid gap-4">
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="grid gap-1">
-                                <p className="text-sm font-medium">
+                    <CardContent className="gap-4 grid">
+                        <div className="gap-4 grid grid-cols-2">
+                            <div className="gap-1 grid">
+                                <p className="font-medium text-sm">
                                     Confidence Score
                                 </p>
                                 <div>

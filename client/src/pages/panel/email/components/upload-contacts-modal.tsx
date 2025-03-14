@@ -51,10 +51,8 @@ export default function UploadContactsModal({
         try {
             await uploadContacts(selectedFile);
 
-            // Invalidate and refetch contacts
             await queryClient.invalidateQueries({ queryKey: ["contacts"] });
 
-            // Reset and close modal
             setSelectedFile(null);
             if (fileInputRef.current) {
                 fileInputRef.current.value = "";

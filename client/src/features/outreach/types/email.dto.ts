@@ -18,14 +18,14 @@ export interface EmailRecipient {
  * Data transfer object for sending a single email
  */
 export interface SendEmailDto {
-    id?: string; // Unique identifier
+    id?: string; 
     from: string;
-    to: Array<string | EmailRecipient>; // Can be either string emails or recipient objects
+    to: Array<string | EmailRecipient>;
     subject: string;
     html: string;
-    createdAt?: string; // Creation timestamp
-    updatedAt?: string; // Update timestamp
-    status?: "delivered" | "sent" | "failed"; // Email delivery status
+    createdAt?: string; 
+    updatedAt?: string; 
+    status?: "delivered" | "sent" | "failed";
 }
 
 /**

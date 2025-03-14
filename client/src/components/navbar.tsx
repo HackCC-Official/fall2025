@@ -29,7 +29,7 @@ export const Navbar = () => {
                 <a onClick={() => {
                             smoothScroll("involvedTab");
                         }}>Get Involved</a>
-                <ApplyButton text="Apply" size="sm" directory="/register"></ApplyButton>
+                <ApplyButton text="Apply" size="sm" directory="/apply"></ApplyButton>
             </div>
             <div className={`${isMenuOpen? 'sm:hidden flex' : 'hidden'} font-mont top-0 left-0 fixed w-screen h-screen bg-white z-50 flex-col justify-center align-center items-center text-center [&>*]:my-2 [&>*]:whitespace-nowrap overflow-hidden`}>
             <a onClick={() => {
@@ -47,7 +47,7 @@ export const Navbar = () => {
                 toggleMenu()
             }}>Get Involved</a>
             <div></div>
-            <ApplyButton text="Apply" size="sm" directory="/register"></ApplyButton>
+            <ApplyButton text="Apply" size="sm" directory="/apply"></ApplyButton>
             </div>
             <h1 className={`${isMenuOpen? 'text-black' : 'text-white'} fixed z-50 top-4 right-4 text-3xl sm:hidden flex`} onClick={() => {toggleMenu()}}>{isMenuOpen ? 'X' : '☰'}</h1>
         </div>

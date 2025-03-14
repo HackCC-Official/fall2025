@@ -16,6 +16,14 @@ export async function createAccountWithInviteLink({ accountDTO } : { accountDTO:
   })
 }
 
+export async function createAccount({ accountDTO } : { accountDTO: AccountDTO }) {
+  return await accountClient.request({
+    method: 'POST',
+    url: 'accounts',
+    data: accountDTO
+  })
+}
+
 export async function deleteAccount({ id } : { id: string }) {
   await accountClient.request({
     method: 'DELETE',

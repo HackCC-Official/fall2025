@@ -61,12 +61,10 @@ const STORAGE_KEY = "selectedOutreachAccount";
 
 type RecipientType = "employers" | "registered" | "interested";
 
-// Update EmailTemplate interface to include type
 interface ExtendedEmailTemplate extends EmailTemplate {
     type: "employers" | "hackers";
 }
 
-// Update recipient interface to include organization and been_contacted
 interface Recipient {
     id: string;
     to: EmailRecipient[];
@@ -75,7 +73,6 @@ interface Recipient {
     been_contacted?: boolean;
 }
 
-// Update EMAIL_TEMPLATES type annotation
 const EMAIL_TEMPLATES: ExtendedEmailTemplate[] = [
     {
         id: "1",
@@ -118,7 +115,6 @@ interface ComposePageProps {
     mails?: Mail[];
 }
 
-// Helper function to extract variables from email content
 const extractVariable = (content: string, variableName: string): string => {
     const regex = new RegExp(`\\[${variableName}\\]\\s*(?:\\n|$)`, "i");
     const match = content.match(regex);
@@ -130,10 +126,8 @@ const extractVariable = (content: string, variableName: string): string => {
 
 export default function ComposePage({ mails = [] }: ComposePageProps) {
     const searchParams = useSearchParams();
-    // Add a ref to track if URL params have been processed
     const paramsProcessedRef = React.useRef(false);
 
-    // State for recipient selection
     const [selectedRecipients, setSelectedRecipients] = React.useState<
         Set<string>
     >(new Set());
@@ -141,7 +135,6 @@ export default function ComposePage({ mails = [] }: ComposePageProps) {
     const [recipientType, setRecipientType] =
         React.useState<RecipientType>("employers");
 
-    // State for email content
     const [selectedTemplate, setSelectedTemplate] =
         React.useState<ExtendedEmailTemplate | null>(null);
     const [emailSubject, setEmailSubject] = React.useState("");
@@ -149,7 +142,6 @@ export default function ComposePage({ mails = [] }: ComposePageProps) {
     const [previewHtml, setPreviewHtml] = React.useState("");
     const [isPreviewOpen, setIsPreviewOpen] = React.useState(false);
 
-    // State for sender account
     const [senderEmail, setSenderEmail] = React.useState<string>(() => {
         if (typeof window !== "undefined") {
             return localStorage.getItem(STORAGE_KEY) || "";
@@ -157,7 +149,6 @@ export default function ComposePage({ mails = [] }: ComposePageProps) {
         return "";
     });
 
-    // Fetch necessary data
     const { data: outreachTeamResponse } = useOutreachTeam();
     const { data: interestedUsers, isLoading: isInterestedLoading } =
         useInterestedUsers();
@@ -167,7 +158,6 @@ export default function ComposePage({ mails = [] }: ComposePageProps) {
         [contactsResponse?.data]
     );
 
-    // Transform outreach team data into account format
     const emailAccounts = React.useMemo(() => {
         const outreachTeamArray = outreachTeamResponse?.data?.data || [];
         return outreachTeamArray.map((member: OutreachTeamDto) => ({
@@ -177,7 +167,6 @@ export default function ComposePage({ mails = [] }: ComposePageProps) {
         }));
     }, [outreachTeamResponse]);
 
-    // Update recipientLists type annotation
     const recipientLists = React.useMemo(() => {
         const employerContacts = contacts.map((contact) => ({
             id: contact.id.toString(),
@@ -219,7 +208,6 @@ export default function ComposePage({ mails = [] }: ComposePageProps) {
         } as Record<RecipientType, Recipient[]>;
     }, [contacts, mails, interestedUsers]);
 
-    // Filter recipients based on type and search query
     const filteredRecipients = React.useMemo(() => {
         const currentList = recipientLists[recipientType];
         return currentList.filter(
@@ -236,7 +224,6 @@ export default function ComposePage({ mails = [] }: ComposePageProps) {
         );
     }, [recipientLists, recipientType, searchQuery]);
 
-    // Calculate selection states
     const areAllFilteredSelected = React.useMemo(() => {
         return (
             filteredRecipients.length > 0 &&
@@ -254,7 +241,6 @@ export default function ComposePage({ mails = [] }: ComposePageProps) {
         );
     }, [filteredRecipients, selectedRecipients, areAllFilteredSelected]);
 
-    // Handlers
     const handleSelectAll = React.useCallback(
         (checked: boolean) => {
             const newSelected = new Set(selectedRecipients);
@@ -303,7 +289,6 @@ export default function ComposePage({ mails = [] }: ComposePageProps) {
         try {
             let previewContent;
             if (recipientType === "employers" && selectedTemplate) {
-                // Use email template renderer for employer emails
                 const renderedEmails = await renderEmailTemplate({
                     templateType: selectedTemplate.name as EmailTemplateType,
                     recipients: contacts.filter((contact) =>
@@ -312,7 +297,6 @@ export default function ComposePage({ mails = [] }: ComposePageProps) {
                     templateData: {
                         sender: selectedTeamMember,
                         emailContent: emailContent,
-                        // Add additional data for Post-Call template
                         ...(selectedTemplate.name === "Post-Call Follow-Up" && {
                             followupDate: extractVariable(
                                 emailContent,
@@ -335,7 +319,6 @@ export default function ComposePage({ mails = [] }: ComposePageProps) {
                 });
                 previewContent = renderedEmails[0];
             } else {
-                // Use EmptyEmail template for hacker emails
                 previewContent = await render(
                     <EmptyEmail
                         recipientName="Preview User"
@@ -381,7 +364,6 @@ export default function ComposePage({ mails = [] }: ComposePageProps) {
             let emailData: SendBatchEmailsDto;
 
             if (recipientType === "employers") {
-                // Handle employer emails
                 const renderedEmails = await renderEmailTemplate({
                     templateType: selectedTemplate?.name as EmailTemplateType,
                     recipients: contacts.filter((contact) =>
@@ -390,7 +372,6 @@ export default function ComposePage({ mails = [] }: ComposePageProps) {
                     templateData: {
                         sender: selectedTeamMember,
                         emailContent: emailContent,
-                        // Add additional data for Post-Call template
                         ...(selectedTemplate?.name ===
                             "Post-Call Follow-Up" && {
                             followupDate: extractVariable(
@@ -464,10 +445,8 @@ export default function ComposePage({ mails = [] }: ComposePageProps) {
                 await sendBatchEmails(emailData);
             }
 
-            // Update been_contacted flag for employers
             if (recipientType === "employers") {
                 try {
-                    // Process in parallel for better performance
                     await Promise.all(
                         selectedRecipientsData.map(async (recipient) => {
                             await updateContact(recipient.id, {
@@ -481,13 +460,11 @@ export default function ComposePage({ mails = [] }: ComposePageProps) {
                         "Error updating employer contact status:",
                         error
                     );
-                    // Don't show error toast here as emails were still sent successfully
                 }
             }
 
             toast.success("Emails sent successfully!");
 
-            // Reset form
             setSelectedRecipients(new Set());
             setSelectedTemplate(null);
             setEmailSubject("");
@@ -505,7 +482,6 @@ export default function ComposePage({ mails = [] }: ComposePageProps) {
             setSelectedTemplate(template);
             setEmailSubject(template.subject);
 
-            // Set default content for email templates
             if (template.name === "Sponsorship Confirmation") {
                 setEmailContent(
                     "Hello [recipient_name],\n\n" +
@@ -548,9 +524,7 @@ export default function ComposePage({ mails = [] }: ComposePageProps) {
         }
     };
 
-    // Handle auto-selection from URL parameters
     React.useEffect(() => {
-        // Skip if we've already processed the params
         if (paramsProcessedRef.current) {
             return;
         }
@@ -559,12 +533,10 @@ export default function ComposePage({ mails = [] }: ComposePageProps) {
         const recipientTypeParam = searchParams?.get("recipientType");
         const toEmail = searchParams?.get("to");
 
-        // Skip if no params are present
         if (!searchParams || (!contactId && !recipientTypeParam && !toEmail)) {
             return;
         }
 
-        // Handle contact selection
         if (contactId) {
             setSelectedRecipients(new Set([contactId]));
             setRecipientType("employers");
@@ -572,7 +544,6 @@ export default function ComposePage({ mails = [] }: ComposePageProps) {
             return;
         }
 
-        // Handle hacker selection
         if (
             recipientTypeParam &&
             (recipientTypeParam === "registered" ||
@@ -611,7 +582,6 @@ export default function ComposePage({ mails = [] }: ComposePageProps) {
 
     return (
         <div className="container mx-auto py-10 max-w-7xl">
-            {/* Breadcrumb Navigation */}
             <div className="flex items-center gap-2 mb-6 text-sm">
                 <Link
                     href="/panel/email"
@@ -651,7 +621,6 @@ export default function ComposePage({ mails = [] }: ComposePageProps) {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                {/* Left Column - Recipients */}
                 <div className="lg:col-span-5">
                     <Card>
                         <CardHeader className="border-b">
@@ -825,7 +794,6 @@ export default function ComposePage({ mails = [] }: ComposePageProps) {
                     </Card>
                 </div>
 
-                {/* Right Column - Email Content */}
                 <div className="lg:col-span-7">
                     <Card>
                         <CardHeader className="border-b">
@@ -929,7 +897,6 @@ export default function ComposePage({ mails = [] }: ComposePageProps) {
                         </CardContent>
                     </Card>
 
-                    {/* Preview Dialog */}
                     <Dialog
                         open={isPreviewOpen}
                         onOpenChange={setIsPreviewOpen}

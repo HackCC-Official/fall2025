@@ -35,10 +35,6 @@ interface UnsubscribePageProps {
     email?: string;
 }
 
-/**
- * Unsubscribe page component that handles email unsubscription requests
- * Accessed via /mailing/unsubscribe?email={email}
- */
 export default function UnsubscribePage({
     email: initialEmail,
 }: UnsubscribePageProps) {
@@ -47,15 +43,11 @@ export default function UnsubscribePage({
     const [isUnsubscribed, setIsUnsubscribed] = React.useState<boolean>(false);
     const [error, setError] = React.useState<string | null>(null);
 
-    // Get email from query parameters
     const email = (router.query.email as string) || initialEmail;
 
-    /**
-     * Handles the unsubscribe action by removing the user from interested users list
-     */
     const handleUnsubscribe = async () => {
         if (!email) {
-            toast.error("No email address provided");
+            toast.error("No email address provided!");
             return;
         }
 
@@ -63,7 +55,6 @@ export default function UnsubscribePage({
         setError(null);
 
         try {
-            // Use the outreach API to delete the interested user by email
             await deleteInterestedUser(email);
 
             setIsUnsubscribed(true);
@@ -77,7 +68,6 @@ export default function UnsubscribePage({
         }
     };
 
-    // Animation variants for Framer Motion
     const containerVariants = {
         hidden: { opacity: 0 },
         visible: {
@@ -473,7 +463,6 @@ export default function UnsubscribePage({
 
     return (
         <div className="relative flex bg-royalpurple w-full min-h-screen overflow-hidden text-white">
-            {/* Background Image */}
             <div className="z-0 absolute inset-0">
                 <Image
                     src={BGImage}
@@ -487,7 +476,6 @@ export default function UnsubscribePage({
                 <div className="absolute inset-0 bg-gradient-to-b from-royalpurple/30 to-royalpurple/60 backdrop-blur-[2px]"></div>
             </div>
 
-            {/* Floating elements for visual interest */}
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
                 <motion.div
                     variants={floatingElementVariants}
@@ -507,7 +495,6 @@ export default function UnsubscribePage({
                     className="top-1/3 left-1/4 absolute bg-pink-500/10 blur-3xl rounded-full w-20 sm:w-24 h-20 sm:h-24"
                 ></motion.div>
 
-                {/* Additional floating elements for more visual interest */}
                 <motion.div
                     animate={{
                         y: [0, -15, 0],
@@ -535,9 +522,7 @@ export default function UnsubscribePage({
                 ></motion.div>
             </div>
 
-            {/* Main Content */}
             <div className="z-10 flex flex-col justify-center items-center mx-auto px-4 py-8 sm:py-0 w-full max-w-md">
-                {/* Logo */}
                 <motion.div
                     initial={{ y: -50, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
@@ -569,11 +554,9 @@ export default function UnsubscribePage({
                     </motion.div>
                 </motion.div>
 
-                {/* Card Content */}
                 <AnimatePresence mode="wait">{renderContent()}</AnimatePresence>
             </div>
 
-            {/* Footer */}
             <motion.div
                 initial={{ y: 50, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
@@ -585,7 +568,7 @@ export default function UnsubscribePage({
                 }}
                 className="bottom-4 sm:bottom-5 z-10 absolute inset-x-0 flex flex-col justify-center items-center mx-auto"
             >
-                <Socials baseColor={""} hoverColor={""}  />
+                <Socials baseColor={""} hoverColor={""} />
                 <div className="mt-2 text-white/80 text-xs sm:text-sm">
                     <p>© 2025 HackCC</p>
                 </div>

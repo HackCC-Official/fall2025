@@ -15,68 +15,20 @@ import {
 } from "@react-email/components";
 import { OutreachTeamDto } from "../../features/outreach/types/outreach-team";
 
-/**
- * Props for the follow-up email template
- */
 interface FollowUpEmailProps {
-    /**
-     * The name of the company being contacted
-     */
     companyName: string;
-
-    /**
-     * The name of the person being contacted at the company
-     */
     recipientName: string;
-
-    /**
-     * The venue where the hackathon will take place
-     */
     venue: string;
-
-    /**
-     * Information about the outreach team member sending the email
-     */
     sender: OutreachTeamDto;
-
-    /**
-     * The position of the sender at HackCC
-     */
     positionAtHackCC: string;
-
-    /**
-     * The town/city where the event will be held
-     */
     location: string;
-
-    /**
-     * Organization's logo URL
-     */
     organizationLogo?: string;
-
-    /**
-     * Social media links to include in the signature
-     */
     socialLinks: {
-        /**
-         * URLs to various social media profiles
-         */
         [key: string]: string;
     };
-
-    /**
-     * Optional custom email body content
-     * When provided, will replace the default email body while preserving variable replacements
-     */
     customEmailBody?: string;
 }
 
-/**
- * FollowUpEmail component for HackCC outreach
- *
- * This template is designed for sending follow-up emails to potential sponsors
- * who were previously contacted about sponsorship opportunities.
- */
 export const FollowUpEmail = ({
     companyName,
     recipientName,
@@ -86,14 +38,11 @@ export const FollowUpEmail = ({
     socialLinks,
     customEmailBody,
 }: FollowUpEmailProps) => {
-    // Format the sender's year and major for better readability
     const formattedYearAndMajor = `${sender.year} ${sender.major}`;
 
-    // Parse custom email body if provided
     const renderCustomEmailBody = () => {
         if (!customEmailBody) return null;
 
-        // Replace variable placeholders with actual values
         const parsedContent = customEmailBody
             .replace(/\[recipient_name\]/g, recipientName)
             .replace(/\[company_name\]/g, companyName)
@@ -103,7 +52,6 @@ export const FollowUpEmail = ({
             .replace(/\[venue\]/g, venue)
             .replace(/\[location\]/g, location);
 
-        // Split paragraphs and render them
         return parsedContent.split("\n\n").map((paragraphText, index) => (
             <Text key={index} style={paragraph}>
                 {paragraphText}
@@ -117,7 +65,6 @@ export const FollowUpEmail = ({
             <Preview>Meet the best students in {location} this May</Preview>
             <Body style={main}>
                 <Container style={container}>
-                    {/* Header */}
                     <Section style={header}>
                         <Img
                             src={`https://minio.hackcc.net/public-bucket/logo.svg`}
@@ -129,7 +76,6 @@ export const FollowUpEmail = ({
                     </Section>
 
                     <Section style={content}>
-                        {/* Email Subject */}
                         <Heading style={subjectLine}>
                             Re: Meet the best students in {location} this May
                         </Heading>
@@ -243,7 +189,7 @@ const container = {
 };
 
 const header = {
-    backgroundColor: "#1e40af", // Deep blue header
+    backgroundColor: "#1e40af",
     padding: "20px 30px",
     display: "flex",
     justifyContent: "space-between",
@@ -262,7 +208,7 @@ const subjectLine = {
     fontSize: "24px",
     lineHeight: "1.3",
     fontWeight: "700",
-    color: "#1e40af", // Matching header color
+    color: "#1e40af",
     margin: "0 0 24px",
 };
 
