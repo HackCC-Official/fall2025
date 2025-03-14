@@ -10,6 +10,10 @@ import HotAirBalloon from "../../../../public/Hot Air Balloon.png"
 import Image from 'next/image';
 import { AlertCircle } from 'lucide-react';
 import { resetPassword } from '@/features/auth/utils/auth-browser';
+import { DarkCard } from '@/components/dark-card';
+import { AuthInput } from '@/components/ui/input';
+import { AuthCardSkeletonDefault } from '@/features/auth/components/auth-card-skeleton';
+import { AuthButton } from '@/features/auth/components/auth-btn';
 
 interface TokenParams {
   access_token: string;
@@ -108,7 +112,7 @@ export function OnboardPageContent() {
         <div className="z-10 mt-4 mb-8 font-bagel text-white text-3xl md:text-4xl text-center">
           <h1>Onboard</h1>
         </div>
-          <div className="relative flex flex-col bg-black bg-opacity-20 px-7 py-7 rounded-3xl w-[275px] sm:w-[350px] font-mont text-xl text-center">
+          <DarkCard>
               {error && (
                   <div className="flex items-center gap-2 bg-red-50 mb-4 p-3 border border-red-200 rounded-md text-red-600 text-sm">
                       <AlertCircle className="w-4 h-4" />
@@ -118,57 +122,43 @@ export function OnboardPageContent() {
                   {isClient ? (
                       <form className="space-y-4">
                           <div className="space-y-2">
-                              <input
-                                  className="bg-white sm:mr-3 md:mr-5 mb-3 sm:mb-0 px-4 py-2 rounded-md w-full text-black text-center"
-                                  id="password"
-                                  type="password"
-                                  placeholder="Password"
-                                  value={password}
-                                  onChange={(e) =>
-                                      setPassword(e.currentTarget.value)
-                                  }
-                                  required
-                              />
+                            <AuthInput
+                              id="password"
+                              type="password"
+                              placeholder="Password"
+                              value={password}
+                              onChange={(e) =>
+                                  setPassword(e.target.value)
+                              }
+                              required
+                            />
                           </div>
 
                           <div className="space-y-2">
-                              <input
-                                  className="bg-white sm:mr-3 md:mr-5 mb-3 sm:mb-0 px-4 py-2 rounded-md w-full text-black text-center"
-                                  id="confirmedpassword"
-                                  type="password"
-                                  placeholder="Confirmed Password"
-                                  value={confirmPassword}
-                                  onChange={(e) =>
-                                      setConfirmPassword(e.target.value)
-                                  }
-                                  required
-                              />
+                            <AuthInput
+                                id="confirmpassword"
+                                type="confirmpassword"
+                                placeholder="Confirmed Password"
+                                value={password}
+                                onChange={(e) =>
+                                    setConfirmPassword(e.target.value)
+                                }
+                                required
+                            />
                           </div>
 
-                          <button
+                          <AuthButton
                               type='button'
                               onClick={handleSubmit}
-                              className="bg-navyblue hover:bg-hoverpurple py-2 rounded-md w-full text-white text-center text-nowrap cursor-pointer"
-                              disabled={isLoading}
-                          >
-                              {isLoading ? "Onboarding..." : "Set password"}
-                          </button>
+                              text="Set Password"
+                              loadingText="Onboarding..."
+                              isLoading={isLoading}
+                          />
                       </form>
                   ) : (
-                      <div className="space-y-4 animate-pulse">
-                          <div className="space-y-2">
-                              <div className="bg-gray-200 rounded-md h-10"></div>
-                          </div>
-                          <div className="space-y-2">
-                              <div className="bg-gray-200 rounded-md h-10"></div>
-                              <div className="flex justify-end">
-                                  <div className="bg-gray-200 rounded w-28 h-4"></div>
-                              </div>
-                          </div>
-                          <div className="bg-gray-200 rounded-md h-10"></div>
-                      </div>
+                      <AuthCardSkeletonDefault />
                   )}
-          </div>
+          </DarkCard>
       </div>
     </div>
   );  

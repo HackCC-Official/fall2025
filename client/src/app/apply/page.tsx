@@ -1,7 +1,5 @@
 "use client";
 
-import Image from "next/image";
-import skybg from '../../../public/BG Image.png'
 import { SkyFixed } from "@/components/sky";
 import { FormCard } from "@/features/application/components/form-card";
 import { Logo } from "@/components/logo";
