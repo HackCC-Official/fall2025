@@ -1,9 +1,7 @@
 import Image from "next/image"
 import React from "react"
 import { Socials } from "../../../components/socials"
-import { bagel_Fat_One, montserrat_Alternates } from "../../../app/styles/fonts"
 import CatCloudCluster from "../../../../public/Cat Cloud Cluster.png"
-
 import BalloonCat from "../../../../public/Baloon Cat 4.png"
 import DarkCloud from "../../../../public/DarkCloudGroup.png"
 import { ApplyButton } from "@/components/applybutton"
@@ -12,7 +10,7 @@ import { ApplyButton } from "@/components/applybutton"
 //<Image className="" src={BackgroundDarkCloud} alt="Back CLoud"></Image>
 export default function Footer() {
     return (
-        <div className="relative bg-bgpurple w-full overflow-hidden -mt-[5px]">
+        <div className="relative bg-bgpurple -mt-[5px] w-full overflow-hidden">
             
             <Image src={"/footerbg.png"} className='z-0 absolute w-screen max-w-full object-cover 2xl:object-fill pointer-events-none' alt="bg" fill/>
             
@@ -20,8 +18,8 @@ export default function Footer() {
                 <div className="relative">
                 <Image className="-top-[100px] md:-top-[125px] lg:-top-[125px] -left-32 md:-left-48 z-10 absolute w-48 md:w-52 lg:w-72 h-auto animate-bobbing ease-linear pointer-events-none" src={BalloonCat} alt="cat" />
                     <div className="flex flex-col items-center overflow-hidden" >
-                        <h2 className={`text-white  text-[3rem] ${bagel_Fat_One.className}  z-10 md:text-[4rem] lg:text-[5rem] xl:text-[6rem]`}>Apply</h2>
-                        <h3 className={`text-white text-[0.8rem] ${montserrat_Alternates.className} z-10 md:text-[1rem] lg:text-[1.4rem] xl:text-[1.6rem]`}>Apply to register as a participant</h3>
+                        <h2 className={`text-white  text-[3rem] font-bagel  z-10 md:text-[4rem] lg:text-[5rem] xl:text-[6rem]`}>Apply</h2>
+                        <h3 className={`text-white text-[0.8rem] font-mont z-10 md:text-[1rem] lg:text-[1.4rem] xl:text-[1.6rem]`}>Apply to register as a participant</h3>
                         <ApplyButton text="Apply now" size="lg"></ApplyButton>
                     </div>
                 </div>
@@ -31,7 +29,7 @@ export default function Footer() {
                     <Image src={"/logo.png"} width={68} height={48} alt='logo' className="z-10 lg:ml-20 w-[40px] sm:w-[60px] h-auto pointer-events-none"></Image> 
                     <div className="flex items-center mr-5 lg:mr-20 xl:mr-40 2xl:mr-60">
                         <Socials baseColor="text-white" hoverColor="hover:text-navyblue"/>
-                        <p className={`z-10 text-[0.6rem] lg:text-[0.8rem] ${montserrat_Alternates.className}`}>© 2025 HackCC</p>
+                        <p className={`z-10 text-[0.6rem] lg:text-[0.8rem] font-mont`}>© 2025 HackCC</p>
                     </div>
                     
                 </div>

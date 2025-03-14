@@ -7,8 +7,6 @@ import PinkClusterR from "../../../public/Pink Cloud Cluster.png"
 import PinkPawL from "../../../public/Pink Paw.png"
 import PinkPawR from "../../../public/Pink Paw 2.png"
 
-
-import { bagel_Fat_One, montserrat_Alternates } from "@/app/styles/fonts"
 import { ApplyButton } from "@/components/applybutton"
 
 
@@ -25,21 +23,21 @@ export default function VolunteerJudgeContainer() {
             <div className="flex flex-col w-full h-full">
                 <div className="z-50 flex mx-auto mt-[50px] w-[90%] max-w-[1300px]">
                     <div className="flex flex-col items-center mx-auto">
-                        <h2 className={`text-[1.5rem] lg:text-[3rem] ${bagel_Fat_One.className} text-white mb-4`}>Get Involved</h2>
-                        <h3 className={`text-[1rem] lg:text-[1.3rem] ${montserrat_Alternates.className} text-center text-white mb-10`}>Interest in judging or being a volunteer</h3>
+                        <h2 className={`text-[1.5rem] lg:text-[3rem] font-bagel text-white mb-4`}>Get Involved</h2>
+                        <h3 className={`text-[1rem] lg:text-[1.3rem] font-mont text-center text-white mb-10`}>Interest in judging or being a volunteer</h3>
                     </div>
                 </div>
                 <div className="z-50 flex flex-wrap md:flex-nowrap items-around md:gap-10 mx-auto w-[90%] max-w-[1300px] h-[70%] md:h-[70%]">
                     <div className="flex flex-col justify-center items-center bg-glass backdrop-blur-md mx-auto my-auto mb-5 md:mb-0 px-5 rounded-[20px] w-[90%] md:w-[50%] h-[375px] lg:h-[425px] text-center">
                         <Image src={PinkPawL} alt="paw" className="mb-5 w-[75px] lg:w-[100px] h-auto pointer-events-none"></Image>
-                        <h2 className={`${bagel_Fat_One.className} lg:text-[2rem] text-white`}>Volunteer</h2>
-                        <h3 className={`${montserrat_Alternates.className} text-[0.7rem] lg:text-[1rem] text-white h-[40px] max-w-[350px] mx-3`}>Interested in helping at the event? Apply to be a volunteer.</h3>
+                        <h2 className={`font-bagel lg:text-[2rem] text-white`}>Volunteer</h2>
+                        <h3 className={`font-mont text-[0.7rem] lg:text-[1rem] text-white h-[40px] max-w-[350px] mx-3`}>Interested in helping at the event? Apply to be a volunteer.</h3>
                         <ApplyButton text="Apply to Volunteer" size="md"></ApplyButton>
                     </div>
                     <div className="flex flex-col justify-center items-center bg-glass backdrop-blur-md mx-auto my-auto px-5 rounded-[20px] w-[90%] md:w-[50%] h-[375px] lg:h-[425px] text-center">
                         <Image src={PinkPawR} alt="paw" className="mb-5 w-[125px] lg:w-[150px] h-auto pointer-events-none"></Image>
-                        <h2 className={`${bagel_Fat_One.className} lg:text-[2rem] text-white`}>Become a Judge</h2>
-                        <h3 className={`${montserrat_Alternates.className} text-[0.7rem] lg:text-[1rem]  text-white max-w-[350px] mx-3`}>Help judge event submissions to determine the top projects from the event.</h3>
+                        <h2 className={`font-bagel lg:text-[2rem] text-white`}>Become a Judge</h2>
+                        <h3 className={`font-mont text-[0.7rem] lg:text-[1rem]  text-white max-w-[350px] mx-3`}>Help judge event submissions to determine the top projects from the event.</h3>
                         <ApplyButton text="Apply to Judge" size="md"></ApplyButton>
                     </div> 
                 </div>
