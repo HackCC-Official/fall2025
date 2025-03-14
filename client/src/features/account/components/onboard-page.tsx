@@ -11,7 +11,7 @@ import Image from 'next/image';
 import { AlertCircle } from 'lucide-react';
 import { resetPassword } from '@/features/auth/utils/auth-browser';
 import { DarkCard } from '@/components/dark-card';
-import { AuthInput } from '@/components/ui/input';
+import { AuthInput } from "@/features/auth/components/auth-input";
 import { AuthCardSkeletonDefault } from '@/features/auth/components/auth-card-skeleton';
 import { AuthButton } from '@/features/auth/components/auth-btn';
 
@@ -72,33 +72,32 @@ export function OnboardPageContent() {
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     if (password !== confirmPassword) {
       setError('Password doesn\'t match, please try again')
       return;
     }
+    setError("");
+    setIsLoading(true);
 
-      e.preventDefault();
-      setError("");
-      setIsLoading(true);
+    try {
+        const { error: authError } = await resetPassword(password);
 
-      try {
-          const { error: authError } = await resetPassword(password);
-
-          if (authError) {
-              setError(
-                  authError.message ||
-                      "Failed to onboard. Contact the administrators"
-              );
-              console.error("Error onboarding in:", authError);
-          }
-          // Redirect the user to a protected page or dashboard
-          router.push('/panel')
-      } catch (err) {
-          setError("An unexpected error occurred. Please try again.");
-          console.error("Onboarding error:", err);
-      } finally {
-          setIsLoading(false);
-      }
+        if (authError) {
+            setError(
+                authError.message ||
+                    "Failed to onboard. Contact the administrators"
+            );
+            console.error("Error onboarding in:", authError);
+        }
+        // Redirect the user to a protected page or dashboard
+        router.push('/panel')
+    } catch (err) {
+        setError("An unexpected error occurred. Please try again.");
+        console.error("Onboarding error:", err);
+    } finally {
+        setIsLoading(false);
+    }
   };
 
   return (
@@ -148,7 +147,7 @@ export function OnboardPageContent() {
                           </div>
 
                           <AuthButton
-                              type='button'
+                              type='submit'
                               onClick={handleSubmit}
                               text="Set Password"
                               loadingText="Onboarding..."
