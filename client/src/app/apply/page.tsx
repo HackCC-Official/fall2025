@@ -1,8 +1,8 @@
 "use client";
 
-import Image from "next/image";
-import Logo from "../../../public/Logo.svg"
-import skybg from '../../../public/BG Image.png'
+import { SkyFixed } from "@/components/sky";
+import { FormCard } from "@/features/application/components/form-card";
+import { Logo } from "@/components/logo";
 
 
 
@@ -10,20 +10,24 @@ export default function ApplyPage() {
     
     return (
         <div className="relative w-screen h-screen overflow-x-hidden">
-            <div>
-                <Image className='fixed max-w-full w-screen h-screen t-0 object-cover -z-10' src={skybg} alt='Sky Background'></Image>
-            </div>
+            <SkyFixed />
             <div className="flex flex-col justify-center items-center mx-auto mt-24 text-white">
-            <div className="relative flex">
-                    <Image className="2xl:h-56 lg:h-48 md:h-48 sm:h-48 h-40 w-auto ml-[5%] z-10" src={Logo} alt="HackCC Logo"></Image>
+                <div className="relative flex">
+                    <Logo />
                 </div>
-                <div className="font-bagel mt-4 mb-16 text-center md:text-4xl sm:text-3xl text-2xl z-10 flex sm:flex-row flex-col">
+                <div className="z-10 flex sm:flex-row flex-col mt-4 mb-16 font-bagel text-2xl sm:text-3xl md:text-4xl text-center">
                     <p>2025 Application</p>
                 </div>
             </div>
-            <div className="bg-white w-[1100px] max-w-[90%] h-[3000px] mx-auto mb-24 rounded-3xl">
-                {/* FORM GOES HERE */}
-            </div>
+            <FormCard className="p-16 font-mont">
+                <h1 className="font-bagel text-[2rem] text-center">Thank you for Applying!</h1>
+                <p className="mt-2 px-20 font-semibold text-muted-foreground text-sm text-center">
+                    Please tell us a little about you, your team and the project you have in mind to work on. Our team will collect applications from March 10 - April 22, 2025.
+                </p>
+                <p className="mt-4 text-sm text-center italic">
+                    All Fields Required
+                </p>
+            </FormCard>
         </div>
     );
 }
