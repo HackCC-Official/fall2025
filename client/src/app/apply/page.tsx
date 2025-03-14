@@ -7,7 +7,6 @@ import { Logo } from "@/components/logo";
 
 
 export default function ApplyPage() {
-    
     return (
         <div className="relative w-screen h-screen overflow-x-hidden">
             <SkyFixed />
