@@ -47,7 +47,7 @@ export default function UnsubscribePage({
 
     const handleUnsubscribe = async () => {
         if (!email) {
-            toast.error("No email address provided");
+            toast.error("No email address provided!");
             return;
         }
 
