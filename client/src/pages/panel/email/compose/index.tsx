@@ -24,7 +24,17 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { CircleUser, ChevronRight, MinusCircle } from "lucide-react";
+import {
+    CircleUser,
+    ChevronRight,
+    MinusCircle,
+    ChevronLeft,
+    Users,
+    Building,
+    Search,
+    ChevronDown,
+    X,
+} from "lucide-react";
 import Link from "next/link";
 import { useOutreachTeam } from "@/hooks/use-outreach-team";
 import type { OutreachTeamDto } from "@/features/outreach/types/outreach-team";
@@ -32,6 +42,7 @@ import {
     sendBatchEmails,
     sendEmail,
     updateContact,
+    searchContacts,
 } from "@/features/outreach/api/outreach";
 import type {
     EmailRecipient,
@@ -56,6 +67,8 @@ import {
     type EmailTemplateType,
 } from "@/lib/email/email-renderer";
 import { useSearchParams } from "next/navigation";
+import type { ContactDto } from "@/features/outreach/types/contact.dto";
+import { debounce } from "lodash";
 
 const STORAGE_KEY = "selectedOutreachAccount";
 
@@ -70,6 +83,7 @@ interface Recipient {
     to: EmailRecipient[];
     labels: string[];
     organization?: string;
+    department?: string;
     been_contacted?: boolean;
 }
 
@@ -124,6 +138,180 @@ const extractVariable = (content: string, variableName: string): string => {
     return "";
 };
 
+const RecipientSelectionTable = ({
+    contacts,
+    currentPage,
+    totalPages,
+    selectedRecipients,
+    onSelectRecipient,
+    onSelectAll,
+    onPageChange,
+    loading,
+    areAllSelected,
+    areSomeSelected,
+}: {
+    contacts: ContactDto[] | Recipient[];
+    currentPage: number;
+    totalPages: number;
+    selectedRecipients: Set<string>;
+    onSelectRecipient: (id: string) => void;
+    onSelectAll: (checked: boolean) => void;
+    onPageChange: (page: number) => void;
+    loading: boolean;
+    areAllSelected: boolean;
+    areSomeSelected: boolean;
+}) => {
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center py-8">
+                <div className="flex flex-col items-center gap-2">
+                    <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-primary"></div>
+                    <p className="text-sm text-muted-foreground">
+                        Loading contacts...
+                    </p>
+                </div>
+            </div>
+        );
+    }
+
+    if (contacts.length === 0) {
+        return (
+            <div className="flex flex-col items-center justify-center py-8 text-center">
+                <Building className="h-12 w-12 text-muted-foreground mb-2" />
+                <h3 className="font-medium text-lg">No contacts found</h3>
+                <p className="text-sm text-muted-foreground mt-1">
+                    Try adjusting your search or filters
+                </p>
+            </div>
+        );
+    }
+
+    return (
+        <>
+            <div className="border rounded-lg overflow-hidden shadow-sm bg-card">
+                <Table>
+                    <TableHeader>
+                        <TableRow className="bg-muted/50">
+                            <TableHead className="w-12 py-3">
+                                <div className="flex items-center justify-center">
+                                    <Checkbox
+                                        checked={areAllSelected}
+                                        onCheckedChange={onSelectAll}
+                                        aria-label="Select all recipients"
+                                    />
+                                    {areSomeSelected && (
+                                        <MinusCircle className="h-4 w-4 text-muted-foreground absolute" />
+                                    )}
+                                </div>
+                            </TableHead>
+                            <TableHead className="py-3 font-semibold">
+                                Name
+                            </TableHead>
+                            <TableHead className="py-3 font-semibold">
+                                Email
+                            </TableHead>
+                            {"organization" in contacts[0] && (
+                                <TableHead className="py-3 font-semibold">
+                                    Organization
+                                </TableHead>
+                            )}
+                            <TableHead className="w-20 py-3">Status</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {contacts.map((contact) => (
+                            <TableRow
+                                key={contact.id}
+                                className={
+                                    "been_contacted" in contact &&
+                                    contact.been_contacted
+                                        ? "bg-purple-100 dark:bg-purple-900/20"
+                                        : "hover:bg-muted/50"
+                                }
+                            >
+                                <TableCell>
+                                    <Checkbox
+                                        checked={selectedRecipients.has(
+                                            contact.id.toString()
+                                        )}
+                                        onCheckedChange={() =>
+                                            onSelectRecipient(
+                                                contact.id.toString()
+                                            )
+                                        }
+                                    />
+                                </TableCell>
+                                <TableCell className="font-medium">
+                                    {("to" in contact &&
+                                        contact.to?.[0]?.name) ||
+                                        ("first_name" in contact &&
+                                            `${contact.first_name} ${contact.last_name}`)}
+                                </TableCell>
+                                <TableCell className="text-muted-foreground">
+                                    {("to" in contact &&
+                                        contact.to?.[0]?.email) ||
+                                        ("email" in contact && contact.email)}
+                                </TableCell>
+                                {"organization" in contact && (
+                                    <TableCell>
+                                        {contact.organization}
+                                    </TableCell>
+                                )}
+                                <TableCell>
+                                    {"labels" in contact && contact.labels ? (
+                                        contact.labels.map((label: string) => (
+                                            <Badge
+                                                key={label}
+                                                variant="secondary"
+                                                className="mr-1"
+                                            >
+                                                {label}
+                                            </Badge>
+                                        ))
+                                    ) : "been_contacted" in contact &&
+                                      contact.been_contacted ? (
+                                        <Badge variant="secondary">
+                                            Contacted
+                                        </Badge>
+                                    ) : null}
+                                </TableCell>
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                </Table>
+            </div>
+
+            {totalPages > 1 && (
+                <div className="flex items-center justify-between mt-4">
+                    <p className="text-sm text-muted-foreground">
+                        Page {currentPage} of {totalPages}
+                    </p>
+                    <div className="flex items-center gap-2">
+                        <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => onPageChange(currentPage - 1)}
+                            disabled={currentPage === 1}
+                        >
+                            <ChevronLeft className="h-4 w-4 mr-1" />
+                            Previous
+                        </Button>
+                        <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => onPageChange(currentPage + 1)}
+                            disabled={currentPage === totalPages}
+                        >
+                            Next
+                            <ChevronRight className="h-4 w-4 ml-1" />
+                        </Button>
+                    </div>
+                </div>
+            )}
+        </>
+    );
+};
+
 export default function ComposePage({ mails = [] }: ComposePageProps) {
     const searchParams = useSearchParams();
     const paramsProcessedRef = React.useRef(false);
@@ -152,20 +340,225 @@ export default function ComposePage({ mails = [] }: ComposePageProps) {
     const { data: outreachTeamResponse } = useOutreachTeam();
     const { data: interestedUsers, isLoading: isInterestedLoading } =
         useInterestedUsers();
-    const { data: contactsResponse } = useContacts();
-    const contacts = React.useMemo(
-        () => contactsResponse?.data || [],
-        [contactsResponse?.data]
+    const {
+        data: contactsResponse,
+        isLoading: isContactsLoading,
+        pagination: {
+            setPage: setContactsApiPage,
+            setSearch: setContactsApiSearch,
+            totalPages: contactsTotalPages,
+        },
+        fetchAllContacts,
+        refetch: refetchContacts,
+    } = useContacts({
+        initialLimit: 50,
+        initialSearch: searchQuery,
+    });
+
+    const [selectedOrganizations, setSelectedOrganizations] = React.useState<
+        Set<string>
+    >(new Set());
+
+    const [contactsView, setContactsView] = React.useState<
+        "individuals" | "organizations" | "selected"
+    >("individuals");
+    const [contactsPage, setContactsPage] = React.useState(1);
+
+    const [isSearching, setIsSearching] = React.useState(false);
+    const [allContacts, setAllContacts] = React.useState<ContactDto[]>([]);
+    const [isLoadingAllContacts, setIsLoadingAllContacts] =
+        React.useState(false);
+
+    // Debounced search for contacts using searchContacts API function
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    const debouncedSearchContacts = React.useCallback(
+        debounce(async (value: string) => {
+            if (!value || value.length < 2) {
+                setContactsApiSearch("");
+                // If search is completely cleared, refetch the initial state and clear selections
+                if (!value) {
+                    setContactsApiPage(1);
+                    refetchContacts();
+                    // Clear selected recipients
+                    setSelectedRecipients(new Set());
+                    // If in organizations view, refresh all contacts
+                    if (contactsView === "organizations") {
+                        setAllContacts([]);
+                        setIsLoadingAllContacts(true);
+                        try {
+                            const allContactsList = await fetchAllContacts(
+                                100,
+                                ""
+                            );
+                            setAllContacts(allContactsList);
+                        } catch (error) {
+                            console.error(
+                                "Error refreshing all contacts:",
+                                error
+                            );
+                        } finally {
+                            setIsLoadingAllContacts(false);
+                        }
+                    }
+                }
+                return;
+            }
+
+            try {
+                setIsSearching(true);
+                // Use searchContacts directly for better searching
+                const results = await searchContacts(value).catch((error) => {
+                    // If the API returns data in a different format than expected,
+                    // try to handle the response directly
+                    if (
+                        error.message ===
+                        "Invalid response format from contacts search API."
+                    ) {
+                        // The response might be a direct array rather than having a data property
+                        const responseData = error.response?.data;
+                        if (Array.isArray(responseData)) {
+                            return responseData;
+                        }
+                    }
+                    throw error;
+                });
+
+                // Update contacts directly instead of using API pagination
+                if (contactsResponse && results) {
+                    contactsResponse.data = results;
+                }
+            } catch (error) {
+                console.error("Error searching contacts:", error);
+                toast.error("Failed to search contacts. Please try again.");
+                // Fall back to regular search if specialized search fails
+                setContactsApiSearch(value);
+            } finally {
+                setIsSearching(false);
+            }
+        }, 300),
+        [
+            contactsResponse,
+            contactsView,
+            fetchAllContacts,
+            refetchContacts,
+            setContactsApiPage,
+            setContactsApiSearch,
+        ]
     );
 
-    const emailAccounts = React.useMemo(() => {
-        const outreachTeamArray = outreachTeamResponse?.data?.data || [];
-        return outreachTeamArray.map((member: OutreachTeamDto) => ({
-            label: member.name,
-            email: member.email,
-            icon: <CircleUser className="h-4 w-4" />,
-        }));
-    }, [outreachTeamResponse]);
+    // Handle page changes more efficiently
+    const handleContactsPageChange = React.useCallback(
+        (newPage: number) => {
+            setContactsPage(newPage);
+            setContactsApiPage(newPage);
+        },
+        [setContactsApiPage]
+    );
+
+    // Handle bulk selection
+    const handleSelectAllVisible = () => {
+        const newSelected = new Set(selectedRecipients);
+        contactsResponse?.data?.forEach((contact) => {
+            newSelected.add(contact.id.toString());
+        });
+        setSelectedRecipients(newSelected);
+    };
+
+    const handleSelectOrganization = (org: string, selected: boolean) => {
+        const newSelectedOrgs = new Set(selectedOrganizations);
+        if (selected) {
+            newSelectedOrgs.add(org);
+        } else {
+            newSelectedOrgs.delete(org);
+        }
+        setSelectedOrganizations(newSelectedOrgs);
+
+        // Update individual recipient selection based on organization
+        const newSelectedRecipients = new Set(selectedRecipients);
+        contactsResponse?.data?.forEach((contact) => {
+            if (contact.organization === org) {
+                if (selected) {
+                    newSelectedRecipients.add(contact.id.toString());
+                } else {
+                    newSelectedRecipients.delete(contact.id.toString());
+                }
+            }
+        });
+        setSelectedRecipients(newSelectedRecipients);
+    };
+
+    const totalSelectedContacts = React.useMemo(() => {
+        return selectedRecipients.size;
+    }, [selectedRecipients]);
+
+    const contacts = React.useMemo(() => {
+        return contactsResponse?.data || [];
+    }, [contactsResponse?.data]);
+
+    // Load all contacts when switching to organization view
+    React.useEffect(() => {
+        if (
+            contactsView === "organizations" &&
+            allContacts.length === 0 &&
+            !isLoadingAllContacts
+        ) {
+            const loadAllContacts = async () => {
+                try {
+                    setIsLoadingAllContacts(true);
+                    // Use the fetchAllContacts method from the hook
+                    const allContactsList = await fetchAllContacts(
+                        100,
+                        searchQuery
+                    );
+                    setAllContacts(allContactsList);
+                } catch (error) {
+                    console.error("Error fetching all contacts:", error);
+                    toast.error(
+                        "Failed to load all organizations. Some may be missing."
+                    );
+                } finally {
+                    setIsLoadingAllContacts(false);
+                }
+            };
+
+            loadAllContacts();
+        }
+    }, [
+        contactsView,
+        allContacts.length,
+        isLoadingAllContacts,
+        fetchAllContacts,
+        searchQuery,
+    ]);
+
+    // Modify the groupedByOrganization to use allContacts when in organization view
+    const groupedByOrganization = React.useMemo(() => {
+        const groups: Record<string, ContactDto[]> = {};
+        const noOrg: ContactDto[] = [];
+
+        // Use allContacts when in organization view and allContacts is populated
+        const contactsToGroup =
+            contactsView === "organizations" && allContacts.length > 0
+                ? allContacts
+                : contacts;
+
+        contactsToGroup.forEach((contact) => {
+            if (contact.organization) {
+                if (!groups[contact.organization]) {
+                    groups[contact.organization] = [];
+                }
+                groups[contact.organization].push(contact);
+            } else {
+                noOrg.push(contact);
+            }
+        });
+
+        if (noOrg.length > 0) {
+            groups["No Organization"] = noOrg;
+        }
+
+        return groups;
+    }, [contacts, contactsView, allContacts]);
 
     const recipientLists = React.useMemo(() => {
         const employerContacts = contacts.map((contact) => ({
@@ -177,6 +570,7 @@ export default function ComposePage({ mails = [] }: ComposePageProps) {
                 },
             ],
             organization: contact.organization,
+            department: contact.department,
             labels: ["Employer"],
             been_contacted: contact.been_contacted,
         }));
@@ -544,6 +938,49 @@ export default function ComposePage({ mails = [] }: ComposePageProps) {
             return;
         }
 
+        // If toEmail is provided without a specific recipient type, assume employers
+        if (toEmail && !recipientTypeParam) {
+            setRecipientType("employers");
+            setSearchQuery(toEmail);
+
+            // Search for the contact with this email and select it when found
+            const searchAndSelectContact = async () => {
+                try {
+                    setIsSearching(true);
+                    const results = await searchContacts(toEmail);
+                    if (results && results.length > 0) {
+                        // Find the exact match for the email
+                        const exactMatch = results.find(
+                            (contact) =>
+                                contact.email.toLowerCase() ===
+                                toEmail.toLowerCase()
+                        );
+
+                        if (exactMatch) {
+                            // Add this contact to selected recipients instead of replacing
+                            const newSelected = new Set(selectedRecipients);
+                            newSelected.add(exactMatch.id.toString());
+                            setSelectedRecipients(newSelected);
+
+                            // Update the contactsResponse data with the search results
+                            // but don't limit to just this one result
+                            if (contactsResponse) {
+                                contactsResponse.data = results;
+                            }
+                        }
+                    }
+                } catch (error) {
+                    console.error("Error searching for contact:", error);
+                } finally {
+                    setIsSearching(false);
+                }
+            };
+
+            searchAndSelectContact();
+            paramsProcessedRef.current = true;
+            return;
+        }
+
         if (
             recipientTypeParam &&
             (recipientTypeParam === "registered" ||
@@ -570,12 +1007,132 @@ export default function ComposePage({ mails = [] }: ComposePageProps) {
             }
             paramsProcessedRef.current = true;
         }
-    }, [mails, interestedUsers, searchParams]);
+    }, [
+        mails,
+        interestedUsers,
+        searchParams,
+        contactsResponse,
+        selectedRecipients,
+    ]);
 
-    if (isInterestedLoading) {
+    const isOrganizationFullySelected = React.useCallback(
+        (org: string) => {
+            const orgContacts = groupedByOrganization[org];
+            if (!orgContacts || orgContacts.length === 0) return false;
+
+            return orgContacts.every((contact) =>
+                selectedRecipients.has(contact.id.toString())
+            );
+        },
+        [groupedByOrganization, selectedRecipients]
+    );
+
+    const isOrganizationPartiallySelected = React.useCallback(
+        (org: string) => {
+            const orgContacts = groupedByOrganization[org];
+            if (!orgContacts || orgContacts.length === 0) return false;
+
+            return (
+                orgContacts.some((contact) =>
+                    selectedRecipients.has(contact.id.toString())
+                ) && !isOrganizationFullySelected(org)
+            );
+        },
+        [groupedByOrganization, selectedRecipients, isOrganizationFullySelected]
+    );
+
+    const emailAccounts = React.useMemo(() => {
+        const outreachTeamArray = outreachTeamResponse?.data?.data || [];
+        return outreachTeamArray.map((member: OutreachTeamDto) => ({
+            label: member.name,
+            email: member.email,
+            icon: <CircleUser className="h-4 w-4" />,
+        }));
+    }, [outreachTeamResponse]);
+
+    const ViewSelector = () => (
+        <div className="flex items-center gap-2 mb-4">
+            <Button
+                size="sm"
+                variant={contactsView === "individuals" ? "default" : "outline"}
+                onClick={() => setContactsView("individuals")}
+            >
+                <Users className="h-4 w-4 mr-2" />
+                Individuals
+            </Button>
+            <Button
+                size="sm"
+                variant={
+                    contactsView === "organizations" ? "default" : "outline"
+                }
+                onClick={() => setContactsView("organizations")}
+            >
+                <Building className="h-4 w-4 mr-2" />
+                Organizations
+                {isLoadingAllContacts && (
+                    <span className="ml-2 h-3 w-3 animate-spin rounded-full border-b-2 border-current"></span>
+                )}
+            </Button>
+            <Button
+                size="sm"
+                variant={contactsView === "selected" ? "default" : "outline"}
+                onClick={() => setContactsView("selected")}
+                disabled={selectedRecipients.size === 0}
+            >
+                <Checkbox className="h-4 w-4 mr-2" checked={true} />
+                Selected ({selectedRecipients.size})
+            </Button>
+        </div>
+    );
+
+    // Add state to track expanded organizations
+    const [expandedOrgs, setExpandedOrgs] = React.useState<Set<string>>(
+        new Set()
+    );
+
+    // Toggle organization expansion
+    const toggleOrgExpansion = (org: string, event: React.MouseEvent) => {
+        event.stopPropagation(); // Prevent triggering the checkbox toggle
+        const newExpanded = new Set(expandedOrgs);
+        if (newExpanded.has(org)) {
+            newExpanded.delete(org);
+        } else {
+            newExpanded.add(org);
+        }
+        setExpandedOrgs(newExpanded);
+    };
+
+    // Add a function to calculate contacted counts for organizations
+    const getOrganizationContactedCount = React.useCallback(
+        (org: string) => {
+            const orgContacts = groupedByOrganization[org];
+            if (!orgContacts || orgContacts.length === 0) return 0;
+
+            return orgContacts.filter((contact) => contact.been_contacted)
+                .length;
+        },
+        [groupedByOrganization]
+    );
+
+    // Add a helper function to get selected contacts
+    const getSelectedContacts = React.useCallback(() => {
+        return contacts.filter((contact) =>
+            selectedRecipients.has(contact.id.toString())
+        );
+    }, [contacts, selectedRecipients]);
+
+    if (isInterestedLoading || isContactsLoading) {
         return (
-            <div className="flex items-center justify-center h-full">
-                Loading...
+            <div className="flex flex-col items-center justify-center h-full gap-4">
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+                <p className="text-lg font-medium">
+                    {isContactsLoading
+                        ? "Loading contacts for email composition..."
+                        : "Loading interested users..."}
+                </p>
+                <p className="text-sm text-muted-foreground">
+                    This may take a moment
+                </p>
             </div>
         );
     }
@@ -626,7 +1183,14 @@ export default function ComposePage({ mails = [] }: ComposePageProps) {
                         <CardHeader className="border-b">
                             <div className="flex items-center justify-between">
                                 <CardTitle>
-                                    Recipients ({filteredRecipients.length})
+                                    Recipients ({totalSelectedContacts})
+                                    {recipientType === "employers" &&
+                                        contactsResponse?.total && (
+                                            <span className="ml-2 text-sm font-normal text-muted-foreground">
+                                                from {contactsResponse.total}{" "}
+                                                total contacts
+                                            </span>
+                                        )}
                                 </CardTitle>
                                 <Select
                                     value={recipientType}
@@ -660,135 +1224,331 @@ export default function ComposePage({ mails = [] }: ComposePageProps) {
                         </CardHeader>
                         <CardContent className="p-6">
                             <div className="space-y-4">
-                                <div>
-                                    <Label
-                                        htmlFor="recipient-filter"
-                                        className="text-sm font-semibold"
-                                    >
-                                        Search Recipients
-                                    </Label>
-                                    <div className="relative mt-1 mb-4">
+                                <div className="flex items-center gap-2">
+                                    <div className="relative flex-1">
+                                        <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                                         <Input
                                             id="recipient-filter"
                                             value={searchQuery}
-                                            onChange={(e) =>
-                                                setSearchQuery(e.target.value)
-                                            }
+                                            onChange={(e) => {
+                                                const value = e.target.value;
+                                                setSearchQuery(value);
+                                                debouncedSearchContacts(value);
+                                            }}
                                             placeholder={
                                                 recipientType === "employers"
                                                     ? "Search by name, email, or organization..."
                                                     : "Search by name or email..."
                                             }
-                                            className="pl-3 pr-10 py-2 w-full border rounded-md shadow-sm focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                                            className="pl-10 pr-10 py-2 w-full"
                                         />
+                                        {searchQuery && (
+                                            <Button
+                                                type="button"
+                                                variant="ghost"
+                                                onClick={() => {
+                                                    setSearchQuery("");
+                                                    setContactsApiSearch("");
+                                                    setContactsPage(1);
+                                                    setContactsApiPage(1);
+
+                                                    // Clear selected recipients
+                                                    setSelectedRecipients(
+                                                        new Set()
+                                                    );
+
+                                                    // Fully refresh the contacts data to initial state
+                                                    refetchContacts();
+
+                                                    // If in organizations view, refresh all contacts
+                                                    if (
+                                                        contactsView ===
+                                                        "organizations"
+                                                    ) {
+                                                        setAllContacts([]);
+                                                        setIsLoadingAllContacts(
+                                                            true
+                                                        );
+                                                        fetchAllContacts(
+                                                            100,
+                                                            ""
+                                                        )
+                                                            .then((data) => {
+                                                                setAllContacts(
+                                                                    data
+                                                                );
+                                                            })
+                                                            .catch((error) => {
+                                                                console.error(
+                                                                    "Error refreshing all contacts:",
+                                                                    error
+                                                                );
+                                                                toast.error(
+                                                                    "Failed to refresh organization data"
+                                                                );
+                                                            })
+                                                            .finally(() => {
+                                                                setIsLoadingAllContacts(
+                                                                    false
+                                                                );
+                                                            });
+                                                    }
+                                                }}
+                                                className="absolute right-2 top-2 h-6 w-6 p-0"
+                                                title="Clear search"
+                                            >
+                                                <X className="h-4 w-4" />
+                                            </Button>
+                                        )}
+                                        {isSearching && (
+                                            <div className="absolute right-10 top-3">
+                                                <div className="h-4 w-4 animate-spin rounded-full border-b-2 border-primary"></div>
+                                            </div>
+                                        )}
                                     </div>
+
+                                    {recipientType === "employers" && (
+                                        <Button
+                                            size="sm"
+                                            variant="outline"
+                                            className="flex items-center gap-1"
+                                            onClick={handleSelectAllVisible}
+                                        >
+                                            <Checkbox
+                                                className="h-3 w-3 mr-1"
+                                                id="select-all-visible"
+                                            />
+                                            Select Page
+                                        </Button>
+                                    )}
                                 </div>
 
-                                <div className="border rounded-lg overflow-hidden shadow-sm bg-card">
-                                    <Table>
-                                        <TableHeader>
-                                            <TableRow className="bg-muted/50">
-                                                <TableHead className="w-12 py-3">
-                                                    <div className="flex items-center justify-center">
-                                                        <Checkbox
-                                                            checked={
-                                                                areAllFilteredSelected
-                                                            }
-                                                            onCheckedChange={
-                                                                handleSelectAll
-                                                            }
-                                                            aria-label="Select all recipients"
-                                                        />
-                                                        {areSomeFilteredSelected && (
-                                                            <MinusCircle className="h-4 w-4 text-muted-foreground absolute" />
-                                                        )}
+                                {recipientType === "employers" && (
+                                    <ViewSelector />
+                                )}
+
+                                {recipientType === "employers" &&
+                                    contactsView === "individuals" && (
+                                        <RecipientSelectionTable
+                                            contacts={contacts}
+                                            currentPage={contactsPage}
+                                            totalPages={contactsTotalPages || 1}
+                                            selectedRecipients={
+                                                selectedRecipients
+                                            }
+                                            onSelectRecipient={
+                                                handleRecipientToggle
+                                            }
+                                            onSelectAll={handleSelectAll}
+                                            onPageChange={
+                                                handleContactsPageChange
+                                            }
+                                            loading={isContactsLoading}
+                                            areAllSelected={
+                                                areAllFilteredSelected
+                                            }
+                                            areSomeSelected={
+                                                areSomeFilteredSelected
+                                            }
+                                        />
+                                    )}
+
+                                {recipientType === "employers" &&
+                                    contactsView === "organizations" && (
+                                        <div className="space-y-2">
+                                            {isLoadingAllContacts &&
+                                            allContacts.length === 0 ? (
+                                                <div className="flex items-center justify-center py-8">
+                                                    <div className="flex flex-col items-center gap-2">
+                                                        <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-primary"></div>
+                                                        <p className="text-sm text-muted-foreground">
+                                                            Loading all
+                                                            organizations...
+                                                        </p>
                                                     </div>
-                                                </TableHead>
-                                                <TableHead className="py-3 font-semibold">
-                                                    Name
-                                                </TableHead>
-                                                <TableHead className="py-3 font-semibold">
-                                                    Email
-                                                </TableHead>
-                                                {recipientType ===
-                                                    "employers" && (
-                                                    <TableHead className="py-3 font-semibold">
-                                                        Organization
-                                                    </TableHead>
-                                                )}
-                                                <TableHead className="w-20 py-3">
-                                                    Status
-                                                </TableHead>
-                                            </TableRow>
-                                        </TableHeader>
-                                        <TableBody>
-                                            {filteredRecipients.map(
-                                                (recipient) => (
-                                                    <TableRow
-                                                        key={recipient.id}
-                                                        className={
-                                                            recipientType ===
-                                                                "employers" &&
-                                                            recipient.been_contacted
-                                                                ? "bg-purple-100 dark:bg-purple-900/20"
-                                                                : "hover:bg-muted/50"
-                                                        }
+                                                </div>
+                                            ) : (
+                                                Object.entries(
+                                                    groupedByOrganization
+                                                ).map(([org, orgContacts]) => (
+                                                    <div
+                                                        key={org}
+                                                        className="border rounded-md overflow-hidden"
                                                     >
-                                                        <TableCell>
-                                                            <Checkbox
-                                                                checked={selectedRecipients.has(
-                                                                    recipient.id
-                                                                )}
-                                                                onCheckedChange={() =>
-                                                                    handleRecipientToggle(
-                                                                        recipient.id
+                                                        {/* Organization header with checkbox */}
+                                                        <div
+                                                            className="flex items-center justify-between p-3 bg-muted/30 cursor-pointer"
+                                                            onClick={() =>
+                                                                handleSelectOrganization(
+                                                                    org,
+                                                                    !isOrganizationFullySelected(
+                                                                        org
+                                                                    )
+                                                                )
+                                                            }
+                                                        >
+                                                            <div className="flex items-center gap-2">
+                                                                <Checkbox
+                                                                    checked={isOrganizationFullySelected(
+                                                                        org
+                                                                    )}
+                                                                    className={
+                                                                        isOrganizationPartiallySelected(
+                                                                            org
+                                                                        )
+                                                                            ? "opacity-70"
+                                                                            : ""
+                                                                    }
+                                                                />
+                                                                <span className="font-medium">
+                                                                    {org}
+                                                                </span>
+                                                                <Badge variant="outline">
+                                                                    {
+                                                                        orgContacts.length
+                                                                    }
+                                                                </Badge>
+                                                                <Badge
+                                                                    variant="secondary"
+                                                                    className={
+                                                                        getOrganizationContactedCount(
+                                                                            org
+                                                                        ) === 0
+                                                                            ? "bg-gray-200 dark:bg-gray-800 text-gray-500 dark:text-gray-400"
+                                                                            : ""
+                                                                    }
+                                                                >
+                                                                    Contacted{" "}
+                                                                    {getOrganizationContactedCount(
+                                                                        org
+                                                                    )}
+                                                                </Badge>
+                                                            </div>
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="sm"
+                                                                onClick={(e) =>
+                                                                    toggleOrgExpansion(
+                                                                        org,
+                                                                        e
                                                                     )
                                                                 }
-                                                            />
-                                                        </TableCell>
-                                                        <TableCell className="font-medium">
-                                                            {
-                                                                recipient
-                                                                    .to?.[0]
-                                                                    ?.name
-                                                            }
-                                                        </TableCell>
-                                                        <TableCell className="text-muted-foreground">
-                                                            {
-                                                                recipient
-                                                                    .to?.[0]
-                                                                    ?.email
-                                                            }
-                                                        </TableCell>
-                                                        {recipientType ===
-                                                            "employers" && (
-                                                            <TableCell>
-                                                                {
-                                                                    recipient.organization
-                                                                }
-                                                            </TableCell>
+                                                                className="p-0 h-8 w-8"
+                                                            >
+                                                                <ChevronDown
+                                                                    className={`h-4 w-4 text-muted-foreground transition-transform duration-200 ${
+                                                                        expandedOrgs.has(
+                                                                            org
+                                                                        )
+                                                                            ? "transform rotate-180"
+                                                                            : ""
+                                                                    }`}
+                                                                />
+                                                            </Button>
+                                                        </div>
+
+                                                        {expandedOrgs.has(
+                                                            org
+                                                        ) && (
+                                                            <div className="border-t border-border">
+                                                                <div className="max-h-60 overflow-y-auto">
+                                                                    <Table>
+                                                                        <TableBody>
+                                                                            {orgContacts.map(
+                                                                                (
+                                                                                    contact
+                                                                                ) => (
+                                                                                    <TableRow
+                                                                                        key={
+                                                                                            contact.id
+                                                                                        }
+                                                                                        className={
+                                                                                            contact.been_contacted
+                                                                                                ? "bg-purple-100 dark:bg-purple-900/20"
+                                                                                                : "hover:bg-muted/50"
+                                                                                        }
+                                                                                    >
+                                                                                        <TableCell className="w-12">
+                                                                                            <Checkbox
+                                                                                                checked={selectedRecipients.has(
+                                                                                                    contact.id.toString()
+                                                                                                )}
+                                                                                                onCheckedChange={() =>
+                                                                                                    handleRecipientToggle(
+                                                                                                        contact.id.toString()
+                                                                                                    )
+                                                                                                }
+                                                                                            />
+                                                                                        </TableCell>
+                                                                                        <TableCell className="font-medium truncate max-w-[150px]">
+                                                                                            {`${contact.first_name} ${contact.last_name}`}
+                                                                                        </TableCell>
+                                                                                        <TableCell className="text-muted-foreground truncate max-w-[200px]">
+                                                                                            {
+                                                                                                contact.email
+                                                                                            }
+                                                                                        </TableCell>
+                                                                                        <TableCell className="w-20">
+                                                                                            {contact.been_contacted && (
+                                                                                                <Badge variant="secondary">
+                                                                                                    Contacted
+                                                                                                </Badge>
+                                                                                            )}
+                                                                                        </TableCell>
+                                                                                    </TableRow>
+                                                                                )
+                                                                            )}
+                                                                        </TableBody>
+                                                                    </Table>
+                                                                </div>
+                                                            </div>
                                                         )}
-                                                        <TableCell>
-                                                            {recipient.labels.map(
-                                                                (label) => (
-                                                                    <Badge
-                                                                        key={
-                                                                            label
-                                                                        }
-                                                                        variant="secondary"
-                                                                        className="mr-1"
-                                                                    >
-                                                                        {label}
-                                                                    </Badge>
-                                                                )
-                                                            )}
-                                                        </TableCell>
-                                                    </TableRow>
-                                                )
+                                                    </div>
+                                                ))
                                             )}
-                                        </TableBody>
-                                    </Table>
-                                </div>
+                                        </div>
+                                    )}
+
+                                {recipientType === "employers" &&
+                                    contactsView === "selected" && (
+                                        <>
+                                            {selectedRecipients.size === 0 ? (
+                                                <div className="flex flex-col items-center justify-center py-8 text-center">
+                                                    <Checkbox className="h-12 w-12 text-muted-foreground mb-2" />
+                                                    <h3 className="font-medium text-lg">
+                                                        No contacts selected
+                                                    </h3>
+                                                    <p className="text-sm text-muted-foreground mt-1">
+                                                        Select contacts to see
+                                                        them here
+                                                    </p>
+                                                </div>
+                                            ) : (
+                                                <RecipientSelectionTable
+                                                    contacts={getSelectedContacts()}
+                                                    currentPage={1}
+                                                    totalPages={1}
+                                                    selectedRecipients={
+                                                        selectedRecipients
+                                                    }
+                                                    onSelectRecipient={
+                                                        handleRecipientToggle
+                                                    }
+                                                    onSelectAll={(checked) => {
+                                                        if (!checked) {
+                                                            setSelectedRecipients(
+                                                                new Set()
+                                                            );
+                                                        }
+                                                    }}
+                                                    onPageChange={() => {}}
+                                                    loading={false}
+                                                    areAllSelected={true}
+                                                    areSomeSelected={false}
+                                                />
+                                            )}
+                                        </>
+                                    )}
                             </div>
                         </CardContent>
                     </Card>
