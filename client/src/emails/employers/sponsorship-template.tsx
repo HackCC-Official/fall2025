@@ -38,7 +38,7 @@ export const SponsorshipEmail = ({
     // positionAtHackCC,
     socialLinks,
     customEmailBody,
-}: SponsorshipEmailProps) => {
+}:  SponsorshipEmailProps) => {
     const formattedYearAndMajor = `${sender.year} ${sender.major}`;
 
     const today = new Date();

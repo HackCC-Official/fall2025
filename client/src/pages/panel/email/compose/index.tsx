@@ -57,6 +57,7 @@ import {
     DialogContent,
     DialogHeader,
     DialogTitle,
+    DialogFooter,
 } from "@/components/ui/dialog";
 import { EmptyEmail } from "@/emails/empty-template";
 import { render } from "@react-email/render";
@@ -69,6 +70,7 @@ import {
 import { useSearchParams } from "next/navigation";
 import type { ContactDto } from "@/features/outreach/types/contact.dto";
 import { debounce } from "lodash";
+import InterestedEmail from "@/emails/interested-template";
 
 const STORAGE_KEY = "selectedOutreachAccount";
 
@@ -88,6 +90,13 @@ interface Recipient {
 }
 
 const EMAIL_TEMPLATES: ExtendedEmailTemplate[] = [
+    {
+        id: "0",
+        name: "Empty Template",
+        subject: "",
+        content: "",
+        type: "employers",
+    },
     {
         id: "1",
         name: "Sponsorship Confirmation",
@@ -127,6 +136,12 @@ const EMAIL_TEMPLATES: ExtendedEmailTemplate[] = [
 
 interface ComposePageProps {
     mails?: Mail[];
+}
+
+interface RecipientConfirmationDetails {
+    name: string;
+    email: string;
+    organization?: string;
 }
 
 const extractVariable = (content: string, variableName: string): string => {
@@ -369,19 +384,20 @@ export default function ComposePage({ mails = [] }: ComposePageProps) {
     const [isLoadingAllContacts, setIsLoadingAllContacts] =
         React.useState(false);
 
-    // Debounced search for contacts using searchContacts API function
+    const [isConfirmationOpen, setIsConfirmationOpen] = React.useState(false);
+    const [recipientsToConfirm, setRecipientsToConfirm] = React.useState<
+        RecipientConfirmationDetails[]
+    >([]);
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
     const debouncedSearchContacts = React.useCallback(
         debounce(async (value: string) => {
             if (!value || value.length < 2) {
                 setContactsApiSearch("");
-                // If search is completely cleared, refetch the initial state and clear selections
                 if (!value) {
                     setContactsApiPage(1);
                     refetchContacts();
-                    // Clear selected recipients
                     setSelectedRecipients(new Set());
-                    // If in organizations view, refresh all contacts
                     if (contactsView === "organizations") {
                         setAllContacts([]);
                         setIsLoadingAllContacts(true);
@@ -408,13 +424,10 @@ export default function ComposePage({ mails = [] }: ComposePageProps) {
                 setIsSearching(true);
                 // Use searchContacts directly for better searching
                 const results = await searchContacts(value).catch((error) => {
-                    // If the API returns data in a different format than expected,
-                    // try to handle the response directly
                     if (
                         error.message ===
                         "Invalid response format from contacts search API."
                     ) {
-                        // The response might be a direct array rather than having a data property
                         const responseData = error.response?.data;
                         if (Array.isArray(responseData)) {
                             return responseData;
@@ -423,14 +436,12 @@ export default function ComposePage({ mails = [] }: ComposePageProps) {
                     throw error;
                 });
 
-                // Update contacts directly instead of using API pagination
                 if (contactsResponse && results) {
                     contactsResponse.data = results;
                 }
             } catch (error) {
                 console.error("Error searching contacts:", error);
                 toast.error("Failed to search contacts. Please try again.");
-                // Fall back to regular search if specialized search fails
                 setContactsApiSearch(value);
             } finally {
                 setIsSearching(false);
@@ -446,7 +457,6 @@ export default function ComposePage({ mails = [] }: ComposePageProps) {
         ]
     );
 
-    // Handle page changes more efficiently
     const handleContactsPageChange = React.useCallback(
         (newPage: number) => {
             setContactsPage(newPage);
@@ -455,7 +465,6 @@ export default function ComposePage({ mails = [] }: ComposePageProps) {
         [setContactsApiPage]
     );
 
-    // Handle bulk selection
     const handleSelectAllVisible = () => {
         const newSelected = new Set(selectedRecipients);
         contactsResponse?.data?.forEach((contact) => {
@@ -473,7 +482,6 @@ export default function ComposePage({ mails = [] }: ComposePageProps) {
         }
         setSelectedOrganizations(newSelectedOrgs);
 
-        // Update individual recipient selection based on organization
         const newSelectedRecipients = new Set(selectedRecipients);
         contactsResponse?.data?.forEach((contact) => {
             if (contact.organization === org) {
@@ -495,7 +503,6 @@ export default function ComposePage({ mails = [] }: ComposePageProps) {
         return contactsResponse?.data || [];
     }, [contactsResponse?.data]);
 
-    // Load all contacts when switching to organization view
     React.useEffect(() => {
         if (
             contactsView === "organizations" &&
@@ -505,7 +512,6 @@ export default function ComposePage({ mails = [] }: ComposePageProps) {
             const loadAllContacts = async () => {
                 try {
                     setIsLoadingAllContacts(true);
-                    // Use the fetchAllContacts method from the hook
                     const allContactsList = await fetchAllContacts(
                         100,
                         searchQuery
@@ -531,12 +537,10 @@ export default function ComposePage({ mails = [] }: ComposePageProps) {
         searchQuery,
     ]);
 
-    // Modify the groupedByOrganization to use allContacts when in organization view
     const groupedByOrganization = React.useMemo(() => {
         const groups: Record<string, ContactDto[]> = {};
         const noOrg: ContactDto[] = [];
 
-        // Use allContacts when in organization view and allContacts is populated
         const contactsToGroup =
             contactsView === "organizations" && allContacts.length > 0
                 ? allContacts
@@ -682,42 +686,60 @@ export default function ComposePage({ mails = [] }: ComposePageProps) {
 
         try {
             let previewContent;
-            if (recipientType === "employers" && selectedTemplate) {
-                const renderedEmails = await renderEmailTemplate({
-                    templateType: selectedTemplate.name as EmailTemplateType,
-                    recipients: contacts.filter((contact) =>
-                        selectedRecipients.has(contact.id.toString())
-                    ),
-                    templateData: {
-                        sender: selectedTeamMember,
-                        emailContent: emailContent,
-                        ...(selectedTemplate.name === "Post-Call Follow-Up" && {
-                            followupDate: extractVariable(
-                                emailContent,
-                                "followup_date"
-                            ),
-                            followupTime: extractVariable(
-                                emailContent,
-                                "followup_time"
-                            ),
-                            requestedMaterials: extractVariable(
-                                emailContent,
-                                "requested_materials"
-                            ),
-                        }),
-                    },
-                    contactInfo: {
-                        email: senderEmail,
-                        phone: "+1234567890",
-                    },
-                });
-                previewContent = renderedEmails[0];
+            if (recipientType === "employers") {
+                if (selectedTemplate?.name === "Empty Template") {
+                    previewContent = await render(
+                        <EmptyEmail
+                            recipientName="Name"
+                            emailContent={emailContent}
+                            sender={selectedTeamMember}
+                            companyName="Company"
+                            socialLinks={{
+                                HackCC: "https://hackcc.net",
+                                LinkedIn: "https://linkedin.com/company/hackcc",
+                            }}
+                        />
+                    );
+                } else {
+                    const renderedEmails = await renderEmailTemplate({
+                        templateType:
+                            selectedTemplate?.name as EmailTemplateType,
+                        recipients: contacts.filter((contact) =>
+                            selectedRecipients.has(contact.id.toString())
+                        ),
+                        templateData: {
+                            sender: selectedTeamMember,
+                            emailContent: emailContent,
+                            ...(selectedTemplate?.name ===
+                                "Post-Call Follow-Up" && {
+                                followupDate: extractVariable(
+                                    emailContent,
+                                    "followup_date"
+                                ),
+                                followupTime: extractVariable(
+                                    emailContent,
+                                    "followup_time"
+                                ),
+                                requestedMaterials: extractVariable(
+                                    emailContent,
+                                    "requested_materials"
+                                ),
+                            }),
+                        },
+                        contactInfo: {
+                            email: senderEmail,
+                            phone: "+1234567890",
+                        },
+                    });
+                    previewContent = renderedEmails[0];
+                }
             } else {
                 previewContent = await render(
                     <EmptyEmail
-                        recipientName="Preview User"
+                        recipientName="Name"
                         emailContent={emailContent}
                         sender={selectedTeamMember}
+                        companyName="Company"
                         socialLinks={{
                             HackCC: "https://hackcc.net",
                             LinkedIn: "https://linkedin.com/company/hackcc",
@@ -749,44 +771,110 @@ export default function ComposePage({ mails = [] }: ComposePageProps) {
             return;
         }
 
+        // Prepare recipients list for confirmation
+        const recipientsList: RecipientConfirmationDetails[] = [];
+
+        if (recipientType === "employers") {
+            contacts.forEach((contact) => {
+                if (selectedRecipients.has(contact.id.toString())) {
+                    recipientsList.push({
+                        name: `${contact.first_name} ${contact.last_name}`,
+                        email: contact.email,
+                        organization: contact.organization,
+                    });
+                }
+            });
+        } else {
+            const allRecipients = recipientLists[recipientType];
+            allRecipients.forEach((recipient) => {
+                if (selectedRecipients.has(recipient.id)) {
+                    recipientsList.push({
+                        name:
+                            recipient.to[0]?.name ||
+                            recipient.to[0]?.email.split("@")[0],
+                        email: recipient.to[0]?.email,
+                    });
+                }
+            });
+        }
+
+        setRecipientsToConfirm(recipientsList);
+        setIsConfirmationOpen(true);
+    };
+
+    const handleConfirmedSend = async () => {
         try {
             const allRecipients = recipientLists[recipientType];
             const selectedRecipientsData = allRecipients.filter((recipient) =>
                 selectedRecipients.has(recipient.id)
             );
 
+            const selectedTeamMember = outreachTeamResponse?.data?.data.find(
+                (member: OutreachTeamDto) => member.email === senderEmail
+            );
+
+            if (!selectedTeamMember) {
+                toast.error("Could not find selected team member information");
+                return;
+            }
+
             let emailData: SendBatchEmailsDto;
 
             if (recipientType === "employers") {
-                const renderedEmails = await renderEmailTemplate({
-                    templateType: selectedTemplate?.name as EmailTemplateType,
-                    recipients: contacts.filter((contact) =>
-                        selectedRecipients.has(contact.id.toString())
-                    ),
-                    templateData: {
-                        sender: selectedTeamMember,
-                        emailContent: emailContent,
-                        ...(selectedTemplate?.name ===
-                            "Post-Call Follow-Up" && {
-                            followupDate: extractVariable(
-                                emailContent,
-                                "followup_date"
-                            ),
-                            followupTime: extractVariable(
-                                emailContent,
-                                "followup_time"
-                            ),
-                            requestedMaterials: extractVariable(
-                                emailContent,
-                                "requested_materials"
-                            ),
-                        }),
-                    },
-                    contactInfo: {
-                        email: senderEmail,
-                        phone: "+1234567890",
-                    },
-                });
+                let renderedEmails;
+                if (selectedTemplate?.name === "Empty Template") {
+                    renderedEmails = await Promise.all(
+                        selectedRecipientsData.map(async (recipient) => {
+                            return render(
+                                <EmptyEmail
+                                    recipientName={recipient.to[0]?.name || ""}
+                                    emailContent={emailContent}
+                                    sender={selectedTeamMember}
+                                    companyName={
+                                        recipient.organization ||
+                                        "[company_name]"
+                                    }
+                                    socialLinks={{
+                                        HackCC: "https://hackcc.net",
+                                        LinkedIn:
+                                            "https://linkedin.com/company/hackcc",
+                                    }}
+                                />
+                            );
+                        })
+                    );
+                } else {
+                    renderedEmails = await renderEmailTemplate({
+                        templateType:
+                            selectedTemplate?.name as EmailTemplateType,
+                        recipients: contacts.filter((contact) =>
+                            selectedRecipients.has(contact.id.toString())
+                        ),
+                        templateData: {
+                            sender: selectedTeamMember,
+                            emailContent: emailContent,
+                            ...(selectedTemplate?.name ===
+                                "Post-Call Follow-Up" && {
+                                followupDate: extractVariable(
+                                    emailContent,
+                                    "followup_date"
+                                ),
+                                followupTime: extractVariable(
+                                    emailContent,
+                                    "followup_time"
+                                ),
+                                requestedMaterials: extractVariable(
+                                    emailContent,
+                                    "requested_materials"
+                                ),
+                            }),
+                        },
+                        contactInfo: {
+                            email: senderEmail,
+                            phone: "+1234567890",
+                        },
+                    });
+                }
 
                 emailData = {
                     emails: selectedRecipientsData.map((recipient, index) => ({
@@ -800,12 +888,11 @@ export default function ComposePage({ mails = [] }: ComposePageProps) {
                     })),
                 };
             } else {
-                // Handle hacker emails
                 const renderedEmails = await Promise.all(
                     selectedRecipientsData.map(async (recipient) => {
                         const recipientName = recipient.to[0]?.name || "Hacker";
                         return render(
-                            <EmptyEmail
+                            <InterestedEmail
                                 recipientName={recipientName}
                                 emailContent={emailContent}
                                 sender={selectedTeamMember}
@@ -832,7 +919,6 @@ export default function ComposePage({ mails = [] }: ComposePageProps) {
                 };
             }
 
-            // Send emails
             if (selectedRecipientsData.length === 1) {
                 await sendEmail(emailData.emails[0]);
             } else {
@@ -864,9 +950,11 @@ export default function ComposePage({ mails = [] }: ComposePageProps) {
             setEmailSubject("");
             setEmailContent("");
             setPreviewHtml("");
+            setIsConfirmationOpen(false);
         } catch (error) {
             console.error("Error sending emails:", error);
             toast.error("Failed to send emails. Please try again.");
+            setIsConfirmationOpen(false);
         }
     };
 
@@ -1671,6 +1759,82 @@ export default function ComposePage({ mails = [] }: ComposePageProps) {
                                     __html: previewHtml,
                                 }}
                             />
+                        </DialogContent>
+                    </Dialog>
+
+                    <Dialog
+                        open={isConfirmationOpen}
+                        onOpenChange={setIsConfirmationOpen}
+                    >
+                        <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+                            <DialogHeader>
+                                <DialogTitle>
+                                    Confirm Email Recipients
+                                </DialogTitle>
+                            </DialogHeader>
+                            <div className="py-4">
+                                <p className="text-sm text-muted-foreground mb-4">
+                                    You are about to send emails to the
+                                    following {recipientsToConfirm.length}{" "}
+                                    recipient
+                                    {recipientsToConfirm.length !== 1
+                                        ? "s"
+                                        : ""}
+                                    :
+                                </p>
+                                <div className="border rounded-lg overflow-hidden">
+                                    <Table>
+                                        <TableHeader>
+                                            <TableRow className="bg-muted/50">
+                                                <TableHead className="py-3 font-semibold">
+                                                    Name
+                                                </TableHead>
+                                                <TableHead className="py-3 font-semibold">
+                                                    Email
+                                                </TableHead>
+                                                {recipientType ===
+                                                    "employers" && (
+                                                    <TableHead className="py-3 font-semibold">
+                                                        Organization
+                                                    </TableHead>
+                                                )}
+                                            </TableRow>
+                                        </TableHeader>
+                                        <TableBody>
+                                            {recipientsToConfirm.map(
+                                                (recipient, index) => (
+                                                    <TableRow key={index}>
+                                                        <TableCell>
+                                                            {recipient.name}
+                                                        </TableCell>
+                                                        <TableCell className="text-muted-foreground">
+                                                            {recipient.email}
+                                                        </TableCell>
+                                                        {recipientType ===
+                                                            "employers" && (
+                                                            <TableCell>
+                                                                {recipient.organization ||
+                                                                    "-"}
+                                                            </TableCell>
+                                                        )}
+                                                    </TableRow>
+                                                )
+                                            )}
+                                        </TableBody>
+                                    </Table>
+                                </div>
+                            </div>
+                            <DialogFooter>
+                                <Button
+                                    variant="outline"
+                                    onClick={() => setIsConfirmationOpen(false)}
+                                >
+                                    Cancel
+                                </Button>
+                                <Button onClick={handleConfirmedSend}>
+                                    Confirm & Send
+                                </Button>
+                            </DialogFooter>
                         </DialogContent>
                     </Dialog>
                 </div>

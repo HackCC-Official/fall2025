@@ -134,7 +134,6 @@ export default function Mail({
                                 isCollapsed={isCollapsed}
                                 links={[
                                     {
-                                        title: "Sent",
                                         label: emailsCount.toString(),
                                         icon: Send,
                                         variant:
@@ -144,7 +143,6 @@ export default function Mail({
                                         onClick: () => setActiveView("mail"),
                                     },
                                     {
-                                        title: "Contacts",
                                         label: totalContacts.toString(),
                                         icon: Users,
                                         variant:

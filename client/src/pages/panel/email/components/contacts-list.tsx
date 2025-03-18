@@ -28,7 +28,10 @@ import {
     DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { deleteContact } from "@/features/outreach/api/outreach";
+import {
+    deleteContact,
+    searchContacts,
+} from "@/features/outreach/api/outreach";
 import { useQueryClient } from "@tanstack/react-query";
 import {
     AlertDialog,
@@ -90,6 +93,8 @@ export default function ContactsList({
     const containerRef = React.useRef<HTMLDivElement>(null);
     const [contact, setContact] = useContact();
     const [searchText, setSearchText] = React.useState("");
+    const [searchResults, setSearchResults] = React.useState<ContactDto[]>([]);
+    const [isSearching, setIsSearching] = React.useState(false);
     const [editingContact, setEditingContact] =
         React.useState<ContactDto | null>(null);
     const [filters, setFilters] = React.useState<FilterOptions>({
@@ -101,15 +106,13 @@ export default function ContactsList({
     const [isFilterOpen, setIsFilterOpen] = React.useState(false);
     const queryClient = useQueryClient();
     const [deleteId, setDeleteId] = React.useState<number | null>(null);
-    const [debouncedSearch, setDebouncedSearch] = React.useState("");
 
     const {
         data,
         isLoading,
-        pagination: { page, setPage, limit, setLimit, setSearch, totalPages },
+        pagination: { page, setPage, limit, setLimit, totalPages },
     } = useContacts({
         initialLimit: 50,
-        initialSearch: debouncedSearch,
     });
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -117,76 +120,30 @@ export default function ContactsList({
     const totalContacts = data?.total || 0;
 
     React.useEffect(() => {
-        const timer = setTimeout(() => {
-            setSearch(searchText);
-            setDebouncedSearch(searchText);
+        const timer = setTimeout(async () => {
+            if (searchText.trim()) {
+                setIsSearching(true);
+                try {
+                    const results = await searchContacts(searchText);
+                    setSearchResults(results);
+                } catch (error) {
+                    console.error("Error searching contacts:", error);
+                    setSearchResults([]);
+                } finally {
+                    setIsSearching(false);
+                }
+            } else {
+                setSearchResults([]);
+            }
         }, 300);
         return () => clearTimeout(timer);
-    }, [searchText, setSearch]);
-
-    const organizations = React.useMemo(() => {
-        const uniqueOrgs = new Set<string>();
-        contacts.forEach((c) => {
-            if (c.organization) uniqueOrgs.add(c.organization);
-        });
-        return Array.from(uniqueOrgs).sort();
-    }, [contacts]);
-
-    const departments = React.useMemo(() => {
-        const uniqueDepts = new Set<string>();
-        contacts.forEach((c) => {
-            if (c.department) uniqueDepts.add(c.department);
-        });
-        return Array.from(uniqueDepts).sort();
-    }, [contacts]);
-
-    const industries = React.useMemo(() => {
-        const uniqueIndustries = new Set<string>();
-        contacts.forEach((c) => {
-            if (c.industry) uniqueIndustries.add(c.industry);
-        });
-        return Array.from(uniqueIndustries).sort();
-    }, [contacts]);
-
-    const contactTypes = React.useMemo(() => {
-        const uniqueTypes = new Set<string>();
-        contacts.forEach((c) => {
-            if (c.type) uniqueTypes.add(c.type);
-        });
-        return Array.from(uniqueTypes).sort();
-    }, [contacts]);
-
-    const virtualizer = useVirtualizer({
-        count: contacts.length,
-        getScrollElement: () => containerRef.current,
-        estimateSize: () => 85,
-        overscan: 10,
-    });
-
-    const handleDelete = async (contactId: number) => {
-        try {
-            await deleteContact(contactId.toString());
-            queryClient.invalidateQueries({ queryKey: ["contacts"] });
-        } catch (error) {
-            console.error("Failed to delete contact:", error);
-        }
-    };
-
-    const handlePageChange = (newPage: number) => {
-        if (newPage >= 1 && newPage <= totalPages) {
-            const currentSelection = contact.selected;
-            const currentId = contact.selectedId;
-            setPage(newPage);
-            if (currentSelection) {
-                console.log("Changing page, preserving selection:", {
-                    email: currentSelection,
-                    id: currentId,
-                });
-            }
-        }
-    };
+    }, [searchText]);
 
     const filteredContacts = React.useMemo(() => {
+        if (searchText.trim()) {
+            return searchResults;
+        }
+
         let filtered = [...contacts];
 
         if (filters.hasEmail) {
@@ -223,7 +180,6 @@ export default function ContactsList({
             filtered = filtered.filter((c) => !c.been_contacted);
         }
 
-        // Apply sorting
         if (filters.sortBy === "name") {
             filtered.sort((a, b) => {
                 const nameA =
@@ -241,7 +197,77 @@ export default function ContactsList({
         }
 
         return filtered;
-    }, [contacts, filters]);
+    }, [searchText, searchResults, contacts, filters]);
+
+    const virtualizer = useVirtualizer({
+        count: filteredContacts.length,
+        getScrollElement: () => containerRef.current,
+        estimateSize: () => 85,
+        overscan: 10,
+    });
+
+    const displayedContactsCount = searchText.trim()
+        ? searchResults.length
+        : totalContacts;
+
+    const organizations = React.useMemo(() => {
+        const uniqueOrgs = new Set<string>();
+        contacts.forEach((c) => {
+            if (c.organization) uniqueOrgs.add(c.organization);
+        });
+        return Array.from(uniqueOrgs).sort();
+    }, [contacts]);
+
+    const departments = React.useMemo(() => {
+        const uniqueDepts = new Set<string>();
+        contacts.forEach((c) => {
+            if (c.department) uniqueDepts.add(c.department);
+        });
+        return Array.from(uniqueDepts).sort();
+    }, [contacts]);
+
+    const industries = React.useMemo(() => {
+        const uniqueIndustries = new Set<string>();
+        contacts.forEach((c) => {
+            if (c.industry) uniqueIndustries.add(c.industry);
+        });
+        return Array.from(uniqueIndustries).sort();
+    }, [contacts]);
+
+    const contactTypes = React.useMemo(() => {
+        const uniqueTypes = new Set<string>();
+        contacts.forEach((c) => {
+            if (c.type) uniqueTypes.add(c.type);
+        });
+        return Array.from(uniqueTypes).sort();
+    }, [contacts]);
+
+    const handleDelete = async (contactId: number) => {
+        try {
+            await deleteContact(contactId.toString());
+            queryClient.invalidateQueries({ queryKey: ["contacts"] });
+            setSearchResults([]);
+            setSearchText("");
+        } catch (error) {
+            console.error("Failed to delete contact:", error);
+        }
+    };
+
+    const handlePageChange = (newPage: number) => {
+        if (newPage >= 1 && newPage <= totalPages) {
+            const currentSelection = contact.selected;
+            const currentId = contact.selectedId;
+            setPage(newPage);
+            setSearchText("");
+            setSearchResults([]);
+            if (currentSelection) {
+                console.log("Changing page, preserving selection:", {
+                    email: currentSelection,
+                    id: currentId,
+                });
+            }
+        }
+    };
 
     const clearFilters = () => {
         setFilters({
@@ -262,6 +288,27 @@ export default function ContactsList({
         return !!value;
     }).length;
 
+    const handleContactUpdate = React.useCallback(() => {
+        // Invalidate both contacts and search queries
+        queryClient.invalidateQueries({ queryKey: ["contacts"] });
+
+        // If we're currently searching, re-trigger the search
+        if (searchText.trim()) {
+            setIsSearching(true);
+            searchContacts(searchText)
+                .then((results) => {
+                    setSearchResults(results);
+                })
+                .catch((error) => {
+                    console.error("Error refreshing search results:", error);
+                    setSearchResults([]);
+                })
+                .finally(() => {
+                    setIsSearching(false);
+                });
+        }
+    }, [queryClient, searchText]);
+
     return (
         <div className="flex flex-col h-full bg-background">
             <header className="border-b px-4 py-3 bg-background sticky top-0 z-10">
@@ -270,16 +317,29 @@ export default function ContactsList({
                         <h1 className="text-xl font-bold">Contacts</h1>
                         <div className="text-sm text-muted-foreground flex items-center gap-2">
                             <span className="bg-primary/10 text-primary px-2 py-1 rounded-md font-medium">
-                                {totalContacts.toLocaleString()}
+                                {displayedContactsCount.toLocaleString()}
                             </span>
-                            <span>total contacts</span>
+                            <span>
+                                {searchText.trim() ? "found" : "total"} contacts
+                            </span>
                         </div>
                     </div>
                     <div className="flex gap-2 items-center">
                         <div className="relative flex-1">
-                            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                            <Search
+                                className={cn(
+                                    "absolute left-2.5 top-2.5 h-4 w-4",
+                                    isSearching
+                                        ? "text-primary animate-pulse"
+                                        : "text-muted-foreground"
+                                )}
+                            />
                             <Input
-                                placeholder="Search contacts..."
+                                placeholder={
+                                    isSearching
+                                        ? "Searching..."
+                                        : "Search contacts..."
+                                }
                                 className="pl-9 pr-4 py-2 h-10"
                                 value={searchText}
                                 onChange={(e) => setSearchText(e.target.value)}
@@ -543,12 +603,14 @@ export default function ContactsList({
                 </div>
             </div>
 
-            {isLoading ? (
+            {isLoading || (searchText.trim() && isSearching) ? (
                 <div className="flex-1 flex items-center justify-center">
                     <div className="flex flex-col items-center">
                         <div className="animate-spin h-10 w-10 border-3 border-primary rounded-full border-t-transparent mb-4"></div>
                         <p className="text-muted-foreground">
-                            Loading contacts...
+                            {searchText.trim()
+                                ? "Searching contacts..."
+                                : "Loading contacts..."}
                         </p>
                     </div>
                 </div>
@@ -621,8 +683,8 @@ export default function ContactsList({
                                     key={`${item.id}-${virtualItem.index}`}
                                     className={cn(
                                         "absolute top-0 left-0 w-full",
-                                        contact.selected === item.email &&
-                                            "bg-accent"
+                                        contact.selected ===
+                                            (item?.email || "") && "bg-accent"
                                     )}
                                     style={{
                                         height: `${virtualItem.size}px`,
@@ -632,7 +694,8 @@ export default function ContactsList({
                                     <div
                                         className={cn(
                                             "flex items-center gap-3 px-4 py-3 h-full border-b transition-colors mx-2 rounded-md",
-                                            contact.selected === item.email
+                                            contact.selected ===
+                                                (item?.email || "")
                                                 ? "bg-accent border-accent shadow-sm"
                                                 : "hover:bg-accent/40 border-border"
                                         )}
@@ -640,19 +703,20 @@ export default function ContactsList({
                                         <button
                                             onClick={() => {
                                                 setContact({
-                                                    selected: item.email,
-                                                    selectedId: item.id,
+                                                    selected: item?.email || "",
+                                                    selectedId: item?.id,
                                                 });
                                             }}
                                             className="flex-1 text-left flex items-center gap-3"
                                         >
                                             <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center text-lg flex-shrink-0 relative">
-                                                {item.first_name
+                                                {item?.first_name
                                                     ?.charAt(0)
                                                     .toUpperCase() ||
-                                                    item.email
-                                                        .charAt(0)
-                                                        .toUpperCase()}
+                                                    item?.email
+                                                        ?.charAt(0)
+                                                        ?.toUpperCase() ||
+                                                    "?"}
                                                 {item.been_contacted && (
                                                     <div className="absolute -top-1 -right-1 bg-primary rounded-full h-4 w-4 flex items-center justify-center">
                                                         <Check className="h-3 w-3 text-primary-foreground" />
@@ -667,7 +731,8 @@ export default function ContactsList({
                                                 <div className="flex flex-wrap items-center gap-x-2 text-sm text-muted-foreground">
                                                     <span className="truncate max-w-[200px] flex items-center gap-1">
                                                         <Mail className="h-3 w-3 text-muted-foreground/60" />
-                                                        {item.email}
+                                                        {item?.email ||
+                                                            "No email"}
                                                     </span>
                                                     {item.organization && (
                                                         <div className="flex items-center gap-1 text-xs">
@@ -712,13 +777,16 @@ export default function ContactsList({
                                                 <DropdownMenuItem
                                                     onClick={() =>
                                                         router.push(
-                                                            `/panel/email/compose?to=${item.email}`
+                                                            `/panel/email/compose?to=${item?.email || ""}`
                                                         )
                                                     }
                                                     className="cursor-pointer"
+                                                    disabled={!item?.email}
                                                 >
                                                     <Mail className="mr-2 h-4 w-4" />
-                                                    Send Email
+                                                    {item?.email
+                                                        ? "Send Email"
+                                                        : "No email available"}
                                                 </DropdownMenuItem>
                                                 <DropdownMenuItem
                                                     onClick={() =>
@@ -1108,7 +1176,12 @@ export default function ContactsList({
                 <EditContactDrawer
                     contact={editingContact}
                     open={!!editingContact}
-                    onOpenChange={(open) => !open && setEditingContact(null)}
+                    onOpenChange={(open) => {
+                        if (!open) {
+                            setEditingContact(null);
+                            handleContactUpdate();
+                        }
+                    }}
                 />
             )}
             <AlertDialog

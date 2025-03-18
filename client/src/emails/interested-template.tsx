@@ -14,24 +14,22 @@ import {
 } from "@react-email/components";
 import { OutreachTeamDto } from "../features/outreach/types/outreach-team";
 
-interface EmptyEmailProps {
+interface InterestedEmailProps {
     recipientName: string;
     emailContent: string;
     sender: OutreachTeamDto;
     organizationLogo?: string;
-    companyName: string;
     socialLinks?: {
         [key: string]: string;
     };
 }
 
-export const EmptyEmail = ({
+export const InterestedEmail = ({
     emailContent,
     sender,
     socialLinks = {},
     recipientName,
-    companyName,
-}: EmptyEmailProps) => {
+}: InterestedEmailProps) => {
     const formattedYearAndMajor = `${sender.year} ${sender.major}`;
 
     const renderCustomEmailBody = () => {
@@ -39,7 +37,6 @@ export const EmptyEmail = ({
 
         const parsedContent = emailContent
             .replace(/\[recipient_name\]/g, recipientName)
-            .replace(/\[company_name\]/g, companyName)
             .replace(/\[sender_name\]/g, sender.name)
             .replace(/\[sender_year_and_major\]/g, formattedYearAndMajor)
             .replace(/\[sender_school\]/g, sender.school);
@@ -125,7 +122,7 @@ export const EmptyEmail = ({
     );
 };
 
-export default EmptyEmail;
+export default InterestedEmail;
 
 // Styles
 const main = {
