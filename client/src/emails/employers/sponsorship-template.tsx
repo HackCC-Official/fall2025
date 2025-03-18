@@ -8,7 +8,6 @@ import {
     Html,
     Img,
     Link,
-    Preview,
     Row,
     Section,
     Text,
@@ -20,6 +19,7 @@ interface SponsorshipEmailProps {
     recipientName: string;
     venue: string;
     sender: OutreachTeamDto;
+    subject: string;
     positionAtHackCC: string;
     socialLinks: {
         linkedin?: string;
@@ -35,25 +35,29 @@ export const SponsorshipEmail = ({
     recipientName,
     venue,
     sender,
-    // positionAtHackCC,
+    subject,
     socialLinks,
     customEmailBody,
-}:  SponsorshipEmailProps) => {
+}: SponsorshipEmailProps) => {
     const formattedYearAndMajor = `${sender.year} ${sender.major}`;
 
     const today = new Date();
     const isCurrentDayTuesday = today.getDay() === 2;
 
-    const renderCustomEmailBody = () => {
-        if (!customEmailBody) return null;
-
-        const parsedContent = customEmailBody
+    const parseContent = (content: string): string => {
+        return content
             .replace(/\[recipient_name\]/g, recipientName)
             .replace(/\[company_name\]/g, companyName)
             .replace(/\[sender_name\]/g, sender.name)
             .replace(/\[sender_year_and_major\]/g, formattedYearAndMajor)
             .replace(/\[sender_school\]/g, sender.school)
             .replace(/\[venue\]/g, venue);
+    };
+
+    const renderCustomEmailBody = () => {
+        if (!customEmailBody) return null;
+
+        const parsedContent = parseContent(customEmailBody);
 
         return parsedContent.split("\n\n").map((paragraphText, index) => (
             <Text key={index} style={paragraph}>
@@ -62,10 +66,11 @@ export const SponsorshipEmail = ({
         ));
     };
 
+    const parsedSubject = parseContent(subject);
+
     return (
         <Html>
             <Head />
-            <Preview>{companyName} and HackCC Sponsorship</Preview>
             <Body style={main}>
                 <Container style={container}>
                     {/* Header */}
@@ -84,9 +89,7 @@ export const SponsorshipEmail = ({
 
                     <Section style={content}>
                         {/* Email Subject */}
-                        <Heading style={subjectLine}>
-                            {companyName} and HackCC Sponsorship
-                        </Heading>
+                        <Heading style={subjectLine}>{parsedSubject}</Heading>
 
                         {/* Email Body */}
                         {customEmailBody ? (

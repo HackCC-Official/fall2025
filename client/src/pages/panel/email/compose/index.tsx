@@ -606,6 +606,14 @@ export default function ComposePage({ mails = [] }: ComposePageProps) {
         } as Record<RecipientType, Recipient[]>;
     }, [contacts, mails, interestedUsers]);
 
+    // Add debug logging
+    React.useEffect(() => {
+        if (recipientType === "interested") {
+            console.log("Interested users data:", interestedUsers);
+            console.log("Interested recipients:", recipientLists.interested);
+        }
+    }, [recipientType, interestedUsers, recipientLists]);
+
     const filteredRecipients = React.useMemo(() => {
         const currentList = recipientLists[recipientType];
         return currentList.filter(
@@ -621,6 +629,13 @@ export default function ComposePage({ mails = [] }: ComposePageProps) {
                     .includes(searchQuery.toLowerCase())
         );
     }, [recipientLists, recipientType, searchQuery]);
+
+    // Add debug logging for filtered recipients
+    React.useEffect(() => {
+        if (recipientType === "interested") {
+            console.log("Filtered interested recipients:", filteredRecipients);
+        }
+    }, [recipientType, filteredRecipients]);
 
     const areAllFilteredSelected = React.useMemo(() => {
         return (
@@ -698,6 +713,7 @@ export default function ComposePage({ mails = [] }: ComposePageProps) {
                                 HackCC: "https://hackcc.net",
                                 LinkedIn: "https://linkedin.com/company/hackcc",
                             }}
+                            subject={emailSubject}
                         />
                     );
                 } else {
@@ -725,6 +741,7 @@ export default function ComposePage({ mails = [] }: ComposePageProps) {
                                     "requested_materials"
                                 ),
                             }),
+                            subject: emailSubject,
                         },
                         contactInfo: {
                             email: senderEmail,
@@ -735,11 +752,10 @@ export default function ComposePage({ mails = [] }: ComposePageProps) {
                 }
             } else {
                 previewContent = await render(
-                    <EmptyEmail
+                    <InterestedEmail
                         recipientName="Name"
                         emailContent={emailContent}
                         sender={selectedTeamMember}
-                        companyName="Company"
                         socialLinks={{
                             HackCC: "https://hackcc.net",
                             LinkedIn: "https://linkedin.com/company/hackcc",
@@ -839,6 +855,7 @@ export default function ComposePage({ mails = [] }: ComposePageProps) {
                                         LinkedIn:
                                             "https://linkedin.com/company/hackcc",
                                     }}
+                                    subject={emailSubject}
                                 />
                             );
                         })
@@ -868,6 +885,7 @@ export default function ComposePage({ mails = [] }: ComposePageProps) {
                                     "requested_materials"
                                 ),
                             }),
+                            subject: "",
                         },
                         contactInfo: {
                             email: senderEmail,
@@ -1167,7 +1185,20 @@ export default function ComposePage({ mails = [] }: ComposePageProps) {
                 onClick={() => setContactsView("selected")}
                 disabled={selectedRecipients.size === 0}
             >
-                <Checkbox className="h-4 w-4 mr-2" checked={true} />
+                <div className="h-4 w-4 mr-2 rounded-sm border border-primary flex items-center justify-center bg-primary text-primary-foreground">
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        className="h-3 w-3"
+                    >
+                        <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                </div>
                 Selected ({selectedRecipients.size})
             </Button>
         </div>
@@ -1402,10 +1433,12 @@ export default function ComposePage({ mails = [] }: ComposePageProps) {
                                             className="flex items-center gap-1"
                                             onClick={handleSelectAllVisible}
                                         >
-                                            <Checkbox
-                                                className="h-3 w-3 mr-1"
-                                                id="select-all-visible"
-                                            />
+                                            <div
+                                                className="h-3 w-3 mr-1 rounded-sm border border-primary flex items-center justify-center"
+                                                aria-hidden="true"
+                                            >
+                                                {/* Empty div styled like an unchecked checkbox */}
+                                            </div>
                                             Select Page
                                         </Button>
                                     )}
@@ -1440,6 +1473,30 @@ export default function ComposePage({ mails = [] }: ComposePageProps) {
                                             }
                                         />
                                     )}
+
+                                {(recipientType === "interested" ||
+                                    recipientType === "registered") && (
+                                    <RecipientSelectionTable
+                                        contacts={recipientLists[recipientType]}
+                                        currentPage={1}
+                                        totalPages={1}
+                                        selectedRecipients={selectedRecipients}
+                                        onSelectRecipient={
+                                            handleRecipientToggle
+                                        }
+                                        onSelectAll={handleSelectAll}
+                                        onPageChange={() => {}}
+                                        loading={
+                                            recipientType === "interested"
+                                                ? isInterestedLoading
+                                                : false
+                                        }
+                                        areAllSelected={areAllFilteredSelected}
+                                        areSomeSelected={
+                                            areSomeFilteredSelected
+                                        }
+                                    />
+                                )}
 
                                 {recipientType === "employers" &&
                                     contactsView === "organizations" && (

@@ -8,7 +8,6 @@ import {
     Html,
     Img,
     Link,
-    Preview,
     Row,
     Section,
     Text,
@@ -18,6 +17,7 @@ import { OutreachTeamDto } from "../../features/outreach/types/outreach-team";
 interface PostCallEmailProps {
     companyName: string;
     recipientName: string;
+    subject: string;
     sender: OutreachTeamDto;
     positionAtHackCC: string;
     organizationLogo?: string;
@@ -34,6 +34,7 @@ interface PostCallEmailProps {
 export const PostCallEmail = ({
     companyName,
     recipientName,
+    subject,
     sender,
     followupDate,
     followupTime,
@@ -43,10 +44,8 @@ export const PostCallEmail = ({
 }: PostCallEmailProps) => {
     const formattedYearAndMajor = `${sender.year} ${sender.major}`;
 
-    const renderCustomEmailBody = () => {
-        if (!customEmailBody) return null;
-
-        const parsedContent = customEmailBody
+    const parseContent = (content: string): string => {
+        return content
             .replace(/\[recipient_name\]/g, recipientName)
             .replace(/\[company_name\]/g, companyName)
             .replace(/\[sender_name\]/g, sender.name)
@@ -58,6 +57,12 @@ export const PostCallEmail = ({
                 /\[requested_materials\]/g,
                 requestedMaterials || "requested materials"
             );
+    };
+
+    const renderCustomEmailBody = () => {
+        if (!customEmailBody) return null;
+
+        const parsedContent = parseContent(customEmailBody);
 
         const sections = parsedContent.split("\n\n");
 
@@ -112,10 +117,11 @@ export const PostCallEmail = ({
         });
     };
 
+    const parsedSubject = parseContent(subject);
+
     return (
         <Html>
             <Head />
-            <Preview>HackCC Sponsorship Next Steps</Preview>
             <Body style={main}>
                 <Container style={container}>
                     {/* Header */}
@@ -131,9 +137,7 @@ export const PostCallEmail = ({
 
                     <Section style={content}>
                         {/* Email Subject */}
-                        <Heading style={subjectLine}>
-                            HackCC Sponsorship Next Steps
-                        </Heading>
+                        <Heading style={subjectLine}>{parsedSubject}</Heading>
 
                         {/* Email Body */}
                         {customEmailBody ? (

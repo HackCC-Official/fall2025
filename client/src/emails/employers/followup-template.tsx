@@ -8,7 +8,6 @@ import {
     Html,
     Img,
     Link,
-    Preview,
     Row,
     Section,
     Text,
@@ -18,6 +17,7 @@ import { OutreachTeamDto } from "../../features/outreach/types/outreach-team";
 interface FollowUpEmailProps {
     companyName: string;
     recipientName: string;
+    subject: string;
     venue: string;
     sender: OutreachTeamDto;
     positionAtHackCC: string;
@@ -32,6 +32,7 @@ interface FollowUpEmailProps {
 export const FollowUpEmail = ({
     companyName,
     recipientName,
+    subject,
     venue,
     sender,
     location,
@@ -40,10 +41,8 @@ export const FollowUpEmail = ({
 }: FollowUpEmailProps) => {
     const formattedYearAndMajor = `${sender.year} ${sender.major}`;
 
-    const renderCustomEmailBody = () => {
-        if (!customEmailBody) return null;
-
-        const parsedContent = customEmailBody
+    const parseContent = (content: string): string => {
+        return content
             .replace(/\[recipient_name\]/g, recipientName)
             .replace(/\[company_name\]/g, companyName)
             .replace(/\[sender_name\]/g, sender.name)
@@ -51,6 +50,12 @@ export const FollowUpEmail = ({
             .replace(/\[sender_school\]/g, sender.school)
             .replace(/\[venue\]/g, venue)
             .replace(/\[location\]/g, location);
+    };
+
+    const renderCustomEmailBody = () => {
+        if (!customEmailBody) return null;
+
+        const parsedContent = parseContent(customEmailBody);
 
         return parsedContent.split("\n\n").map((paragraphText, index) => (
             <Text key={index} style={paragraph}>
@@ -59,10 +64,11 @@ export const FollowUpEmail = ({
         ));
     };
 
+    const parsedSubject = parseContent(subject);
+
     return (
         <Html>
             <Head />
-            <Preview>Meet the best students in {location} this May</Preview>
             <Body style={main}>
                 <Container style={container}>
                     <Section style={header}>
@@ -76,9 +82,7 @@ export const FollowUpEmail = ({
                     </Section>
 
                     <Section style={content}>
-                        <Heading style={subjectLine}>
-                            Re: Meet the best students in {location} this May
-                        </Heading>
+                        <Heading style={subjectLine}>{parsedSubject}</Heading>
 
                         {/* Email Body */}
                         {customEmailBody ? (
@@ -111,8 +115,6 @@ export const FollowUpEmail = ({
                                 </Text>
                             </>
                         )}
-
-                        <Text style={paragraph}>Best regards,</Text>
 
                         {/* Signature */}
                         <Section style={signatureContainer}>

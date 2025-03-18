@@ -16,51 +16,16 @@ import {
 import { OutreachTeamDto } from "../../features/outreach/types/outreach-team";
 
 interface ConfirmationEmailProps {
-    /**
-     * The name of the company being contacted
-     */
     companyName: string;
-
-    /**
-     * The name of the person being contacted at the company
-     */
     recipientName: string;
-
-    /**
-     * Information about the outreach team member sending the email
-     */
     sender: OutreachTeamDto;
-
-    /**
-     * The position of the sender at HackCC
-     */
-    positionAtHackCC: string;
-
-    /**
-     * Organization's logo URL
-     */
-    organizationLogo?: string;
-
-    /**
-     * Social media links to include in the signature
-     */
+    subject: string;
     socialLinks: {
-        /**
-         * URLs to various social media profiles
-         */
         [key: string]: string;
     };
 
-    /**
-     * Optional custom email body content
-     * When provided, will replace the default email body while preserving variable replacements
-     */
     customEmailBody?: string;
 }
-
-const baseUrl = process.env.VERCEL_URL
-    ? `https://${process.env.VERCEL_URL}`
-    : "";
 
 /**
  * ConfirmationEmail component for HackCC outreach
@@ -72,23 +37,29 @@ export const ConfirmationEmail = ({
     companyName,
     recipientName,
     sender,
+    subject,
     socialLinks,
     customEmailBody,
 }: ConfirmationEmailProps) => {
     // Format the sender's year and major for better readability
     const formattedYearAndMajor = `${sender.year} ${sender.major}`;
 
-    // Parse custom email body if provided
-    const renderCustomEmailBody = () => {
-        if (!customEmailBody) return null;
-
-        // Replace variable placeholders with actual values
-        const parsedContent = customEmailBody
+    // Function to parse content with placeholders
+    const parseContent = (content: string): string => {
+        return content
             .replace(/\[recipient_name\]/g, recipientName)
             .replace(/\[company_name\]/g, companyName)
             .replace(/\[sender_name\]/g, sender.name)
             .replace(/\[sender_year_and_major\]/g, formattedYearAndMajor)
             .replace(/\[sender_school\]/g, sender.school);
+    };
+
+    // Parse custom email body if provided
+    const renderCustomEmailBody = () => {
+        if (!customEmailBody) return null;
+
+        // Replace variable placeholders with actual values
+        const parsedContent = parseContent(customEmailBody);
 
         // Split the content into sections
         const sections = parsedContent.split("\n\n");
@@ -105,15 +76,12 @@ export const ConfirmationEmail = ({
 
             // Check if this section contains bullet points
             if (section.includes("•") || section.includes("-")) {
-                // Split by lines to handle each bullet point separately
                 const lines = section.split("\n");
                 return (
                     <React.Fragment key={`bullets-${index}`}>
                         {lines.map((line, lineIndex) => {
-                            // Skip empty lines
                             if (!line.trim()) return null;
 
-                            // If this is a bullet point (starts with • or -), use bullet point styling
                             if (
                                 line.trim().startsWith("•") ||
                                 line.trim().startsWith("-")
@@ -151,6 +119,8 @@ export const ConfirmationEmail = ({
         });
     };
 
+    const parsedSubject = parseContent(subject);
+
     return (
         <Html>
             <Head />
@@ -160,7 +130,7 @@ export const ConfirmationEmail = ({
                     {/* Header */}
                     <Section style={header}>
                         <Img
-                            src={`${baseUrl}/static/hackcc-logo.png`}
+                            src={`https://minio.hackcc.net/public-bucket/logo.svg`}
                             width={120}
                             height={45}
                             alt="HackCC Logo"
@@ -170,9 +140,7 @@ export const ConfirmationEmail = ({
 
                     <Section style={content}>
                         {/* Email Subject */}
-                        <Heading style={subjectLine}>
-                            HackCC x {companyName} Sponsorship Confirmation!
-                        </Heading>
+                        <Heading style={subjectLine}>{parsedSubject}</Heading>
 
                         {/* Email Body */}
                         {customEmailBody ? (

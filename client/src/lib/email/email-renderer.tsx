@@ -16,6 +16,7 @@ export type EmailTemplateType =
     | "Empty";
 
 interface TemplateData {
+    subject: string;
     sender: OutreachTeamDto;
     emailContent?: string;
     followupDate?: string;
@@ -58,6 +59,7 @@ export async function renderEmailTemplate({
                             github: "",
                         }}
                         customEmailBody={templateData.emailContent}
+                        subject={templateData.subject}
                     />
                 );
                 break;
@@ -65,6 +67,7 @@ export async function renderEmailTemplate({
                 emailComponent = (
                     <FollowUpEmail
                         companyName={recipient.organization}
+                        subject={templateData.subject}
                         recipientName={`${recipient.first_name} ${recipient.last_name}`}
                         venue="California Community College"
                         sender={templateData.sender}
@@ -79,6 +82,7 @@ export async function renderEmailTemplate({
                 emailComponent = (
                     <PostCallEmail
                         companyName={recipient.organization}
+                        subject={templateData.subject}
                         recipientName={`${recipient.first_name} ${recipient.last_name}`}
                         sender={templateData.sender}
                         positionAtHackCC={`${templateData.sender.year} ${templateData.sender.major} Student at ${templateData.sender.school}`}
@@ -100,13 +104,12 @@ export async function renderEmailTemplate({
                         companyName={recipient.organization}
                         recipientName={`${recipient.first_name} ${recipient.last_name}`}
                         sender={templateData.sender}
-                        positionAtHackCC={`${templateData.sender.year} ${templateData.sender.major} Student at ${templateData.sender.school}`}
-                        organizationLogo=""
                         socialLinks={{
                             linkedin: recipient.linkedin_url || "",
                             HackCC: "https://hackcc.net",
                         }}
                         customEmailBody={templateData.emailContent}
+                        subject={templateData.subject}
                     />
                 );
                 break;
@@ -119,6 +122,7 @@ export async function renderEmailTemplate({
                         companyName={
                             recipient.organization || "your organization"
                         }
+                        subject={templateData.subject}
                         socialLinks={{
                             linkedin: recipient.linkedin_url || "",
                             HackCC: "https://hackcc.net",

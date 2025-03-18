@@ -11,6 +11,7 @@ import {
     Row,
     Section,
     Text,
+    Heading,
 } from "@react-email/components";
 import { OutreachTeamDto } from "../features/outreach/types/outreach-team";
 
@@ -20,6 +21,7 @@ interface EmptyEmailProps {
     sender: OutreachTeamDto;
     organizationLogo?: string;
     companyName: string;
+    subject: string;
     socialLinks?: {
         [key: string]: string;
     };
@@ -31,18 +33,23 @@ export const EmptyEmail = ({
     socialLinks = {},
     recipientName,
     companyName,
+    subject,
 }: EmptyEmailProps) => {
     const formattedYearAndMajor = `${sender.year} ${sender.major}`;
 
-    const renderCustomEmailBody = () => {
-        if (!emailContent) return null;
-
-        const parsedContent = emailContent
+    const parseContent = (content: string): string => {
+        return content
             .replace(/\[recipient_name\]/g, recipientName)
             .replace(/\[company_name\]/g, companyName)
             .replace(/\[sender_name\]/g, sender.name)
             .replace(/\[sender_year_and_major\]/g, formattedYearAndMajor)
             .replace(/\[sender_school\]/g, sender.school);
+    };
+
+    const renderCustomEmailBody = () => {
+        if (!emailContent) return null;
+
+        const parsedContent = parseContent(emailContent);
 
         return parsedContent.split("\n\n").map((paragraphText, index) => (
             <Text key={index} style={paragraph}>
@@ -51,10 +58,12 @@ export const EmptyEmail = ({
         ));
     };
 
+    const parsedSubject = parseContent(subject);
+
     return (
         <Html>
             <Head />
-            <Preview>Message from HackCC</Preview>
+            <Preview>{parsedSubject || "Message from HackCC"}</Preview>
             <Body style={main}>
                 <Container style={container}>
                     <Section style={header}>
@@ -68,6 +77,9 @@ export const EmptyEmail = ({
                     </Section>
 
                     <Section style={content}>
+                        {/* Email Subject */}
+                        <Heading style={subjectLine}>{parsedSubject}</Heading>
+
                         {renderCustomEmailBody()}
 
                         {/* Signature */}
@@ -217,4 +229,12 @@ const footerText = {
     fontSize: "12px",
     color: "#6b7280",
     margin: "0",
+};
+
+const subjectLine = {
+    fontSize: "24px",
+    lineHeight: "1.3",
+    fontWeight: "700",
+    color: "#1e40af",
+    margin: "0 0 24px",
 };
