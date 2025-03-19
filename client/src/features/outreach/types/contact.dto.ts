@@ -1,35 +1,26 @@
-/**
- * Base interface for contact information
- */
+export type ContactStatus =
+    | "Cold"
+    | "Follow Up 1"
+    | "Follow Up 2"
+    | "Accept"
+    | "Rejected"
+    | "Contacted";
+
 export interface ContactDto {
     id: number;
-    email: string;
-    name?: string;
-    domain_name: string;
-    organization: string;
+    email_address: string;
+    contact_name?: string;
+    company?: string;
     country?: string;
-    state?: string;
-    city?: string;
-    postal_code?: string;
-    street?: string;
     confidence_score?: number;
-    type?: string;
-    number_of_sources?: number;
-    pattern?: string;
-    first_name: string;
-    last_name: string;
-    department?: string;
-    position: string;
-    twitter_handle?: string;
-    linkedin_url?: string;
+    position?: string;
+    linkedin?: string;
     phone_number?: string;
-    company_type?: string;
-    industry?: string;
-    been_contacted?: boolean;
+    website?: string;
+    liaison?: string;
+    status?: ContactStatus;
+    meeting_method?: string;
+    created_at?: string;
 }
 
-/**
- * DTO for updating contact information
- * Makes all fields optional
- */
 export type UpdateContactDto = Partial<ContactDto>;

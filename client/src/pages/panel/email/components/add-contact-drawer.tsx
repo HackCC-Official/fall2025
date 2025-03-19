@@ -37,26 +37,13 @@ interface AddContactDrawerProps {
 
 const contactFormSchema = z
     .object({
-        first_name: z.string().min(1, "First name is required"),
-        last_name: z.string().min(1, "Last name is required"),
-        email: z.string().email("Invalid email address"),
-        domain_name: z.string().optional(),
-        organization: z.string().min(1, "Organization is required"),
+        contact_name: z.string().min(1, "Name is required"),
+        email_address: z.string().email("Invalid email address"),
+        company: z.string().optional(),
         country: z.string().optional(),
-        state: z.string().optional(),
-        city: z.string().optional(),
-        postal_code: z.string().optional(),
-        street: z.string().optional(),
-        confidence_score: z.number({
-            required_error: "Confidence score is required",
-        }),
-        type: z.enum(["sponsor", "partner", "personal", "other"]).optional(),
-        number_of_sources: z.number().optional(),
-        pattern: z.string().optional(),
-        department: z.string().optional(),
-        position: z.string().min(1, "Position is required"),
-        twitter_handle: z.string().optional(),
-        linkedin_url: z
+        position: z.string().optional(),
+        confidence_score: z.number().min(0).max(100).optional(),
+        linkedin: z
             .string()
             .refine(
                 (val) => {
@@ -75,8 +62,23 @@ const contactFormSchema = z
             )
             .optional(),
         phone_number: z.string().optional(),
-        company_type: z.string().optional(),
-        industry: z.string().optional(),
+        website: z
+            .string()
+            .url("Please enter a valid URL")
+            .optional()
+            .or(z.literal("")),
+        liaison: z.string().optional(),
+        status: z
+            .enum([
+                "Cold",
+                "Follow Up 1",
+                "Follow Up 2",
+                "Accept",
+                "Rejected",
+                "Contacted",
+            ])
+            .optional(),
+        meeting_method: z.string().optional(),
     })
     .transform((data) => {
         const cleaned = { ...data } as unknown as Record<
@@ -104,27 +106,18 @@ export default function AddContactDrawer({
     const form = useForm<ContactFormValues>({
         resolver: zodResolver(contactFormSchema),
         defaultValues: {
-            first_name: "",
-            last_name: "",
-            email: "",
-            domain_name: "",
-            organization: "",
+            contact_name: "",
+            email_address: "",
+            company: "",
             country: "",
-            state: "",
-            city: "",
-            postal_code: "",
-            street: "",
-            confidence_score: undefined,
-            type: undefined,
-            number_of_sources: undefined,
-            pattern: "",
-            department: "",
             position: "",
-            twitter_handle: "",
-            linkedin_url: "",
+            confidence_score: undefined,
+            linkedin: "",
             phone_number: "",
-            company_type: "",
-            industry: "",
+            website: "",
+            liaison: "",
+            status: undefined,
+            meeting_method: "",
         },
     });
 
@@ -149,10 +142,6 @@ export default function AddContactDrawer({
                 {} as Record<string, string | number>
             );
 
-            if (typeof cleanedValues.email === "string") {
-                cleanedValues.domain_name = cleanedValues.email.split("@")[1];
-            }
-
             const contactData: Partial<ContactDto> = {
                 ...Object.fromEntries(
                     Object.entries(cleanedValues).map(([key, value]) => [
@@ -162,7 +151,6 @@ export default function AddContactDrawer({
                             : String(value),
                     ])
                 ),
-                type: (cleanedValues.type as string) || "other",
             };
 
             await createContact(contactData);
@@ -202,38 +190,24 @@ export default function AddContactDrawer({
                                 {error}
                             </div>
                         )}
-                        <div className="grid grid-cols-2 gap-4">
-                            <FormField
-                                control={form.control}
-                                name="first_name"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>First Name *</FormLabel>
-                                        <FormControl>
-                                            <Input {...field} />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                            <FormField
-                                control={form.control}
-                                name="last_name"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Last Name *</FormLabel>
-                                        <FormControl>
-                                            <Input {...field} />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                        </div>
 
                         <FormField
                             control={form.control}
-                            name="email"
+                            name="contact_name"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Contact Name *</FormLabel>
+                                    <FormControl>
+                                        <Input {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+
+                        <FormField
+                            control={form.control}
+                            name="email_address"
                             render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Email *</FormLabel>
@@ -248,10 +222,10 @@ export default function AddContactDrawer({
                         <div className="grid grid-cols-2 gap-4">
                             <FormField
                                 control={form.control}
-                                name="organization"
+                                name="company"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Organization</FormLabel>
+                                        <FormLabel>Company</FormLabel>
                                         <FormControl>
                                             <Input {...field} />
                                         </FormControl>
@@ -290,34 +264,13 @@ export default function AddContactDrawer({
                             />
                             <FormField
                                 control={form.control}
-                                name="type"
+                                name="country"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Contact Type</FormLabel>
-                                        <Select
-                                            onValueChange={field.onChange}
-                                            defaultValue={field.value?.toString()}
-                                        >
-                                            <FormControl>
-                                                <SelectTrigger>
-                                                    <SelectValue placeholder="Select type" />
-                                                </SelectTrigger>
-                                            </FormControl>
-                                            <SelectContent>
-                                                <SelectItem value="sponsor">
-                                                    Sponsor
-                                                </SelectItem>
-                                                <SelectItem value="partner">
-                                                    Partner
-                                                </SelectItem>
-                                                <SelectItem value="personal">
-                                                    Personal
-                                                </SelectItem>
-                                                <SelectItem value="other">
-                                                    Other
-                                                </SelectItem>
-                                            </SelectContent>
-                                        </Select>
+                                        <FormLabel>Country</FormLabel>
+                                        <FormControl>
+                                            <Input {...field} />
+                                        </FormControl>
                                         <FormMessage />
                                     </FormItem>
                                 )}
@@ -353,10 +306,66 @@ export default function AddContactDrawer({
                             />
                             <FormField
                                 control={form.control}
-                                name="linkedin_url"
+                                name="status"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Status</FormLabel>
+                                        <Select
+                                            onValueChange={field.onChange}
+                                            defaultValue={field.value?.toString()}
+                                        >
+                                            <FormControl>
+                                                <SelectTrigger>
+                                                    <SelectValue placeholder="Select status" />
+                                                </SelectTrigger>
+                                            </FormControl>
+                                            <SelectContent>
+                                                <SelectItem value="Cold">
+                                                    Cold
+                                                </SelectItem>
+                                                <SelectItem value="Follow Up 1">
+                                                    Follow Up 1
+                                                </SelectItem>
+                                                <SelectItem value="Follow Up 2">
+                                                    Follow Up 2
+                                                </SelectItem>
+                                                <SelectItem value="Accept">
+                                                    Accept
+                                                </SelectItem>
+                                                <SelectItem value="Rejected">
+                                                    Rejected
+                                                </SelectItem>
+                                                <SelectItem value="Contacted">
+                                                    Contacted
+                                                </SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                            <FormField
+                                control={form.control}
+                                name="linkedin"
                                 render={({ field }) => (
                                     <FormItem>
                                         <FormLabel>LinkedIn URL</FormLabel>
+                                        <FormControl>
+                                            <Input type="url" {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={form.control}
+                                name="website"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Website</FormLabel>
                                         <FormControl>
                                             <Input type="url" {...field} />
                                         </FormControl>
@@ -369,10 +378,10 @@ export default function AddContactDrawer({
                         <div className="grid grid-cols-2 gap-4">
                             <FormField
                                 control={form.control}
-                                name="department"
+                                name="liaison"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Department</FormLabel>
+                                        <FormLabel>Liaison</FormLabel>
                                         <FormControl>
                                             <Input {...field} />
                                         </FormControl>
@@ -382,10 +391,10 @@ export default function AddContactDrawer({
                             />
                             <FormField
                                 control={form.control}
-                                name="industry"
+                                name="meeting_method"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Industry</FormLabel>
+                                        <FormLabel>Meeting Method</FormLabel>
                                         <FormControl>
                                             <Input {...field} />
                                         </FormControl>
@@ -394,78 +403,6 @@ export default function AddContactDrawer({
                                 )}
                             />
                         </div>
-
-                        <div className="grid grid-cols-2 gap-4">
-                            <FormField
-                                control={form.control}
-                                name="country"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Country</FormLabel>
-                                        <FormControl>
-                                            <Input {...field} />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                            <FormField
-                                control={form.control}
-                                name="state"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>State</FormLabel>
-                                        <FormControl>
-                                            <Input {...field} />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-4">
-                            <FormField
-                                control={form.control}
-                                name="city"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>City</FormLabel>
-                                        <FormControl>
-                                            <Input {...field} />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                            <FormField
-                                control={form.control}
-                                name="postal_code"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Postal Code</FormLabel>
-                                        <FormControl>
-                                            <Input {...field} />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                        </div>
-
-                        <FormField
-                            control={form.control}
-                            name="street"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Street Address</FormLabel>
-                                    <FormControl>
-                                        <Input {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
 
                         <div className="flex justify-end gap-2">
                             <Button

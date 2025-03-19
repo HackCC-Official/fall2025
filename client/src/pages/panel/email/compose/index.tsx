@@ -68,7 +68,10 @@ import {
     type EmailTemplateType,
 } from "@/lib/email/email-renderer";
 import { useSearchParams } from "next/navigation";
-import type { ContactDto } from "@/features/outreach/types/contact.dto";
+import type {
+    ContactDto,
+    ContactStatus,
+} from "@/features/outreach/types/contact.dto";
 import { debounce } from "lodash";
 import InterestedEmail from "@/emails/interested-template";
 
@@ -84,9 +87,8 @@ interface Recipient {
     id: string;
     to: EmailRecipient[];
     labels: string[];
-    organization?: string;
-    department?: string;
-    been_contacted?: boolean;
+    company?: string;
+    status?: ContactStatus;
 }
 
 const EMAIL_TEMPLATES: ExtendedEmailTemplate[] = [
@@ -121,7 +123,7 @@ const EMAIL_TEMPLATES: ExtendedEmailTemplate[] = [
     {
         id: "5",
         name: "Sponsorship Agreement",
-        subject: "HackCC x [Company] Sponsorship Confirmation!",
+        subject: "HackCC x [company_name] Sponsorship Confirmation!",
         content: "Hi [Name],\n\nThank you for confirming your sponsorship...",
         type: "employers",
     },
@@ -225,7 +227,7 @@ const RecipientSelectionTable = ({
                             <TableHead className="py-3 font-semibold">
                                 Email
                             </TableHead>
-                            {"organization" in contacts[0] && (
+                            {"company" in contacts[0] && (
                                 <TableHead className="py-3 font-semibold">
                                     Organization
                                 </TableHead>
@@ -238,8 +240,8 @@ const RecipientSelectionTable = ({
                             <TableRow
                                 key={contact.id}
                                 className={
-                                    "been_contacted" in contact &&
-                                    contact.been_contacted
+                                    "status" in contact &&
+                                    contact.status === "Contacted"
                                         ? "bg-purple-100 dark:bg-purple-900/20"
                                         : "hover:bg-muted/50"
                                 }
@@ -259,18 +261,17 @@ const RecipientSelectionTable = ({
                                 <TableCell className="font-medium">
                                     {("to" in contact &&
                                         contact.to?.[0]?.name) ||
-                                        ("first_name" in contact &&
-                                            `${contact.first_name} ${contact.last_name}`)}
+                                        ("contact_name" in contact &&
+                                            contact.contact_name)}
                                 </TableCell>
                                 <TableCell className="text-muted-foreground">
                                     {("to" in contact &&
                                         contact.to?.[0]?.email) ||
-                                        ("email" in contact && contact.email)}
+                                        ("email_address" in contact &&
+                                            contact.email_address)}
                                 </TableCell>
-                                {"organization" in contact && (
-                                    <TableCell>
-                                        {contact.organization}
-                                    </TableCell>
+                                {"company" in contact && (
+                                    <TableCell>{contact.company}</TableCell>
                                 )}
                                 <TableCell>
                                     {"labels" in contact && contact.labels ? (
@@ -283,10 +284,14 @@ const RecipientSelectionTable = ({
                                                 {label}
                                             </Badge>
                                         ))
-                                    ) : "been_contacted" in contact &&
-                                      contact.been_contacted ? (
+                                    ) : "status" in contact &&
+                                      contact.status === "Contacted" ? (
                                         <Badge variant="secondary">
                                             Contacted
+                                        </Badge>
+                                    ) : "status" in contact ? (
+                                        <Badge variant="secondary">
+                                            {contact.status}
                                         </Badge>
                                     ) : null}
                                 </TableCell>
@@ -484,7 +489,7 @@ export default function ComposePage({ mails = [] }: ComposePageProps) {
 
         const newSelectedRecipients = new Set(selectedRecipients);
         contactsResponse?.data?.forEach((contact) => {
-            if (contact.organization === org) {
+            if (contact.company === org) {
                 if (selected) {
                     newSelectedRecipients.add(contact.id.toString());
                 } else {
@@ -547,11 +552,11 @@ export default function ComposePage({ mails = [] }: ComposePageProps) {
                 : contacts;
 
         contactsToGroup.forEach((contact) => {
-            if (contact.organization) {
-                if (!groups[contact.organization]) {
-                    groups[contact.organization] = [];
+            if (contact.company) {
+                if (!groups[contact.company]) {
+                    groups[contact.company] = [];
                 }
-                groups[contact.organization].push(contact);
+                groups[contact.company].push(contact);
             } else {
                 noOrg.push(contact);
             }
@@ -569,14 +574,13 @@ export default function ComposePage({ mails = [] }: ComposePageProps) {
             id: contact.id.toString(),
             to: [
                 {
-                    name: `${contact.first_name} ${contact.last_name}`,
-                    email: contact.email,
+                    name: contact.contact_name || "",
+                    email: contact.email_address,
                 },
             ],
-            organization: contact.organization,
-            department: contact.department,
+            company: contact.company,
             labels: ["Employer"],
-            been_contacted: contact.been_contacted,
+            status: contact.status,
         }));
 
         const registeredHackers = mails.map((hacker) => ({
@@ -624,7 +628,7 @@ export default function ComposePage({ mails = [] }: ComposePageProps) {
                 recipient.to?.[0]?.email
                     ?.toLowerCase()
                     .includes(searchQuery.toLowerCase()) ||
-                recipient.organization
+                recipient.company
                     ?.toLowerCase()
                     .includes(searchQuery.toLowerCase())
         );
@@ -794,9 +798,9 @@ export default function ComposePage({ mails = [] }: ComposePageProps) {
             contacts.forEach((contact) => {
                 if (selectedRecipients.has(contact.id.toString())) {
                     recipientsList.push({
-                        name: `${contact.first_name} ${contact.last_name}`,
-                        email: contact.email,
-                        organization: contact.organization,
+                        name: contact.contact_name || "",
+                        email: contact.email_address,
+                        organization: contact.company,
                     });
                 }
             });
@@ -847,8 +851,7 @@ export default function ComposePage({ mails = [] }: ComposePageProps) {
                                     emailContent={emailContent}
                                     sender={selectedTeamMember}
                                     companyName={
-                                        recipient.organization ||
-                                        "[company_name]"
+                                        recipient.company || "[company_name]"
                                     }
                                     socialLinks={{
                                         HackCC: "https://hackcc.net",
@@ -885,7 +888,7 @@ export default function ComposePage({ mails = [] }: ComposePageProps) {
                                     "requested_materials"
                                 ),
                             }),
-                            subject: "",
+                            subject: emailSubject,
                         },
                         contactInfo: {
                             email: senderEmail,
@@ -895,15 +898,38 @@ export default function ComposePage({ mails = [] }: ComposePageProps) {
                 }
 
                 emailData = {
-                    emails: selectedRecipientsData.map((recipient, index) => ({
-                        from: senderEmail,
-                        to: recipient.to.map((to) => ({
-                            email: to.email,
-                            name: to.name || to.email.split("@")[0],
-                        })),
-                        subject: emailSubject,
-                        html: renderedEmails[index],
-                    })),
+                    emails: selectedRecipientsData.map((recipient, index) => {
+                        // Parse the subject line to replace variables
+                        let parsedSubject = emailSubject;
+                        if (
+                            parsedSubject.includes("[company_name]") &&
+                            recipient.company
+                        ) {
+                            parsedSubject = parsedSubject.replace(
+                                /\[company_name\]/g,
+                                recipient.company
+                            );
+                        }
+                        if (
+                            parsedSubject.includes("[recipient_name]") &&
+                            recipient.to[0]?.name
+                        ) {
+                            parsedSubject = parsedSubject.replace(
+                                /\[recipient_name\]/g,
+                                recipient.to[0].name
+                            );
+                        }
+
+                        return {
+                            from: senderEmail,
+                            to: recipient.to.map((to) => ({
+                                email: to.email,
+                                name: to.name || to.email.split("@")[0],
+                            })),
+                            subject: parsedSubject,
+                            html: renderedEmails[index],
+                        };
+                    }),
                 };
             } else {
                 const renderedEmails = await Promise.all(
@@ -925,15 +951,29 @@ export default function ComposePage({ mails = [] }: ComposePageProps) {
                 );
 
                 emailData = {
-                    emails: selectedRecipientsData.map((recipient, index) => ({
-                        from: senderEmail,
-                        to: recipient.to.map((to) => ({
-                            email: to.email,
-                            name: to.name || to.email.split("@")[0],
-                        })),
-                        subject: emailSubject,
-                        html: renderedEmails[index],
-                    })),
+                    emails: selectedRecipientsData.map((recipient, index) => {
+                        // Parse the subject line to replace variables
+                        let parsedSubject = emailSubject;
+                        if (
+                            parsedSubject.includes("[recipient_name]") &&
+                            recipient.to[0]?.name
+                        ) {
+                            parsedSubject = parsedSubject.replace(
+                                /\[recipient_name\]/g,
+                                recipient.to[0].name
+                            );
+                        }
+
+                        return {
+                            from: senderEmail,
+                            to: recipient.to.map((to) => ({
+                                email: to.email,
+                                name: to.name || to.email.split("@")[0],
+                            })),
+                            subject: parsedSubject,
+                            html: renderedEmails[index],
+                        };
+                    }),
                 };
             }
 
@@ -948,7 +988,7 @@ export default function ComposePage({ mails = [] }: ComposePageProps) {
                     await Promise.all(
                         selectedRecipientsData.map(async (recipient) => {
                             await updateContact(recipient.id, {
-                                been_contacted: true,
+                                status: "Contacted",
                             });
                         })
                     );
@@ -1058,7 +1098,7 @@ export default function ComposePage({ mails = [] }: ComposePageProps) {
                         // Find the exact match for the email
                         const exactMatch = results.find(
                             (contact) =>
-                                contact.email.toLowerCase() ===
+                                contact.email_address.toLowerCase() ===
                                 toEmail.toLowerCase()
                         );
 
@@ -1227,8 +1267,9 @@ export default function ComposePage({ mails = [] }: ComposePageProps) {
             const orgContacts = groupedByOrganization[org];
             if (!orgContacts || orgContacts.length === 0) return 0;
 
-            return orgContacts.filter((contact) => contact.been_contacted)
-                .length;
+            return orgContacts.filter(
+                (contact) => contact.status === "Contacted"
+            ).length;
         },
         [groupedByOrganization]
     );
@@ -1608,7 +1649,8 @@ export default function ComposePage({ mails = [] }: ComposePageProps) {
                                                                                             contact.id
                                                                                         }
                                                                                         className={
-                                                                                            contact.been_contacted
+                                                                                            contact.status ===
+                                                                                            "Contacted"
                                                                                                 ? "bg-purple-100 dark:bg-purple-900/20"
                                                                                                 : "hover:bg-muted/50"
                                                                                         }
@@ -1626,15 +1668,17 @@ export default function ComposePage({ mails = [] }: ComposePageProps) {
                                                                                             />
                                                                                         </TableCell>
                                                                                         <TableCell className="font-medium truncate max-w-[150px]">
-                                                                                            {`${contact.first_name} ${contact.last_name}`}
+                                                                                            {contact.contact_name ||
+                                                                                                ""}
                                                                                         </TableCell>
                                                                                         <TableCell className="text-muted-foreground truncate max-w-[200px]">
                                                                                             {
-                                                                                                contact.email
+                                                                                                contact.email_address
                                                                                             }
                                                                                         </TableCell>
                                                                                         <TableCell className="w-20">
-                                                                                            {contact.been_contacted && (
+                                                                                            {contact.status ===
+                                                                                                "Contacted" && (
                                                                                                 <Badge variant="secondary">
                                                                                                     Contacted
                                                                                                 </Badge>
@@ -1776,8 +1820,7 @@ export default function ComposePage({ mails = [] }: ComposePageProps) {
                                                     [company_name],
                                                     [sender_name],
                                                     [sender_year_and_major],
-                                                    [sender_school], [venue],
-                                                    [location]
+                                                    [sender_school]
                                                 </div>
                                             </div>
                                             <Textarea

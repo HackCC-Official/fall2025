@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useQueryClient } from "@tanstack/react-query";
 import { uploadContacts } from "@/features/outreach/api/outreach";
+import { Download } from "lucide-react";
 
 interface UploadContactsModalProps {
     open: boolean;
@@ -69,6 +70,57 @@ export default function UploadContactsModal({
         }
     };
 
+    const downloadTemplate = () => {
+        // Create template CSV content
+        const headers = [
+            "Contact Name",
+            "Email address",
+            "Company",
+            "Position",
+            "Country",
+            "Phone Number",
+            "LinkedIn",
+            "Website",
+            "Status",
+            "Confidence Score",
+            "Liaison",
+            "Meeting Method",
+        ];
+
+        // Example data row
+        const exampleData = [
+            "John Doe",
+            "john.doe@example.com",
+            "Dash Technology",
+            "Software Engineer",
+            "United States",
+            "555-123-4567",
+            "https://linkedin.com/in/johndoe",
+            "https://example.com",
+            "Cold",
+            "75",
+            "Jane Smith",
+            "Virtual",
+        ];
+
+        const csvContent = [headers.join(","), exampleData.join(",")].join(
+            "\n"
+        );
+
+        // Create and download the file
+        const blob = new Blob([csvContent], {
+            type: "text/csv;charset=utf-8;",
+        });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.setAttribute("href", url);
+        link.setAttribute("download", "hackcc-contacts-template.csv");
+        link.style.visibility = "hidden";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="sm:max-w-[500px]">
@@ -81,6 +133,19 @@ export default function UploadContactsModal({
                 </DialogHeader>
 
                 <div className="space-y-6">
+                    <div className="flex justify-between items-center">
+                        <h4 className="font-medium">CSV Template:</h4>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={downloadTemplate}
+                            className="flex items-center gap-1"
+                        >
+                            <Download className="h-4 w-4" />
+                            Download Template
+                        </Button>
+                    </div>
+
                     <div className="bg-muted/50 p-4 border rounded-lg">
                         <h4 className="mb-2 font-medium">
                             Required CSV Columns:
@@ -91,9 +156,8 @@ export default function UploadContactsModal({
                                     Required:
                                 </span>
                                 <ul className="mt-1 text-muted-foreground list-disc list-inside">
-                                    <li>first_name</li>
-                                    <li>last_name</li>
-                                    <li>email</li>
+                                    <li>contact_name</li>
+                                    <li>email_address</li>
                                 </ul>
                             </div>
                             <div>
@@ -101,13 +165,16 @@ export default function UploadContactsModal({
                                     Optional:
                                 </span>
                                 <ul className="mt-1 text-muted-foreground list-disc list-inside">
-                                    <li>organization</li>
+                                    <li>company</li>
                                     <li>position</li>
+                                    <li>country</li>
                                     <li>phone_number</li>
-                                    <li>linkedin_url</li>
-                                    <li>type</li>
-                                    <li>department</li>
-                                    <li>industry</li>
+                                    <li>linkedin</li>
+                                    <li>website</li>
+                                    <li>status</li>
+                                    <li>confidence_score</li>
+                                    <li>liaison</li>
+                                    <li>meeting_method</li>
                                 </ul>
                             </div>
                         </div>

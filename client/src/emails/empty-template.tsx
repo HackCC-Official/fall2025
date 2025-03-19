@@ -160,7 +160,7 @@ const header = {
     backgroundColor: "#1e40af", // Deep blue header
     padding: "20px 30px",
     display: "flex",
-    justifyContent: "space-between",
+    justifyContent: "center",
     alignItems: "center",
 };
 

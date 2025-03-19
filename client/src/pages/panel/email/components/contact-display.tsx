@@ -3,13 +3,11 @@ import { Badge } from "@/components/ui/badge";
 import {
     Building2,
     Mail,
-    MapPin,
     Phone,
     User,
     AlertTriangle,
     Briefcase,
     Link as LinkIcon,
-    Tag,
     Clipboard,
     Copy,
     Check,
@@ -57,7 +55,7 @@ export default function ContactDisplay({
             setLocalContact(initialContact);
             if (
                 initialContact.id &&
-                initialContact.email === contactState.selected
+                initialContact.email_address === contactState.selected
             ) {
                 setContact({ selectedId: initialContact.id });
             }
@@ -110,8 +108,8 @@ export default function ContactDisplay({
     ]);
 
     const handleSendEmail = () => {
-        if (contact?.email) {
-            router.push(`/panel/email/compose?to=${contact.email}`);
+        if (contact?.email_address) {
+            router.push(`/panel/email/compose?to=${contact.email_address}`);
         }
     };
 
@@ -190,9 +188,9 @@ export default function ContactDisplay({
                 <div className="flex justify-between items-start mb-4">
                     <div className="flex items-center gap-4">
                         <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center text-2xl relative">
-                            {contact.first_name?.charAt(0).toUpperCase() ||
-                                contact.email.charAt(0).toUpperCase()}
-                            {contact.been_contacted && (
+                            {contact.contact_name?.charAt(0).toUpperCase() ||
+                                contact.email_address.charAt(0).toUpperCase()}
+                            {contact.status === "Contacted" && (
                                 <div className="absolute -top-1 -right-1 bg-primary rounded-full h-5 w-5 flex items-center justify-center">
                                     <Check className="h-3 w-3 text-primary-foreground" />
                                 </div>
@@ -200,8 +198,7 @@ export default function ContactDisplay({
                         </div>
                         <div>
                             <h1 className="text-2xl font-bold">
-                                {`${contact.first_name || ""} ${contact.last_name || ""}`.trim() ||
-                                    "Unnamed Contact"}
+                                {contact.contact_name || "Unnamed Contact"}
                             </h1>
                             <div className="flex items-center gap-2 text-muted-foreground">
                                 {contact.position && (
@@ -210,12 +207,12 @@ export default function ContactDisplay({
                                         {contact.position}
                                     </span>
                                 )}
-                                {contact.organization && (
+                                {contact.company && (
                                     <>
                                         <span className="text-xs">•</span>
                                         <span className="flex items-center gap-1 text-sm">
                                             <Building className="h-3.5 w-3.5" />
-                                            {contact.organization}
+                                            {contact.company}
                                         </span>
                                     </>
                                 )}
@@ -235,30 +232,10 @@ export default function ContactDisplay({
                     </div>
                 </div>
                 <div className="flex flex-wrap gap-2">
-                    {contact.type && (
-                        <Badge variant="outline" className="capitalize">
-                            <Tag className="h-3 w-3 mr-1" />
-                            {contact.type}
-                        </Badge>
-                    )}
-                    {contact.been_contacted && (
+                    {contact.status && (
                         <Badge variant="default">
                             <Check className="h-3 w-3 mr-1" />
-                            Contacted
-                        </Badge>
-                    )}
-                    {contact.industry && (
-                        <Badge variant="secondary">
-                            <Building2 className="h-3 w-3 mr-1" />
-                            {contact.industry}
-                        </Badge>
-                    )}
-                    {contact.department && (
-                        <Badge
-                            variant="secondary"
-                            className="bg-primary/5 text-primary"
-                        >
-                            {contact.department}
+                            {contact.status}
                         </Badge>
                     )}
                 </div>
@@ -275,11 +252,11 @@ export default function ContactDisplay({
                     <CardContent className="space-y-4 p-5">
                         <TooltipProvider delayDuration={300}>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                                {contact.email && (
+                                {contact.email_address && (
                                     <div className="flex items-center gap-2 p-2 rounded-md hover:bg-muted/50 transition-colors">
                                         <Mail className="h-4 w-4 text-primary flex-shrink-0" />
                                         <div className="truncate flex-1">
-                                            {contact.email}
+                                            {contact.email_address}
                                         </div>
                                         <Tooltip>
                                             <TooltipTrigger asChild>
@@ -289,7 +266,7 @@ export default function ContactDisplay({
                                                     className="h-6 w-6"
                                                     onClick={() =>
                                                         copyToClipboard(
-                                                            contact.email,
+                                                            contact.email_address,
                                                             "email"
                                                         )
                                                     }
@@ -345,11 +322,11 @@ export default function ContactDisplay({
                                     </div>
                                 )}
 
-                                {contact.linkedin_url && (
+                                {contact.linkedin && (
                                     <div className="flex items-center gap-2 p-2 rounded-md hover:bg-muted/50 transition-colors">
                                         <LinkIcon className="h-4 w-4 text-primary flex-shrink-0" />
                                         <a
-                                            href={contact.linkedin_url}
+                                            href={contact.linkedin}
                                             target="_blank"
                                             rel="noopener noreferrer"
                                             className="text-primary hover:underline truncate flex-1"
@@ -364,7 +341,7 @@ export default function ContactDisplay({
                                                     className="h-6 w-6"
                                                     onClick={() =>
                                                         copyToClipboard(
-                                                            contact.linkedin_url,
+                                                            contact.linkedin,
                                                             "linkedin"
                                                         )
                                                     }
@@ -378,6 +355,46 @@ export default function ContactDisplay({
                                             </TooltipTrigger>
                                             <TooltipContent>
                                                 {copied === "linkedin"
+                                                    ? "Copied!"
+                                                    : "Copy URL"}
+                                            </TooltipContent>
+                                        </Tooltip>
+                                    </div>
+                                )}
+
+                                {contact.website && (
+                                    <div className="flex items-center gap-2 p-2 rounded-md hover:bg-muted/50 transition-colors">
+                                        <LinkIcon className="h-4 w-4 text-primary flex-shrink-0" />
+                                        <a
+                                            href={contact.website}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="text-primary hover:underline truncate flex-1"
+                                        >
+                                            Website
+                                        </a>
+                                        <Tooltip>
+                                            <TooltipTrigger asChild>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    className="h-6 w-6"
+                                                    onClick={() =>
+                                                        copyToClipboard(
+                                                            contact.website,
+                                                            "website"
+                                                        )
+                                                    }
+                                                >
+                                                    {copied === "website" ? (
+                                                        <Check className="h-3.5 w-3.5 text-green-500" />
+                                                    ) : (
+                                                        <Copy className="h-3.5 w-3.5 text-muted-foreground" />
+                                                    )}
+                                                </Button>
+                                            </TooltipTrigger>
+                                            <TooltipContent>
+                                                {copied === "website"
                                                     ? "Copied!"
                                                     : "Copy URL"}
                                             </TooltipContent>
@@ -398,55 +415,50 @@ export default function ContactDisplay({
                     </CardHeader>
                     <CardContent className="p-5">
                         <div className="space-y-4">
-                            {contact.organization && (
+                            {contact.company && (
                                 <div className="space-y-1">
                                     <div className="text-sm font-medium">
-                                        Organization
+                                        Company
                                     </div>
                                     <div className="text-sm text-muted-foreground flex items-center">
-                                        {contact.organization}
-                                        {contact.domain_name && (
-                                            <Badge className="ml-2 bg-primary/10 text-primary hover:bg-primary/20 border-none">
-                                                {contact.domain_name}
-                                            </Badge>
-                                        )}
+                                        {contact.company}
                                     </div>
                                 </div>
                             )}
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                {contact.department && (
+                                {contact.position && (
                                     <div className="space-y-1 p-2 rounded-md hover:bg-muted/50 transition-colors">
                                         <div className="text-sm font-medium flex items-center gap-1">
                                             <span className="h-1.5 w-1.5 rounded-full bg-primary/60"></span>
-                                            Department
+                                            Position
                                         </div>
                                         <div className="text-sm text-muted-foreground">
-                                            {contact.department}
+                                            {contact.position}
                                         </div>
                                     </div>
                                 )}
 
-                                {contact.industry && (
+                                {contact.meeting_method && (
                                     <div className="space-y-1 p-2 rounded-md hover:bg-muted/50 transition-colors">
                                         <div className="text-sm font-medium flex items-center gap-1">
                                             <span className="h-1.5 w-1.5 rounded-full bg-primary/60"></span>
-                                            Industry
+                                            Meeting Method
                                         </div>
                                         <div className="text-sm text-muted-foreground">
-                                            {contact.industry}
+                                            {contact.meeting_method}
                                         </div>
                                     </div>
                                 )}
 
-                                {contact.company_type && (
+                                {contact.liaison && (
                                     <div className="space-y-1 p-2 rounded-md hover:bg-muted/50 transition-colors">
                                         <div className="text-sm font-medium flex items-center gap-1">
                                             <span className="h-1.5 w-1.5 rounded-full bg-primary/60"></span>
-                                            Company Type
+                                            Liaison
                                         </div>
                                         <div className="text-sm text-muted-foreground">
-                                            {contact.company_type}
+                                            {contact.liaison}
                                         </div>
                                     </div>
                                 )}
@@ -454,42 +466,6 @@ export default function ContactDisplay({
                         </div>
                     </CardContent>
                 </Card>
-
-                {(contact.country ||
-                    contact.city ||
-                    contact.state ||
-                    contact.postal_code ||
-                    contact.street) && (
-                    <Card className="overflow-hidden border-none shadow-sm">
-                        <CardHeader className="pb-3 bg-muted/30 border-b">
-                            <CardTitle className="text-md font-medium flex items-center">
-                                <MapPin className="w-4 h-4 mr-2 text-primary" />
-                                Location
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent className="p-5">
-                            <div className="space-y-2 text-sm">
-                                {contact.street && <div>{contact.street}</div>}
-                                {(contact.city ||
-                                    contact.state ||
-                                    contact.postal_code) && (
-                                    <div>
-                                        {[
-                                            contact.city,
-                                            contact.state,
-                                            contact.postal_code,
-                                        ]
-                                            .filter(Boolean)
-                                            .join(", ")}
-                                    </div>
-                                )}
-                                {contact.country && (
-                                    <div>{contact.country}</div>
-                                )}
-                            </div>
-                        </CardContent>
-                    </Card>
-                )}
 
                 {contact.confidence_score !== undefined && (
                     <Card className="overflow-hidden border-none shadow-sm">
@@ -528,17 +504,6 @@ export default function ContactDisplay({
                                         </span>
                                     </div>
                                 </div>
-
-                                {contact.number_of_sources !== undefined && (
-                                    <div className="space-y-1">
-                                        <div className="text-sm font-medium">
-                                            Number of Sources
-                                        </div>
-                                        <div className="text-sm text-muted-foreground">
-                                            {contact.number_of_sources}
-                                        </div>
-                                    </div>
-                                )}
                             </div>
                         </CardContent>
                     </Card>

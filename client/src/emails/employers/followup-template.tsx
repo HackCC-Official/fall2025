@@ -137,22 +137,39 @@ export const FollowUpEmail = ({
                             </Row>
 
                             {/* Social Media Links */}
-                            {Object.keys(socialLinks).length > 0 && (
+                            {(socialLinks.linkedin ||
+                                socialLinks.twitter ||
+                                socialLinks.github) && (
                                 <Row style={socialLinksContainer}>
-                                    {Object.entries(socialLinks).map(
-                                        ([platform, url]) => (
-                                            <Column
-                                                key={platform}
-                                                style={socialLinkColumn}
+                                    {socialLinks.linkedin && (
+                                        <Column style={socialLinkColumn}>
+                                            <Link
+                                                href={socialLinks.linkedin}
+                                                style={socialLink}
                                             >
-                                                <Link
-                                                    href={url}
-                                                    style={socialLink}
-                                                >
-                                                    {platform}
-                                                </Link>
-                                            </Column>
-                                        )
+                                                LinkedIn
+                                            </Link>
+                                        </Column>
+                                    )}
+                                    {socialLinks.twitter && (
+                                        <Column style={socialLinkColumn}>
+                                            <Link
+                                                href={socialLinks.twitter}
+                                                style={socialLink}
+                                            >
+                                                Twitter
+                                            </Link>
+                                        </Column>
+                                    )}
+                                    {socialLinks.github && (
+                                        <Column style={socialLinkColumn}>
+                                            <Link
+                                                href={socialLinks.github}
+                                                style={socialLink}
+                                            >
+                                                GitHub
+                                            </Link>
+                                        </Column>
                                     )}
                                 </Row>
                             )}
@@ -194,7 +211,7 @@ const header = {
     backgroundColor: "#1e40af",
     padding: "20px 30px",
     display: "flex",
-    justifyContent: "space-between",
+    justifyContent: "center",
     alignItems: "center",
 };
 

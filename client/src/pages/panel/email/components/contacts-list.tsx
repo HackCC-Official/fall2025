@@ -11,13 +11,14 @@ import {
     Sliders,
     X,
     Check,
-    Building,
-    Briefcase,
     Mail,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useContact } from "@/hooks/use-contact";
-import type { ContactDto } from "@/features/outreach/types/contact.dto";
+import type {
+    ContactDto,
+    ContactStatus,
+} from "@/features/outreach/types/contact.dto";
 import { cn } from "@/lib/utils";
 import EditContactDrawer from "./edit-contact-drawer";
 import {
@@ -76,12 +77,20 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 type FilterOptions = {
     hasEmail: boolean;
     hasName: boolean;
-    organization?: string;
-    department?: string;
-    industry?: string;
-    contactType?: string;
-    status?: "all" | "contacted" | "not-contacted";
-    sortBy?: "name" | "email" | "organization" | "recent";
+    hasLinkedIn: boolean;
+    hasPhone: boolean;
+    hasWebsite: boolean;
+    company?: string;
+    country?: string;
+    position?: string;
+    liaison?: string;
+    status?: "all" | ContactStatus;
+    confidenceScore?: {
+        min: number;
+        max: number;
+    };
+    meetingMethod?: string;
+    sortBy?: "name" | "email" | "company" | "recent" | "confidence";
 };
 
 export default function ContactsList({
@@ -100,8 +109,12 @@ export default function ContactsList({
     const [filters, setFilters] = React.useState<FilterOptions>({
         hasEmail: false,
         hasName: false,
+        hasLinkedIn: false,
+        hasPhone: false,
+        hasWebsite: false,
         status: "all",
         sortBy: "name",
+        confidenceScore: undefined,
     });
     const [isFilterOpen, setIsFilterOpen] = React.useState(false);
     const queryClient = useQueryClient();
@@ -140,64 +153,103 @@ export default function ContactsList({
     }, [searchText]);
 
     const filteredContacts = React.useMemo(() => {
-        if (searchText.trim()) {
-            return searchResults;
-        }
-
         let filtered = [...contacts];
 
+        if (searchText.trim()) {
+            filtered = filtered.filter((c) => {
+                const query = searchText.toLowerCase();
+                return (
+                    c.contact_name?.toLowerCase().includes(query) ||
+                    c.email_address?.toLowerCase().includes(query) ||
+                    c.company?.toLowerCase().includes(query) ||
+                    c.position?.toLowerCase().includes(query) ||
+                    c.country?.toLowerCase().includes(query)
+                );
+            });
+        }
+
         if (filters.hasEmail) {
-            filtered = filtered.filter((c) => !!c.email);
+            filtered = filtered.filter((c) => !!c.email_address);
         }
 
         if (filters.hasName) {
-            filtered = filtered.filter((c) => !!(c.first_name || c.last_name));
+            filtered = filtered.filter((c) => !!c.contact_name);
         }
 
-        if (filters.organization) {
+        if (filters.hasLinkedIn) {
+            filtered = filtered.filter((c) => !!c.linkedin);
+        }
+
+        if (filters.hasPhone) {
+            filtered = filtered.filter((c) => !!c.phone_number);
+        }
+
+        if (filters.hasWebsite) {
+            filtered = filtered.filter((c) => !!c.website);
+        }
+
+        if (filters.company) {
+            filtered = filtered.filter((c) => c.company === filters.company);
+        }
+
+        if (filters.country) {
+            filtered = filtered.filter((c) => c.country === filters.country);
+        }
+
+        if (filters.position) {
+            filtered = filtered.filter((c) => c.position === filters.position);
+        }
+
+        if (filters.liaison) {
+            filtered = filtered.filter((c) => c.liaison === filters.liaison);
+        }
+
+        if (filters.status && filters.status !== "all") {
+            filtered = filtered.filter((c) => c.status === filters.status);
+        } else if (filters.status === "all") {
+            // Keep all contacts
+        }
+
+        if (filters.meetingMethod) {
             filtered = filtered.filter(
-                (c) => c.organization === filters.organization
+                (c) => c.meeting_method === filters.meetingMethod
             );
         }
 
-        if (filters.department) {
-            filtered = filtered.filter(
-                (c) => c.department === filters.department
-            );
-        }
-
-        if (filters.industry) {
-            filtered = filtered.filter((c) => c.industry === filters.industry);
-        }
-
-        if (filters.contactType) {
-            filtered = filtered.filter((c) => c.type === filters.contactType);
-        }
-
-        if (filters.status === "contacted") {
-            filtered = filtered.filter((c) => c.been_contacted);
-        } else if (filters.status === "not-contacted") {
-            filtered = filtered.filter((c) => !c.been_contacted);
+        if (filters.confidenceScore) {
+            filtered = filtered.filter((c) => {
+                const score = c.confidence_score || 0;
+                return (
+                    score >= (filters.confidenceScore?.min || 0) &&
+                    score <= (filters.confidenceScore?.max || 100)
+                );
+            });
         }
 
         if (filters.sortBy === "name") {
             filtered.sort((a, b) => {
-                const nameA =
-                    `${a.first_name || ""} ${a.last_name || ""}`.trim();
-                const nameB =
-                    `${b.first_name || ""} ${b.last_name || ""}`.trim();
+                const nameA = a.contact_name || "";
+                const nameB = b.contact_name || "";
                 return nameA.localeCompare(nameB);
             });
         } else if (filters.sortBy === "email") {
-            filtered.sort((a, b) => a.email.localeCompare(b.email));
-        } else if (filters.sortBy === "organization") {
             filtered.sort((a, b) =>
-                (a.organization || "").localeCompare(b.organization || "")
+                a.email_address.localeCompare(b.email_address)
             );
+        } else if (filters.sortBy === "company") {
+            filtered.sort((a, b) =>
+                (a.company || "").localeCompare(b.company || "")
+            );
+        } else if (filters.sortBy === "confidence") {
+            filtered.sort((a, b) => {
+                const scoreA = a.confidence_score || 0;
+                const scoreB = b.confidence_score || 0;
+                return scoreB - scoreA; // Higher scores first
+            });
         }
 
         return filtered;
-    }, [searchText, searchResults, contacts, filters]);
+    }, [contacts, searchText, filters]);
 
     const virtualizer = useVirtualizer({
         count: filteredContacts.length,
@@ -213,33 +265,9 @@ export default function ContactsList({
     const organizations = React.useMemo(() => {
         const uniqueOrgs = new Set<string>();
         contacts.forEach((c) => {
-            if (c.organization) uniqueOrgs.add(c.organization);
+            if (c.company) uniqueOrgs.add(c.company);
         });
         return Array.from(uniqueOrgs).sort();
-    }, [contacts]);
-
-    const departments = React.useMemo(() => {
-        const uniqueDepts = new Set<string>();
-        contacts.forEach((c) => {
-            if (c.department) uniqueDepts.add(c.department);
-        });
-        return Array.from(uniqueDepts).sort();
-    }, [contacts]);
-
-    const industries = React.useMemo(() => {
-        const uniqueIndustries = new Set<string>();
-        contacts.forEach((c) => {
-            if (c.industry) uniqueIndustries.add(c.industry);
-        });
-        return Array.from(uniqueIndustries).sort();
-    }, [contacts]);
-
-    const contactTypes = React.useMemo(() => {
-        const uniqueTypes = new Set<string>();
-        contacts.forEach((c) => {
-            if (c.type) uniqueTypes.add(c.type);
-        });
-        return Array.from(uniqueTypes).sort();
     }, [contacts]);
 
     const handleDelete = async (contactId: number) => {
@@ -273,11 +301,16 @@ export default function ContactsList({
         setFilters({
             hasEmail: false,
             hasName: false,
-            organization: undefined,
-            department: undefined,
-            industry: undefined,
-            contactType: undefined,
+            hasLinkedIn: false,
+            hasPhone: false,
+            hasWebsite: false,
+            company: undefined,
+            country: undefined,
+            position: undefined,
+            liaison: undefined,
             status: "all",
+            confidenceScore: undefined,
+            meetingMethod: undefined,
             sortBy: "name",
         });
     };
@@ -441,12 +474,12 @@ export default function ContactsList({
                                     </Button>
                                 </Badge>
                             )}
-                            {filters.organization && (
+                            {filters.hasLinkedIn && (
                                 <Badge
                                     variant="outline"
                                     className="bg-primary/5 gap-1 pl-2"
                                 >
-                                    {filters.organization}
+                                    Has LinkedIn
                                     <Button
                                         variant="ghost"
                                         size="icon"
@@ -454,7 +487,7 @@ export default function ContactsList({
                                         onClick={() =>
                                             setFilters({
                                                 ...filters,
-                                                organization: undefined,
+                                                hasLinkedIn: false,
                                             })
                                         }
                                     >
@@ -462,12 +495,12 @@ export default function ContactsList({
                                     </Button>
                                 </Badge>
                             )}
-                            {filters.department && (
+                            {filters.hasPhone && (
                                 <Badge
                                     variant="outline"
                                     className="bg-primary/5 gap-1 pl-2"
                                 >
-                                    Dept: {filters.department}
+                                    Has Phone
                                     <Button
                                         variant="ghost"
                                         size="icon"
@@ -475,7 +508,7 @@ export default function ContactsList({
                                         onClick={() =>
                                             setFilters({
                                                 ...filters,
-                                                department: undefined,
+                                                hasPhone: false,
                                             })
                                         }
                                     >
@@ -483,12 +516,12 @@ export default function ContactsList({
                                     </Button>
                                 </Badge>
                             )}
-                            {filters.industry && (
+                            {filters.hasWebsite && (
                                 <Badge
                                     variant="outline"
                                     className="bg-primary/5 gap-1 pl-2"
                                 >
-                                    Industry: {filters.industry}
+                                    Has Website
                                     <Button
                                         variant="ghost"
                                         size="icon"
@@ -496,7 +529,7 @@ export default function ContactsList({
                                         onClick={() =>
                                             setFilters({
                                                 ...filters,
-                                                industry: undefined,
+                                                hasWebsite: false,
                                             })
                                         }
                                     >
@@ -504,12 +537,12 @@ export default function ContactsList({
                                     </Button>
                                 </Badge>
                             )}
-                            {filters.contactType && (
+                            {filters.company && (
                                 <Badge
                                     variant="outline"
                                     className="bg-primary/5 gap-1 pl-2"
                                 >
-                                    Type: {filters.contactType}
+                                    {filters.company}
                                     <Button
                                         variant="ghost"
                                         size="icon"
@@ -517,7 +550,70 @@ export default function ContactsList({
                                         onClick={() =>
                                             setFilters({
                                                 ...filters,
-                                                contactType: undefined,
+                                                company: undefined,
+                                            })
+                                        }
+                                    >
+                                        <X className="h-3 w-3" />
+                                    </Button>
+                                </Badge>
+                            )}
+                            {filters.country && (
+                                <Badge
+                                    variant="outline"
+                                    className="bg-primary/5 gap-1 pl-2"
+                                >
+                                    {filters.country}
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="h-4 w-4 ml-1"
+                                        onClick={() =>
+                                            setFilters({
+                                                ...filters,
+                                                country: undefined,
+                                            })
+                                        }
+                                    >
+                                        <X className="h-3 w-3" />
+                                    </Button>
+                                </Badge>
+                            )}
+                            {filters.position && (
+                                <Badge
+                                    variant="outline"
+                                    className="bg-primary/5 gap-1 pl-2"
+                                >
+                                    {filters.position}
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="h-4 w-4 ml-1"
+                                        onClick={() =>
+                                            setFilters({
+                                                ...filters,
+                                                position: undefined,
+                                            })
+                                        }
+                                    >
+                                        <X className="h-3 w-3" />
+                                    </Button>
+                                </Badge>
+                            )}
+                            {filters.liaison && (
+                                <Badge
+                                    variant="outline"
+                                    className="bg-primary/5 gap-1 pl-2"
+                                >
+                                    Liaison: {filters.liaison}
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="h-4 w-4 ml-1"
+                                        onClick={() =>
+                                            setFilters({
+                                                ...filters,
+                                                liaison: undefined,
                                             })
                                         }
                                     >
@@ -530,9 +626,7 @@ export default function ContactsList({
                                     variant="outline"
                                     className="bg-primary/5 gap-1 pl-2"
                                 >
-                                    {filters.status === "contacted"
-                                        ? "Contacted"
-                                        : "Not Contacted"}
+                                    {filters.status}
                                     <Button
                                         variant="ghost"
                                         size="icon"
@@ -541,6 +635,50 @@ export default function ContactsList({
                                             setFilters({
                                                 ...filters,
                                                 status: "all",
+                                            })
+                                        }
+                                    >
+                                        <X className="h-3 w-3" />
+                                    </Button>
+                                </Badge>
+                            )}
+                            {filters.meetingMethod && (
+                                <Badge
+                                    variant="outline"
+                                    className="bg-primary/5 gap-1 pl-2"
+                                >
+                                    {filters.meetingMethod}
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="h-4 w-4 ml-1"
+                                        onClick={() =>
+                                            setFilters({
+                                                ...filters,
+                                                meetingMethod: undefined,
+                                            })
+                                        }
+                                    >
+                                        <X className="h-3 w-3" />
+                                    </Button>
+                                </Badge>
+                            )}
+                            {filters.confidenceScore && (
+                                <Badge
+                                    variant="outline"
+                                    className="bg-primary/5 gap-1 pl-2"
+                                >
+                                    Confidence:{" "}
+                                    {filters.confidenceScore?.min ?? 0}-
+                                    {filters.confidenceScore?.max ?? 100}
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="h-4 w-4 ml-1"
+                                        onClick={() =>
+                                            setFilters({
+                                                ...filters,
+                                                confidenceScore: undefined,
                                             })
                                         }
                                     >
@@ -678,13 +816,15 @@ export default function ContactsList({
                     >
                         {virtualizer.getVirtualItems().map((virtualItem) => {
                             const item = filteredContacts[virtualItem.index];
+                            if (!item) return null;
                             return (
                                 <div
-                                    key={`${item.id}-${virtualItem.index}`}
+                                    key={virtualItem.key}
                                     className={cn(
                                         "absolute top-0 left-0 w-full",
                                         contact.selected ===
-                                            (item?.email || "") && "bg-accent"
+                                            (item?.email_address || "") &&
+                                            "bg-accent"
                                     )}
                                     style={{
                                         height: `${virtualItem.size}px`,
@@ -695,72 +835,56 @@ export default function ContactsList({
                                         className={cn(
                                             "flex items-center gap-3 px-4 py-3 h-full border-b transition-colors mx-2 rounded-md",
                                             contact.selected ===
-                                                (item?.email || "")
+                                                (item?.email_address || "")
                                                 ? "bg-accent border-accent shadow-sm"
                                                 : "hover:bg-accent/40 border-border"
                                         )}
+                                        onClick={() => {
+                                            setContact({
+                                                selected:
+                                                    item?.email_address || "",
+                                                selectedId: item?.id,
+                                            });
+                                        }}
+                                        tabIndex={0}
                                     >
-                                        <button
-                                            onClick={() => {
-                                                setContact({
-                                                    selected: item?.email || "",
-                                                    selectedId: item?.id,
-                                                });
-                                            }}
-                                            className="flex-1 text-left flex items-center gap-3"
-                                        >
-                                            <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center text-lg flex-shrink-0 relative">
-                                                {item?.first_name
+                                        <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center text-lg flex-shrink-0 relative">
+                                            {item?.contact_name
+                                                ?.charAt(0)
+                                                .toUpperCase() ||
+                                                item?.email_address
                                                     ?.charAt(0)
-                                                    .toUpperCase() ||
-                                                    item?.email
-                                                        ?.charAt(0)
-                                                        ?.toUpperCase() ||
-                                                    "?"}
-                                                {item.been_contacted && (
-                                                    <div className="absolute -top-1 -right-1 bg-primary rounded-full h-4 w-4 flex items-center justify-center">
-                                                        <Check className="h-3 w-3 text-primary-foreground" />
+                                                    ?.toUpperCase() ||
+                                                "?"}
+                                            {item.status === "Contacted" && (
+                                                <div className="absolute -top-1 -right-1 bg-primary rounded-full h-4 w-4 flex items-center justify-center">
+                                                    <Check className="h-3 w-3 text-primary-foreground" />
+                                                </div>
+                                            )}
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <div className="font-medium text-base truncate">
+                                                {item.contact_name ||
+                                                    item.email_address}
+                                            </div>
+                                            <div className="flex flex-wrap items-center gap-x-2 text-sm text-muted-foreground">
+                                                <span className="truncate max-w-[200px] flex items-center gap-1">
+                                                    <Mail className="h-3 w-3 text-muted-foreground/60" />
+                                                    {item?.email_address ||
+                                                        "No email"}
+                                                </span>
+                                                {item.company && (
+                                                    <div className="flex items-center gap-1 text-xs">
+                                                        <span className="text-muted-foreground/60">
+                                                            •
+                                                        </span>
+                                                        <span className="truncate max-w-[150px]">
+                                                            {item.company}
+                                                        </span>
                                                     </div>
                                                 )}
                                             </div>
-                                            <div className="flex-1 min-w-0">
-                                                <div className="font-medium text-base truncate">
-                                                    {`${item.first_name || ""} ${item.last_name || ""}`.trim() ||
-                                                        item.email}
-                                                </div>
-                                                <div className="flex flex-wrap items-center gap-x-2 text-sm text-muted-foreground">
-                                                    <span className="truncate max-w-[200px] flex items-center gap-1">
-                                                        <Mail className="h-3 w-3 text-muted-foreground/60" />
-                                                        {item?.email ||
-                                                            "No email"}
-                                                    </span>
-                                                    {item.organization && (
-                                                        <div className="flex items-center gap-1 text-xs">
-                                                            <span className="text-muted-foreground/60">
-                                                                •
-                                                            </span>
-                                                            <Building className="h-3 w-3 text-muted-foreground/60" />
-                                                            <span className="truncate max-w-[150px]">
-                                                                {
-                                                                    item.organization
-                                                                }
-                                                            </span>
-                                                        </div>
-                                                    )}
-                                                    {item.position && (
-                                                        <div className="flex items-center gap-1 text-xs">
-                                                            <span className="text-muted-foreground/60">
-                                                                •
-                                                            </span>
-                                                            <Briefcase className="h-3 w-3 text-muted-foreground/60" />
-                                                            <span className="truncate max-w-[120px]">
-                                                                {item.position}
-                                                            </span>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        </button>
+                                        </div>
                                         <DropdownMenu>
                                             <DropdownMenuTrigger asChild>
                                                 <Button
@@ -777,14 +901,16 @@ export default function ContactsList({
                                                 <DropdownMenuItem
                                                     onClick={() =>
                                                         router.push(
-                                                            `/panel/email/compose?to=${item?.email || ""}`
+                                                            `/panel/email/compose?to=${item?.email_address || ""}`
                                                         )
                                                     }
                                                     className="cursor-pointer"
-                                                    disabled={!item?.email}
+                                                    disabled={
+                                                        !item?.email_address
+                                                    }
                                                 >
                                                     <Mail className="mr-2 h-4 w-4" />
-                                                    {item?.email
+                                                    {item?.email_address
                                                         ? "Send Email"
                                                         : "No email available"}
                                                 </DropdownMenuItem>
@@ -895,8 +1021,9 @@ export default function ContactsList({
                                             sortBy: value as
                                                 | "name"
                                                 | "email"
-                                                | "organization"
-                                                | "recent",
+                                                | "company"
+                                                | "recent"
+                                                | "confidence",
                                         })
                                     }
                                 >
@@ -910,11 +1037,14 @@ export default function ContactsList({
                                         <SelectItem value="email">
                                             Email
                                         </SelectItem>
-                                        <SelectItem value="organization">
-                                            Organization
+                                        <SelectItem value="company">
+                                            Company
                                         </SelectItem>
                                         <SelectItem value="recent">
                                             Recently Added
+                                        </SelectItem>
+                                        <SelectItem value="confidence">
+                                            Confidence Score
                                         </SelectItem>
                                     </SelectContent>
                                 </Select>
@@ -929,8 +1059,7 @@ export default function ContactsList({
                                             ...filters,
                                             status: value as
                                                 | "all"
-                                                | "contacted"
-                                                | "not-contacted",
+                                                | ContactStatus,
                                         })
                                     }
                                 >
@@ -941,44 +1070,24 @@ export default function ContactsList({
                                         <SelectItem value="all">
                                             All Contacts
                                         </SelectItem>
-                                        <SelectItem value="contacted">
+                                        <SelectItem value="Cold">
+                                            Cold
+                                        </SelectItem>
+                                        <SelectItem value="Follow Up 1">
+                                            Follow Up 1
+                                        </SelectItem>
+                                        <SelectItem value="Follow Up 2">
+                                            Follow Up 2
+                                        </SelectItem>
+                                        <SelectItem value="Accept">
+                                            Accept
+                                        </SelectItem>
+                                        <SelectItem value="Rejected">
+                                            Rejected
+                                        </SelectItem>
+                                        <SelectItem value="Contacted">
                                             Contacted
                                         </SelectItem>
-                                        <SelectItem value="not-contacted">
-                                            Not Contacted
-                                        </SelectItem>
-                                    </SelectContent>
-                                </Select>
-                            </div>
-
-                            <div className="space-y-2">
-                                <h3 className="text-sm font-medium">
-                                    Contact Type
-                                </h3>
-                                <Select
-                                    value={filters.contactType || "any-type"}
-                                    onValueChange={(value) =>
-                                        setFilters({
-                                            ...filters,
-                                            contactType:
-                                                value === "any-type"
-                                                    ? undefined
-                                                    : value,
-                                        })
-                                    }
-                                >
-                                    <SelectTrigger className="w-full">
-                                        <SelectValue placeholder="Contact Type" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="any-type">
-                                            Any Type
-                                        </SelectItem>
-                                        {contactTypes.map((type) => (
-                                            <SelectItem key={type} value={type}>
-                                                {type}
-                                            </SelectItem>
-                                        ))}
                                     </SelectContent>
                                 </Select>
                             </div>
@@ -1024,36 +1133,87 @@ export default function ContactsList({
                                             Has Name
                                         </label>
                                     </div>
+                                    <div className="flex items-center space-x-2">
+                                        <Checkbox
+                                            id="hasLinkedIn"
+                                            checked={filters.hasLinkedIn}
+                                            onCheckedChange={(checked) =>
+                                                setFilters({
+                                                    ...filters,
+                                                    hasLinkedIn:
+                                                        checked === true,
+                                                })
+                                            }
+                                        />
+                                        <label
+                                            htmlFor="hasLinkedIn"
+                                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                                        >
+                                            Has LinkedIn
+                                        </label>
+                                    </div>
+                                    <div className="flex items-center space-x-2">
+                                        <Checkbox
+                                            id="hasPhone"
+                                            checked={filters.hasPhone}
+                                            onCheckedChange={(checked) =>
+                                                setFilters({
+                                                    ...filters,
+                                                    hasPhone: checked === true,
+                                                })
+                                            }
+                                        />
+                                        <label
+                                            htmlFor="hasPhone"
+                                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                                        >
+                                            Has Phone
+                                        </label>
+                                    </div>
+                                    <div className="flex items-center space-x-2">
+                                        <Checkbox
+                                            id="hasWebsite"
+                                            checked={filters.hasWebsite}
+                                            onCheckedChange={(checked) =>
+                                                setFilters({
+                                                    ...filters,
+                                                    hasWebsite:
+                                                        checked === true,
+                                                })
+                                            }
+                                        />
+                                        <label
+                                            htmlFor="hasWebsite"
+                                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                                        >
+                                            Has Website
+                                        </label>
+                                    </div>
                                 </div>
                             </div>
                         </TabsContent>
 
                         <TabsContent value="organization" className="space-y-4">
                             <div className="space-y-2">
-                                <h3 className="text-sm font-medium">
-                                    Organization
-                                </h3>
+                                <h3 className="text-sm font-medium">Company</h3>
                                 <Select
-                                    value={
-                                        filters.organization ||
-                                        "any-organization"
-                                    }
+                                    value={filters.company || "any-company"}
                                     onValueChange={(value) =>
                                         setFilters({
                                             ...filters,
-                                            organization:
-                                                value === "any-organization"
+                                            company:
+                                                value === "any-company"
                                                     ? undefined
                                                     : value,
                                         })
                                     }
                                 >
                                     <SelectTrigger className="w-full">
-                                        <SelectValue placeholder="Organization" />
+                                        <SelectValue placeholder="Company" />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value="any-organization">
-                                            Any Organization
+                                        <SelectItem value="any-company">
+                                            Any Company
                                         </SelectItem>
                                         {organizations.map((org) => (
                                             <SelectItem key={org} value={org}>
@@ -1065,84 +1225,256 @@ export default function ContactsList({
                             </div>
 
                             <div className="space-y-2">
-                                <h3 className="text-sm font-medium">
-                                    Department
-                                </h3>
+                                <h3 className="text-sm font-medium">Liaison</h3>
                                 <Select
-                                    value={
-                                        filters.department || "any-department"
-                                    }
+                                    value={filters.liaison || "any-liaison"}
                                     onValueChange={(value) =>
                                         setFilters({
                                             ...filters,
-                                            department:
-                                                value === "any-department"
+                                            liaison:
+                                                value === "any-liaison"
                                                     ? undefined
                                                     : value,
                                         })
                                     }
                                 >
                                     <SelectTrigger className="w-full">
-                                        <SelectValue placeholder="Department" />
+                                        <SelectValue placeholder="Liaison" />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value="any-department">
-                                            Any Department
+                                        <SelectItem value="any-liaison">
+                                            Any Liaison
                                         </SelectItem>
-                                        {departments.map((dept) => (
-                                            <SelectItem key={dept} value={dept}>
-                                                {dept}
-                                            </SelectItem>
-                                        ))}
+                                        {Array.from(
+                                            new Set(
+                                                contacts
+                                                    .map((c) => c.liaison)
+                                                    .filter(Boolean)
+                                            )
+                                        )
+                                            .sort()
+                                            .map((liaison) => (
+                                                <SelectItem
+                                                    key={liaison}
+                                                    value={liaison as string}
+                                                >
+                                                    {liaison}
+                                                </SelectItem>
+                                            ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+
+                            <div className="space-y-2">
+                                <h3 className="text-sm font-medium">Country</h3>
+                                <Select
+                                    value={filters.country || "any-country"}
+                                    onValueChange={(value) =>
+                                        setFilters({
+                                            ...filters,
+                                            country:
+                                                value === "any-country"
+                                                    ? undefined
+                                                    : value,
+                                        })
+                                    }
+                                >
+                                    <SelectTrigger className="w-full">
+                                        <SelectValue placeholder="Country" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="any-country">
+                                            Any Country
+                                        </SelectItem>
+                                        {Array.from(
+                                            new Set(
+                                                contacts
+                                                    .map((c) => c.country)
+                                                    .filter(Boolean)
+                                            )
+                                        )
+                                            .sort()
+                                            .map((country) => (
+                                                <SelectItem
+                                                    key={country}
+                                                    value={country as string}
+                                                >
+                                                    {country}
+                                                </SelectItem>
+                                            ))}
                                     </SelectContent>
                                 </Select>
                             </div>
 
                             <div className="space-y-2">
                                 <h3 className="text-sm font-medium">
-                                    Industry
+                                    Position
                                 </h3>
                                 <Select
-                                    value={filters.industry || "any-industry"}
+                                    value={filters.position || "any-position"}
                                     onValueChange={(value) =>
                                         setFilters({
                                             ...filters,
-                                            industry:
-                                                value === "any-industry"
+                                            position:
+                                                value === "any-position"
                                                     ? undefined
                                                     : value,
                                         })
                                     }
                                 >
                                     <SelectTrigger className="w-full">
-                                        <SelectValue placeholder="Industry" />
+                                        <SelectValue placeholder="Position" />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value="any-industry">
-                                            Any Industry
+                                        <SelectItem value="any-position">
+                                            Any Position
                                         </SelectItem>
-                                        {industries.map((industry) => (
-                                            <SelectItem
-                                                key={industry}
-                                                value={industry}
-                                            >
-                                                {industry}
-                                            </SelectItem>
-                                        ))}
+                                        {Array.from(
+                                            new Set(
+                                                contacts
+                                                    .map((c) => c.position)
+                                                    .filter(Boolean)
+                                            )
+                                        )
+                                            .sort()
+                                            .map((position) => (
+                                                <SelectItem
+                                                    key={position}
+                                                    value={position as string}
+                                                >
+                                                    {position}
+                                                </SelectItem>
+                                            ))}
                                     </SelectContent>
                                 </Select>
                             </div>
                         </TabsContent>
 
                         <TabsContent value="advanced" className="space-y-4">
-                            <div className="bg-muted/30 rounded-lg p-4">
-                                <h3 className="text-sm font-medium mb-2">
-                                    Coming Soon
+                            <div className="space-y-2">
+                                <h3 className="text-sm font-medium">
+                                    Confidence Score
                                 </h3>
-                                <p className="text-sm text-muted-foreground">
-                                    Advanced filtering options will be available
-                                    in a future update.
-                                </p>
+                                <div className="pt-2 px-1">
+                                    <div className="flex justify-between mb-2">
+                                        <span className="text-xs text-muted-foreground">
+                                            Low
+                                        </span>
+                                        <span className="text-xs text-muted-foreground">
+                                            High
+                                        </span>
+                                    </div>
+                                    <div className="flex items-center gap-4">
+                                        <Input
+                                            type="number"
+                                            min="0"
+                                            max="100"
+                                            placeholder="Min"
+                                            className="w-20"
+                                            value={
+                                                filters.confidenceScore?.min ??
+                                                ""
+                                            }
+                                            onChange={(e) => {
+                                                const min =
+                                                    parseInt(e.target.value) ||
+                                                    0;
+                                                setFilters({
+                                                    ...filters,
+                                                    confidenceScore: {
+                                                        min: min,
+                                                        max:
+                                                            filters
+                                                                .confidenceScore
+                                                                ?.max ?? 100,
+                                                    },
+                                                });
+                                            }}
+                                        />
+                                        <div className="flex-1 h-2 bg-muted rounded-full relative">
+                                            <div
+                                                className="absolute top-0 left-0 h-full bg-primary rounded-full"
+                                                style={{
+                                                    width: `${(filters.confidenceScore?.max ?? 100) - (filters.confidenceScore?.min ?? 0)}%`,
+                                                    left: `${filters.confidenceScore?.min ?? 0}%`,
+                                                }}
+                                            ></div>
+                                        </div>
+                                        <Input
+                                            type="number"
+                                            min="0"
+                                            max="100"
+                                            placeholder="Max"
+                                            className="w-20"
+                                            value={
+                                                filters.confidenceScore?.max ??
+                                                ""
+                                            }
+                                            onChange={(e) => {
+                                                const max =
+                                                    parseInt(e.target.value) ||
+                                                    100;
+                                                setFilters({
+                                                    ...filters,
+                                                    confidenceScore: {
+                                                        min:
+                                                            filters
+                                                                .confidenceScore
+                                                                ?.min ?? 0,
+                                                        max: max,
+                                                    },
+                                                });
+                                            }}
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="space-y-2">
+                                <h3 className="text-sm font-medium">
+                                    Meeting Method
+                                </h3>
+                                <Select
+                                    value={
+                                        filters.meetingMethod || "any-method"
+                                    }
+                                    onValueChange={(value) =>
+                                        setFilters({
+                                            ...filters,
+                                            meetingMethod:
+                                                value === "any-method"
+                                                    ? undefined
+                                                    : value,
+                                        })
+                                    }
+                                >
+                                    <SelectTrigger className="w-full">
+                                        <SelectValue placeholder="Meeting Method" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="any-method">
+                                            Any Method
+                                        </SelectItem>
+                                        {Array.from(
+                                            new Set(
+                                                contacts
+                                                    .map(
+                                                        (c) => c.meeting_method
+                                                    )
+                                                    .filter(Boolean)
+                                            )
+                                        )
+                                            .sort()
+                                            .map((method) => (
+                                                <SelectItem
+                                                    key={method}
+                                                    value={method as string}
+                                                >
+                                                    {method}
+                                                </SelectItem>
+                                            ))}
+                                    </SelectContent>
+                                </Select>
                             </div>
                         </TabsContent>
                     </Tabs>

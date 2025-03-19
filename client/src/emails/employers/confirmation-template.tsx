@@ -27,12 +27,6 @@ interface ConfirmationEmailProps {
     customEmailBody?: string;
 }
 
-/**
- * ConfirmationEmail component for HackCC outreach
- *
- * This template is designed for sending confirmation emails to sponsors
- * who have agreed to sponsor a HackCC event.
- */
 export const ConfirmationEmail = ({
     companyName,
     recipientName,
@@ -41,10 +35,8 @@ export const ConfirmationEmail = ({
     socialLinks,
     customEmailBody,
 }: ConfirmationEmailProps) => {
-    // Format the sender's year and major for better readability
     const formattedYearAndMajor = `${sender.year} ${sender.major}`;
 
-    // Function to parse content with placeholders
     const parseContent = (content: string): string => {
         return content
             .replace(/\[recipient_name\]/g, recipientName)
@@ -54,18 +46,14 @@ export const ConfirmationEmail = ({
             .replace(/\[sender_school\]/g, sender.school);
     };
 
-    // Parse custom email body if provided
     const renderCustomEmailBody = () => {
         if (!customEmailBody) return null;
 
-        // Replace variable placeholders with actual values
         const parsedContent = parseContent(customEmailBody);
 
-        // Split the content into sections
         const sections = parsedContent.split("\n\n");
 
         return sections.map((section, index) => {
-            // Check if this is a section header (like "Next Steps:")
             if (section.endsWith(":")) {
                 return (
                     <Text key={`header-${index}`} style={paragraphBold}>
@@ -74,7 +62,6 @@ export const ConfirmationEmail = ({
                 );
             }
 
-            // Check if this section contains bullet points
             if (section.includes("•") || section.includes("-")) {
                 const lines = section.split("\n");
                 return (
@@ -127,7 +114,6 @@ export const ConfirmationEmail = ({
             <Preview>HackCC x {companyName} Sponsorship Confirmation!</Preview>
             <Body style={main}>
                 <Container style={container}>
-                    {/* Header */}
                     <Section style={header}>
                         <Img
                             src={`https://minio.hackcc.net/public-bucket/logo.svg`}
@@ -195,7 +181,7 @@ export const ConfirmationEmail = ({
                                         {sender.position &&
                                             `- ${sender.position}`}
                                     </Text>
-                                    <Text style={signaturePosition}>
+                                    <Text style={signatureDetails}>
                                         {formattedYearAndMajor}
                                     </Text>
                                 </Column>
@@ -207,22 +193,39 @@ export const ConfirmationEmail = ({
                             </Row>
 
                             {/* Social Media Links */}
-                            {Object.keys(socialLinks).length > 0 && (
+                            {(socialLinks.linkedin ||
+                                socialLinks.twitter ||
+                                socialLinks.github) && (
                                 <Row style={socialLinksContainer}>
-                                    {Object.entries(socialLinks).map(
-                                        ([platform, url]) => (
-                                            <Column
-                                                key={platform}
-                                                style={socialLinkColumn}
+                                    {socialLinks.linkedin && (
+                                        <Column style={socialLinkColumn}>
+                                            <Link
+                                                href={socialLinks.linkedin}
+                                                style={socialLink}
                                             >
-                                                <Link
-                                                    href={url}
-                                                    style={socialLink}
-                                                >
-                                                    {platform}
-                                                </Link>
-                                            </Column>
-                                        )
+                                                LinkedIn
+                                            </Link>
+                                        </Column>
+                                    )}
+                                    {socialLinks.twitter && (
+                                        <Column style={socialLinkColumn}>
+                                            <Link
+                                                href={socialLinks.twitter}
+                                                style={socialLink}
+                                            >
+                                                Twitter
+                                            </Link>
+                                        </Column>
+                                    )}
+                                    {socialLinks.github && (
+                                        <Column style={socialLinkColumn}>
+                                            <Link
+                                                href={socialLinks.github}
+                                                style={socialLink}
+                                            >
+                                                GitHub
+                                            </Link>
+                                        </Column>
                                     )}
                                 </Row>
                             )}
@@ -264,7 +267,7 @@ const header = {
     backgroundColor: "#1e40af", // Deep blue header
     padding: "20px 30px",
     display: "flex",
-    justifyContent: "space-between",
+    justifyContent: "center",
     alignItems: "center",
 };
 
@@ -326,11 +329,10 @@ const signatureName = {
     margin: "0 0 4px",
 };
 
-const signaturePosition = {
+const signatureDetails = {
     fontSize: "14px",
     color: "#4b5563",
     margin: "0 0 8px",
-    textAlign: "right" as const,
 };
 
 const socialLinksContainer = {

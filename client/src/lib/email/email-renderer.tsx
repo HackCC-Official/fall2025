@@ -48,13 +48,13 @@ export async function renderEmailTemplate({
             case "Sponsorship Confirmation":
                 emailComponent = (
                     <SponsorshipEmail
-                        companyName={recipient.organization}
-                        recipientName={`${recipient.first_name} ${recipient.last_name}`}
+                        companyName={recipient.company || ""}
+                        recipientName={recipient.contact_name || ""}
                         venue="California Community College"
                         sender={templateData.sender}
                         positionAtHackCC={`${templateData.sender.year} ${templateData.sender.major} Student at ${templateData.sender.school}`}
                         socialLinks={{
-                            linkedin: recipient.linkedin_url || "",
+                            linkedin: recipient.linkedin || "",
                             twitter: "",
                             github: "",
                         }}
@@ -66,13 +66,13 @@ export async function renderEmailTemplate({
             case "Follow-Up Email":
                 emailComponent = (
                     <FollowUpEmail
-                        companyName={recipient.organization}
+                        companyName={recipient.company || ""}
                         subject={templateData.subject}
-                        recipientName={`${recipient.first_name} ${recipient.last_name}`}
+                        recipientName={recipient.contact_name || ""}
                         venue="California Community College"
                         sender={templateData.sender}
                         positionAtHackCC={`${templateData.sender.year} ${templateData.sender.major} Student at ${templateData.sender.school}`}
-                        location={recipient.city || "your area"}
+                        location={"Los Angeles, CA"}
                         socialLinks={{}}
                         customEmailBody={templateData.emailContent}
                     />
@@ -81,9 +81,9 @@ export async function renderEmailTemplate({
             case "Post-Call Follow-Up":
                 emailComponent = (
                     <PostCallEmail
-                        companyName={recipient.organization}
+                        companyName={recipient.company || ""}
                         subject={templateData.subject}
-                        recipientName={`${recipient.first_name} ${recipient.last_name}`}
+                        recipientName={recipient.contact_name || ""}
                         sender={templateData.sender}
                         positionAtHackCC={`${templateData.sender.year} ${templateData.sender.major} Student at ${templateData.sender.school}`}
                         organizationLogo=""
@@ -91,7 +91,7 @@ export async function renderEmailTemplate({
                         followupTime={templateData.followupTime}
                         requestedMaterials={templateData.requestedMaterials}
                         socialLinks={{
-                            linkedin: recipient.linkedin_url || "",
+                            linkedin: recipient.linkedin || "",
                             HackCC: "https://hackcc.net",
                         }}
                         customEmailBody={templateData.emailContent}
@@ -101,11 +101,11 @@ export async function renderEmailTemplate({
             case "Sponsorship Agreement":
                 emailComponent = (
                     <ConfirmationEmail
-                        companyName={recipient.organization}
-                        recipientName={`${recipient.first_name} ${recipient.last_name}`}
+                        companyName={recipient.company || ""}
+                        recipientName={recipient.contact_name || ""}
                         sender={templateData.sender}
                         socialLinks={{
-                            linkedin: recipient.linkedin_url || "",
+                            linkedin: recipient.linkedin || "",
                             HackCC: "https://hackcc.net",
                         }}
                         customEmailBody={templateData.emailContent}
@@ -116,15 +116,13 @@ export async function renderEmailTemplate({
             case "Empty":
                 emailComponent = (
                     <EmptyEmail
-                        recipientName={`${recipient.first_name} ${recipient.last_name}`}
+                        recipientName={recipient.contact_name || ""}
                         emailContent={templateData.emailContent || ""}
                         sender={templateData.sender}
-                        companyName={
-                            recipient.organization || "your organization"
-                        }
+                        companyName={recipient.company || "your organization"}
                         subject={templateData.subject}
                         socialLinks={{
-                            linkedin: recipient.linkedin_url || "",
+                            linkedin: recipient.linkedin || "",
                             HackCC: "https://hackcc.net",
                         }}
                     />
