@@ -2,7 +2,13 @@
 
 import * as React from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+    Card,
+    CardContent,
+    CardHeader,
+    CardTitle,
+    CardFooter,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -32,8 +38,9 @@ import {
     Users,
     Building,
     Search,
-    ChevronDown,
     X,
+    CheckCircle2,
+    Circle,
 } from "lucide-react";
 import Link from "next/link";
 import { useOutreachTeam } from "@/hooks/use-outreach-team";
@@ -232,7 +239,12 @@ const RecipientSelectionTable = ({
                                     Organization
                                 </TableHead>
                             )}
-                            <TableHead className="w-20 py-3">Status</TableHead>
+                            {contacts.length > 0 &&
+                                "liaison" in contacts[0] && (
+                                    <TableHead className="py-3 font-semibold">
+                                        Liaison
+                                    </TableHead>
+                                )}
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -273,28 +285,11 @@ const RecipientSelectionTable = ({
                                 {"company" in contact && (
                                     <TableCell>{contact.company}</TableCell>
                                 )}
-                                <TableCell>
-                                    {"labels" in contact && contact.labels ? (
-                                        contact.labels.map((label: string) => (
-                                            <Badge
-                                                key={label}
-                                                variant="secondary"
-                                                className="mr-1"
-                                            >
-                                                {label}
-                                            </Badge>
-                                        ))
-                                    ) : "status" in contact &&
-                                      contact.status === "Contacted" ? (
-                                        <Badge variant="secondary">
-                                            Contacted
-                                        </Badge>
-                                    ) : "status" in contact ? (
-                                        <Badge variant="secondary">
-                                            {contact.status}
-                                        </Badge>
-                                    ) : null}
-                                </TableCell>
+                                {"liaison" in contact && (
+                                    <TableCell>
+                                        {contact.liaison || "-"}
+                                    </TableCell>
+                                )}
                             </TableRow>
                         ))}
                     </TableBody>
@@ -332,6 +327,228 @@ const RecipientSelectionTable = ({
     );
 };
 
+const OrganizationsView = ({
+    contacts,
+    isLoading,
+    selectedRecipients,
+    onToggleRecipient,
+    onUpdateSelected,
+}: {
+    contacts: ContactDto[];
+    isLoading: boolean;
+    selectedRecipients: Set<string>;
+    onToggleRecipient: (id: string) => void;
+    onUpdateSelected: (selected: Set<string>) => void;
+}) => {
+    // State for tracking expanded companies
+    const [expandedCompanies, setExpandedCompanies] = React.useState<
+        Record<string, boolean>
+    >({});
+
+    // Group contacts by company
+    const groupedByCompany = React.useMemo(() => {
+        const grouped: Record<string, ContactDto[]> = {};
+
+        contacts.forEach((contact) => {
+            if (contact.company) {
+                const company = contact.company;
+                if (!grouped[company]) {
+                    grouped[company] = [];
+                }
+                grouped[company].push(contact);
+            }
+        });
+
+        return grouped;
+    }, [contacts]);
+
+    // Get sorted company names
+    const sortedCompanyNames = React.useMemo(() => {
+        return Object.keys(groupedByCompany).sort();
+    }, [groupedByCompany]);
+
+    const toggleCompany = React.useCallback((company: string) => {
+        setExpandedCompanies((prev) => ({
+            ...prev,
+            [company]: !prev[company],
+        }));
+    }, []);
+
+    const toggleSelectAllForCompany = React.useCallback(
+        (company: string) => {
+            const companyContacts = groupedByCompany[company];
+            if (!companyContacts) return;
+
+            const areAllSelected = companyContacts.every((contact) =>
+                selectedRecipients.has(contact.id.toString())
+            );
+
+            const newSelected = new Set(selectedRecipients);
+
+            if (areAllSelected) {
+                // Deselect all contacts from this company
+                companyContacts.forEach((contact) => {
+                    newSelected.delete(contact.id.toString());
+                });
+            } else {
+                // Select all contacts from this company
+                companyContacts.forEach((contact) => {
+                    newSelected.add(contact.id.toString());
+                });
+            }
+
+            onUpdateSelected(newSelected);
+        },
+        [groupedByCompany, selectedRecipients, onUpdateSelected]
+    );
+
+    if (isLoading) {
+        return (
+            <div className="flex items-center justify-center py-8">
+                <div className="flex flex-col items-center gap-2">
+                    <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-primary"></div>
+                    <p className="text-sm text-muted-foreground">
+                        Loading organizations...
+                    </p>
+                </div>
+            </div>
+        );
+    }
+
+    if (sortedCompanyNames.length === 0) {
+        return (
+            <div className="flex flex-col items-center justify-center py-8 text-center">
+                <Building className="h-12 w-12 text-muted-foreground mb-2" />
+                <h3 className="font-medium text-lg">No organizations found</h3>
+                <p className="text-sm text-muted-foreground mt-1">
+                    Try adjusting your search or filters
+                </p>
+            </div>
+        );
+    }
+
+    return (
+        <div className="space-y-4">
+            {sortedCompanyNames.map((company) => {
+                const companyContacts = groupedByCompany[company];
+                const isExpanded = !!expandedCompanies[company];
+
+                // Find out how many contacts from this company are selected
+                const selectedCount = companyContacts.filter((contact) =>
+                    selectedRecipients.has(contact.id.toString())
+                ).length;
+
+                const areAllSelected = selectedCount === companyContacts.length;
+                const areSomeSelected = selectedCount > 0 && !areAllSelected;
+
+                return (
+                    <div
+                        key={company}
+                        className={`border rounded-lg overflow-hidden ${areAllSelected ? "bg-primary/5 border-primary/20" : "bg-card"}`}
+                    >
+                        <div
+                            className="p-4 flex items-center justify-between cursor-pointer"
+                            onClick={() => toggleCompany(company)}
+                        >
+                            <div className="flex items-center gap-3">
+                                <Checkbox
+                                    checked={areAllSelected}
+                                    onCheckedChange={() =>
+                                        toggleSelectAllForCompany(company)
+                                    }
+                                    aria-label={`Select all contacts from ${company}`}
+                                    onClick={(e) => e.stopPropagation()}
+                                    className={
+                                        areSomeSelected ? "opacity-60" : ""
+                                    }
+                                />
+                                <div>
+                                    <h3 className="font-medium text-lg">
+                                        {company}
+                                    </h3>
+                                    <p className="text-sm text-muted-foreground">
+                                        {companyContacts.length} contacts
+                                    </p>
+                                </div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                {selectedCount > 0 && (
+                                    <Badge variant="outline">
+                                        {selectedCount}/{companyContacts.length}{" "}
+                                        selected
+                                    </Badge>
+                                )}
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="h-8 w-8 p-0"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        toggleCompany(company);
+                                    }}
+                                >
+                                    <ChevronRight
+                                        className={`h-4 w-4 transition-transform ${isExpanded ? "rotate-90" : ""}`}
+                                    />
+                                </Button>
+                            </div>
+                        </div>
+
+                        {isExpanded && (
+                            <div className="border-t p-3 bg-muted/30">
+                                <div className="space-y-2">
+                                    {companyContacts.map((contact) => (
+                                        <div
+                                            key={contact.id}
+                                            className={`flex items-center justify-between p-2 rounded-md ${selectedRecipients.has(contact.id.toString()) ? "bg-primary/10" : "hover:bg-muted"}`}
+                                        >
+                                            <div className="flex items-center gap-3">
+                                                <Checkbox
+                                                    checked={selectedRecipients.has(
+                                                        contact.id.toString()
+                                                    )}
+                                                    onCheckedChange={() =>
+                                                        onToggleRecipient(
+                                                            contact.id.toString()
+                                                        )
+                                                    }
+                                                    aria-label={`Select ${contact.contact_name}`}
+                                                />
+                                                <div>
+                                                    <p className="font-medium">
+                                                        {contact.contact_name ||
+                                                            "Unnamed Contact"}
+                                                    </p>
+                                                    <p className="text-sm text-muted-foreground">
+                                                        {contact.email_address}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            {contact.status && (
+                                                <Badge
+                                                    variant={
+                                                        contact.status ===
+                                                        "Contacted"
+                                                            ? "secondary"
+                                                            : "outline"
+                                                    }
+                                                    className="text-xs"
+                                                >
+                                                    {contact.status}
+                                                </Badge>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                );
+            })}
+        </div>
+    );
+};
+
 export default function ComposePage({ mails = [] }: ComposePageProps) {
     const searchParams = useSearchParams();
     const paramsProcessedRef = React.useRef(false);
@@ -342,6 +559,9 @@ export default function ComposePage({ mails = [] }: ComposePageProps) {
     const [searchQuery, setSearchQuery] = React.useState("");
     const [recipientType, setRecipientType] =
         React.useState<RecipientType>("employers");
+    const [selectedLiaison, setSelectedLiaison] = React.useState<string>("");
+    const [, setShowLiaisonSelect] = React.useState(false);
+    const [liaisons, setLiaisons] = React.useState<string[]>([]);
 
     const [selectedTemplate, setSelectedTemplate] =
         React.useState<ExtendedEmailTemplate | null>(null);
@@ -375,24 +595,36 @@ export default function ComposePage({ mails = [] }: ComposePageProps) {
         initialSearch: searchQuery,
     });
 
-    const [selectedOrganizations, setSelectedOrganizations] = React.useState<
-        Set<string>
-    >(new Set());
-
     const [contactsView, setContactsView] = React.useState<
         "individuals" | "organizations" | "selected"
     >("individuals");
     const [contactsPage, setContactsPage] = React.useState(1);
 
     const [isSearching, setIsSearching] = React.useState(false);
-    const [allContacts, setAllContacts] = React.useState<ContactDto[]>([]);
-    const [isLoadingAllContacts, setIsLoadingAllContacts] =
-        React.useState(false);
+    const [, setAllContacts] = React.useState<ContactDto[]>([]);
+    const [, setIsLoadingAllContacts] = React.useState(false);
+    const [isSelectingAll, setIsSelectingAll] = React.useState(false);
 
     const [isConfirmationOpen, setIsConfirmationOpen] = React.useState(false);
     const [recipientsToConfirm, setRecipientsToConfirm] = React.useState<
         RecipientConfirmationDetails[]
     >([]);
+
+    // Add active filters state
+    const [activeFilters, setActiveFilters] = React.useState<{
+        liaison: string | null;
+        status: string | null;
+    }>({
+        liaison: null,
+        status: null,
+    });
+    const [showFiltersPanel, setShowFiltersPanel] =
+        React.useState<boolean>(false);
+
+    // Add a new state for tracking the active step
+    const [activeStep, setActiveStep] = React.useState<
+        "recipients" | "content" | "preview"
+    >("recipients");
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
     const debouncedSearchContacts = React.useCallback(
@@ -443,6 +675,8 @@ export default function ComposePage({ mails = [] }: ComposePageProps) {
 
                 if (contactsResponse && results) {
                     contactsResponse.data = results;
+                    // Refresh the view with search results
+                    setContactsApiPage(1);
                 }
             } catch (error) {
                 console.error("Error searching contacts:", error);
@@ -478,96 +712,57 @@ export default function ComposePage({ mails = [] }: ComposePageProps) {
         setSelectedRecipients(newSelected);
     };
 
-    const handleSelectOrganization = (org: string, selected: boolean) => {
-        const newSelectedOrgs = new Set(selectedOrganizations);
-        if (selected) {
-            newSelectedOrgs.add(org);
-        } else {
-            newSelectedOrgs.delete(org);
-        }
-        setSelectedOrganizations(newSelectedOrgs);
-
-        const newSelectedRecipients = new Set(selectedRecipients);
-        contactsResponse?.data?.forEach((contact) => {
-            if (contact.company === org) {
-                if (selected) {
-                    newSelectedRecipients.add(contact.id.toString());
-                } else {
-                    newSelectedRecipients.delete(contact.id.toString());
-                }
+    // Add filtered contacts function
+    const getFilteredContacts = React.useCallback(
+        (contactsList: ContactDto[]) => {
+            if (!activeFilters.liaison && !activeFilters.status) {
+                return contactsList;
             }
-        });
-        setSelectedRecipients(newSelectedRecipients);
-    };
 
-    const totalSelectedContacts = React.useMemo(() => {
-        return selectedRecipients.size;
-    }, [selectedRecipients]);
+            return contactsList.filter((contact) => {
+                // Apply liaison filter
+                if (
+                    activeFilters.liaison &&
+                    contact.liaison !== activeFilters.liaison
+                ) {
+                    return false;
+                }
 
+                // Apply status filter
+                if (
+                    activeFilters.status &&
+                    contact.status !== activeFilters.status
+                ) {
+                    return false;
+                }
+
+                return true;
+            });
+        },
+        [activeFilters]
+    );
+
+    // Modify the existing contacts memo to include filtering
     const contacts = React.useMemo(() => {
-        return contactsResponse?.data || [];
-    }, [contactsResponse?.data]);
+        const baseContacts = contactsResponse?.data || [];
+        return getFilteredContacts(baseContacts);
+    }, [contactsResponse?.data, getFilteredContacts]);
 
     React.useEffect(() => {
-        if (
-            contactsView === "organizations" &&
-            allContacts.length === 0 &&
-            !isLoadingAllContacts
-        ) {
-            const loadAllContacts = async () => {
-                try {
-                    setIsLoadingAllContacts(true);
-                    const allContactsList = await fetchAllContacts(
-                        100,
-                        searchQuery
-                    );
-                    setAllContacts(allContactsList);
-                } catch (error) {
-                    console.error("Error fetching all contacts:", error);
-                    toast.error(
-                        "Failed to load all organizations. Some may be missing."
-                    );
-                } finally {
-                    setIsLoadingAllContacts(false);
+        if (contacts && contacts.length > 0 && recipientType === "employers") {
+            const liaisonSet = new Set<string>();
+            contacts.forEach((contact) => {
+                if (
+                    contact.liaison &&
+                    typeof contact.liaison === "string" &&
+                    contact.liaison.trim() !== ""
+                ) {
+                    liaisonSet.add(contact.liaison);
                 }
-            };
-
-            loadAllContacts();
+            });
+            setLiaisons(Array.from(liaisonSet).sort());
         }
-    }, [
-        contactsView,
-        allContacts.length,
-        isLoadingAllContacts,
-        fetchAllContacts,
-        searchQuery,
-    ]);
-
-    const groupedByOrganization = React.useMemo(() => {
-        const groups: Record<string, ContactDto[]> = {};
-        const noOrg: ContactDto[] = [];
-
-        const contactsToGroup =
-            contactsView === "organizations" && allContacts.length > 0
-                ? allContacts
-                : contacts;
-
-        contactsToGroup.forEach((contact) => {
-            if (contact.company) {
-                if (!groups[contact.company]) {
-                    groups[contact.company] = [];
-                }
-                groups[contact.company].push(contact);
-            } else {
-                noOrg.push(contact);
-            }
-        });
-
-        if (noOrg.length > 0) {
-            groups["No Organization"] = noOrg;
-        }
-
-        return groups;
-    }, [contacts, contactsView, allContacts]);
+    }, [contacts, recipientType]);
 
     const recipientLists = React.useMemo(() => {
         const employerContacts = contacts.map((contact) => ({
@@ -610,14 +805,6 @@ export default function ComposePage({ mails = [] }: ComposePageProps) {
         } as Record<RecipientType, Recipient[]>;
     }, [contacts, mails, interestedUsers]);
 
-    // Add debug logging
-    React.useEffect(() => {
-        if (recipientType === "interested") {
-            console.log("Interested users data:", interestedUsers);
-            console.log("Interested recipients:", recipientLists.interested);
-        }
-    }, [recipientType, interestedUsers, recipientLists]);
-
     const filteredRecipients = React.useMemo(() => {
         const currentList = recipientLists[recipientType];
         return currentList.filter(
@@ -633,13 +820,6 @@ export default function ComposePage({ mails = [] }: ComposePageProps) {
                     .includes(searchQuery.toLowerCase())
         );
     }, [recipientLists, recipientType, searchQuery]);
-
-    // Add debug logging for filtered recipients
-    React.useEffect(() => {
-        if (recipientType === "interested") {
-            console.log("Filtered interested recipients:", filteredRecipients);
-        }
-    }, [recipientType, filteredRecipients]);
 
     const areAllFilteredSelected = React.useMemo(() => {
         return (
@@ -1161,32 +1341,6 @@ export default function ComposePage({ mails = [] }: ComposePageProps) {
         selectedRecipients,
     ]);
 
-    const isOrganizationFullySelected = React.useCallback(
-        (org: string) => {
-            const orgContacts = groupedByOrganization[org];
-            if (!orgContacts || orgContacts.length === 0) return false;
-
-            return orgContacts.every((contact) =>
-                selectedRecipients.has(contact.id.toString())
-            );
-        },
-        [groupedByOrganization, selectedRecipients]
-    );
-
-    const isOrganizationPartiallySelected = React.useCallback(
-        (org: string) => {
-            const orgContacts = groupedByOrganization[org];
-            if (!orgContacts || orgContacts.length === 0) return false;
-
-            return (
-                orgContacts.some((contact) =>
-                    selectedRecipients.has(contact.id.toString())
-                ) && !isOrganizationFullySelected(org)
-            );
-        },
-        [groupedByOrganization, selectedRecipients, isOrganizationFullySelected]
-    );
-
     const emailAccounts = React.useMemo(() => {
         const outreachTeamArray = outreachTeamResponse?.data?.data || [];
         return outreachTeamArray.map((member: OutreachTeamDto) => ({
@@ -1196,90 +1350,107 @@ export default function ComposePage({ mails = [] }: ComposePageProps) {
         }));
     }, [outreachTeamResponse]);
 
-    const ViewSelector = () => (
-        <div className="flex items-center gap-2 mb-4">
-            <Button
-                size="sm"
-                variant={contactsView === "individuals" ? "default" : "outline"}
-                onClick={() => setContactsView("individuals")}
-            >
-                <Users className="h-4 w-4 mr-2" />
-                Individuals
-            </Button>
-            <Button
-                size="sm"
-                variant={
-                    contactsView === "organizations" ? "default" : "outline"
-                }
-                onClick={() => setContactsView("organizations")}
-            >
-                <Building className="h-4 w-4 mr-2" />
-                Organizations
-                {isLoadingAllContacts && (
-                    <span className="ml-2 h-3 w-3 animate-spin rounded-full border-b-2 border-current"></span>
-                )}
-            </Button>
-            <Button
-                size="sm"
-                variant={contactsView === "selected" ? "default" : "outline"}
-                onClick={() => setContactsView("selected")}
-                disabled={selectedRecipients.size === 0}
-            >
-                <div className="h-4 w-4 mr-2 rounded-sm border border-primary flex items-center justify-center bg-primary text-primary-foreground">
-                    <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        className="h-3 w-3"
-                    >
-                        <polyline points="20 6 9 17 4 12" />
-                    </svg>
-                </div>
-                Selected ({selectedRecipients.size})
-            </Button>
-        </div>
-    );
+    // Add the handleSelectAllContacts function here
+    const handleSelectAllContacts = async () => {
+        // Show loading state
+        setIsSelectingAll(true);
 
-    // Add state to track expanded organizations
-    const [expandedOrgs, setExpandedOrgs] = React.useState<Set<string>>(
-        new Set()
-    );
+        try {
+            toast.info("Loading all recipients...", { duration: 2000 });
 
-    // Toggle organization expansion
-    const toggleOrgExpansion = (org: string, event: React.MouseEvent) => {
-        event.stopPropagation(); // Prevent triggering the checkbox toggle
-        const newExpanded = new Set(expandedOrgs);
-        if (newExpanded.has(org)) {
-            newExpanded.delete(org);
-        } else {
-            newExpanded.add(org);
+            const allRecipientsIds = new Set<string>();
+
+            if (recipientType === "employers") {
+                // Fetch all contacts without pagination for employers
+                const allContactsList = await fetchAllContacts(
+                    1000,
+                    searchQuery
+                );
+
+                // Apply liaison filter if selected
+                const filtered =
+                    selectedLiaison && selectedLiaison !== "all"
+                        ? allContactsList.filter(
+                              (contact: ContactDto) =>
+                                  contact.liaison === selectedLiaison
+                          )
+                        : allContactsList;
+
+                filtered.forEach((contact: ContactDto) => {
+                    allRecipientsIds.add(contact.id.toString());
+                });
+
+                const filterMessage = selectedLiaison
+                    ? `Selected ${filtered.length} employer contacts with liaison: ${selectedLiaison}`
+                    : `Selected ${filtered.length} employer contacts`;
+
+                toast.success(filterMessage);
+
+                // Reset liaison selection
+                setSelectedLiaison("");
+                setShowLiaisonSelect(false);
+            } else if (recipientType === "registered") {
+                // For registered users, use the mails array
+                mails.forEach((mail) => {
+                    allRecipientsIds.add(mail.id);
+                });
+                toast.success(`Selected ${mails.length} registered hackers`);
+            } else if (recipientType === "interested") {
+                // For interested users
+                interestedUsers?.forEach((user) => {
+                    allRecipientsIds.add(user.email);
+                });
+                toast.success(
+                    `Selected ${interestedUsers?.length || 0} interested users`
+                );
+            }
+
+            setSelectedRecipients(allRecipientsIds);
+        } catch (error) {
+            console.error("Error selecting all recipients:", error);
+            toast.error("Failed to select all recipients. Please try again.");
+        } finally {
+            setIsSelectingAll(false);
         }
-        setExpandedOrgs(newExpanded);
     };
 
-    // Add a function to calculate contacted counts for organizations
-    const getOrganizationContactedCount = React.useCallback(
-        (org: string) => {
-            const orgContacts = groupedByOrganization[org];
-            if (!orgContacts || orgContacts.length === 0) return 0;
-
-            return orgContacts.filter(
-                (contact) => contact.status === "Contacted"
-            ).length;
-        },
-        [groupedByOrganization]
+    // Add some helper functions for the UI
+    const StepIndicator = ({
+        label,
+        isActive,
+        isCompleted,
+        onClick,
+    }: {
+        step: "recipients" | "content" | "preview";
+        label: string;
+        isActive: boolean;
+        isCompleted: boolean;
+        onClick: () => void;
+    }) => (
+        <div
+            className={`flex items-center gap-2 cursor-pointer ${
+                isActive ? "text-primary" : "text-muted-foreground"
+            }`}
+            onClick={onClick}
+        >
+            <div
+                className={`flex items-center justify-center rounded-full w-6 h-6 ${
+                    isActive
+                        ? "bg-primary text-primary-foreground"
+                        : isCompleted
+                          ? "bg-primary/20 text-primary"
+                          : "bg-muted text-muted-foreground"
+                }`}
+            >
+                {isCompleted ? (
+                    <CheckCircle2 className="h-5 w-5" />
+                ) : (
+                    <Circle className="h-5 w-5" />
+                )}
+            </div>
+            <span className={`${isActive ? "font-medium" : ""}`}>{label}</span>
+        </div>
     );
-
-    // Add a helper function to get selected contacts
-    const getSelectedContacts = React.useCallback(() => {
-        return contacts.filter((contact) =>
-            selectedRecipients.has(contact.id.toString())
-        );
-    }, [contacts, selectedRecipients]);
 
     if (isInterestedLoading || isContactsLoading) {
         return (
@@ -1319,39 +1490,67 @@ export default function ComposePage({ mails = [] }: ComposePageProps) {
                         onAccountChange={handleAccountChange}
                         defaultEmail={senderEmail}
                     />
-                    <div className="flex gap-2">
-                        <Button
-                            variant="outline"
-                            onClick={handlePreview}
-                            disabled={selectedRecipients.size === 0}
-                        >
-                            Preview Email
-                        </Button>
-                        <Button
-                            onClick={handleSendEmails}
-                            disabled={selectedRecipients.size === 0}
-                        >
-                            Send Emails ({selectedRecipients.size})
-                        </Button>
-                    </div>
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                <div className="lg:col-span-5">
-                    <Card>
-                        <CardHeader className="border-b">
-                            <div className="flex items-center justify-between">
-                                <CardTitle>
-                                    Recipients ({totalSelectedContacts})
-                                    {recipientType === "employers" &&
-                                        contactsResponse?.total && (
-                                            <span className="ml-2 text-sm font-normal text-muted-foreground">
-                                                from {contactsResponse.total}{" "}
-                                                total contacts
-                                            </span>
-                                        )}
-                                </CardTitle>
+            {/* Step indicators */}
+            <div className="flex items-center justify-center gap-8 mb-8 border-b pb-4">
+                <StepIndicator
+                    step="recipients"
+                    label="1. Select Recipients"
+                    isActive={activeStep === "recipients"}
+                    isCompleted={selectedRecipients.size > 0}
+                    onClick={() => setActiveStep("recipients")}
+                />
+                <div className="h-px w-8 bg-border"></div>
+                <StepIndicator
+                    step="content"
+                    label="2. Compose Email"
+                    isActive={activeStep === "content"}
+                    isCompleted={
+                        emailSubject.length > 0 && emailContent.length > 0
+                    }
+                    onClick={() => setActiveStep("content")}
+                />
+                <div className="h-px w-8 bg-border"></div>
+                <StepIndicator
+                    step="preview"
+                    label="3. Preview & Send"
+                    isActive={activeStep === "preview"}
+                    isCompleted={false}
+                    onClick={() => {
+                        if (selectedRecipients.size > 0) {
+                            handlePreview();
+                            setActiveStep("preview");
+                        } else {
+                            toast.error(
+                                "Please select at least one recipient first"
+                            );
+                        }
+                    }}
+                />
+            </div>
+
+            {/* Recipients step */}
+            {activeStep === "recipients" && (
+                <Card>
+                    <CardHeader className="border-b">
+                        <div className="flex items-center justify-between">
+                            <CardTitle>
+                                <div className="flex items-center gap-2">
+                                    Recipients
+                                    {selectedRecipients.size > 0 && (
+                                        <Badge
+                                            variant="secondary"
+                                            className="ml-2"
+                                        >
+                                            {selectedRecipients.size} selected
+                                        </Badge>
+                                    )}
+                                </div>
+                            </CardTitle>
+
+                            <div className="flex items-center gap-3">
                                 <Select
                                     value={recipientType}
                                     onValueChange={(value: RecipientType) => {
@@ -1380,158 +1579,446 @@ export default function ComposePage({ mails = [] }: ComposePageProps) {
                                         </SelectItem>
                                     </SelectContent>
                                 </Select>
-                            </div>
-                        </CardHeader>
-                        <CardContent className="p-6">
-                            <div className="space-y-4">
-                                <div className="flex items-center gap-2">
-                                    <div className="relative flex-1">
-                                        <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                                        <Input
-                                            id="recipient-filter"
-                                            value={searchQuery}
-                                            onChange={(e) => {
-                                                const value = e.target.value;
-                                                setSearchQuery(value);
-                                                debouncedSearchContacts(value);
-                                            }}
-                                            placeholder={
-                                                recipientType === "employers"
-                                                    ? "Search by name, email, or organization..."
-                                                    : "Search by name or email..."
-                                            }
-                                            className="pl-10 pr-10 py-2 w-full"
-                                        />
-                                        {searchQuery && (
-                                            <Button
-                                                type="button"
-                                                variant="ghost"
-                                                onClick={() => {
-                                                    setSearchQuery("");
-                                                    setContactsApiSearch("");
-                                                    setContactsPage(1);
-                                                    setContactsApiPage(1);
 
-                                                    // Clear selected recipients
-                                                    setSelectedRecipients(
-                                                        new Set()
-                                                    );
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() =>
+                                        setShowFiltersPanel(!showFiltersPanel)
+                                    }
+                                    className="relative"
+                                >
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        strokeWidth="2"
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        className="h-4 w-4 mr-1"
+                                    >
+                                        <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
+                                    </svg>
+                                    Filters
+                                    {(activeFilters.liaison ||
+                                        activeFilters.status) && (
+                                        <Badge
+                                            variant="secondary"
+                                            className="ml-1"
+                                        >
+                                            {(activeFilters.liaison ? 1 : 0) +
+                                                (activeFilters.status ? 1 : 0)}
+                                        </Badge>
+                                    )}
+                                    {showFiltersPanel && (
+                                        <div className="absolute right-0 top-10 mt-1 w-64 bg-background border rounded-md shadow-lg z-20">
+                                            <div className="p-3">
+                                                <h4 className="font-medium mb-2">
+                                                    Filter Options
+                                                </h4>
+                                                <div className="space-y-3">
+                                                    <div>
+                                                        <Label
+                                                            htmlFor="filter-liaison"
+                                                            className="text-xs"
+                                                        >
+                                                            Liaison
+                                                        </Label>
+                                                        <Select
+                                                            value={
+                                                                activeFilters.liaison ||
+                                                                "all"
+                                                            }
+                                                            onValueChange={(
+                                                                value
+                                                            ) =>
+                                                                setActiveFilters(
+                                                                    (prev) => ({
+                                                                        ...prev,
+                                                                        liaison:
+                                                                            value ===
+                                                                            "all"
+                                                                                ? null
+                                                                                : value,
+                                                                    })
+                                                                )
+                                                            }
+                                                        >
+                                                            <SelectTrigger
+                                                                id="filter-liaison"
+                                                                className="w-full"
+                                                            >
+                                                                <SelectValue placeholder="Select liaison" />
+                                                            </SelectTrigger>
+                                                            <SelectContent>
+                                                                <SelectItem value="all">
+                                                                    All Liaisons
+                                                                </SelectItem>
+                                                                {liaisons.map(
+                                                                    (
+                                                                        liaison
+                                                                    ) => (
+                                                                        <SelectItem
+                                                                            key={
+                                                                                liaison
+                                                                            }
+                                                                            value={
+                                                                                liaison
+                                                                            }
+                                                                        >
+                                                                            {
+                                                                                liaison
+                                                                            }
+                                                                        </SelectItem>
+                                                                    )
+                                                                )}
+                                                            </SelectContent>
+                                                        </Select>
+                                                    </div>
 
-                                                    // Fully refresh the contacts data to initial state
-                                                    refetchContacts();
+                                                    <div>
+                                                        <Label
+                                                            htmlFor="filter-status"
+                                                            className="text-xs"
+                                                        >
+                                                            Status
+                                                        </Label>
+                                                        <Select
+                                                            value={
+                                                                activeFilters.status ||
+                                                                "all"
+                                                            }
+                                                            onValueChange={(
+                                                                value
+                                                            ) =>
+                                                                setActiveFilters(
+                                                                    (prev) => ({
+                                                                        ...prev,
+                                                                        status:
+                                                                            value ===
+                                                                            "all"
+                                                                                ? null
+                                                                                : value,
+                                                                    })
+                                                                )
+                                                            }
+                                                        >
+                                                            <SelectTrigger
+                                                                id="filter-status"
+                                                                className="w-full"
+                                                            >
+                                                                <SelectValue placeholder="Select status" />
+                                                            </SelectTrigger>
+                                                            <SelectContent>
+                                                                <SelectItem value="all">
+                                                                    All Statuses
+                                                                </SelectItem>
+                                                                <SelectItem value="Contacted">
+                                                                    Contacted
+                                                                </SelectItem>
+                                                                <SelectItem value="Not Contacted">
+                                                                    Not
+                                                                    Contacted
+                                                                </SelectItem>
+                                                                <SelectItem value="Interested">
+                                                                    Interested
+                                                                </SelectItem>
+                                                                <SelectItem value="Not Interested">
+                                                                    Not
+                                                                    Interested
+                                                                </SelectItem>
+                                                            </SelectContent>
+                                                        </Select>
+                                                    </div>
 
-                                                    // If in organizations view, refresh all contacts
-                                                    if (
-                                                        contactsView ===
-                                                        "organizations"
-                                                    ) {
-                                                        setAllContacts([]);
-                                                        setIsLoadingAllContacts(
-                                                            true
-                                                        );
-                                                        fetchAllContacts(
-                                                            100,
-                                                            ""
-                                                        )
-                                                            .then((data) => {
-                                                                setAllContacts(
-                                                                    data
+                                                    <div className="flex justify-between pt-2">
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="sm"
+                                                            onClick={() => {
+                                                                setActiveFilters(
+                                                                    {
+                                                                        liaison:
+                                                                            null,
+                                                                        status: null,
+                                                                    }
                                                                 );
-                                                            })
-                                                            .catch((error) => {
-                                                                console.error(
-                                                                    "Error refreshing all contacts:",
-                                                                    error
-                                                                );
-                                                                toast.error(
-                                                                    "Failed to refresh organization data"
-                                                                );
-                                                            })
-                                                            .finally(() => {
-                                                                setIsLoadingAllContacts(
+                                                            }}
+                                                        >
+                                                            Clear
+                                                        </Button>
+                                                        <Button
+                                                            size="sm"
+                                                            onClick={() =>
+                                                                setShowFiltersPanel(
                                                                     false
-                                                                );
-                                                            });
-                                                    }
-                                                }}
-                                                className="absolute right-2 top-2 h-6 w-6 p-0"
-                                                title="Clear search"
-                                            >
-                                                <X className="h-4 w-4" />
-                                            </Button>
-                                        )}
-                                        {isSearching && (
-                                            <div className="absolute right-10 top-3">
-                                                <div className="h-4 w-4 animate-spin rounded-full border-b-2 border-primary"></div>
+                                                                )
+                                                            }
+                                                        >
+                                                            Apply
+                                                        </Button>
+                                                    </div>
+                                                </div>
                                             </div>
-                                        )}
-                                    </div>
+                                        </div>
+                                    )}
+                                </Button>
+                            </div>
+                        </div>
+                    </CardHeader>
+                    <CardContent className="p-4">
+                        <div className="space-y-4">
+                            {/* Applied filters */}
+                            {(activeFilters.liaison ||
+                                activeFilters.status) && (
+                                <div className="flex flex-wrap gap-2 p-2 bg-muted/30 rounded-md items-center mb-4">
+                                    <span className="text-sm font-medium">
+                                        Active filters:
+                                    </span>
+                                    {activeFilters.liaison && (
+                                        <Badge
+                                            variant="secondary"
+                                            className="flex items-center gap-1"
+                                        >
+                                            Liaison: {activeFilters.liaison}
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                onClick={() =>
+                                                    setActiveFilters(
+                                                        (prev) => ({
+                                                            ...prev,
+                                                            liaison: null,
+                                                        })
+                                                    )
+                                                }
+                                                className="h-4 w-4 p-0 hover:bg-transparent"
+                                            >
+                                                <X className="h-3 w-3" />
+                                            </Button>
+                                        </Badge>
+                                    )}
+                                    {activeFilters.status && (
+                                        <Badge
+                                            variant="secondary"
+                                            className="flex items-center gap-1"
+                                        >
+                                            Status: {activeFilters.status}
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                onClick={() =>
+                                                    setActiveFilters(
+                                                        (prev) => ({
+                                                            ...prev,
+                                                            status: null,
+                                                        })
+                                                    )
+                                                }
+                                                className="h-4 w-4 p-0 hover:bg-transparent"
+                                            >
+                                                <X className="h-3 w-3" />
+                                            </Button>
+                                        </Badge>
+                                    )}
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() =>
+                                            setActiveFilters({
+                                                liaison: null,
+                                                status: null,
+                                            })
+                                        }
+                                        className="h-6 text-xs ml-auto"
+                                    >
+                                        Clear All Filters
+                                    </Button>
+                                </div>
+                            )}
 
+                            {/* Search and bulk actions */}
+                            <div className="flex items-center gap-2 mb-4">
+                                <div className="relative flex-1">
+                                    <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                                    <Input
+                                        id="recipient-filter"
+                                        value={searchQuery}
+                                        onChange={(e) => {
+                                            const value = e.target.value;
+                                            setSearchQuery(value);
+                                            debouncedSearchContacts(value);
+                                        }}
+                                        placeholder={
+                                            recipientType === "employers"
+                                                ? "Search by name, email, or organization..."
+                                                : "Search by name or email..."
+                                        }
+                                        className="pl-10 pr-10 py-2 w-full"
+                                    />
+                                    {searchQuery && (
+                                        <Button
+                                            type="button"
+                                            variant="ghost"
+                                            onClick={() => {
+                                                setSearchQuery("");
+                                                setContactsApiSearch("");
+                                                setContactsPage(1);
+                                                setContactsApiPage(1);
+                                                refetchContacts();
+                                            }}
+                                            className="absolute right-2 top-2 h-6 w-6 p-0"
+                                            title="Clear search"
+                                        >
+                                            <X className="h-4 w-4" />
+                                        </Button>
+                                    )}
+                                    {isSearching && (
+                                        <div className="absolute right-10 top-3">
+                                            <div className="h-4 w-4 animate-spin rounded-full border-b-2 border-primary"></div>
+                                        </div>
+                                    )}
+                                </div>
+
+                                <div className="flex flex-col gap-2 sm:flex-row">
                                     {recipientType === "employers" && (
                                         <Button
                                             size="sm"
                                             variant="outline"
-                                            className="flex items-center gap-1"
+                                            className="flex items-center gap-1 whitespace-nowrap"
                                             onClick={handleSelectAllVisible}
+                                            title="Select all visible recipients"
                                         >
-                                            <div
-                                                className="h-3 w-3 mr-1 rounded-sm border border-primary flex items-center justify-center"
-                                                aria-hidden="true"
-                                            >
-                                                {/* Empty div styled like an unchecked checkbox */}
-                                            </div>
-                                            Select Page
+                                            Select Visible
                                         </Button>
                                     )}
+                                    <Button
+                                        size="sm"
+                                        variant="secondary"
+                                        className="flex items-center gap-1 whitespace-nowrap"
+                                        onClick={handleSelectAllContacts}
+                                        disabled={isSelectingAll}
+                                        title="Select all available recipients"
+                                    >
+                                        {isSelectingAll ? (
+                                            <div className="h-3 w-3 mr-1 animate-spin rounded-full border-b-2 border-current"></div>
+                                        ) : (
+                                            <svg
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                viewBox="0 0 24 24"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                strokeWidth="2"
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                className="h-4 w-4 mr-1"
+                                            >
+                                                <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
+                                            </svg>
+                                        )}
+                                        Select All
+                                    </Button>
                                 </div>
+                            </div>
 
-                                {recipientType === "employers" && (
-                                    <ViewSelector />
-                                )}
+                            {/* Loading indicator or selection count */}
+                            {isSelectingAll && (
+                                <div className="w-full bg-muted rounded-full h-2.5">
+                                    <div className="bg-primary h-2.5 rounded-full animate-pulse w-full"></div>
+                                </div>
+                            )}
 
-                                {recipientType === "employers" &&
-                                    contactsView === "individuals" && (
-                                        <RecipientSelectionTable
-                                            contacts={contacts}
-                                            currentPage={contactsPage}
-                                            totalPages={contactsTotalPages || 1}
-                                            selectedRecipients={
-                                                selectedRecipients
-                                            }
-                                            onSelectRecipient={
-                                                handleRecipientToggle
-                                            }
-                                            onSelectAll={handleSelectAll}
-                                            onPageChange={
-                                                handleContactsPageChange
-                                            }
-                                            loading={isContactsLoading}
-                                            areAllSelected={
-                                                areAllFilteredSelected
-                                            }
-                                            areSomeSelected={
-                                                areSomeFilteredSelected
-                                            }
-                                        />
-                                    )}
+                            {selectedRecipients.size > 0 && (
+                                <div className="flex items-center justify-between p-2 px-3 bg-primary/10 rounded-md">
+                                    <div className="text-sm">
+                                        <span className="font-medium">
+                                            {selectedRecipients.size}
+                                        </span>{" "}
+                                        {selectedRecipients.size === 1
+                                            ? "recipient"
+                                            : "recipients"}
+                                        selected
+                                    </div>
+                                    <Button
+                                        size="sm"
+                                        variant="ghost"
+                                        className="h-7 text-xs"
+                                        onClick={() =>
+                                            setSelectedRecipients(new Set())
+                                        }
+                                    >
+                                        Clear Selection
+                                    </Button>
+                                </div>
+                            )}
 
-                                {(recipientType === "interested" ||
-                                    recipientType === "registered") && (
+                            {/* Simple view switcher for employers */}
+                            {recipientType === "employers" && (
+                                <div className="flex border rounded-md overflow-hidden mb-4">
+                                    <Button
+                                        size="sm"
+                                        variant={
+                                            contactsView === "individuals"
+                                                ? "default"
+                                                : "ghost"
+                                        }
+                                        className="flex-1 rounded-none"
+                                        onClick={() =>
+                                            setContactsView("individuals")
+                                        }
+                                    >
+                                        <Users className="h-4 w-4 mr-2" />
+                                        Individuals
+                                    </Button>
+                                    <Button
+                                        size="sm"
+                                        variant={
+                                            contactsView === "organizations"
+                                                ? "default"
+                                                : "ghost"
+                                        }
+                                        className="flex-1 rounded-none"
+                                        onClick={() =>
+                                            setContactsView("organizations")
+                                        }
+                                    >
+                                        <Building className="h-4 w-4 mr-2" />
+                                        Organizations
+                                    </Button>
+                                    <Button
+                                        size="sm"
+                                        variant={
+                                            contactsView === "selected"
+                                                ? "default"
+                                                : "ghost"
+                                        }
+                                        className="flex-1 rounded-none"
+                                        onClick={() =>
+                                            setContactsView("selected")
+                                        }
+                                        disabled={selectedRecipients.size === 0}
+                                    >
+                                        <CheckCircle2 className="h-4 w-4 mr-2" />
+                                        Selected
+                                    </Button>
+                                </div>
+                            )}
+
+                            {/* Contact lists */}
+                            {recipientType === "employers" &&
+                                contactsView === "individuals" && (
                                     <RecipientSelectionTable
-                                        contacts={recipientLists[recipientType]}
-                                        currentPage={1}
-                                        totalPages={1}
+                                        contacts={contacts}
+                                        currentPage={contactsPage}
+                                        totalPages={contactsTotalPages || 1}
                                         selectedRecipients={selectedRecipients}
                                         onSelectRecipient={
                                             handleRecipientToggle
                                         }
                                         onSelectAll={handleSelectAll}
-                                        onPageChange={() => {}}
-                                        loading={
-                                            recipientType === "interested"
-                                                ? isInterestedLoading
-                                                : false
-                                        }
+                                        onPageChange={handleContactsPageChange}
+                                        loading={isContactsLoading}
                                         areAllSelected={areAllFilteredSelected}
                                         areSomeSelected={
                                             areSomeFilteredSelected
@@ -1539,406 +2026,383 @@ export default function ComposePage({ mails = [] }: ComposePageProps) {
                                     />
                                 )}
 
-                                {recipientType === "employers" &&
-                                    contactsView === "organizations" && (
-                                        <div className="space-y-2">
-                                            {isLoadingAllContacts &&
-                                            allContacts.length === 0 ? (
-                                                <div className="flex items-center justify-center py-8">
-                                                    <div className="flex flex-col items-center gap-2">
-                                                        <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-primary"></div>
-                                                        <p className="text-sm text-muted-foreground">
-                                                            Loading all
-                                                            organizations...
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                            ) : (
-                                                Object.entries(
-                                                    groupedByOrganization
-                                                ).map(([org, orgContacts]) => (
-                                                    <div
-                                                        key={org}
-                                                        className="border rounded-md overflow-hidden"
-                                                    >
-                                                        {/* Organization header with checkbox */}
-                                                        <div
-                                                            className="flex items-center justify-between p-3 bg-muted/30 cursor-pointer"
-                                                            onClick={() =>
-                                                                handleSelectOrganization(
-                                                                    org,
-                                                                    !isOrganizationFullySelected(
-                                                                        org
-                                                                    )
-                                                                )
-                                                            }
-                                                        >
-                                                            <div className="flex items-center gap-2">
-                                                                <Checkbox
-                                                                    checked={isOrganizationFullySelected(
-                                                                        org
-                                                                    )}
-                                                                    className={
-                                                                        isOrganizationPartiallySelected(
-                                                                            org
-                                                                        )
-                                                                            ? "opacity-70"
-                                                                            : ""
-                                                                    }
-                                                                />
-                                                                <span className="font-medium">
-                                                                    {org}
-                                                                </span>
-                                                                <Badge variant="outline">
-                                                                    {
-                                                                        orgContacts.length
-                                                                    }
-                                                                </Badge>
-                                                                <Badge
-                                                                    variant="secondary"
-                                                                    className={
-                                                                        getOrganizationContactedCount(
-                                                                            org
-                                                                        ) === 0
-                                                                            ? "bg-gray-200 dark:bg-gray-800 text-gray-500 dark:text-gray-400"
-                                                                            : ""
-                                                                    }
-                                                                >
-                                                                    Contacted{" "}
-                                                                    {getOrganizationContactedCount(
-                                                                        org
-                                                                    )}
-                                                                </Badge>
-                                                            </div>
-                                                            <Button
-                                                                variant="ghost"
-                                                                size="sm"
-                                                                onClick={(e) =>
-                                                                    toggleOrgExpansion(
-                                                                        org,
-                                                                        e
-                                                                    )
-                                                                }
-                                                                className="p-0 h-8 w-8"
-                                                            >
-                                                                <ChevronDown
-                                                                    className={`h-4 w-4 text-muted-foreground transition-transform duration-200 ${
-                                                                        expandedOrgs.has(
-                                                                            org
-                                                                        )
-                                                                            ? "transform rotate-180"
-                                                                            : ""
-                                                                    }`}
-                                                                />
-                                                            </Button>
-                                                        </div>
-
-                                                        {expandedOrgs.has(
-                                                            org
-                                                        ) && (
-                                                            <div className="border-t border-border">
-                                                                <div className="max-h-60 overflow-y-auto">
-                                                                    <Table>
-                                                                        <TableBody>
-                                                                            {orgContacts.map(
-                                                                                (
-                                                                                    contact
-                                                                                ) => (
-                                                                                    <TableRow
-                                                                                        key={
-                                                                                            contact.id
-                                                                                        }
-                                                                                        className={
-                                                                                            contact.status ===
-                                                                                            "Contacted"
-                                                                                                ? "bg-purple-100 dark:bg-purple-900/20"
-                                                                                                : "hover:bg-muted/50"
-                                                                                        }
-                                                                                    >
-                                                                                        <TableCell className="w-12">
-                                                                                            <Checkbox
-                                                                                                checked={selectedRecipients.has(
-                                                                                                    contact.id.toString()
-                                                                                                )}
-                                                                                                onCheckedChange={() =>
-                                                                                                    handleRecipientToggle(
-                                                                                                        contact.id.toString()
-                                                                                                    )
-                                                                                                }
-                                                                                            />
-                                                                                        </TableCell>
-                                                                                        <TableCell className="font-medium truncate max-w-[150px]">
-                                                                                            {contact.contact_name ||
-                                                                                                ""}
-                                                                                        </TableCell>
-                                                                                        <TableCell className="text-muted-foreground truncate max-w-[200px]">
-                                                                                            {
-                                                                                                contact.email_address
-                                                                                            }
-                                                                                        </TableCell>
-                                                                                        <TableCell className="w-20">
-                                                                                            {contact.status ===
-                                                                                                "Contacted" && (
-                                                                                                <Badge variant="secondary">
-                                                                                                    Contacted
-                                                                                                </Badge>
-                                                                                            )}
-                                                                                        </TableCell>
-                                                                                    </TableRow>
-                                                                                )
-                                                                            )}
-                                                                        </TableBody>
-                                                                    </Table>
-                                                                </div>
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                ))
-                                            )}
-                                        </div>
-                                    )}
-
-                                {recipientType === "employers" &&
-                                    contactsView === "selected" && (
-                                        <>
-                                            {selectedRecipients.size === 0 ? (
-                                                <div className="flex flex-col items-center justify-center py-8 text-center">
-                                                    <Checkbox className="h-12 w-12 text-muted-foreground mb-2" />
-                                                    <h3 className="font-medium text-lg">
-                                                        No contacts selected
-                                                    </h3>
-                                                    <p className="text-sm text-muted-foreground mt-1">
-                                                        Select contacts to see
-                                                        them here
-                                                    </p>
-                                                </div>
-                                            ) : (
-                                                <RecipientSelectionTable
-                                                    contacts={getSelectedContacts()}
-                                                    currentPage={1}
-                                                    totalPages={1}
-                                                    selectedRecipients={
-                                                        selectedRecipients
-                                                    }
-                                                    onSelectRecipient={
-                                                        handleRecipientToggle
-                                                    }
-                                                    onSelectAll={(checked) => {
-                                                        if (!checked) {
-                                                            setSelectedRecipients(
-                                                                new Set()
-                                                            );
-                                                        }
-                                                    }}
-                                                    onPageChange={() => {}}
-                                                    loading={false}
-                                                    areAllSelected={true}
-                                                    areSomeSelected={false}
-                                                />
-                                            )}
-                                        </>
-                                    )}
-                            </div>
-                        </CardContent>
-                    </Card>
-                </div>
-
-                <div className="lg:col-span-7">
-                    <Card>
-                        <CardHeader className="border-b">
-                            <CardTitle>Email Content</CardTitle>
-                        </CardHeader>
-                        <CardContent className="p-6">
-                            <div className="space-y-6">
-                                {recipientType === "employers" && (
-                                    <div>
-                                        <Label htmlFor="template">
-                                            Email Template
-                                        </Label>
-                                        <Select
-                                            onValueChange={handleTemplateChange}
-                                        >
-                                            <SelectTrigger>
-                                                <SelectValue placeholder="Select a template" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                {EMAIL_TEMPLATES.filter(
-                                                    (template) =>
-                                                        template.type ===
-                                                        "employers"
-                                                ).map((template) => (
-                                                    <SelectItem
-                                                        key={template.id}
-                                                        value={template.id}
-                                                    >
-                                                        {template.name}
-                                                    </SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
-                                    </div>
+                            {recipientType === "employers" &&
+                                contactsView === "organizations" && (
+                                    <OrganizationsView
+                                        contacts={contacts}
+                                        isLoading={isContactsLoading}
+                                        selectedRecipients={selectedRecipients}
+                                        onToggleRecipient={
+                                            handleRecipientToggle
+                                        }
+                                        onUpdateSelected={setSelectedRecipients}
+                                    />
                                 )}
 
-                                <div>
-                                    <Label htmlFor="subject">Subject</Label>
-                                    <Input
-                                        id="subject"
-                                        value={emailSubject}
-                                        onChange={(e) =>
-                                            setEmailSubject(e.target.value)
+                            {recipientType === "employers" &&
+                                contactsView === "selected" && (
+                                    <RecipientSelectionTable
+                                        contacts={contacts.filter((contact) =>
+                                            selectedRecipients.has(
+                                                contact.id.toString()
+                                            )
+                                        )}
+                                        currentPage={1}
+                                        totalPages={1}
+                                        selectedRecipients={selectedRecipients}
+                                        onSelectRecipient={
+                                            handleRecipientToggle
                                         }
-                                        placeholder="Enter email subject..."
-                                        className="mt-1"
+                                        onSelectAll={() => {}}
+                                        onPageChange={() => {}}
+                                        loading={false}
+                                        areAllSelected={true}
+                                        areSomeSelected={false}
+                                    />
+                                )}
+
+                            {(recipientType === "interested" ||
+                                recipientType === "registered") && (
+                                <RecipientSelectionTable
+                                    contacts={recipientLists[recipientType]}
+                                    currentPage={1}
+                                    totalPages={1}
+                                    selectedRecipients={selectedRecipients}
+                                    onSelectRecipient={handleRecipientToggle}
+                                    onSelectAll={handleSelectAll}
+                                    onPageChange={() => {}}
+                                    loading={
+                                        recipientType === "interested"
+                                            ? isInterestedLoading
+                                            : false
+                                    }
+                                    areAllSelected={areAllFilteredSelected}
+                                    areSomeSelected={areSomeFilteredSelected}
+                                />
+                            )}
+                        </div>
+                    </CardContent>
+                    <CardFooter className="border-t bg-muted/30 p-2 px-6 flex justify-end gap-2">
+                        <Button
+                            variant="default"
+                            disabled={selectedRecipients.size === 0}
+                            onClick={() => setActiveStep("content")}
+                        >
+                            Continue to Compose
+                            <ChevronRight className="h-4 w-4 ml-1" />
+                        </Button>
+                    </CardFooter>
+                </Card>
+            )}
+
+            {/* Content step */}
+            {activeStep === "content" && (
+                <Card>
+                    <CardHeader className="border-b">
+                        <div className="flex items-center justify-between">
+                            <CardTitle>Compose Email</CardTitle>
+                            {recipientType === "employers" && (
+                                <Select onValueChange={handleTemplateChange}>
+                                    <SelectTrigger className="w-[200px]">
+                                        <SelectValue placeholder="Select a template" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {EMAIL_TEMPLATES.filter(
+                                            (template) =>
+                                                template.type === "employers"
+                                        ).map((template) => (
+                                            <SelectItem
+                                                key={template.id}
+                                                value={template.id}
+                                            >
+                                                {template.name}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            )}
+                        </div>
+                    </CardHeader>
+                    <CardContent className="p-6">
+                        <div className="space-y-6">
+                            <div>
+                                <Label htmlFor="subject">Email Subject</Label>
+                                <Input
+                                    id="subject"
+                                    value={emailSubject}
+                                    onChange={(e) =>
+                                        setEmailSubject(e.target.value)
+                                    }
+                                    placeholder="Enter email subject..."
+                                    className="mt-1"
+                                />
+                            </div>
+
+                            {recipientType !== "employers" && (
+                                <div>
+                                    <Label htmlFor="content">
+                                        Email Content
+                                    </Label>
+                                    <Textarea
+                                        id="content"
+                                        value={emailContent}
+                                        onChange={(e) =>
+                                            setEmailContent(e.target.value)
+                                        }
+                                        placeholder="Enter email content..."
+                                        className="mt-1 min-h-[300px]"
                                     />
                                 </div>
+                            )}
 
-                                {recipientType !== "employers" && (
+                            {recipientType === "employers" &&
+                                selectedTemplate && (
                                     <div>
-                                        <Label htmlFor="content">Content</Label>
+                                        <div className="flex items-center justify-between mb-2">
+                                            <Label htmlFor="content">
+                                                Template Content
+                                            </Label>
+                                            <div className="text-xs text-muted-foreground">
+                                                Available variables:
+                                                [recipient_name],
+                                                [company_name], [sender_name],
+                                                [sender_year_and_major],
+                                                [sender_school]
+                                            </div>
+                                        </div>
                                         <Textarea
                                             id="content"
                                             value={emailContent}
                                             onChange={(e) =>
                                                 setEmailContent(e.target.value)
                                             }
-                                            placeholder="Enter email content..."
-                                            className="mt-1 min-h-[300px]"
+                                            placeholder="Enter email content with variables..."
+                                            className="mt-1 min-h-[300px] font-mono text-sm"
                                         />
                                     </div>
                                 )}
 
-                                {recipientType === "employers" &&
-                                    selectedTemplate && (
-                                        <div>
-                                            <div className="flex items-center justify-between mb-2">
-                                                <Label htmlFor="content">
-                                                    Template Content
-                                                </Label>
-                                                <div className="text-xs text-muted-foreground">
-                                                    You can use these variables:
-                                                    [recipient_name],
-                                                    [company_name],
-                                                    [sender_name],
-                                                    [sender_year_and_major],
-                                                    [sender_school]
-                                                </div>
-                                            </div>
-                                            <Textarea
-                                                id="content"
-                                                value={emailContent}
-                                                onChange={(e) =>
-                                                    setEmailContent(
-                                                        e.target.value
-                                                    )
-                                                }
-                                                placeholder="Enter email content with variables..."
-                                                className="mt-1 min-h-[300px] font-mono text-sm"
-                                            />
-                                        </div>
-                                    )}
-
-                                <div className="text-sm text-muted-foreground">
-                                    Email will be sent using your outreach team
-                                    member information.
-                                </div>
+                            <div className="text-sm text-muted-foreground">
+                                Email will be sent to {selectedRecipients.size}{" "}
+                                {selectedRecipients.size === 1
+                                    ? "recipient"
+                                    : "recipients"}{" "}
+                                using your outreach team member information.
                             </div>
-                        </CardContent>
-                    </Card>
+                        </div>
+                    </CardContent>
+                    <CardFooter className="border-t bg-muted/30 p-2 px-6 flex justify-between">
+                        <Button
+                            variant="ghost"
+                            onClick={() => setActiveStep("recipients")}
+                        >
+                            <ChevronLeft className="h-4 w-4 mr-1" />
+                            Back to Recipients
+                        </Button>
+                        <Button
+                            variant="default"
+                            onClick={() => {
+                                handlePreview();
+                                setActiveStep("preview");
+                            }}
+                            disabled={!emailSubject || !emailContent}
+                        >
+                            Preview Email
+                            <ChevronRight className="h-4 w-4 ml-1" />
+                        </Button>
+                    </CardFooter>
+                </Card>
+            )}
 
-                    <Dialog
-                        open={isPreviewOpen}
-                        onOpenChange={setIsPreviewOpen}
-                    >
-                        <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
-                            <DialogHeader>
-                                <DialogTitle>Email Preview</DialogTitle>
-                            </DialogHeader>
-                            <div
-                                className="prose dark:prose-invert max-w-none mt-4"
-                                dangerouslySetInnerHTML={{
-                                    __html: previewHtml,
-                                }}
-                            />
-                        </DialogContent>
-                    </Dialog>
-
-                    <Dialog
-                        open={isConfirmationOpen}
-                        onOpenChange={setIsConfirmationOpen}
-                    >
-                        <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
-                            <DialogHeader>
-                                <DialogTitle>
-                                    Confirm Email Recipients
-                                </DialogTitle>
-                            </DialogHeader>
-                            <div className="py-4">
-                                <p className="text-sm text-muted-foreground mb-4">
-                                    You are about to send emails to the
-                                    following {recipientsToConfirm.length}{" "}
-                                    recipient
-                                    {recipientsToConfirm.length !== 1
-                                        ? "s"
+            {/* Preview step */}
+            {activeStep === "preview" && isPreviewOpen && (
+                <Card>
+                    <CardHeader className="border-b">
+                        <CardTitle>Email Preview & Send</CardTitle>
+                    </CardHeader>
+                    <CardContent className="p-6">
+                        <div className="space-y-6">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <h3 className="text-lg font-medium">
+                                        Email Details
+                                    </h3>
+                                    <p className="text-sm text-muted-foreground">
+                                        Review your email before sending
+                                    </p>
+                                </div>
+                                <Badge
+                                    variant={
+                                        selectedRecipients.size > 10
+                                            ? "destructive"
+                                            : "outline"
+                                    }
+                                >
+                                    {selectedRecipients.size}{" "}
+                                    {selectedRecipients.size === 1
+                                        ? "recipient"
+                                        : "recipients"}
+                                    {selectedRecipients.size > 10
+                                        ? " (Mass Email)"
                                         : ""}
-                                    :
-                                </p>
-                                <div className="border rounded-lg overflow-hidden">
-                                    <Table>
-                                        <TableHeader>
-                                            <TableRow className="bg-muted/50">
-                                                <TableHead className="py-3 font-semibold">
-                                                    Name
-                                                </TableHead>
-                                                <TableHead className="py-3 font-semibold">
-                                                    Email
-                                                </TableHead>
+                                </Badge>
+                            </div>
+
+                            <div className="border rounded-md p-4">
+                                <div className="mb-4">
+                                    <span className="text-sm font-medium">
+                                        Subject:
+                                    </span>{" "}
+                                    {emailSubject}
+                                </div>
+                                <div
+                                    className="prose dark:prose-invert max-w-none"
+                                    dangerouslySetInnerHTML={{
+                                        __html: previewHtml,
+                                    }}
+                                />
+                            </div>
+
+                            <div className="text-sm text-muted-foreground">
+                                This email will be sent from{" "}
+                                <span className="font-medium">
+                                    {senderEmail}
+                                </span>
+                            </div>
+                        </div>
+                    </CardContent>
+                    <CardFooter className="border-t bg-muted/30 p-2 px-6 flex justify-between">
+                        <Button
+                            variant="ghost"
+                            onClick={() => setActiveStep("content")}
+                        >
+                            <ChevronLeft className="h-4 w-4 mr-1" />
+                            Back to Edit
+                        </Button>
+                        <Button
+                            variant={
+                                selectedRecipients.size > 10
+                                    ? "destructive"
+                                    : "default"
+                            }
+                            onClick={handleSendEmails}
+                            className="gap-2"
+                        >
+                            {selectedRecipients.size > 10 ? (
+                                <>
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        strokeWidth="2"
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        className="h-4 w-4"
+                                    >
+                                        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                                        <line x1="12" y1="9" x2="12" y2="13" />
+                                        <line
+                                            x1="12"
+                                            y1="17"
+                                            x2="12.01"
+                                            y2="17"
+                                        />
+                                    </svg>
+                                    Send Mass Email ({selectedRecipients.size})
+                                </>
+                            ) : (
+                                <>
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        strokeWidth="2"
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        className="h-4 w-4"
+                                    >
+                                        <path d="M22 2L11 13" />
+                                        <path d="M22 2l-7 20-4-9-9-4 20-7z" />
+                                    </svg>
+                                    Send Email
+                                </>
+                            )}
+                        </Button>
+                    </CardFooter>
+                </Card>
+            )}
+
+            {/* Confirmation dialog */}
+            <Dialog
+                open={isConfirmationOpen}
+                onOpenChange={setIsConfirmationOpen}
+            >
+                <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+                    <DialogHeader>
+                        <DialogTitle>Confirm Email Recipients</DialogTitle>
+                    </DialogHeader>
+                    <div className="py-4">
+                        <p className="text-sm text-muted-foreground mb-4">
+                            You are about to send emails to the following{" "}
+                            {recipientsToConfirm.length} recipient
+                            {recipientsToConfirm.length !== 1 ? "s" : ""}:
+                        </p>
+                        <div className="border rounded-lg overflow-hidden">
+                            <Table>
+                                <TableHeader>
+                                    <TableRow className="bg-muted/50">
+                                        <TableHead className="py-3 font-semibold">
+                                            Name
+                                        </TableHead>
+                                        <TableHead className="py-3 font-semibold">
+                                            Email
+                                        </TableHead>
+                                        {recipientType === "employers" && (
+                                            <TableHead className="py-3 font-semibold">
+                                                Organization
+                                            </TableHead>
+                                        )}
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {recipientsToConfirm.map(
+                                        (recipient, index) => (
+                                            <TableRow key={index}>
+                                                <TableCell>
+                                                    {recipient.name}
+                                                </TableCell>
+                                                <TableCell className="text-muted-foreground">
+                                                    {recipient.email}
+                                                </TableCell>
                                                 {recipientType ===
                                                     "employers" && (
-                                                    <TableHead className="py-3 font-semibold">
-                                                        Organization
-                                                    </TableHead>
+                                                    <TableCell>
+                                                        {recipient.organization ||
+                                                            "-"}
+                                                    </TableCell>
                                                 )}
                                             </TableRow>
-                                        </TableHeader>
-                                        <TableBody>
-                                            {recipientsToConfirm.map(
-                                                (recipient, index) => (
-                                                    <TableRow key={index}>
-                                                        <TableCell>
-                                                            {recipient.name}
-                                                        </TableCell>
-                                                        <TableCell className="text-muted-foreground">
-                                                            {recipient.email}
-                                                        </TableCell>
-                                                        {recipientType ===
-                                                            "employers" && (
-                                                            <TableCell>
-                                                                {recipient.organization ||
-                                                                    "-"}
-                                                            </TableCell>
-                                                        )}
-                                                    </TableRow>
-                                                )
-                                            )}
-                                        </TableBody>
-                                    </Table>
-                                </div>
-                            </div>
-                            <DialogFooter>
-                                <Button
-                                    variant="outline"
-                                    onClick={() => setIsConfirmationOpen(false)}
-                                >
-                                    Cancel
-                                </Button>
-                                <Button onClick={handleConfirmedSend}>
-                                    Confirm & Send
-                                </Button>
-                            </DialogFooter>
-                        </DialogContent>
-                    </Dialog>
-                </div>
-            </div>
+                                        )
+                                    )}
+                                </TableBody>
+                            </Table>
+                        </div>
+                    </div>
+                    <DialogFooter>
+                        <Button
+                            variant="outline"
+                            onClick={() => setIsConfirmationOpen(false)}
+                        >
+                            Cancel
+                        </Button>
+                        <Button onClick={handleConfirmedSend}>
+                            Confirm & Send
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }
