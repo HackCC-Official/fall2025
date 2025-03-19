@@ -123,6 +123,7 @@ export default function AddContactDrawer({
 
     const onSubmit = async (values: ContactFormValues) => {
         setIsSubmitting(true);
+        setError(null);
         try {
             const entries = Object.entries(values).filter(([, value]) => {
                 if (typeof value === "string") return value.trim() !== "";
@@ -159,10 +160,26 @@ export default function AddContactDrawer({
             onOpenChange(false);
         } catch (err) {
             console.error("Failed to create contact:", err);
-            const errorMessage =
-                err instanceof Error
-                    ? err.message
-                    : "Failed to create contact. Please try again.";
+            let errorMessage = "Failed to create contact. Please try again.";
+
+            // Handle structured API error responses
+            if (err && typeof err === "object") {
+                if (
+                    "error" in err &&
+                    typeof err.error === "object" &&
+                    err.error &&
+                    "message" in err.error
+                ) {
+                    // Structure: { error: { message: string } }
+                    errorMessage = String(err.error.message);
+                } else if ("message" in err) {
+                    // Structure: { message: string }
+                    errorMessage = String(err.message);
+                } else if (err instanceof Error) {
+                    errorMessage = err.message;
+                }
+            }
+
             setError(errorMessage);
         } finally {
             setIsSubmitting(false);

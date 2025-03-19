@@ -24,3 +24,9 @@ export interface ContactDto {
 }
 
 export type UpdateContactDto = Partial<ContactDto>;
+
+export interface RecipientConfirmationDetails {
+    name: string;
+    email: string;
+    organization?: string;
+}
