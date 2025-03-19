@@ -1018,10 +1018,20 @@ export default function ComposePage({ mails = [] }: ComposePageProps) {
                 return;
             }
 
-            let emailData: SendBatchEmailsDto;
+            // Create a notification that stays open during the entire sending process
+            const toastId = toast.loading(
+                `Preparing to send ${selectedRecipientsData.length} emails. Please do not close this tab.`,
+                { duration: Infinity }
+            );
 
+            // If we have more than 100 recipients, send in batches
+            const BATCH_SIZE = 100;
+            const needsBatching = selectedRecipientsData.length > BATCH_SIZE;
+
+            let renderedEmails: string[] = [];
+
+            // Render all emails first based on recipient type
             if (recipientType === "employers") {
-                let renderedEmails;
                 if (selectedTemplate?.name === "Empty Template") {
                     renderedEmails = await Promise.all(
                         selectedRecipientsData.map(async (recipient) => {
@@ -1076,43 +1086,8 @@ export default function ComposePage({ mails = [] }: ComposePageProps) {
                         },
                     });
                 }
-
-                emailData = {
-                    emails: selectedRecipientsData.map((recipient, index) => {
-                        // Parse the subject line to replace variables
-                        let parsedSubject = emailSubject;
-                        if (
-                            parsedSubject.includes("[company_name]") &&
-                            recipient.company
-                        ) {
-                            parsedSubject = parsedSubject.replace(
-                                /\[company_name\]/g,
-                                recipient.company
-                            );
-                        }
-                        if (
-                            parsedSubject.includes("[recipient_name]") &&
-                            recipient.to[0]?.name
-                        ) {
-                            parsedSubject = parsedSubject.replace(
-                                /\[recipient_name\]/g,
-                                recipient.to[0].name
-                            );
-                        }
-
-                        return {
-                            from: senderEmail,
-                            to: recipient.to.map((to) => ({
-                                email: to.email,
-                                name: to.name || to.email.split("@")[0],
-                            })),
-                            subject: parsedSubject,
-                            html: renderedEmails[index],
-                        };
-                    }),
-                };
             } else {
-                const renderedEmails = await Promise.all(
+                renderedEmails = await Promise.all(
                     selectedRecipientsData.map(async (recipient) => {
                         const recipientName = recipient.to[0]?.name || "Hacker";
                         return render(
@@ -1129,42 +1104,123 @@ export default function ComposePage({ mails = [] }: ComposePageProps) {
                         );
                     })
                 );
+            }
 
-                emailData = {
-                    emails: selectedRecipientsData.map((recipient, index) => {
-                        // Parse the subject line to replace variables
-                        let parsedSubject = emailSubject;
-                        if (
-                            parsedSubject.includes("[recipient_name]") &&
-                            recipient.to[0]?.name
-                        ) {
-                            parsedSubject = parsedSubject.replace(
-                                /\[recipient_name\]/g,
-                                recipient.to[0].name
+            // Prepare all email objects
+            const allEmails = selectedRecipientsData.map((recipient, index) => {
+                // Parse the subject line to replace variables
+                let parsedSubject = emailSubject;
+                if (recipientType === "employers") {
+                    if (
+                        parsedSubject.includes("[company_name]") &&
+                        recipient.company
+                    ) {
+                        parsedSubject = parsedSubject.replace(
+                            /\[company_name\]/g,
+                            recipient.company
+                        );
+                    }
+                }
+
+                if (
+                    parsedSubject.includes("[recipient_name]") &&
+                    recipient.to[0]?.name
+                ) {
+                    parsedSubject = parsedSubject.replace(
+                        /\[recipient_name\]/g,
+                        recipient.to[0].name
+                    );
+                }
+
+                return {
+                    from: senderEmail,
+                    to: recipient.to.map((to) => ({
+                        email: to.email,
+                        name: to.name || to.email.split("@")[0],
+                    })),
+                    subject: parsedSubject,
+                    html: renderedEmails[index],
+                };
+            });
+
+            // Update toast to show we're starting to send
+            toast.loading(
+                `Sending emails to ${selectedRecipientsData.length} recipients. Please do not close this tab.`,
+                { id: toastId }
+            );
+
+            if (needsBatching) {
+                // Split into batches
+                const batches = [];
+                for (let i = 0; i < allEmails.length; i += BATCH_SIZE) {
+                    batches.push(allEmails.slice(i, i + BATCH_SIZE));
+                }
+
+                let batchCounter = 1;
+                const totalBatches = batches.length;
+
+                // Send each batch with a delay
+                for (const batch of batches) {
+                    // Update toast with current batch info
+                    toast.loading(
+                        `Sending batch ${batchCounter} of ${totalBatches} (${batch.length} emails). Please do not close this tab.`,
+                        { id: toastId }
+                    );
+
+                    try {
+                        // Send the current batch
+                        await sendBatchEmails({
+                            emails: batch,
+                        } as SendBatchEmailsDto);
+
+                        // Update toast with success for this batch
+                        toast.success(
+                            `Batch ${batchCounter} of ${totalBatches} sent successfully! (${batch.length} emails)`,
+                            { duration: 3000 }
+                        );
+
+                        // If we have more batches to go, update the main toast
+                        if (batchCounter < totalBatches) {
+                            toast.loading(
+                                `Sending email batches: ${batchCounter} of ${totalBatches} completed. Please do not close this tab.`,
+                                { id: toastId }
+                            );
+
+                            // Wait for 5 seconds before sending the next batch
+                            await new Promise((resolve) =>
+                                setTimeout(resolve, 5000)
                             );
                         }
+                    } catch (error) {
+                        console.error(
+                            `Error sending batch ${batchCounter}:`,
+                            error
+                        );
+                        toast.error(
+                            `Failed to send batch ${batchCounter}. Continuing with remaining batches.`
+                        );
+                    }
 
-                        return {
-                            from: senderEmail,
-                            to: recipient.to.map((to) => ({
-                                email: to.email,
-                                name: to.name || to.email.split("@")[0],
-                            })),
-                            subject: parsedSubject,
-                            html: renderedEmails[index],
-                        };
-                    }),
-                };
-            }
-
-            if (selectedRecipientsData.length === 1) {
-                await sendEmail(emailData.emails[0]);
+                    batchCounter++;
+                }
             } else {
-                await sendBatchEmails(emailData);
+                // For small batches, send directly
+                if (allEmails.length === 1) {
+                    await sendEmail(allEmails[0]);
+                } else {
+                    await sendBatchEmails({
+                        emails: allEmails,
+                    } as SendBatchEmailsDto);
+                }
             }
 
+            // Update recipients as contacted if they're employers
             if (recipientType === "employers") {
                 try {
+                    toast.loading("Updating contact statuses...", {
+                        id: toastId,
+                    });
+
                     await Promise.all(
                         selectedRecipientsData.map(async (recipient) => {
                             await updateContact(recipient.id, {
@@ -1178,10 +1234,18 @@ export default function ComposePage({ mails = [] }: ComposePageProps) {
                         "Error updating employer contact status:",
                         error
                     );
+                    toast.error("Failed to update some contact statuses");
                 }
             }
 
-            toast.success("Emails sent successfully!");
+            // Final success message
+            toast.success(
+                `All ${selectedRecipientsData.length} emails sent successfully!`,
+                {
+                    id: toastId,
+                    duration: 5000,
+                }
+            );
 
             setSelectedRecipients(new Set());
             setSelectedTemplate(null);
@@ -2186,7 +2250,7 @@ export default function ComposePage({ mails = [] }: ComposePageProps) {
                                 Email will be sent to {selectedRecipients.size}{" "}
                                 {selectedRecipients.size === 1
                                     ? "recipient"
-                                    : "recipients"}{" "}
+                                    : "recipients"}
                                 using your outreach team member information.
                             </div>
                         </div>
