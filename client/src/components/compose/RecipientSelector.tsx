@@ -39,6 +39,9 @@ import type { Mail } from "@/types/mail";
 import { searchContacts } from "@/features/outreach/api/outreach";
 import type { RecipientType } from "./ComposeView";
 
+// Export RecipientType for use in other components
+export type { RecipientType };
+
 // Define interfaces for the 'any' types
 interface ContactsResponse {
     data: ContactDto[];

@@ -17,7 +17,7 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
-import type { RecipientType } from "../../../pages/panel/email/compose";
+import type { RecipientType } from "@/components/compose/RecipientSelector";
 
 interface RecipientConfirmationDetails {
     name: string;

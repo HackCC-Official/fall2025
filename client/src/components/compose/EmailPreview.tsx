@@ -4,7 +4,7 @@ import * as React from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ChevronLeft } from "lucide-react";
-import type { RecipientType } from "../../../pages/panel/email/compose";
+import type { RecipientType } from "./RecipientSelector";
 
 interface EmailPreviewProps {
     recipientType: RecipientType;
@@ -19,7 +19,6 @@ interface EmailPreviewProps {
 }
 
 export const EmailPreview: React.FC<EmailPreviewProps> = ({
-    recipientType,
     selectedRecipients,
     emailSubject,
     previewHtml,
