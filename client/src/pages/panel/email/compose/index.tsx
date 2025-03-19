@@ -560,7 +560,7 @@ export default function ComposePage({ mails = [] }: ComposePageProps) {
     const [recipientType, setRecipientType] =
         React.useState<RecipientType>("employers");
     const [selectedLiaison, setSelectedLiaison] = React.useState<string>("");
-    const [, setShowLiaisonSelect] = React.useState(false);
+    const [showLiaisonSelect, setShowLiaisonSelect] = React.useState(false);
     const [liaisons, setLiaisons] = React.useState<string[]>([]);
 
     const [selectedTemplate, setSelectedTemplate] =
@@ -1444,15 +1444,16 @@ export default function ComposePage({ mails = [] }: ComposePageProps) {
                     allRecipientsIds.add(contact.id.toString());
                 });
 
-                const filterMessage = selectedLiaison
-                    ? `Selected ${filtered.length} employer contacts with liaison: ${selectedLiaison}`
-                    : `Selected ${filtered.length} employer contacts`;
+                const filterMessage =
+                    selectedLiaison && selectedLiaison !== "all"
+                        ? `Selected ${filtered.length} employer contacts with liaison: ${selectedLiaison}`
+                        : `Selected ${filtered.length} employer contacts`;
 
                 toast.success(filterMessage);
 
-                // Reset liaison selection
-                setSelectedLiaison("");
-                setShowLiaisonSelect(false);
+                // Reset liaison selection only if we don't want to keep it visible
+                // setSelectedLiaison("");
+                // setShowLiaisonSelect(false);
             } else if (recipientType === "registered") {
                 // For registered users, use the mails array
                 mails.forEach((mail) => {
@@ -1957,13 +1958,69 @@ export default function ComposePage({ mails = [] }: ComposePageProps) {
                                             Select Visible
                                         </Button>
                                     )}
+
+                                    {recipientType === "employers" && (
+                                        <div className="flex gap-2">
+                                            {showLiaisonSelect ? (
+                                                <Select
+                                                    value={selectedLiaison}
+                                                    onValueChange={(value) => {
+                                                        setSelectedLiaison(
+                                                            value
+                                                        );
+                                                    }}
+                                                >
+                                                    <SelectTrigger className="h-9 w-[180px]">
+                                                        <SelectValue placeholder="Filter by liaison" />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        <SelectItem value="all">
+                                                            All Liaisons
+                                                        </SelectItem>
+                                                        {liaisons.map(
+                                                            (liaison) => (
+                                                                <SelectItem
+                                                                    key={
+                                                                        liaison
+                                                                    }
+                                                                    value={
+                                                                        liaison
+                                                                    }
+                                                                >
+                                                                    {liaison}
+                                                                </SelectItem>
+                                                            )
+                                                        )}
+                                                    </SelectContent>
+                                                </Select>
+                                            ) : (
+                                                <Button
+                                                    size="sm"
+                                                    variant="outline"
+                                                    onClick={() =>
+                                                        setShowLiaisonSelect(
+                                                            true
+                                                        )
+                                                    }
+                                                >
+                                                    Filter by Liaison
+                                                </Button>
+                                            )}
+                                        </div>
+                                    )}
+
                                     <Button
                                         size="sm"
                                         variant="secondary"
                                         className="flex items-center gap-1 whitespace-nowrap"
                                         onClick={handleSelectAllContacts}
                                         disabled={isSelectingAll}
-                                        title="Select all available recipients"
+                                        title={
+                                            recipientType === "employers" &&
+                                            selectedLiaison
+                                                ? `Select all contacts with liaison: ${selectedLiaison}`
+                                                : "Select all available recipients"
+                                        }
                                     >
                                         {isSelectingAll ? (
                                             <div className="h-3 w-3 mr-1 animate-spin rounded-full border-b-2 border-current"></div>
@@ -1981,7 +2038,10 @@ export default function ComposePage({ mails = [] }: ComposePageProps) {
                                                 <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
                                             </svg>
                                         )}
-                                        Select All
+                                        {selectedLiaison &&
+                                        recipientType === "employers"
+                                            ? `Select All (${selectedLiaison})`
+                                            : "Select All"}
                                     </Button>
                                 </div>
                             </div>
