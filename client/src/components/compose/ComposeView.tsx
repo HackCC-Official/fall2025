@@ -328,6 +328,11 @@ export default function ComposePage({ mails = [] }: ComposePageProps) {
     };
 
     const handlePreview = async () => {
+        // Log the number of selected recipients to help debug
+        console.log(
+            `Preview requested with ${selectedRecipients.size} recipients selected`
+        );
+
         if (selectedRecipients.size === 0) {
             toast.error("Please select at least one recipient");
             return;
@@ -343,6 +348,12 @@ export default function ComposePage({ mails = [] }: ComposePageProps) {
         }
 
         try {
+            // Get fresh count of selected recipients
+            const currentSelectedCount = selectedRecipients.size;
+            console.log(
+                `Generating preview for ${currentSelectedCount} recipients`
+            );
+
             let previewContent;
             if (recipientType === "employers") {
                 if (selectedTemplate?.name === "Empty Template") {
@@ -378,7 +389,7 @@ export default function ComposePage({ mails = [] }: ComposePageProps) {
                     const renderedEmails = await renderEmailTemplate({
                         templateType:
                             selectedTemplate?.name as EmailTemplateType,
-                        recipients: contacts.filter((contact) =>
+                        recipients: allContacts.filter((contact) =>
                             selectedRecipients.has(contact.id.toString())
                         ),
                         templateData: {
@@ -458,7 +469,13 @@ export default function ComposePage({ mails = [] }: ComposePageProps) {
         const recipientsList: RecipientConfirmationDetails[] = [];
 
         if (recipientType === "employers") {
-            contacts.forEach((contact) => {
+            // Use allContacts instead of contacts to ensure we have all selected recipients
+            // This fixes the issue where only paginated contacts would be included
+            console.log(
+                `Preparing ${selectedRecipients.size} selected recipients for confirmation`
+            );
+
+            allContacts.forEach((contact) => {
                 if (selectedRecipients.has(contact.id.toString())) {
                     recipientsList.push({
                         name: contact.contact_name || "",
@@ -467,6 +484,10 @@ export default function ComposePage({ mails = [] }: ComposePageProps) {
                     });
                 }
             });
+
+            console.log(
+                `Found ${recipientsList.length} contact details from ${allContacts.length} total contacts`
+            );
         } else {
             const allRecipients = recipientLists[recipientType];
             allRecipients.forEach((recipient) => {
@@ -543,12 +564,52 @@ export default function ComposePage({ mails = [] }: ComposePageProps) {
             setRecipientType("employers");
             setSearchQuery(toEmail);
 
+            // Set global filters to ensure the email appears in the search field
+            setGlobalFilters((prev) => ({
+                ...prev,
+                search: toEmail,
+            }));
+
             // Search for the contact with this email and select it when found
             const searchAndSelectContact = async () => {
                 try {
-                    // Handle searching logic...
+                    // First try to find in already loaded contacts
+                    let found = contacts.find(
+                        (contact) =>
+                            contact.email_address.toLowerCase() ===
+                            toEmail.toLowerCase()
+                    );
+
+                    // If not found and we have all contacts loaded
+                    if (!found && allContacts.length > 0) {
+                        found = allContacts.find(
+                            (contact) =>
+                                contact.email_address.toLowerCase() ===
+                                toEmail.toLowerCase()
+                        );
+                    }
+
+                    // If still not found, try to fetch all contacts
+                    if (!found) {
+                        const fetchedContacts = await fetchAllContacts(
+                            1000,
+                            ""
+                        );
+                        found = fetchedContacts.find(
+                            (contact) =>
+                                contact.email_address.toLowerCase() ===
+                                toEmail.toLowerCase()
+                        );
+                    }
+
+                    if (found) {
+                        setSelectedRecipients(new Set([found.id.toString()]));
+                    } else {
+                        toast.error(`Contact with email ${toEmail} not found`);
+                    }
                 } catch (error) {
                     console.error("Error searching for contact:", error);
+                    toast.error("Failed to search for contact");
                 }
             };
 
@@ -583,7 +644,15 @@ export default function ComposePage({ mails = [] }: ComposePageProps) {
             }
             paramsProcessedRef.current = true;
         }
-    }, [mails, interestedUsers, searchParams, contacts, selectedRecipients]);
+    }, [
+        mails,
+        interestedUsers,
+        searchParams,
+        contacts,
+        selectedRecipients,
+        allContacts,
+        fetchAllContacts,
+    ]);
 
     const emailAccounts = React.useMemo(() => {
         const outreachTeamArray = outreachTeamResponse?.data?.data || [];
@@ -653,6 +722,18 @@ export default function ComposePage({ mails = [] }: ComposePageProps) {
             <span className={`${isActive ? "font-medium" : ""}`}>{label}</span>
         </div>
     );
+
+    // Add effect to automatically show selected tab when returning to recipients step with selections
+    React.useEffect(() => {
+        // If we're on the recipients step and there are selected recipients, show the selected view
+        if (
+            activeStep === "recipients" &&
+            selectedRecipients.size > 0 &&
+            recipientType === "employers"
+        ) {
+            setContactsView("selected");
+        }
+    }, [activeStep, selectedRecipients.size, recipientType]);
 
     if (isInterestedLoading || isContactsLoading) {
         return (
@@ -768,9 +849,6 @@ export default function ComposePage({ mails = [] }: ComposePageProps) {
                             setGlobalFilters={setGlobalFilters}
                             activeFilters={activeFilters}
                             setActiveFilters={setActiveFilters}
-                            getGloballyFilteredContacts={
-                                getGloballyFilteredContacts
-                            }
                         />
                     </CardContent>
                     <CardFooter className="border-t bg-muted/30 p-2 px-6 flex justify-end gap-2">

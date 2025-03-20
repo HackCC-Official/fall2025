@@ -28,6 +28,9 @@ import {
     Users,
     X,
     CheckCircle2,
+    SlidersHorizontal,
+    Plus,
+    Filter,
 } from "lucide-react";
 import { toast } from "sonner";
 import { debounce } from "lodash";
@@ -38,6 +41,22 @@ import type {
 import type { Mail } from "@/types/mail";
 import { searchContacts } from "@/features/outreach/api/outreach";
 import type { RecipientType } from "./ComposeView";
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+    DialogClose,
+} from "@/components/ui/dialog";
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from "@/components/ui/popover";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 // Export RecipientType for use in other components
 export type { RecipientType };
@@ -114,8 +133,464 @@ interface RecipientSelectorProps {
             status: string | null;
         }>
     >;
-    getGloballyFilteredContacts: () => ContactDto[];
 }
+
+// Define filter condition types
+type FilterOperator =
+    | "equals"
+    | "contains"
+    | "not_equals"
+    | "not_contains"
+    | "is_empty"
+    | "is_not_empty";
+type FilterField = "name" | "email" | "company" | "liaison" | "status";
+
+interface FilterCondition {
+    id: string;
+    field: FilterField;
+    operator: FilterOperator;
+    value: string;
+}
+
+interface AdvancedFilterDialogProps {
+    isOpen: boolean;
+    onOpenChange: (open: boolean) => void;
+    onApplyFilters: (conditions: FilterCondition[]) => void;
+    contacts: ContactDto[];
+    initialConditions?: FilterCondition[];
+}
+
+const getFieldOptions = () => [
+    { label: "Name", value: "name" },
+    { label: "Email", value: "email" },
+    { label: "Company", value: "company" },
+    { label: "Liaison", value: "liaison" },
+    { label: "Status", value: "status" },
+];
+
+const getOperatorOptions = (): Array<{
+    label: string;
+    value: FilterOperator;
+}> => {
+    const baseOperators: Array<{ label: string; value: FilterOperator }> = [
+        { label: "Equals", value: "equals" },
+        { label: "Contains", value: "contains" },
+        { label: "Not equals", value: "not_equals" },
+        { label: "Not contains", value: "not_contains" },
+        { label: "Is empty", value: "is_empty" },
+        { label: "Is not empty", value: "is_not_empty" },
+    ];
+
+    return baseOperators;
+};
+
+// Function to apply filter conditions to contacts
+const applyFilterConditions = (
+    contacts: ContactDto[],
+    conditions: FilterCondition[]
+): ContactDto[] => {
+    if (!conditions.length) return contacts;
+
+    return contacts.filter((contact) => {
+        return conditions.every((condition) => {
+            const fieldValue = getContactFieldValue(contact, condition.field);
+
+            // Handle empty value operators
+            if (condition.operator === "is_empty") {
+                return !fieldValue;
+            }
+
+            if (condition.operator === "is_not_empty") {
+                return !!fieldValue;
+            }
+
+            // Skip if no value to compare against
+            if (!fieldValue) return false;
+
+            const fieldValueLower = String(fieldValue).toLowerCase();
+            const conditionValueLower = condition.value.toLowerCase();
+
+            switch (condition.operator) {
+                case "equals":
+                    return fieldValueLower === conditionValueLower;
+                case "contains":
+                    return fieldValueLower.includes(conditionValueLower);
+                case "not_equals":
+                    return fieldValueLower !== conditionValueLower;
+                case "not_contains":
+                    return !fieldValueLower.includes(conditionValueLower);
+                default:
+                    return true;
+            }
+        });
+    });
+};
+
+// Helper function to get field value from a contact
+const getContactFieldValue = (
+    contact: ContactDto,
+    field: FilterField
+): string => {
+    switch (field) {
+        case "name":
+            return contact.contact_name || "";
+        case "email":
+            return contact.email_address || "";
+        case "company":
+            return contact.company || "";
+        case "liaison":
+            return contact.liaison || "";
+        case "status":
+            return contact.status || "";
+        default:
+            return "";
+    }
+};
+
+// Get field-specific suggestions for values
+const getValueSuggestions = (
+    contacts: ContactDto[],
+    field: FilterField
+): string[] => {
+    if (!contacts.length) return [];
+
+    const values = new Set<string>();
+
+    contacts.forEach((contact) => {
+        const value = getContactFieldValue(contact, field);
+        if (value) values.add(value);
+    });
+
+    return Array.from(values).sort();
+};
+
+const AdvancedFilterDialog: React.FC<AdvancedFilterDialogProps> = ({
+    isOpen,
+    onOpenChange,
+    onApplyFilters,
+    contacts,
+    initialConditions = [],
+}) => {
+    const [conditions, setConditions] =
+        React.useState<FilterCondition[]>(initialConditions);
+    const [suggestionSearch, setSuggestionSearch] = React.useState("");
+
+    // Reset conditions when dialog opens with initialConditions
+    React.useEffect(() => {
+        if (isOpen) {
+            setConditions(initialConditions);
+        }
+    }, [isOpen, initialConditions]);
+
+    const addCondition = () => {
+        const newCondition: FilterCondition = {
+            id: Date.now().toString(),
+            field: "name",
+            operator: "contains",
+            value: "",
+        };
+        setConditions([...conditions, newCondition]);
+    };
+
+    const removeCondition = (id: string) => {
+        setConditions(conditions.filter((c) => c.id !== id));
+    };
+
+    const updateCondition = (id: string, updates: Partial<FilterCondition>) => {
+        setConditions(
+            conditions.map((c) => (c.id === id ? { ...c, ...updates } : c))
+        );
+    };
+
+    const handleApply = () => {
+        // Filter out incomplete conditions
+        const validConditions = conditions.filter(
+            (c) =>
+                c.operator === "is_empty" ||
+                c.operator === "is_not_empty" ||
+                (c.value && c.value.trim() !== "")
+        );
+
+        onApplyFilters(validConditions);
+        onOpenChange(false);
+    };
+
+    const getPreviewCount = () => {
+        return applyFilterConditions(contacts, conditions).length;
+    };
+
+    return (
+        <DialogContent className="sm:max-w-[600px]">
+            <DialogHeader>
+                <DialogTitle>Advanced Filters</DialogTitle>
+                <DialogDescription>
+                    Define multiple conditions to filter contacts. All
+                    conditions must match (AND logic).
+                </DialogDescription>
+            </DialogHeader>
+
+            <div className="py-4">
+                <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2">
+                    {conditions.length === 0 ? (
+                        <div className="text-center py-4 text-muted-foreground">
+                            <p>No filter conditions defined yet.</p>
+                            <p className="text-sm">
+                                Click &quot;Add Condition&quot; to start
+                                building your filter.
+                            </p>
+                        </div>
+                    ) : (
+                        conditions.map((condition) => (
+                            <div
+                                key={condition.id}
+                                className="flex items-start gap-2 p-3 border rounded-md bg-muted/20"
+                            >
+                                <div className="flex-1 grid grid-cols-12 gap-2">
+                                    <div className="col-span-3">
+                                        <Select
+                                            value={condition.field}
+                                            onValueChange={(value) =>
+                                                updateCondition(condition.id, {
+                                                    field: value as FilterField,
+                                                    // Reset value when changing field
+                                                    value: "",
+                                                })
+                                            }
+                                        >
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="Field" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {getFieldOptions().map(
+                                                    (option) => (
+                                                        <SelectItem
+                                                            key={option.value}
+                                                            value={option.value}
+                                                        >
+                                                            {option.label}
+                                                        </SelectItem>
+                                                    )
+                                                )}
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+
+                                    <div className="col-span-4">
+                                        <Select
+                                            value={condition.operator}
+                                            onValueChange={(value) =>
+                                                updateCondition(condition.id, {
+                                                    operator:
+                                                        value as FilterOperator,
+                                                })
+                                            }
+                                        >
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="Operator" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {getOperatorOptions().map(
+                                                    (option) => (
+                                                        <SelectItem
+                                                            key={option.value}
+                                                            value={option.value}
+                                                        >
+                                                            {option.label}
+                                                        </SelectItem>
+                                                    )
+                                                )}
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+
+                                    {condition.operator !== "is_empty" &&
+                                        condition.operator !==
+                                            "is_not_empty" && (
+                                            <div className="col-span-5">
+                                                <Popover>
+                                                    <PopoverTrigger asChild>
+                                                        <div className="relative">
+                                                            <Input
+                                                                placeholder="Value"
+                                                                value={
+                                                                    condition.value
+                                                                }
+                                                                onChange={(e) =>
+                                                                    updateCondition(
+                                                                        condition.id,
+                                                                        {
+                                                                            value: e
+                                                                                .target
+                                                                                .value,
+                                                                        }
+                                                                    )
+                                                                }
+                                                                className="w-full pr-8"
+                                                            />
+                                                            <div className="absolute right-2 top-1/2 transform -translate-y-1/2">
+                                                                <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                                                            </div>
+                                                        </div>
+                                                    </PopoverTrigger>
+                                                    <PopoverContent
+                                                        className="w-[250px] p-0"
+                                                        align="end"
+                                                    >
+                                                        <div className="p-2 border-b">
+                                                            <div className="relative">
+                                                                <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                                                <Input
+                                                                    placeholder="Search values..."
+                                                                    value={
+                                                                        suggestionSearch
+                                                                    }
+                                                                    onChange={(
+                                                                        e
+                                                                    ) =>
+                                                                        setSuggestionSearch(
+                                                                            e
+                                                                                .target
+                                                                                .value
+                                                                        )
+                                                                    }
+                                                                    className="pl-8 h-8 text-sm"
+                                                                />
+                                                                {suggestionSearch && (
+                                                                    <X
+                                                                        onClick={() =>
+                                                                            setSuggestionSearch(
+                                                                                ""
+                                                                            )
+                                                                        }
+                                                                        className="absolute right-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground cursor-pointer"
+                                                                    />
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                        <ScrollArea className="h-[200px]">
+                                                            <div className="p-2">
+                                                                <p className="text-sm font-medium mb-2">
+                                                                    Suggestions
+                                                                </p>
+                                                                {getValueSuggestions(
+                                                                    contacts,
+                                                                    condition.field
+                                                                )
+                                                                    .filter(
+                                                                        (
+                                                                            suggestion
+                                                                        ) =>
+                                                                            suggestion
+                                                                                .toLowerCase()
+                                                                                .includes(
+                                                                                    suggestionSearch.toLowerCase()
+                                                                                )
+                                                                    )
+                                                                    .map(
+                                                                        (
+                                                                            suggestion,
+                                                                            i
+                                                                        ) => (
+                                                                            <div
+                                                                                key={
+                                                                                    i
+                                                                                }
+                                                                                className="px-2 py-1.5 text-sm cursor-pointer hover:bg-muted rounded-sm"
+                                                                                onClick={() => {
+                                                                                    updateCondition(
+                                                                                        condition.id,
+                                                                                        {
+                                                                                            value: suggestion,
+                                                                                        }
+                                                                                    );
+                                                                                    setSuggestionSearch(
+                                                                                        ""
+                                                                                    );
+                                                                                }}
+                                                                            >
+                                                                                {
+                                                                                    suggestion
+                                                                                }
+                                                                            </div>
+                                                                        )
+                                                                    )}
+                                                                {getValueSuggestions(
+                                                                    contacts,
+                                                                    condition.field
+                                                                ).filter(
+                                                                    (
+                                                                        suggestion
+                                                                    ) =>
+                                                                        suggestion
+                                                                            .toLowerCase()
+                                                                            .includes(
+                                                                                suggestionSearch.toLowerCase()
+                                                                            )
+                                                                ).length ===
+                                                                    0 && (
+                                                                    <div className="px-2 py-1.5 text-sm text-muted-foreground">
+                                                                        No
+                                                                        suggestions
+                                                                        match
+                                                                        your
+                                                                        search
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        </ScrollArea>
+                                                    </PopoverContent>
+                                                </Popover>
+                                            </div>
+                                        )}
+                                </div>
+
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={() =>
+                                        removeCondition(condition.id)
+                                    }
+                                    className="h-8 w-8"
+                                >
+                                    <X className="h-4 w-4" />
+                                </Button>
+                            </div>
+                        ))
+                    )}
+                </div>
+
+                <div className="flex items-center justify-between mt-4">
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={addCondition}
+                        className="flex items-center gap-1"
+                    >
+                        <Plus className="h-4 w-4" /> Add Condition
+                    </Button>
+
+                    <div className="text-sm text-muted-foreground">
+                        Preview:{" "}
+                        <span className="font-medium">{getPreviewCount()}</span>{" "}
+                        contacts match
+                    </div>
+                </div>
+            </div>
+
+            <DialogFooter>
+                <DialogClose asChild>
+                    <Button variant="outline">Cancel</Button>
+                </DialogClose>
+                <Button
+                    onClick={handleApply}
+                    disabled={conditions.length === 0}
+                >
+                    Apply Filters
+                </Button>
+            </DialogFooter>
+        </DialogContent>
+    );
+};
 
 // Component for displaying selected recipients or filtered by criteria
 export const RecipientSelectionTable = ({
@@ -536,13 +1011,100 @@ export const RecipientSelector: React.FC<RecipientSelectorProps> = ({
     setGlobalFilters,
     activeFilters,
     setActiveFilters,
-    getGloballyFilteredContacts,
 }) => {
-    const [searchQuery, setSearchQuery] = React.useState("");
+    // Use globalFilters.search as the initial value for searchQuery to sync with URL parameters
+    const [searchQuery, setSearchQuery] = React.useState(
+        globalFilters.search || ""
+    );
     const [isSearching, setIsSearching] = React.useState(false);
     const [isSelectingAll, setIsSelectingAll] = React.useState(false);
     const [searchResults, setSearchResults] = React.useState<ContactDto[]>([]);
-    const [inSearchMode, setInSearchMode] = React.useState(false);
+    const [inSearchMode, setInSearchMode] = React.useState(
+        !!globalFilters.search
+    );
+
+    // Log when selected recipients changes
+    React.useEffect(() => {
+        console.log(
+            `RecipientSelector: selectedRecipients changed - count: ${selectedRecipients.size}`
+        );
+
+        // Automatically switch to selected view when recipients are selected
+        if (selectedRecipients.size > 0 && recipientType === "employers") {
+            setContactsView("selected");
+        }
+    }, [selectedRecipients, recipientType, setContactsView]);
+
+    // Create a proper debounced search function that persists between renders
+    const debouncedSearchContacts = React.useMemo(
+        () =>
+            debounce(async (value: string) => {
+                if (!value || value.length < 2) {
+                    setInSearchMode(false);
+                    setSearchResults([]);
+                    return;
+                }
+
+                try {
+                    setIsSearching(true);
+                    setInSearchMode(true);
+
+                    const results = await searchContacts(value).catch(
+                        (error) => {
+                            if (
+                                error.message ===
+                                "Invalid response format from contacts search API."
+                            ) {
+                                const responseData = error.response?.data;
+                                if (Array.isArray(responseData)) {
+                                    return responseData;
+                                }
+                            }
+                            throw error;
+                        }
+                    );
+
+                    if (results) {
+                        setSearchResults(results);
+
+                        // Update the global contacts array with search results
+                        if (contacts !== results && Array.isArray(results)) {
+                            // Create a new array to trigger reactivity
+                            const updatedContacts = [...results];
+
+                            // Replace all items in the contacts array
+                            contacts.splice(
+                                0,
+                                contacts.length,
+                                ...updatedContacts
+                            );
+                        }
+                    }
+                } catch (error) {
+                    console.error("Error searching contacts:", error);
+                    toast.error("Failed to search contacts. Please try again.");
+                } finally {
+                    setIsSearching(false);
+                }
+            }, 500), // Increased debounce time to 500ms
+        [contacts]
+    );
+
+    // Update searchQuery when globalFilters.search changes (for URL parameters)
+    React.useEffect(() => {
+        if (globalFilters.search) {
+            setSearchQuery(globalFilters.search);
+            setInSearchMode(true);
+
+            // If we have a specific email and we're in employers view, filter immediately
+            if (
+                globalFilters.search.includes("@") &&
+                recipientType === "employers"
+            ) {
+                debouncedSearchContacts(globalFilters.search);
+            }
+        }
+    }, [globalFilters.search, recipientType, debouncedSearchContacts]);
 
     // Create the recipient lists from props
     const recipientLists = React.useMemo(() => {
@@ -618,61 +1180,6 @@ export const RecipientSelector: React.FC<RecipientSelectorProps> = ({
             ) && !areAllFilteredSelected
         );
     }, [filteredRecipients, selectedRecipients, areAllFilteredSelected]);
-
-    // Create a proper debounced search function that persists between renders
-    const debouncedSearchContacts = React.useMemo(
-        () =>
-            debounce(async (value: string) => {
-                if (!value || value.length < 2) {
-                    setInSearchMode(false);
-                    setSearchResults([]);
-                    return;
-                }
-
-                try {
-                    setIsSearching(true);
-                    setInSearchMode(true);
-
-                    const results = await searchContacts(value).catch(
-                        (error) => {
-                            if (
-                                error.message ===
-                                "Invalid response format from contacts search API."
-                            ) {
-                                const responseData = error.response?.data;
-                                if (Array.isArray(responseData)) {
-                                    return responseData;
-                                }
-                            }
-                            throw error;
-                        }
-                    );
-
-                    if (results) {
-                        setSearchResults(results);
-
-                        // Update the global contacts array with search results
-                        if (contacts !== results && Array.isArray(results)) {
-                            // Create a new array to trigger reactivity
-                            const updatedContacts = [...results];
-
-                            // Replace all items in the contacts array
-                            contacts.splice(
-                                0,
-                                contacts.length,
-                                ...updatedContacts
-                            );
-                        }
-                    }
-                } catch (error) {
-                    console.error("Error searching contacts:", error);
-                    toast.error("Failed to search contacts. Please try again.");
-                } finally {
-                    setIsSearching(false);
-                }
-            }, 500), // Increased debounce time to 500ms
-        [contacts]
-    );
 
     // Handle global search
     const handleGlobalSearch = (value: string) => {
@@ -776,6 +1283,37 @@ export const RecipientSelector: React.FC<RecipientSelectorProps> = ({
         setSelectedRecipients(newSelected);
     };
 
+    // Add advanced filter state
+    const [isAdvancedFilterOpen, setIsAdvancedFilterOpen] =
+        React.useState(false);
+    const [advancedFilterConditions, setAdvancedFilterConditions] =
+        React.useState<FilterCondition[]>([]);
+    const [isUsingAdvancedFilter, setIsUsingAdvancedFilter] =
+        React.useState(false);
+
+    // Apply advanced filters
+    const applyAdvancedFilters = (conditions: FilterCondition[]) => {
+        setAdvancedFilterConditions(conditions);
+        setIsUsingAdvancedFilter(conditions.length > 0);
+
+        if (conditions.length > 0) {
+            // Clear other filters when using advanced filters
+            setGlobalFilters({
+                liaison: null,
+                status: null,
+                search: "",
+            });
+
+            toast.success(
+                `Advanced filter with ${conditions.length} condition${conditions.length !== 1 ? "s" : ""} applied`
+            );
+        } else {
+            setIsUsingAdvancedFilter(false);
+            toast.info("Advanced filters cleared");
+        }
+    };
+
+    // Modify handleSelectAllContacts to handle advanced filters
     const handleSelectAllContacts = async () => {
         // Show loading state
         setIsSelectingAll(true);
@@ -786,18 +1324,94 @@ export const RecipientSelector: React.FC<RecipientSelectorProps> = ({
             const allRecipientsIds = new Set<string>();
 
             if (recipientType === "employers") {
-                // Use the already loaded all contacts instead of fetching again
-                let filtered = allContacts;
+                // First, ensure we have all contacts loaded
+                let allContactsData = allContacts;
 
-                // Apply global filters
+                // If we're using advanced filtering or global filters, make sure we have all data
+                // This is critical to ensure we don't just select the paginated subset
                 if (
+                    isUsingAdvancedFilter ||
                     globalFilters.liaison ||
                     globalFilters.status ||
                     globalFilters.search
                 ) {
-                    filtered = getGloballyFilteredContacts();
+                    // Only fetch if we don't already have a large set of contacts
+                    if (allContactsData.length < 1000) {
+                        try {
+                            // Show loading toast
+                            toast.info(
+                                "Loading all contacts to apply filters...",
+                                { duration: 3000 }
+                            );
+
+                            // Fetch all contacts with a large limit
+                            allContactsData = await fetchAllContacts(
+                                5000,
+                                globalFilters.search || ""
+                            );
+                        } catch (error) {
+                            console.error("Error loading all contacts:", error);
+                            toast.error(
+                                "Failed to load all contacts. Selection may be incomplete."
+                            );
+                        }
+                    }
                 }
 
+                // Apply advanced filters if active
+                let filtered = allContactsData;
+                if (
+                    isUsingAdvancedFilter &&
+                    advancedFilterConditions.length > 0
+                ) {
+                    filtered = applyFilterConditions(
+                        allContactsData,
+                        advancedFilterConditions
+                    );
+                }
+                // Otherwise apply global filters
+                else if (
+                    globalFilters.liaison ||
+                    globalFilters.status ||
+                    globalFilters.search
+                ) {
+                    // Apply liaison filter
+                    if (globalFilters.liaison) {
+                        filtered = filtered.filter(
+                            (contact) =>
+                                contact.liaison === globalFilters.liaison
+                        );
+                    }
+
+                    // Apply status filter
+                    if (globalFilters.status) {
+                        filtered = filtered.filter(
+                            (contact) => contact.status === globalFilters.status
+                        );
+                    }
+
+                    // Apply search filter if present
+                    if (
+                        globalFilters.search &&
+                        globalFilters.search.length > 1
+                    ) {
+                        const searchLower = globalFilters.search.toLowerCase();
+                        filtered = filtered.filter(
+                            (contact) =>
+                                contact.contact_name
+                                    ?.toLowerCase()
+                                    .includes(searchLower) ||
+                                contact.email_address
+                                    ?.toLowerCase()
+                                    .includes(searchLower) ||
+                                contact.company
+                                    ?.toLowerCase()
+                                    .includes(searchLower)
+                        );
+                    }
+                }
+
+                // Add all filtered contacts to the selection set
                 filtered.forEach((contact: ContactDto) => {
                     allRecipientsIds.add(contact.id.toString());
                 });
@@ -805,19 +1419,26 @@ export const RecipientSelector: React.FC<RecipientSelectorProps> = ({
                 // Create appropriate message based on filters applied
                 let filterMessage = `Selected ${filtered.length} employer contacts`;
 
-                if (globalFilters.liaison) {
-                    filterMessage += ` with liaison: ${globalFilters.liaison}`;
-                }
+                if (isUsingAdvancedFilter) {
+                    filterMessage += ` using advanced filter with ${advancedFilterConditions.length} condition${advancedFilterConditions.length !== 1 ? "s" : ""}`;
+                } else {
+                    if (globalFilters.liaison) {
+                        filterMessage += ` with liaison: ${globalFilters.liaison}`;
+                    }
 
-                if (globalFilters.status) {
-                    filterMessage += ` with status: ${globalFilters.status}`;
-                }
+                    if (globalFilters.status) {
+                        filterMessage += `${globalFilters.liaison ? " and" : " with"} status: ${globalFilters.status}`;
+                    }
 
-                if (globalFilters.search) {
-                    filterMessage += ` matching: "${globalFilters.search}"`;
+                    if (globalFilters.search) {
+                        filterMessage += ` matching: "${globalFilters.search}"`;
+                    }
                 }
 
                 toast.success(filterMessage);
+                console.log(
+                    `Selected ${allRecipientsIds.size} recipients from advanced filter`
+                );
             } else if (recipientType === "registered") {
                 // For registered users, use the mails array
                 mails.forEach((mail) => {
@@ -834,7 +1455,15 @@ export const RecipientSelector: React.FC<RecipientSelectorProps> = ({
                 );
             }
 
-            setSelectedRecipients(allRecipientsIds);
+            // Directly update the selectedRecipients state with a new Set
+            setSelectedRecipients(new Set(allRecipientsIds));
+
+            // Verify the selection was made correctly
+            setTimeout(() => {
+                console.log(
+                    `Verification: ${allRecipientsIds.size} recipients selected`
+                );
+            }, 100);
         } catch (error) {
             console.error("Error selecting all recipients:", error);
             toast.error("Failed to select all recipients. Please try again.");
@@ -864,6 +1493,57 @@ export const RecipientSelector: React.FC<RecipientSelectorProps> = ({
             liaison: value === "all" ? null : value,
         }));
     };
+
+    // Add handler for status filter change
+    const handleGlobalStatusChange = (value: string) => {
+        setGlobalFilters((prev) => ({
+            ...prev,
+            status: value === "all" ? null : value,
+        }));
+
+        if (value !== "all") {
+            toast.info(`Filtering to show only contacts with status: ${value}`);
+        } else {
+            toast.info("Showing contacts with all statuses");
+        }
+
+        // Update active filters as well for consistency
+        setActiveFilters((prev) => ({
+            ...prev,
+            status: value === "all" ? null : value,
+        }));
+    };
+
+    // Get all unique statuses from contacts
+    const availableStatuses = React.useMemo(() => {
+        if (!allContacts.length) return [];
+
+        const statusSet = new Set<string>();
+        allContacts.forEach((contact) => {
+            if (
+                contact.status &&
+                typeof contact.status === "string" &&
+                contact.status.trim() !== ""
+            ) {
+                statusSet.add(contact.status);
+            }
+        });
+        return Array.from(statusSet).sort();
+    }, [allContacts]);
+
+    // Apply advanced filters to the search results when active
+    React.useEffect(() => {
+        // When advanced filters are active, we need to ensure the UI displays filtered results
+        if (isUsingAdvancedFilter && advancedFilterConditions.length > 0) {
+            const filteredContacts = applyFilterConditions(
+                allContacts,
+                advancedFilterConditions
+            );
+            console.log(
+                `Advanced filter applied: ${filteredContacts.length} contacts matched`
+            );
+        }
+    }, [isUsingAdvancedFilter, advancedFilterConditions, allContacts]);
 
     return (
         <div className="space-y-6">
@@ -930,63 +1610,138 @@ export const RecipientSelector: React.FC<RecipientSelectorProps> = ({
             </div>
 
             {/* Applied filters */}
-            {(activeFilters.liaison || activeFilters.status) && (
-                <div className="flex flex-wrap gap-2 p-2 px-3 bg-muted/30 rounded-md items-center mb-4">
-                    <span className="text-sm font-medium">Active filters:</span>
-                    {activeFilters.liaison && (
-                        <Badge
-                            variant="secondary"
-                            className="flex items-center gap-1"
-                        >
-                            Liaison: {activeFilters.liaison}
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() =>
-                                    setActiveFilters((prev) => ({
-                                        ...prev,
-                                        liaison: null,
-                                    }))
-                                }
-                                className="h-4 w-4 p-0 hover:bg-transparent"
+            {(activeFilters.liaison || activeFilters.status) &&
+                !isUsingAdvancedFilter && (
+                    <div className="flex flex-wrap gap-2 p-2 px-3 bg-muted/30 rounded-md items-center mb-4">
+                        <span className="text-sm font-medium">
+                            Active filters:
+                        </span>
+                        {activeFilters.liaison && (
+                            <Badge
+                                variant="secondary"
+                                className="flex items-center gap-1"
                             >
-                                <X className="h-3 w-3" />
-                            </Button>
-                        </Badge>
-                    )}
-                    {activeFilters.status && (
-                        <Badge
-                            variant="secondary"
-                            className="flex items-center gap-1"
-                        >
-                            Status: {activeFilters.status}
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() =>
-                                    setActiveFilters((prev) => ({
-                                        ...prev,
-                                        status: null,
-                                    }))
-                                }
-                                className="h-4 w-4 p-0 hover:bg-transparent"
+                                Liaison: {activeFilters.liaison}
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() =>
+                                        setActiveFilters((prev) => ({
+                                            ...prev,
+                                            liaison: null,
+                                        }))
+                                    }
+                                    className="h-4 w-4 p-0 hover:bg-transparent"
+                                >
+                                    <X className="h-3 w-3" />
+                                </Button>
+                            </Badge>
+                        )}
+                        {activeFilters.status && (
+                            <Badge
+                                variant="secondary"
+                                className="flex items-center gap-1"
                             >
-                                <X className="h-3 w-3" />
-                            </Button>
-                        </Badge>
-                    )}
+                                Status: {activeFilters.status}
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() =>
+                                        setActiveFilters((prev) => ({
+                                            ...prev,
+                                            status: null,
+                                        }))
+                                    }
+                                    className="h-4 w-4 p-0 hover:bg-transparent"
+                                >
+                                    <X className="h-3 w-3" />
+                                </Button>
+                            </Badge>
+                        )}
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() =>
+                                setActiveFilters({
+                                    liaison: null,
+                                    status: null,
+                                })
+                            }
+                            className="h-6 text-xs ml-auto"
+                        >
+                            Clear All Filters
+                        </Button>
+                    </div>
+                )}
+
+            {/* Applied advanced filters */}
+            {isUsingAdvancedFilter && advancedFilterConditions.length > 0 && (
+                <div className="flex flex-wrap gap-2 p-3 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 rounded-md items-center mb-4">
+                    <span className="text-sm font-medium flex items-center gap-1.5">
+                        <Filter className="h-4 w-4" />
+                        Advanced filter:
+                    </span>
+                    <Badge
+                        variant="outline"
+                        className="border-amber-300 dark:border-amber-700 bg-amber-100/50 dark:bg-amber-900/20 text-amber-800 dark:text-amber-300"
+                    >
+                        {advancedFilterConditions.length} condition
+                        {advancedFilterConditions.length !== 1 ? "s" : ""}
+                    </Badge>
+
+                    <div className="w-full mt-2">
+                        <details className="text-xs">
+                            <summary className="cursor-pointer text-muted-foreground hover:text-foreground">
+                                View details
+                            </summary>
+                            <div className="space-y-1 mt-2 text-sm">
+                                {advancedFilterConditions.map((condition) => {
+                                    const fieldLabel = getFieldOptions().find(
+                                        (f) => f.value === condition.field
+                                    )?.label;
+                                    const operatorLabel =
+                                        getOperatorOptions().find(
+                                            (o) =>
+                                                o.value === condition.operator
+                                        )?.label;
+
+                                    return (
+                                        <div
+                                            key={condition.id}
+                                            className="flex items-center gap-1.5"
+                                        >
+                                            <span className="font-medium">
+                                                {fieldLabel}
+                                            </span>
+                                            <span className="text-muted-foreground">
+                                                {operatorLabel}
+                                            </span>
+                                            {condition.operator !==
+                                                "is_empty" &&
+                                                condition.operator !==
+                                                    "is_not_empty" && (
+                                                    <span className="bg-muted px-1.5 py-0.5 rounded text-xs">
+                                                        {condition.value}
+                                                    </span>
+                                                )}
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </details>
+                    </div>
+
                     <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() =>
-                            setActiveFilters({
-                                liaison: null,
-                                status: null,
-                            })
-                        }
+                        onClick={() => {
+                            setAdvancedFilterConditions([]);
+                            setIsUsingAdvancedFilter(false);
+                            toast.info("Advanced filters cleared");
+                        }}
                         className="h-6 text-xs ml-auto"
                     >
-                        Clear All Filters
+                        Clear Advanced Filter
                     </Button>
                 </div>
             )}
@@ -1008,6 +1763,7 @@ export const RecipientSelector: React.FC<RecipientSelectorProps> = ({
                                 : "Search by name or email..."
                         }
                         className="pl-10 pr-10 py-2 w-full"
+                        disabled={isUsingAdvancedFilter}
                     />
                     {searchQuery && (
                         <Button
@@ -1019,6 +1775,7 @@ export const RecipientSelector: React.FC<RecipientSelectorProps> = ({
                             }}
                             className="absolute right-2 top-2 h-6 w-6 p-0"
                             title="Clear search"
+                            disabled={isUsingAdvancedFilter}
                         >
                             <X className="h-4 w-4" />
                         </Button>
@@ -1038,35 +1795,89 @@ export const RecipientSelector: React.FC<RecipientSelectorProps> = ({
                             className="flex items-center gap-1 whitespace-nowrap"
                             onClick={handleSelectAllVisible}
                             title="Select all visible recipients"
+                            disabled={isUsingAdvancedFilter}
                         >
                             Select Visible
                         </Button>
                     )}
 
-                    {recipientType === "employers" && (
-                        <div className="flex gap-2">
-                            <Select
-                                value={globalFilters.liaison || "all"}
-                                onValueChange={handleGlobalLiaisonChange}
-                            >
-                                <SelectTrigger className="h-9 w-[180px]">
-                                    <SelectValue placeholder="Filter by liaison" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="all">
-                                        All Liaisons
-                                    </SelectItem>
-                                    {liaisons.map((liaison) => (
-                                        <SelectItem
-                                            key={liaison}
-                                            value={liaison}
-                                        >
-                                            {liaison}
+                    {recipientType === "employers" &&
+                        !isUsingAdvancedFilter && (
+                            <div className="flex gap-2">
+                                <Select
+                                    value={globalFilters.liaison || "all"}
+                                    onValueChange={handleGlobalLiaisonChange}
+                                >
+                                    <SelectTrigger className="h-9 w-[180px]">
+                                        <SelectValue placeholder="Filter by liaison" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="all">
+                                            All Liaisons
                                         </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                        </div>
+                                        {liaisons.map((liaison) => (
+                                            <SelectItem
+                                                key={liaison}
+                                                value={liaison}
+                                            >
+                                                {liaison}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+
+                                {/* Status filter dropdown */}
+                                <Select
+                                    value={globalFilters.status || "all"}
+                                    onValueChange={handleGlobalStatusChange}
+                                >
+                                    <SelectTrigger className="h-9 w-[180px]">
+                                        <SelectValue placeholder="Filter by status" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="all">
+                                            All Statuses
+                                        </SelectItem>
+                                        {availableStatuses.map((status) => (
+                                            <SelectItem
+                                                key={status}
+                                                value={status}
+                                            >
+                                                {status}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        )}
+
+                    {recipientType === "employers" && (
+                        <Dialog
+                            open={isAdvancedFilterOpen}
+                            onOpenChange={setIsAdvancedFilterOpen}
+                        >
+                            <DialogTrigger asChild>
+                                <Button
+                                    size="sm"
+                                    variant={
+                                        isUsingAdvancedFilter
+                                            ? "default"
+                                            : "outline"
+                                    }
+                                    className="flex items-center gap-1 whitespace-nowrap"
+                                >
+                                    <SlidersHorizontal className="h-4 w-4" />
+                                    Advanced Filter
+                                </Button>
+                            </DialogTrigger>
+                            <AdvancedFilterDialog
+                                isOpen={isAdvancedFilterOpen}
+                                onOpenChange={setIsAdvancedFilterOpen}
+                                onApplyFilters={applyAdvancedFilters}
+                                contacts={allContacts}
+                                initialConditions={advancedFilterConditions}
+                            />
+                        </Dialog>
                     )}
 
                     <Button
@@ -1076,9 +1887,13 @@ export const RecipientSelector: React.FC<RecipientSelectorProps> = ({
                         onClick={handleSelectAllContacts}
                         disabled={isSelectingAll}
                         title={
-                            recipientType === "employers" &&
-                            globalFilters.liaison
-                                ? `Select all contacts with liaison: ${globalFilters.liaison}`
+                            recipientType === "employers"
+                                ? isUsingAdvancedFilter
+                                    ? `Select all contacts matching advanced filter conditions`
+                                    : globalFilters.liaison ||
+                                        globalFilters.status
+                                      ? `Select all contacts with ${globalFilters.liaison ? `liaison: ${globalFilters.liaison}` : ""}${globalFilters.liaison && globalFilters.status ? " and " : ""}${globalFilters.status ? `status: ${globalFilters.status}` : ""}`
+                                      : "Select all available recipients"
                                 : "Select all available recipients"
                         }
                     >
@@ -1098,8 +1913,12 @@ export const RecipientSelector: React.FC<RecipientSelectorProps> = ({
                                 <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
                             </svg>
                         )}
-                        {recipientType === "employers" && globalFilters.liaison
-                            ? `Select All (${globalFilters.liaison})`
+                        {recipientType === "employers"
+                            ? isUsingAdvancedFilter
+                                ? "Select All (Advanced Filter)"
+                                : globalFilters.liaison || globalFilters.status
+                                  ? `Select All${globalFilters.liaison ? ` (${globalFilters.liaison})` : ""}${globalFilters.status ? ` (${globalFilters.status})` : ""}`
+                                  : "Select All"
                             : "Select All"}
                     </Button>
                 </div>
@@ -1167,12 +1986,14 @@ export const RecipientSelector: React.FC<RecipientSelectorProps> = ({
                         variant={
                             contactsView === "selected" ? "default" : "ghost"
                         }
-                        className="flex-1 rounded-none"
+                        className={`flex-1 rounded-none ${selectedRecipients.size > 0 ? "bg-primary/10" : ""}`}
                         onClick={() => setContactsView("selected")}
                         disabled={selectedRecipients.size === 0}
                     >
                         <CheckCircle2 className="h-4 w-4 mr-2" />
-                        Selected
+                        Selected{" "}
+                        {selectedRecipients.size > 0 &&
+                            `(${selectedRecipients.size})`}
                     </Button>
                 </div>
             )}
@@ -1207,9 +2028,13 @@ export const RecipientSelector: React.FC<RecipientSelectorProps> = ({
 
             {recipientType === "employers" && contactsView === "selected" && (
                 <RecipientSelectionTable
-                    contacts={contacts.filter((contact) =>
-                        selectedRecipients.has(contact.id.toString())
-                    )}
+                    contacts={
+                        // Always use allContacts for the selected view to ensure we show all selected items
+                        // This ensures advanced filtering selections are properly displayed when returning to step 1
+                        allContacts.filter((contact) =>
+                            selectedRecipients.has(contact.id.toString())
+                        )
+                    }
                     currentPage={1}
                     totalPages={1}
                     selectedRecipients={selectedRecipients}

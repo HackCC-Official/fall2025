@@ -26,6 +26,41 @@ export const EmailPreview: React.FC<EmailPreviewProps> = ({
     handleSendEmails,
     setActiveStep,
 }) => {
+    // Use state instead of ref for more reliable reactivity
+    const [recipientCount, setRecipientCount] = React.useState(
+        selectedRecipients.size
+    );
+
+    // Log the number of recipients to help debug
+    React.useEffect(() => {
+        const count = selectedRecipients.size;
+        console.log(
+            `EmailPreview: selectedRecipients changed to ${count} recipients`
+        );
+        setRecipientCount(count);
+    }, [selectedRecipients]);
+
+    // Force refresh the component when mounted to get latest count
+    React.useEffect(() => {
+        console.log(
+            `EmailPreview mounted with ${selectedRecipients.size} recipients`
+        );
+        setRecipientCount(selectedRecipients.size);
+
+        // Handle any case where selectedRecipients might change without triggering a rerender
+        const intervalId = setInterval(() => {
+            const currentCount = selectedRecipients.size;
+            if (currentCount !== recipientCount) {
+                console.log(
+                    `Detected change in recipient count: ${currentCount} (was ${recipientCount})`
+                );
+                setRecipientCount(currentCount);
+            }
+        }, 500);
+
+        return () => clearInterval(intervalId);
+    }, [recipientCount, selectedRecipients]);
+
     return (
         <div className="space-y-6">
             <div className="flex items-center justify-between">
@@ -36,13 +71,11 @@ export const EmailPreview: React.FC<EmailPreviewProps> = ({
                     </p>
                 </div>
                 <Badge
-                    variant={
-                        selectedRecipients.size > 10 ? "destructive" : "outline"
-                    }
+                    variant={recipientCount > 10 ? "destructive" : "outline"}
                 >
-                    {selectedRecipients.size}{" "}
-                    {selectedRecipients.size === 1 ? "recipient" : "recipients"}
-                    {selectedRecipients.size > 10 ? " (Mass Email)" : ""}
+                    {recipientCount}{" "}
+                    {recipientCount === 1 ? "recipient" : "recipients"}
+                    {recipientCount > 10 ? " (Mass Email)" : ""}
                 </Badge>
             </div>
 
@@ -73,13 +106,11 @@ export const EmailPreview: React.FC<EmailPreviewProps> = ({
                     Back to Edit
                 </Button>
                 <Button
-                    variant={
-                        selectedRecipients.size > 10 ? "destructive" : "default"
-                    }
+                    variant={recipientCount > 10 ? "destructive" : "default"}
                     onClick={handleSendEmails}
                     className="gap-2"
                 >
-                    {selectedRecipients.size > 10 ? (
+                    {recipientCount > 10 ? (
                         <>
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
@@ -95,7 +126,7 @@ export const EmailPreview: React.FC<EmailPreviewProps> = ({
                                 <line x1="12" y1="9" x2="12" y2="13" />
                                 <line x1="12" y1="17" x2="12.01" y2="17" />
                             </svg>
-                            Send Mass Email ({selectedRecipients.size})
+                            Send Mass Email ({recipientCount})
                         </>
                     ) : (
                         <>
