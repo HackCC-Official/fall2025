@@ -123,16 +123,7 @@ export const PostCallEmail = ({
                 <Container style={container}>
                     {/* Header */}
                     <Section style={header}>
-                        <Text
-                            style={{
-                                color: "#ffffff",
-                                fontSize: "18px",
-                                fontWeight: "700",
-                                margin: "0",
-                            }}
-                        >
-                            HackCC - All California Community Colleges
-                        </Text>
+                        <Text style={headerText}>HackCC</Text>
                     </Section>
 
                     <Section style={content}>
@@ -246,6 +237,14 @@ const header = {
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
+};
+
+const headerText = {
+    fontSize: "20px",
+    fontWeight: "700",
+    color: "#ffffff",
+    margin: "0",
+    textAlign: "center" as const,
 };
 
 const content = {

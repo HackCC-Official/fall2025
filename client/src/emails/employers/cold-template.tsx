@@ -6,7 +6,6 @@ import {
     Head,
     Heading,
     Html,
-    Img,
     Row,
     Section,
     Text,
@@ -72,13 +71,7 @@ export const ColdEmail = ({
                 <Container style={container}>
                     {/* Header */}
                     <Section style={header}>
-                        <Img
-                            src={`https://minio.hackcc.net/public-bucket/logo.svg`}
-                            width={120}
-                            height={45}
-                            alt="HackCC Logo"
-                            style={logo}
-                        />
+                        <Text style={headerText}>HackCC</Text>
                     </Section>
 
                     <Section style={content}>
@@ -180,8 +173,12 @@ const header = {
     alignItems: "center",
 };
 
-const logo = {
+const headerText = {
+    fontSize: "20px",
+    fontWeight: "700",
+    color: "#ffffff",
     margin: "0",
+    textAlign: "center" as const,
 };
 
 const content = {
