@@ -138,7 +138,7 @@ export function OnboardPageContent() {
                                 id="confirmpassword"
                                 type="confirmpassword"
                                 placeholder="Confirmed Password"
-                                value={password}
+                                value={confirmPassword}
                                 onChange={(e) =>
                                     setConfirmPassword(e.target.value)
                                 }
