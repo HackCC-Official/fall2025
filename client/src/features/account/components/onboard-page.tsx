@@ -136,7 +136,7 @@ export function OnboardPageContent() {
                           <div className="space-y-2">
                             <AuthInput
                                 id="confirmpassword"
-                                type="confirmpassword"
+                                type="password"
                                 placeholder="Confirmed Password"
                                 value={confirmPassword}
                                 onChange={(e) =>
