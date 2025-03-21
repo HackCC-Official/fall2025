@@ -7,7 +7,6 @@ import {
     Heading,
     Html,
     Img,
-    Link,
     Row,
     Section,
     Text,
@@ -36,13 +35,9 @@ export const ColdEmail = ({
     venue,
     sender,
     subject,
-    socialLinks,
     customEmailBody,
 }: ColdEmailProps) => {
     const formattedYearAndMajor = `${sender.year} ${sender.major}`;
-
-    const today = new Date();
-    const isCurrentDayTuesday = today.getDay() === 2;
 
     const parseContent = (content: string): string => {
         return content
@@ -84,9 +79,6 @@ export const ColdEmail = ({
                             alt="HackCC Logo"
                             style={logo}
                         />
-                        {isCurrentDayTuesday && (
-                            <Text style={scheduleNote}>Sent on Tuesday</Text>
-                        )}
                     </Section>
 
                     <Section style={content}>
@@ -146,44 +138,6 @@ export const ColdEmail = ({
                                     </Text>
                                 </Column>
                             </Row>
-
-                            {/* Social Media Links */}
-                            {(socialLinks.linkedin ||
-                                socialLinks.twitter ||
-                                socialLinks.github) && (
-                                <Row style={socialLinksContainer}>
-                                    {socialLinks.linkedin && (
-                                        <Column style={socialLinkColumn}>
-                                            <Link
-                                                href={socialLinks.linkedin}
-                                                style={socialLink}
-                                            >
-                                                LinkedIn
-                                            </Link>
-                                        </Column>
-                                    )}
-                                    {socialLinks.twitter && (
-                                        <Column style={socialLinkColumn}>
-                                            <Link
-                                                href={socialLinks.twitter}
-                                                style={socialLink}
-                                            >
-                                                Twitter
-                                            </Link>
-                                        </Column>
-                                    )}
-                                    {socialLinks.github && (
-                                        <Column style={socialLinkColumn}>
-                                            <Link
-                                                href={socialLinks.github}
-                                                style={socialLink}
-                                            >
-                                                GitHub
-                                            </Link>
-                                        </Column>
-                                    )}
-                                </Row>
-                            )}
                         </Section>
                     </Section>
 
@@ -230,16 +184,6 @@ const logo = {
     margin: "0",
 };
 
-const scheduleNote = {
-    color: "#ffffff",
-    fontSize: "14px",
-    fontWeight: "500",
-    margin: "0",
-    padding: "4px 8px",
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
-    borderRadius: "4px",
-};
-
 const content = {
     padding: "30px",
 };
@@ -283,20 +227,6 @@ const signatureSchool = {
     color: "#4b5563",
     margin: "0",
     textAlign: "right" as const,
-};
-
-const socialLinksContainer = {
-    marginTop: "12px",
-};
-
-const socialLinkColumn = {
-    paddingRight: "12px",
-};
-
-const socialLink = {
-    fontSize: "14px",
-    color: "#2563eb",
-    textDecoration: "none",
 };
 
 const footer = {

@@ -6,8 +6,6 @@ import {
     Head,
     Heading,
     Html,
-    Img,
-    Link,
     Row,
     Section,
     Text,
@@ -21,12 +19,6 @@ interface SponsorshipEmailProps {
     sender: OutreachTeamDto;
     subject: string;
     positionAtHackCC: string;
-    socialLinks: {
-        linkedin?: string;
-        twitter?: string;
-        github?: string;
-    };
-
     customEmailBody?: string;
 }
 
@@ -36,7 +28,6 @@ export const SponsorshipEmail = ({
     venue,
     sender,
     subject,
-    socialLinks,
     customEmailBody,
 }: SponsorshipEmailProps) => {
     const formattedYearAndMajor = `${sender.year} ${sender.major}`;
@@ -75,13 +66,16 @@ export const SponsorshipEmail = ({
                 <Container style={container}>
                     {/* Header */}
                     <Section style={header}>
-                        <Img
-                            src={`https://minio.hackcc.net/public-bucket/logo.svg`}
-                            width={120}
-                            height={45}
-                            alt="HackCC Logo"
-                            style={logo}
-                        />
+                        <Text
+                            style={{
+                                color: "#ffffff",
+                                fontSize: "18px",
+                                fontWeight: "700",
+                                margin: "0",
+                            }}
+                        >
+                            HackCC - All California Community Colleges
+                        </Text>
                         {isCurrentDayTuesday && (
                             <Text style={scheduleNote}>Sent on Tuesday</Text>
                         )}
@@ -144,44 +138,6 @@ export const SponsorshipEmail = ({
                                     </Text>
                                 </Column>
                             </Row>
-
-                            {/* Social Media Links */}
-                            {(socialLinks.linkedin ||
-                                socialLinks.twitter ||
-                                socialLinks.github) && (
-                                <Row style={socialLinksContainer}>
-                                    {socialLinks.linkedin && (
-                                        <Column style={socialLinkColumn}>
-                                            <Link
-                                                href={socialLinks.linkedin}
-                                                style={socialLink}
-                                            >
-                                                LinkedIn
-                                            </Link>
-                                        </Column>
-                                    )}
-                                    {socialLinks.twitter && (
-                                        <Column style={socialLinkColumn}>
-                                            <Link
-                                                href={socialLinks.twitter}
-                                                style={socialLink}
-                                            >
-                                                Twitter
-                                            </Link>
-                                        </Column>
-                                    )}
-                                    {socialLinks.github && (
-                                        <Column style={socialLinkColumn}>
-                                            <Link
-                                                href={socialLinks.github}
-                                                style={socialLink}
-                                            >
-                                                GitHub
-                                            </Link>
-                                        </Column>
-                                    )}
-                                </Row>
-                            )}
                         </Section>
                     </Section>
 
@@ -222,10 +178,6 @@ const header = {
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
-};
-
-const logo = {
-    margin: "0",
 };
 
 const scheduleNote = {
@@ -281,20 +233,6 @@ const signatureSchool = {
     color: "#4b5563",
     margin: "0",
     textAlign: "right" as const,
-};
-
-const socialLinksContainer = {
-    marginTop: "12px",
-};
-
-const socialLinkColumn = {
-    paddingRight: "12px",
-};
-
-const socialLink = {
-    fontSize: "14px",
-    color: "#2563eb",
-    textDecoration: "none",
 };
 
 const footer = {

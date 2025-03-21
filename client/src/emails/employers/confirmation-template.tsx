@@ -6,8 +6,6 @@ import {
     Head,
     Heading,
     Html,
-    Img,
-    Link,
     Preview,
     Row,
     Section,
@@ -32,7 +30,6 @@ export const ConfirmationEmail = ({
     recipientName,
     sender,
     subject,
-    socialLinks,
     customEmailBody,
 }: ConfirmationEmailProps) => {
     const formattedYearAndMajor = `${sender.year} ${sender.major}`;
@@ -115,13 +112,16 @@ export const ConfirmationEmail = ({
             <Body style={main}>
                 <Container style={container}>
                     <Section style={header}>
-                        <Img
-                            src={`https://minio.hackcc.net/public-bucket/logo.svg`}
-                            width={120}
-                            height={45}
-                            alt="HackCC Logo"
-                            style={logo}
-                        />
+                        <Text
+                            style={{
+                                color: "#ffffff",
+                                fontSize: "18px",
+                                fontWeight: "700",
+                                margin: "0",
+                            }}
+                        >
+                            HackCC - All California Community Colleges
+                        </Text>
                     </Section>
 
                     <Section style={content}>
@@ -191,44 +191,6 @@ export const ConfirmationEmail = ({
                                     </Text>
                                 </Column>
                             </Row>
-
-                            {/* Social Media Links */}
-                            {(socialLinks.linkedin ||
-                                socialLinks.twitter ||
-                                socialLinks.github) && (
-                                <Row style={socialLinksContainer}>
-                                    {socialLinks.linkedin && (
-                                        <Column style={socialLinkColumn}>
-                                            <Link
-                                                href={socialLinks.linkedin}
-                                                style={socialLink}
-                                            >
-                                                LinkedIn
-                                            </Link>
-                                        </Column>
-                                    )}
-                                    {socialLinks.twitter && (
-                                        <Column style={socialLinkColumn}>
-                                            <Link
-                                                href={socialLinks.twitter}
-                                                style={socialLink}
-                                            >
-                                                Twitter
-                                            </Link>
-                                        </Column>
-                                    )}
-                                    {socialLinks.github && (
-                                        <Column style={socialLinkColumn}>
-                                            <Link
-                                                href={socialLinks.github}
-                                                style={socialLink}
-                                            >
-                                                GitHub
-                                            </Link>
-                                        </Column>
-                                    )}
-                                </Row>
-                            )}
                         </Section>
                     </Section>
 
@@ -269,10 +231,6 @@ const header = {
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
-};
-
-const logo = {
-    margin: "0",
 };
 
 const content = {
@@ -333,20 +291,6 @@ const signatureDetails = {
     fontSize: "14px",
     color: "#4b5563",
     margin: "0 0 8px",
-};
-
-const socialLinksContainer = {
-    marginTop: "12px",
-};
-
-const socialLinkColumn = {
-    paddingRight: "12px",
-};
-
-const socialLink = {
-    fontSize: "14px",
-    color: "#2563eb",
-    textDecoration: "none",
 };
 
 const footer = {
