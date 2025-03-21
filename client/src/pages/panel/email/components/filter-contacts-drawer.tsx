@@ -26,6 +26,9 @@ import type {
 import { getContacts } from "@/features/outreach/api/outreach";
 import { toast } from "sonner";
 
+// Ensure this component only runs on the client
+const isClient = typeof window !== "undefined";
+
 /**
  * Filter options for contacts list
  */
@@ -72,44 +75,57 @@ interface FilterContactsDrawerProps {
  * Drawer component for filtering contacts
  */
 export default function FilterContactsDrawer({
-    open,
-    onOpenChange,
-    filters,
-    setFilters,
-    contacts,
-    activeFilterCount,
-    clearFilters,
+    open = false,
+    onOpenChange = () => {},
+    filters = {
+        hasEmail: false,
+        hasName: false,
+        hasLinkedIn: false,
+        hasPhone: false,
+        hasWebsite: false,
+        status: "all" as "all" | ContactStatus,
+        sortBy: "name" as
+            | "name"
+            | "email"
+            | "company"
+            | "recent"
+            | "confidence",
+    },
+    setFilters = () => {},
+    contacts = [],
+    activeFilterCount = 0,
+    clearFilters = () => {},
 }: FilterContactsDrawerProps) {
     const [isLoadingAllContacts, setIsLoadingAllContacts] =
         React.useState(false);
     const [allContacts, setAllContacts] = React.useState<ContactDto[]>([]);
     const [isApplyingFilters, setIsApplyingFilters] = React.useState(false);
 
-    // Fetch all contacts when drawer opens
     React.useEffect(() => {
+        // Only run on client-side
+        if (!isClient) return;
+
         if (open && allContacts.length === 0) {
             fetchAllContacts();
         }
     }, [open, allContacts.length]);
 
-    /**
-     * Fetches all contacts across all pages
-     */
     const fetchAllContacts = async (
         pageSize = 100,
         searchTerm = ""
     ): Promise<void> => {
+        // Don't execute on server
+        if (!isClient) return;
+
         try {
             setIsLoadingAllContacts(true);
 
-            // First get the initial page with total count
             const initialResponse = await getContacts(1, pageSize, searchTerm);
             const allData = [...initialResponse.data];
 
             const totalItems = initialResponse.total;
             const totalFetchPages = Math.ceil(totalItems / pageSize);
 
-            // Fetch remaining pages in parallel
             if (totalFetchPages > 1) {
                 const pagePromises = [];
                 for (let i = 2; i <= totalFetchPages; i++) {
@@ -141,9 +157,8 @@ export default function FilterContactsDrawer({
         }
     };
 
-    // Get unique organizations for the company dropdown
     const organizations = React.useMemo(() => {
-        if (allContacts.length > 0) {
+        if (allContacts?.length > 0) {
             const uniqueOrgs = new Set<string>();
             allContacts.forEach((c) => {
                 if (c.company) uniqueOrgs.add(c.company);
@@ -151,60 +166,68 @@ export default function FilterContactsDrawer({
             return Array.from(uniqueOrgs).sort();
         }
 
-        // Fallback to current contacts if all contacts aren't loaded yet
         const uniqueOrgs = new Set<string>();
-        contacts.forEach((c) => {
-            if (c.company) uniqueOrgs.add(c.company);
-        });
+        if (contacts?.length) {
+            contacts.forEach((c) => {
+                if (c.company) uniqueOrgs.add(c.company);
+            });
+        }
         return Array.from(uniqueOrgs).sort();
     }, [contacts, allContacts]);
 
-    // Get all unique liaisons
     const liaisons = React.useMemo(() => {
-        const contactsToUse = allContacts.length > 0 ? allContacts : contacts;
+        const contactsToUse = allContacts?.length > 0 ? allContacts : contacts;
         const uniqueLiaisons = new Set<string>();
-        contactsToUse.forEach((c) => {
-            if (c.liaison) uniqueLiaisons.add(c.liaison);
-        });
+        if (contactsToUse?.length) {
+            contactsToUse.forEach((c) => {
+                if (c.liaison) uniqueLiaisons.add(c.liaison);
+            });
+        }
         return Array.from(uniqueLiaisons).sort();
     }, [contacts, allContacts]);
 
-    // Get all unique countries
     const countries = React.useMemo(() => {
-        const contactsToUse = allContacts.length > 0 ? allContacts : contacts;
+        const contactsToUse = allContacts?.length > 0 ? allContacts : contacts;
         const uniqueCountries = new Set<string>();
-        contactsToUse.forEach((c) => {
-            if (c.country) uniqueCountries.add(c.country);
-        });
+        if (contactsToUse?.length) {
+            contactsToUse.forEach((c) => {
+                if (c.country) uniqueCountries.add(c.country);
+            });
+        }
         return Array.from(uniqueCountries).sort();
     }, [contacts, allContacts]);
 
-    // Get all unique positions
     const positions = React.useMemo(() => {
-        const contactsToUse = allContacts.length > 0 ? allContacts : contacts;
+        const contactsToUse = allContacts?.length > 0 ? allContacts : contacts;
         const uniquePositions = new Set<string>();
-        contactsToUse.forEach((c) => {
-            if (c.position) uniquePositions.add(c.position);
-        });
+        if (contactsToUse?.length) {
+            contactsToUse.forEach((c) => {
+                if (c.position) uniquePositions.add(c.position);
+            });
+        }
         return Array.from(uniquePositions).sort();
     }, [contacts, allContacts]);
 
-    // Get all unique meeting methods
     const meetingMethods = React.useMemo(() => {
-        const contactsToUse = allContacts.length > 0 ? allContacts : contacts;
+        const contactsToUse = allContacts?.length > 0 ? allContacts : contacts;
         const uniqueMethods = new Set<string>();
-        contactsToUse.forEach((c) => {
-            if (c.meeting_method) uniqueMethods.add(c.meeting_method);
-        });
+        if (contactsToUse?.length) {
+            contactsToUse.forEach((c) => {
+                if (c.meeting_method) uniqueMethods.add(c.meeting_method);
+            });
+        }
         return Array.from(uniqueMethods).sort();
     }, [contacts, allContacts]);
 
-    // Apply filters with preview count
     const getFilteredContactsCount = (): number => {
-        const contactsToFilter =
-            allContacts.length > 0 ? allContacts : contacts;
+        if (!contacts?.length && !allContacts?.length) {
+            return 0;
+        }
 
-        let filtered = [...contactsToFilter];
+        const contactsToFilter =
+            allContacts?.length > 0 ? allContacts : contacts;
+
+        let filtered = [...(contactsToFilter || [])];
 
         if (filters.hasEmail) {
             filtered = filtered.filter((c) => !!c.email_address);
@@ -265,17 +288,18 @@ export default function FilterContactsDrawer({
         return filtered.length;
     };
 
-    // Handle applying filters
     const handleApplyFilters = () => {
+        // Don't execute on server
+        if (!isClient) return;
+
         const filteredCount = getFilteredContactsCount();
         const totalCount =
             allContacts.length > 0 ? allContacts.length : contacts.length;
 
         setIsApplyingFilters(true);
 
-        // Simulate loading time for better UX
         setTimeout(() => {
-            if (activeFilterCount > 0) {
+            if (activeFilterCount > 0 && isClient) {
                 toast.success(
                     `Applied filters: ${filteredCount} of ${totalCount} contacts match`
                 );
