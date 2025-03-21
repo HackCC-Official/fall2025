@@ -32,9 +32,6 @@ export const SponsorshipEmail = ({
 }: SponsorshipEmailProps) => {
     const formattedYearAndMajor = `${sender.year} ${sender.major}`;
 
-    const today = new Date();
-    const isCurrentDayTuesday = today.getDay() === 2;
-
     const parseContent = (content: string): string => {
         return content
             .replace(/\[recipient_name\]/g, recipientName)
@@ -67,9 +64,6 @@ export const SponsorshipEmail = ({
                     {/* Header */}
                     <Section style={header}>
                         <Text style={headerText}>HackCC</Text>
-                        {isCurrentDayTuesday && (
-                            <Text style={scheduleNote}>Sent on Tuesday</Text>
-                        )}
                     </Section>
 
                     <Section style={content}>
@@ -177,16 +171,6 @@ const headerText = {
     color: "#ffffff",
     margin: "0",
     textAlign: "center" as const,
-};
-
-const scheduleNote = {
-    color: "#ffffff",
-    fontSize: "14px",
-    fontWeight: "500",
-    margin: "0",
-    padding: "4px 8px",
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
-    borderRadius: "4px",
 };
 
 const content = {

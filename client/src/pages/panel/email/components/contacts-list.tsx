@@ -15,12 +15,10 @@ import {
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useContact } from "@/hooks/use-contact";
-import type {
-    ContactDto,
-    ContactStatus,
-} from "@/features/outreach/types/contact.dto";
+import type { ContactDto } from "@/features/outreach/types/contact.dto";
 import { cn } from "@/lib/utils";
 import EditContactDrawer from "./edit-contact-drawer";
+import FilterContactsDrawer, { FilterOptions } from "./filter-contacts-drawer";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -55,14 +53,7 @@ import {
 } from "@/components/ui/select";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { useRouter } from "next/navigation";
-
-import {
-    Sheet,
-    SheetContent,
-    SheetDescription,
-    SheetHeader,
-    SheetTitle,
-} from "@/components/ui/sheet";
+import { toast } from "sonner";
 
 import {
     Tooltip,
@@ -70,28 +61,6 @@ import {
     TooltipProvider,
     TooltipTrigger,
 } from "@/components/ui/tooltip";
-
-import { Checkbox } from "@/components/ui/checkbox";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-
-type FilterOptions = {
-    hasEmail: boolean;
-    hasName: boolean;
-    hasLinkedIn: boolean;
-    hasPhone: boolean;
-    hasWebsite: boolean;
-    company?: string;
-    country?: string;
-    position?: string;
-    liaison?: string;
-    status?: "all" | ContactStatus;
-    confidenceScore?: {
-        min: number;
-        max: number;
-    };
-    meetingMethod?: string;
-    sortBy?: "name" | "email" | "company" | "recent" | "confidence";
-};
 
 export default function ContactsList({
     contacts: initialContacts,
@@ -119,11 +88,23 @@ export default function ContactsList({
     const [isFilterOpen, setIsFilterOpen] = React.useState(false);
     const queryClient = useQueryClient();
     const [deleteId, setDeleteId] = React.useState<number | null>(null);
+    const [allContacts, setAllContacts] = React.useState<ContactDto[]>([]);
+    const [isLoadingAllContacts, setIsLoadingAllContacts] =
+        React.useState(false);
+    const [hasAppliedFilters, setHasAppliedFilters] = React.useState(false);
+
+    // Calculate active filter count early in the component
+    const activeFilterCount = Object.entries(filters).filter(([key, value]) => {
+        if (key === "status" && value === "all") return false;
+        if (key === "sortBy") return false;
+        return !!value;
+    }).length;
 
     const {
         data,
         isLoading,
         pagination: { page, setPage, limit, setLimit, totalPages },
+        fetchAllContacts: fetchAllContactsFromHook,
     } = useContacts({
         initialLimit: 50,
     });
@@ -131,6 +112,37 @@ export default function ContactsList({
     // eslint-disable-next-line react-hooks/exhaustive-deps
     const contacts = data?.data || initialContacts || [];
     const totalContacts = data?.total || 0;
+
+    /**
+     * Fetch all contacts across all pages when filters are applied
+     */
+    const loadAllContacts = React.useCallback(async () => {
+        if (activeFilterCount > 0 && !hasAppliedFilters) {
+            setIsLoadingAllContacts(true);
+            try {
+                const allContactsData = await fetchAllContactsFromHook(100);
+                setAllContacts(allContactsData);
+                setHasAppliedFilters(true);
+            } catch (error) {
+                console.error(
+                    "Error loading all contacts for filtering:",
+                    error
+                );
+                toast.error("Failed to load all contacts for filtering");
+            } finally {
+                setIsLoadingAllContacts(false);
+            }
+        }
+    }, [activeFilterCount, fetchAllContactsFromHook, hasAppliedFilters]);
+
+    // Fetch all contacts when filters change
+    React.useEffect(() => {
+        if (activeFilterCount > 0) {
+            loadAllContacts();
+        } else {
+            setHasAppliedFilters(false);
+        }
+    }, [activeFilterCount, loadAllContacts]);
 
     React.useEffect(() => {
         const timer = setTimeout(async () => {
@@ -153,20 +165,16 @@ export default function ContactsList({
     }, [searchText]);
 
     const filteredContacts = React.useMemo(() => {
-        let filtered = [...contacts];
-
+        // If searching, use search results
         if (searchText.trim()) {
-            filtered = filtered.filter((c) => {
-                const query = searchText.toLowerCase();
-                return (
-                    c.contact_name?.toLowerCase().includes(query) ||
-                    c.email_address?.toLowerCase().includes(query) ||
-                    c.company?.toLowerCase().includes(query) ||
-                    c.position?.toLowerCase().includes(query) ||
-                    c.country?.toLowerCase().includes(query)
-                );
-            });
+            return searchResults;
         }
+
+        // Use the appropriate data source based on filter status
+        const dataSource =
+            activeFilterCount > 0 && hasAppliedFilters ? allContacts : contacts;
+
+        let filtered = [...dataSource];
 
         if (filters.hasEmail) {
             filtered = filtered.filter((c) => !!c.email_address);
@@ -234,7 +242,7 @@ export default function ContactsList({
             });
         } else if (filters.sortBy === "email") {
             filtered.sort((a, b) =>
-                a.email_address.localeCompare(b.email_address)
+                (a.email_address || "").localeCompare(b.email_address || "")
             );
         } else if (filters.sortBy === "company") {
             filtered.sort((a, b) =>
@@ -249,7 +257,35 @@ export default function ContactsList({
         }
 
         return filtered;
-    }, [contacts, searchText, filters]);
+    }, [
+        contacts,
+        allContacts,
+        searchText,
+        filters,
+        searchResults,
+        activeFilterCount,
+        hasAppliedFilters,
+    ]);
+
+    // Calculate total filtered count for display
+    const displayedContactsCount = React.useMemo(() => {
+        if (searchText.trim()) {
+            return searchResults.length;
+        }
+
+        if (activeFilterCount > 0 && hasAppliedFilters) {
+            return filteredContacts.length;
+        }
+
+        return totalContacts;
+    }, [
+        activeFilterCount,
+        filteredContacts.length,
+        hasAppliedFilters,
+        searchResults.length,
+        searchText,
+        totalContacts,
+    ]);
 
     const virtualizer = useVirtualizer({
         count: filteredContacts.length,
@@ -258,24 +294,17 @@ export default function ContactsList({
         overscan: 10,
     });
 
-    const displayedContactsCount = searchText.trim()
-        ? searchResults.length
-        : totalContacts;
-
-    const organizations = React.useMemo(() => {
-        const uniqueOrgs = new Set<string>();
-        contacts.forEach((c) => {
-            if (c.company) uniqueOrgs.add(c.company);
-        });
-        return Array.from(uniqueOrgs).sort();
-    }, [contacts]);
-
     const handleDelete = async (contactId: number) => {
         try {
             await deleteContact(contactId.toString());
             queryClient.invalidateQueries({ queryKey: ["contacts"] });
             setSearchResults([]);
             setSearchText("");
+            // Reset filter application state when deleting a contact
+            if (hasAppliedFilters) {
+                setHasAppliedFilters(false);
+                setAllContacts([]);
+            }
         } catch (error) {
             console.error("Failed to delete contact:", error);
         }
@@ -285,9 +314,14 @@ export default function ContactsList({
         if (newPage >= 1 && newPage <= totalPages) {
             const currentSelection = contact.selected;
             const currentId = contact.selectedId;
-            setPage(newPage);
+
+            // Only change page if we're not using filters
+            if (activeFilterCount === 0) {
+                setPage(newPage);
+            }
             setSearchText("");
             setSearchResults([]);
+
             if (currentSelection) {
                 console.log("Changing page, preserving selection:", {
                     email: currentSelection,
@@ -313,17 +347,18 @@ export default function ContactsList({
             meetingMethod: undefined,
             sortBy: "name",
         });
+        setHasAppliedFilters(false);
+        setAllContacts([]);
     };
-
-    const activeFilterCount = Object.entries(filters).filter(([key, value]) => {
-        if (key === "status" && value === "all") return false;
-        if (key === "sortBy") return false;
-        return !!value;
-    }).length;
 
     const handleContactUpdate = React.useCallback(() => {
         // Invalidate both contacts and search queries
         queryClient.invalidateQueries({ queryKey: ["contacts"] });
+
+        // If we're currently filtering, reload all contacts
+        if (activeFilterCount > 0 && hasAppliedFilters) {
+            loadAllContacts();
+        }
 
         // If we're currently searching, re-trigger the search
         if (searchText.trim()) {
@@ -340,7 +375,18 @@ export default function ContactsList({
                     setIsSearching(false);
                 });
         }
-    }, [queryClient, searchText]);
+    }, [
+        queryClient,
+        searchText,
+        activeFilterCount,
+        hasAppliedFilters,
+        loadAllContacts,
+    ]);
+
+    // For use in the FilterContactsDrawer to synchronize filter application
+    const handleFilterApply = () => {
+        setHasAppliedFilters(true);
+    };
 
     return (
         <div className="flex flex-col h-full bg-background">
@@ -353,7 +399,12 @@ export default function ContactsList({
                                 {displayedContactsCount.toLocaleString()}
                             </span>
                             <span>
-                                {searchText.trim() ? "found" : "total"} contacts
+                                {searchText.trim()
+                                    ? "found"
+                                    : activeFilterCount > 0 && hasAppliedFilters
+                                      ? "filtered"
+                                      : "total"}{" "}
+                                contacts
                             </span>
                         </div>
                     </div>
@@ -701,39 +752,65 @@ export default function ContactsList({
 
             <div className="flex items-center justify-between px-4 py-2 border-b bg-muted/30">
                 <div className="text-sm font-medium">
-                    Showing{" "}
-                    <span className="font-semibold text-primary">
-                        {filteredContacts.length > 0
-                            ? (page - 1) * limit + 1
-                            : 0}
-                    </span>{" "}
-                    -{" "}
-                    <span className="font-semibold text-primary">
-                        {Math.min(page * limit, totalContacts)}
-                    </span>{" "}
-                    of{" "}
-                    <span className="font-semibold text-primary">
-                        {totalContacts}
-                    </span>
+                    {activeFilterCount > 0 && hasAppliedFilters ? (
+                        <span>
+                            Showing filtered results:{" "}
+                            <span className="font-semibold text-primary">
+                                {filteredContacts.length}
+                            </span>{" "}
+                            contacts
+                        </span>
+                    ) : (
+                        <span>
+                            Showing{" "}
+                            <span className="font-semibold text-primary">
+                                {filteredContacts.length > 0
+                                    ? (page - 1) * limit + 1
+                                    : 0}
+                            </span>{" "}
+                            -{" "}
+                            <span className="font-semibold text-primary">
+                                {Math.min(page * limit, totalContacts)}
+                            </span>{" "}
+                            of{" "}
+                            <span className="font-semibold text-primary">
+                                {totalContacts}
+                            </span>
+                        </span>
+                    )}
                 </div>
                 <div className="flex items-center space-x-2">
                     <Button
                         variant="outline"
                         size="icon"
                         onClick={() => handlePageChange(page - 1)}
-                        disabled={page <= 1 || isLoading}
+                        disabled={
+                            page <= 1 ||
+                            isLoading ||
+                            (activeFilterCount > 0 && hasAppliedFilters)
+                        }
                         className="h-8 w-8"
                     >
                         <ChevronLeft className="h-4 w-4" />
                     </Button>
                     <div className="text-sm font-medium bg-background px-3 py-1 rounded-md border">
-                        Page {page} of {totalPages || 1}
+                        {activeFilterCount > 0 && hasAppliedFilters ? (
+                            <span>Filtered View</span>
+                        ) : (
+                            <span>
+                                Page {page} of {totalPages || 1}
+                            </span>
+                        )}
                     </div>
                     <Button
                         variant="outline"
                         size="icon"
                         onClick={() => handlePageChange(page + 1)}
-                        disabled={page >= totalPages || isLoading}
+                        disabled={
+                            page >= totalPages ||
+                            isLoading ||
+                            (activeFilterCount > 0 && hasAppliedFilters)
+                        }
                         className="h-8 w-8"
                     >
                         <ChevronRight className="h-4 w-4" />
@@ -741,14 +818,18 @@ export default function ContactsList({
                 </div>
             </div>
 
-            {isLoading || (searchText.trim() && isSearching) ? (
+            {isLoading ||
+            isLoadingAllContacts ||
+            (searchText.trim() && isSearching) ? (
                 <div className="flex-1 flex items-center justify-center">
                     <div className="flex flex-col items-center">
                         <div className="animate-spin h-10 w-10 border-3 border-primary rounded-full border-t-transparent mb-4"></div>
                         <p className="text-muted-foreground">
                             {searchText.trim()
                                 ? "Searching contacts..."
-                                : "Loading contacts..."}
+                                : isLoadingAllContacts
+                                  ? "Loading all contacts for filtering..."
+                                  : "Loading contacts..."}
                         </p>
                     </div>
                 </div>
@@ -944,565 +1025,92 @@ export default function ContactsList({
             )}
 
             <div className="flex items-center justify-between px-4 py-3 border-t bg-muted/30">
-                <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handlePageChange(1)}
-                    disabled={page <= 1 || isLoading}
-                    className="h-8 px-3"
-                >
-                    First
-                </Button>
-                <div className="flex items-center space-x-1">
-                    {Array.from({ length: Math.min(5, totalPages) }).map(
-                        (_, i) => {
-                            const pageNumber = page <= 2 ? i + 1 : page - 2 + i;
-                            if (pageNumber > totalPages) return null;
+                {activeFilterCount > 0 && hasAppliedFilters ? (
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={clearFilters}
+                        className="h-8 px-3"
+                    >
+                        Clear Filters
+                    </Button>
+                ) : (
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handlePageChange(1)}
+                        disabled={page <= 1 || isLoading}
+                        className="h-8 px-3"
+                    >
+                        First
+                    </Button>
+                )}
 
-                            return (
-                                <Button
-                                    key={pageNumber}
-                                    variant={
-                                        pageNumber === page
-                                            ? "default"
-                                            : "outline"
-                                    }
-                                    size="sm"
-                                    onClick={() => handlePageChange(pageNumber)}
-                                    disabled={isLoading}
-                                    className="h-8 w-8"
-                                >
-                                    {pageNumber}
-                                </Button>
-                            );
-                        }
-                    )}
-                </div>
-                <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handlePageChange(totalPages)}
-                    disabled={page >= totalPages || isLoading}
-                    className="h-8 px-3"
-                >
-                    Last
-                </Button>
+                {activeFilterCount > 0 && hasAppliedFilters ? (
+                    <div className="text-sm text-muted-foreground">
+                        Showing all {filteredContacts.length} filtered contacts
+                    </div>
+                ) : (
+                    <div className="flex items-center space-x-1">
+                        {Array.from({ length: Math.min(5, totalPages) }).map(
+                            (_, i) => {
+                                const pageNumber =
+                                    page <= 2 ? i + 1 : page - 2 + i;
+                                if (pageNumber > totalPages) return null;
+
+                                return (
+                                    <Button
+                                        key={pageNumber}
+                                        variant={
+                                            pageNumber === page
+                                                ? "default"
+                                                : "outline"
+                                        }
+                                        size="sm"
+                                        onClick={() =>
+                                            handlePageChange(pageNumber)
+                                        }
+                                        disabled={isLoading}
+                                        className="h-8 w-8"
+                                    >
+                                        {pageNumber}
+                                    </Button>
+                                );
+                            }
+                        )}
+                    </div>
+                )}
+
+                {activeFilterCount > 0 && hasAppliedFilters ? (
+                    <div className="text-sm text-primary">Filter Active</div>
+                ) : (
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handlePageChange(totalPages)}
+                        disabled={page >= totalPages || isLoading}
+                        className="h-8 px-3"
+                    >
+                        Last
+                    </Button>
+                )}
             </div>
 
-            <Sheet open={isFilterOpen} onOpenChange={setIsFilterOpen}>
-                <SheetContent
-                    className="w-[400px] sm:max-w-md overflow-y-auto"
-                    side="right"
-                >
-                    <SheetHeader className="pb-4">
-                        <SheetTitle>Filter Contacts</SheetTitle>
-                        <SheetDescription>
-                            Refine your contact list with multiple criteria
-                        </SheetDescription>
-                    </SheetHeader>
-
-                    <Tabs defaultValue="basic" className="w-full">
-                        <TabsList className="grid w-full grid-cols-3 mb-4">
-                            <TabsTrigger value="basic">Basic</TabsTrigger>
-                            <TabsTrigger value="organization">
-                                Organization
-                            </TabsTrigger>
-                            <TabsTrigger value="advanced">Advanced</TabsTrigger>
-                        </TabsList>
-
-                        <TabsContent value="basic" className="space-y-4">
-                            <div className="space-y-2">
-                                <h3 className="text-sm font-medium">Sort By</h3>
-                                <Select
-                                    value={filters.sortBy || "name"}
-                                    onValueChange={(value) =>
-                                        setFilters({
-                                            ...filters,
-                                            sortBy: value as
-                                                | "name"
-                                                | "email"
-                                                | "company"
-                                                | "recent"
-                                                | "confidence",
-                                        })
-                                    }
-                                >
-                                    <SelectTrigger className="w-full">
-                                        <SelectValue placeholder="Sort by" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="name">
-                                            Name
-                                        </SelectItem>
-                                        <SelectItem value="email">
-                                            Email
-                                        </SelectItem>
-                                        <SelectItem value="company">
-                                            Company
-                                        </SelectItem>
-                                        <SelectItem value="recent">
-                                            Recently Added
-                                        </SelectItem>
-                                        <SelectItem value="confidence">
-                                            Confidence Score
-                                        </SelectItem>
-                                    </SelectContent>
-                                </Select>
-                            </div>
-
-                            <div className="space-y-2">
-                                <h3 className="text-sm font-medium">Status</h3>
-                                <Select
-                                    value={filters.status || "all"}
-                                    onValueChange={(value) =>
-                                        setFilters({
-                                            ...filters,
-                                            status: value as
-                                                | "all"
-                                                | ContactStatus,
-                                        })
-                                    }
-                                >
-                                    <SelectTrigger className="w-full">
-                                        <SelectValue placeholder="Status" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="all">
-                                            All Contacts
-                                        </SelectItem>
-                                        <SelectItem value="Cold">
-                                            Cold
-                                        </SelectItem>
-                                        <SelectItem value="Follow Up 1">
-                                            Follow Up 1
-                                        </SelectItem>
-                                        <SelectItem value="Follow Up 2">
-                                            Follow Up 2
-                                        </SelectItem>
-                                        <SelectItem value="Accept">
-                                            Accept
-                                        </SelectItem>
-                                        <SelectItem value="Rejected">
-                                            Rejected
-                                        </SelectItem>
-                                        <SelectItem value="Contacted">
-                                            Contacted
-                                        </SelectItem>
-                                    </SelectContent>
-                                </Select>
-                            </div>
-
-                            <div className="space-y-2">
-                                <h3 className="text-sm font-medium">
-                                    Data Quality
-                                </h3>
-                                <div className="flex flex-col gap-3 pt-1">
-                                    <div className="flex items-center space-x-2">
-                                        <Checkbox
-                                            id="hasEmail"
-                                            checked={filters.hasEmail}
-                                            onCheckedChange={(checked) =>
-                                                setFilters({
-                                                    ...filters,
-                                                    hasEmail: checked === true,
-                                                })
-                                            }
-                                        />
-                                        <label
-                                            htmlFor="hasEmail"
-                                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                                        >
-                                            Has Email
-                                        </label>
-                                    </div>
-                                    <div className="flex items-center space-x-2">
-                                        <Checkbox
-                                            id="hasName"
-                                            checked={filters.hasName}
-                                            onCheckedChange={(checked) =>
-                                                setFilters({
-                                                    ...filters,
-                                                    hasName: checked === true,
-                                                })
-                                            }
-                                        />
-                                        <label
-                                            htmlFor="hasName"
-                                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                                        >
-                                            Has Name
-                                        </label>
-                                    </div>
-                                    <div className="flex items-center space-x-2">
-                                        <Checkbox
-                                            id="hasLinkedIn"
-                                            checked={filters.hasLinkedIn}
-                                            onCheckedChange={(checked) =>
-                                                setFilters({
-                                                    ...filters,
-                                                    hasLinkedIn:
-                                                        checked === true,
-                                                })
-                                            }
-                                        />
-                                        <label
-                                            htmlFor="hasLinkedIn"
-                                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                                        >
-                                            Has LinkedIn
-                                        </label>
-                                    </div>
-                                    <div className="flex items-center space-x-2">
-                                        <Checkbox
-                                            id="hasPhone"
-                                            checked={filters.hasPhone}
-                                            onCheckedChange={(checked) =>
-                                                setFilters({
-                                                    ...filters,
-                                                    hasPhone: checked === true,
-                                                })
-                                            }
-                                        />
-                                        <label
-                                            htmlFor="hasPhone"
-                                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                                        >
-                                            Has Phone
-                                        </label>
-                                    </div>
-                                    <div className="flex items-center space-x-2">
-                                        <Checkbox
-                                            id="hasWebsite"
-                                            checked={filters.hasWebsite}
-                                            onCheckedChange={(checked) =>
-                                                setFilters({
-                                                    ...filters,
-                                                    hasWebsite:
-                                                        checked === true,
-                                                })
-                                            }
-                                        />
-                                        <label
-                                            htmlFor="hasWebsite"
-                                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                                        >
-                                            Has Website
-                                        </label>
-                                    </div>
-                                </div>
-                            </div>
-                        </TabsContent>
-
-                        <TabsContent value="organization" className="space-y-4">
-                            <div className="space-y-2">
-                                <h3 className="text-sm font-medium">Company</h3>
-                                <Select
-                                    value={filters.company || "any-company"}
-                                    onValueChange={(value) =>
-                                        setFilters({
-                                            ...filters,
-                                            company:
-                                                value === "any-company"
-                                                    ? undefined
-                                                    : value,
-                                        })
-                                    }
-                                >
-                                    <SelectTrigger className="w-full">
-                                        <SelectValue placeholder="Company" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="any-company">
-                                            Any Company
-                                        </SelectItem>
-                                        {organizations.map((org) => (
-                                            <SelectItem key={org} value={org}>
-                                                {org}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                            </div>
-
-                            <div className="space-y-2">
-                                <h3 className="text-sm font-medium">Liaison</h3>
-                                <Select
-                                    value={filters.liaison || "any-liaison"}
-                                    onValueChange={(value) =>
-                                        setFilters({
-                                            ...filters,
-                                            liaison:
-                                                value === "any-liaison"
-                                                    ? undefined
-                                                    : value,
-                                        })
-                                    }
-                                >
-                                    <SelectTrigger className="w-full">
-                                        <SelectValue placeholder="Liaison" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="any-liaison">
-                                            Any Liaison
-                                        </SelectItem>
-                                        {Array.from(
-                                            new Set(
-                                                contacts
-                                                    .map((c) => c.liaison)
-                                                    .filter(Boolean)
-                                            )
-                                        )
-                                            .sort()
-                                            .map((liaison) => (
-                                                <SelectItem
-                                                    key={liaison}
-                                                    value={liaison as string}
-                                                >
-                                                    {liaison}
-                                                </SelectItem>
-                                            ))}
-                                    </SelectContent>
-                                </Select>
-                            </div>
-
-                            <div className="space-y-2">
-                                <h3 className="text-sm font-medium">Country</h3>
-                                <Select
-                                    value={filters.country || "any-country"}
-                                    onValueChange={(value) =>
-                                        setFilters({
-                                            ...filters,
-                                            country:
-                                                value === "any-country"
-                                                    ? undefined
-                                                    : value,
-                                        })
-                                    }
-                                >
-                                    <SelectTrigger className="w-full">
-                                        <SelectValue placeholder="Country" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="any-country">
-                                            Any Country
-                                        </SelectItem>
-                                        {Array.from(
-                                            new Set(
-                                                contacts
-                                                    .map((c) => c.country)
-                                                    .filter(Boolean)
-                                            )
-                                        )
-                                            .sort()
-                                            .map((country) => (
-                                                <SelectItem
-                                                    key={country}
-                                                    value={country as string}
-                                                >
-                                                    {country}
-                                                </SelectItem>
-                                            ))}
-                                    </SelectContent>
-                                </Select>
-                            </div>
-
-                            <div className="space-y-2">
-                                <h3 className="text-sm font-medium">
-                                    Position
-                                </h3>
-                                <Select
-                                    value={filters.position || "any-position"}
-                                    onValueChange={(value) =>
-                                        setFilters({
-                                            ...filters,
-                                            position:
-                                                value === "any-position"
-                                                    ? undefined
-                                                    : value,
-                                        })
-                                    }
-                                >
-                                    <SelectTrigger className="w-full">
-                                        <SelectValue placeholder="Position" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="any-position">
-                                            Any Position
-                                        </SelectItem>
-                                        {Array.from(
-                                            new Set(
-                                                contacts
-                                                    .map((c) => c.position)
-                                                    .filter(Boolean)
-                                            )
-                                        )
-                                            .sort()
-                                            .map((position) => (
-                                                <SelectItem
-                                                    key={position}
-                                                    value={position as string}
-                                                >
-                                                    {position}
-                                                </SelectItem>
-                                            ))}
-                                    </SelectContent>
-                                </Select>
-                            </div>
-                        </TabsContent>
-
-                        <TabsContent value="advanced" className="space-y-4">
-                            <div className="space-y-2">
-                                <h3 className="text-sm font-medium">
-                                    Confidence Score
-                                </h3>
-                                <div className="pt-2 px-1">
-                                    <div className="flex justify-between mb-2">
-                                        <span className="text-xs text-muted-foreground">
-                                            Low
-                                        </span>
-                                        <span className="text-xs text-muted-foreground">
-                                            High
-                                        </span>
-                                    </div>
-                                    <div className="flex items-center gap-4">
-                                        <Input
-                                            type="number"
-                                            min="0"
-                                            max="100"
-                                            placeholder="Min"
-                                            className="w-20"
-                                            value={
-                                                filters.confidenceScore?.min ??
-                                                ""
-                                            }
-                                            onChange={(e) => {
-                                                const min =
-                                                    parseInt(e.target.value) ||
-                                                    0;
-                                                setFilters({
-                                                    ...filters,
-                                                    confidenceScore: {
-                                                        min: min,
-                                                        max:
-                                                            filters
-                                                                .confidenceScore
-                                                                ?.max ?? 100,
-                                                    },
-                                                });
-                                            }}
-                                        />
-                                        <div className="flex-1 h-2 bg-muted rounded-full relative">
-                                            <div
-                                                className="absolute top-0 left-0 h-full bg-primary rounded-full"
-                                                style={{
-                                                    width: `${(filters.confidenceScore?.max ?? 100) - (filters.confidenceScore?.min ?? 0)}%`,
-                                                    left: `${filters.confidenceScore?.min ?? 0}%`,
-                                                }}
-                                            ></div>
-                                        </div>
-                                        <Input
-                                            type="number"
-                                            min="0"
-                                            max="100"
-                                            placeholder="Max"
-                                            className="w-20"
-                                            value={
-                                                filters.confidenceScore?.max ??
-                                                ""
-                                            }
-                                            onChange={(e) => {
-                                                const max =
-                                                    parseInt(e.target.value) ||
-                                                    100;
-                                                setFilters({
-                                                    ...filters,
-                                                    confidenceScore: {
-                                                        min:
-                                                            filters
-                                                                .confidenceScore
-                                                                ?.min ?? 0,
-                                                        max: max,
-                                                    },
-                                                });
-                                            }}
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="space-y-2">
-                                <h3 className="text-sm font-medium">
-                                    Meeting Method
-                                </h3>
-                                <Select
-                                    value={
-                                        filters.meetingMethod || "any-method"
-                                    }
-                                    onValueChange={(value) =>
-                                        setFilters({
-                                            ...filters,
-                                            meetingMethod:
-                                                value === "any-method"
-                                                    ? undefined
-                                                    : value,
-                                        })
-                                    }
-                                >
-                                    <SelectTrigger className="w-full">
-                                        <SelectValue placeholder="Meeting Method" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="any-method">
-                                            Any Method
-                                        </SelectItem>
-                                        {Array.from(
-                                            new Set(
-                                                contacts
-                                                    .map(
-                                                        (c) => c.meeting_method
-                                                    )
-                                                    .filter(Boolean)
-                                            )
-                                        )
-                                            .sort()
-                                            .map((method) => (
-                                                <SelectItem
-                                                    key={method}
-                                                    value={method as string}
-                                                >
-                                                    {method}
-                                                </SelectItem>
-                                            ))}
-                                    </SelectContent>
-                                </Select>
-                            </div>
-                        </TabsContent>
-                    </Tabs>
-
-                    <div className="space-y-4 pt-6 mt-4 border-t">
-                        <div className="flex items-center justify-between">
-                            <div className="text-sm">
-                                {activeFilterCount > 0
-                                    ? `${activeFilterCount} active filters`
-                                    : "No filters applied"}
-                            </div>
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={clearFilters}
-                            >
-                                Reset All
-                            </Button>
-                        </div>
-                        <Button
-                            className="w-full"
-                            onClick={() => setIsFilterOpen(false)}
-                        >
-                            Apply Filters
-                        </Button>
-                    </div>
-                </SheetContent>
-            </Sheet>
+            <FilterContactsDrawer
+                open={isFilterOpen}
+                onOpenChange={(isOpen) => {
+                    setIsFilterOpen(isOpen);
+                    if (!isOpen && activeFilterCount > 0) {
+                        // When drawer closes and filters are active, ensure they're applied
+                        handleFilterApply();
+                    }
+                }}
+                filters={filters}
+                setFilters={setFilters}
+                contacts={contacts}
+                activeFilterCount={activeFilterCount}
+                clearFilters={clearFilters}
+            />
 
             {editingContact && (
                 <EditContactDrawer

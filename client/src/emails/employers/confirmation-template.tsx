@@ -112,9 +112,7 @@ export const ConfirmationEmail = ({
             <Body style={main}>
                 <Container style={container}>
                     <Section style={header}>
-                        <Text style={headerText}>
-                            HackCC - All California Community Colleges
-                        </Text>
+                        <Text style={headerText}>HackCC</Text>
                     </Section>
 
                     <Section style={content}>

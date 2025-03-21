@@ -282,18 +282,33 @@ export default function ComposePage({ mails = [] }: ComposePageProps) {
 
     // Create the recipient lists using contacts
     const recipientLists = React.useMemo(() => {
-        const employerContacts = contacts.map((contact) => ({
-            id: contact.id.toString(),
-            to: [
-                {
-                    name: contact.contact_name || "",
-                    email: contact.email_address,
-                },
-            ],
-            company: contact.company,
-            labels: ["Employer"],
-            status: contact.status,
-        }));
+        // Use allContacts for employers instead of paginated contacts
+        const employerContacts =
+            recipientType === "employers"
+                ? allContacts.map((contact) => ({
+                      id: contact.id.toString(),
+                      to: [
+                          {
+                              name: contact.contact_name || "",
+                              email: contact.email_address,
+                          },
+                      ],
+                      company: contact.company,
+                      labels: ["Employer"],
+                      status: contact.status,
+                  }))
+                : contacts.map((contact) => ({
+                      id: contact.id.toString(),
+                      to: [
+                          {
+                              name: contact.contact_name || "",
+                              email: contact.email_address,
+                          },
+                      ],
+                      company: contact.company,
+                      labels: ["Employer"],
+                      status: contact.status,
+                  }));
 
         const registeredHackers = mails.map((hacker) => ({
             id: hacker.id,
@@ -320,7 +335,7 @@ export default function ComposePage({ mails = [] }: ComposePageProps) {
             registered: registeredHackers,
             interested: interestedHackers,
         } as Record<RecipientType, RecipientItem[]>;
-    }, [contacts, mails, interestedUsers]);
+    }, [contacts, mails, interestedUsers, allContacts, recipientType]);
 
     const handleAccountChange = (email: string) => {
         setSenderEmail(email);
@@ -470,13 +485,16 @@ export default function ComposePage({ mails = [] }: ComposePageProps) {
 
         if (recipientType === "employers") {
             // Use allContacts instead of contacts to ensure we have all selected recipients
-            // This fixes the issue where only paginated contacts would be included
             console.log(
                 `Preparing ${selectedRecipients.size} selected recipients for confirmation`
             );
 
             allContacts.forEach((contact) => {
-                if (selectedRecipients.has(contact.id.toString())) {
+                // Check both string and numeric IDs to ensure consistency
+                if (
+                    selectedRecipients.has(contact.id.toString()) ||
+                    selectedRecipients.has(String(contact.id))
+                ) {
                     recipientsList.push({
                         name: contact.contact_name || "",
                         email: contact.email_address,
@@ -491,7 +509,11 @@ export default function ComposePage({ mails = [] }: ComposePageProps) {
         } else {
             const allRecipients = recipientLists[recipientType];
             allRecipients.forEach((recipient) => {
-                if (selectedRecipients.has(recipient.id)) {
+                // Check both string and numeric IDs to ensure consistency
+                if (
+                    selectedRecipients.has(recipient.id) ||
+                    selectedRecipients.has(String(recipient.id))
+                ) {
                     recipientsList.push({
                         name:
                             recipient.to[0]?.name ||
@@ -521,7 +543,7 @@ export default function ComposePage({ mails = [] }: ComposePageProps) {
         recipientType,
         selectedRecipients,
         recipientLists,
-        contacts,
+        contacts: allContacts,
         emailSubject,
         emailContent,
         senderEmail,
@@ -722,18 +744,6 @@ export default function ComposePage({ mails = [] }: ComposePageProps) {
             <span className={`${isActive ? "font-medium" : ""}`}>{label}</span>
         </div>
     );
-
-    // Add effect to automatically show selected tab when returning to recipients step with selections
-    React.useEffect(() => {
-        // If we're on the recipients step and there are selected recipients, show the selected view
-        if (
-            activeStep === "recipients" &&
-            selectedRecipients.size > 0 &&
-            recipientType === "employers"
-        ) {
-            setContactsView("selected");
-        }
-    }, [activeStep, selectedRecipients.size, recipientType]);
 
     if (isInterestedLoading || isContactsLoading) {
         return (
