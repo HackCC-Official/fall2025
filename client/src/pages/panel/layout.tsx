@@ -24,9 +24,9 @@ export default function PanelLayout({
             className={`${geistSans.variable} ${geistMono.variable}`}
         >
             <AppSidebar />
-            <main className="px-8 py-4 h-full container">
+            <main className="flex flex-col px-8 py-4 h-screen container">
                 <SidebarTrigger />
-                <div className="mt-4">{children}</div>
+                <div className="flex-grow mt-4">{children}</div>
             </main>
             <Toaster />
         </SidebarProvider>

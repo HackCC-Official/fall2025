@@ -17,7 +17,6 @@ export default function AccountPage() {
     queryFn: () => getAccounts()
   })
   return (
-    <div>
     <div className="py-10">
       <h1 className="font-bold text-3xl">Account</h1>
       <div className="flex space-x-4 my-4">
@@ -41,7 +40,6 @@ export default function AccountPage() {
         </Sheet>
       </div>
       <DataTable isLoading={isLoading} data={data || []} columns={columns} />
-    </div>
     </div>
   )
 }
