@@ -22,11 +22,65 @@ interface OutreachTeamApiResponse {
 }
 
 /**
- * Retrieves all contacts from the outreach service
+ * Retrieves contacts from the outreach service with pagination support
+ * @param page - The page number to retrieve (1-based indexing)
+ * @param limit - Number of contacts per page
+ * @param search - Optional search term to filter contacts
+ * @returns Object containing contacts data and total count
  */
-export async function getContacts(): Promise<ContactDto[]> {
-    const response = await outreachClient.get("/contacts");
-    return response.data.data; // Extract the nested data array
+export async function getContacts(
+    page = 1,
+    limit = 20,
+    search = ""
+): Promise<{ data: ContactDto[]; total: number }> {
+    const params: Record<string, string | number> = {
+        page,
+        limit,
+    };
+
+    if (search) {
+        params.search = search;
+    }
+
+    const response = await outreachClient.get("/contacts", { params });
+
+    return {
+        data: response.data.data || [],
+        total: response.data.total || response.data.data?.length || 0,
+    };
+}
+
+/**
+ * Searches contacts by name, email, or company.
+ * @param query - The search query string to filter contacts by name, email, or company.
+ * @returns An array of contacts matching the search criteria.
+ */
+export async function searchContacts(query: string): Promise<ContactDto[]> {
+    if (!query.trim()) {
+        throw new Error("Search query cannot be empty.");
+    }
+
+    try {
+        const response = await outreachClient.get("/contacts/search", {
+            params: { query },
+        });
+
+        // The API may return array directly in response.data
+        if (Array.isArray(response.data)) {
+            return response.data;
+        }
+
+        // Or it might use the nested data.data structure
+        if (response.data && Array.isArray(response.data.data)) {
+            return response.data.data;
+        }
+
+        // If neither format is valid, throw an error
+        throw new Error("Invalid response format from contacts search API.");
+    } catch (error) {
+        console.error("Error searching contacts:", error);
+        throw error;
+    }
 }
 
 /**

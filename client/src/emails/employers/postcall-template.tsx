@@ -6,9 +6,6 @@ import {
     Head,
     Heading,
     Html,
-    Img,
-    Link,
-    Preview,
     Row,
     Section,
     Text,
@@ -18,6 +15,7 @@ import { OutreachTeamDto } from "../../features/outreach/types/outreach-team";
 interface PostCallEmailProps {
     companyName: string;
     recipientName: string;
+    subject: string;
     sender: OutreachTeamDto;
     positionAtHackCC: string;
     organizationLogo?: string;
@@ -34,19 +32,17 @@ interface PostCallEmailProps {
 export const PostCallEmail = ({
     companyName,
     recipientName,
+    subject,
     sender,
     followupDate,
     followupTime,
     requestedMaterials,
-    socialLinks,
     customEmailBody,
 }: PostCallEmailProps) => {
     const formattedYearAndMajor = `${sender.year} ${sender.major}`;
 
-    const renderCustomEmailBody = () => {
-        if (!customEmailBody) return null;
-
-        const parsedContent = customEmailBody
+    const parseContent = (content: string): string => {
+        return content
             .replace(/\[recipient_name\]/g, recipientName)
             .replace(/\[company_name\]/g, companyName)
             .replace(/\[sender_name\]/g, sender.name)
@@ -58,6 +54,12 @@ export const PostCallEmail = ({
                 /\[requested_materials\]/g,
                 requestedMaterials || "requested materials"
             );
+    };
+
+    const renderCustomEmailBody = () => {
+        if (!customEmailBody) return null;
+
+        const parsedContent = parseContent(customEmailBody);
 
         const sections = parsedContent.split("\n\n");
 
@@ -112,28 +114,21 @@ export const PostCallEmail = ({
         });
     };
 
+    const parsedSubject = parseContent(subject);
+
     return (
         <Html>
             <Head />
-            <Preview>HackCC Sponsorship Next Steps</Preview>
             <Body style={main}>
                 <Container style={container}>
                     {/* Header */}
                     <Section style={header}>
-                        <Img
-                            src={`https://minio.hackcc.net/public-bucket/logo.svg`}
-                            width={120}
-                            height={45}
-                            alt="HackCC Logo"
-                            style={logo}
-                        />
+                        <Text style={headerText}>HackCC</Text>
                     </Section>
 
                     <Section style={content}>
                         {/* Email Subject */}
-                        <Heading style={subjectLine}>
-                            HackCC Sponsorship Next Steps
-                        </Heading>
+                        <Heading style={subjectLine}>{parsedSubject}</Heading>
 
                         {/* Email Body */}
                         {customEmailBody ? (
@@ -192,7 +187,7 @@ export const PostCallEmail = ({
                                         {sender.position &&
                                             `- ${sender.position}`}
                                     </Text>
-                                    <Text style={signaturePosition}>
+                                    <Text style={signatureDetails}>
                                         {formattedYearAndMajor}
                                     </Text>
                                 </Column>
@@ -202,27 +197,6 @@ export const PostCallEmail = ({
                                     </Text>
                                 </Column>
                             </Row>
-
-                            {/* Social Media Links */}
-                            {Object.keys(socialLinks).length > 0 && (
-                                <Row style={socialLinksContainer}>
-                                    {Object.entries(socialLinks).map(
-                                        ([platform, url]) => (
-                                            <Column
-                                                key={platform}
-                                                style={socialLinkColumn}
-                                            >
-                                                <Link
-                                                    href={url}
-                                                    style={socialLink}
-                                                >
-                                                    {platform}
-                                                </Link>
-                                            </Column>
-                                        )
-                                    )}
-                                </Row>
-                            )}
                         </Section>
                     </Section>
 
@@ -261,12 +235,16 @@ const header = {
     backgroundColor: "#1e40af",
     padding: "20px 30px",
     display: "flex",
-    justifyContent: "space-between",
+    justifyContent: "center",
     alignItems: "center",
 };
 
-const logo = {
+const headerText = {
+    fontSize: "20px",
+    fontWeight: "700",
+    color: "#ffffff",
     margin: "0",
+    textAlign: "center" as const,
 };
 
 const content = {
@@ -323,25 +301,10 @@ const signatureName = {
     margin: "0 0 4px",
 };
 
-const signaturePosition = {
+const signatureDetails = {
     fontSize: "14px",
     color: "#4b5563",
     margin: "0 0 8px",
-    textAlign: "right" as const,
-};
-
-const socialLinksContainer = {
-    marginTop: "12px",
-};
-
-const socialLinkColumn = {
-    paddingRight: "12px",
-};
-
-const socialLink = {
-    fontSize: "14px",
-    color: "#2563eb",
-    textDecoration: "none",
 };
 
 const footer = {

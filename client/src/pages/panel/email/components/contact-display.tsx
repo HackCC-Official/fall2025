@@ -1,31 +1,181 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Building2, Globe, Mail, MapPin, Phone, User } from "lucide-react";
+import {
+    Building2,
+    Mail,
+    Phone,
+    User,
+    AlertTriangle,
+    Briefcase,
+    Link as LinkIcon,
+    Clipboard,
+    Copy,
+    Check,
+    Building,
+} from "lucide-react";
 import type { ContactDto } from "@/features/outreach/types/contact.dto";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
+import { useContact } from "@/hooks/use-contact";
+import { useEffect, useState } from "react";
+import { getContactById } from "@/features/outreach/api/outreach";
+import { cn } from "@/lib/utils";
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface ContactDisplayProps {
     contact: ContactDto | null;
 }
 
-export default function ContactDisplay({ contact }: ContactDisplayProps) {
+export default function ContactDisplay({
+    contact: initialContact,
+}: ContactDisplayProps) {
     const router = useRouter();
+    const [contactState, setContact] = useContact();
+    const [contact, setLocalContact] = useState<ContactDto | null>(
+        initialContact
+    );
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    const [copied, setCopied] = useState<string | null>(null);
+
+    const copyToClipboard = (text: string | undefined, field: string) => {
+        if (!text) return;
+        navigator.clipboard.writeText(text);
+        setCopied(field);
+        setTimeout(() => setCopied(null), 2000);
+    };
+
+    useEffect(() => {
+        if (initialContact) {
+            setLocalContact(initialContact);
+            if (
+                initialContact.id &&
+                initialContact.email_address === contactState.selected
+            ) {
+                setContact({ selectedId: initialContact.id });
+            }
+            return;
+        }
+
+        if (contactState.selectedId && !initialContact) {
+            const fetchContact = async () => {
+                setIsLoading(true);
+                setError(null);
+
+                try {
+                    console.log(
+                        "Fetching contact by ID:",
+                        contactState.selectedId
+                    );
+                    if (contactState.selectedId) {
+                        const fetchedContact = await getContactById(
+                            contactState.selectedId.toString()
+                        );
+                        setLocalContact(fetchedContact);
+                    }
+                } catch (err) {
+                    console.error("Failed to fetch contact:", err);
+                    setError("Failed to load contact details");
+                    setLocalContact(null);
+                } finally {
+                    setIsLoading(false);
+                }
+            };
+
+            fetchContact();
+        } else if (
+            contactState.selected &&
+            !contactState.selectedId &&
+            !initialContact
+        ) {
+            setLocalContact(null);
+            setError(
+                "Contact ID not available. Please select a contact from the list."
+            );
+        } else {
+            setLocalContact(initialContact);
+        }
+    }, [
+        initialContact,
+        contactState.selected,
+        contactState.selectedId,
+        setContact,
+    ]);
 
     const handleSendEmail = () => {
-        if (contact?.id) {
-            router.push(`/panel/email/compose?contactId=${contact.id}`);
+        if (contact?.email_address) {
+            router.push(`/panel/email/compose?to=${contact.email_address}`);
         }
     };
 
-    if (!contact) {
+    if (isLoading) {
         return (
             <div className="flex flex-col justify-center items-center p-8 h-full text-muted-foreground">
-                <div className="flex justify-center items-center bg-muted mb-4 rounded-full w-12 h-12">
-                    <User className="w-6 h-6" />
+                <div className="flex justify-center items-center mb-4">
+                    <div className="animate-spin h-16 w-16 border-4 border-primary rounded-full border-t-transparent"></div>
                 </div>
-                <h3 className="mb-1 font-medium">No Contact Selected</h3>
+                <h3 className="text-xl font-medium mb-2 text-foreground">
+                    Loading Contact Details
+                </h3>
                 <p className="text-sm text-center">
+                    Please wait while we load the contact information
+                </p>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="flex flex-col justify-center items-center p-8 h-full text-destructive">
+                <div className="flex justify-center items-center bg-destructive/10 mb-4 rounded-full w-16 h-16">
+                    <AlertTriangle className="w-8 h-8" />
+                </div>
+                <h3 className="text-xl font-medium mb-2">
+                    Error Loading Contact
+                </h3>
+                <p className="text-sm text-center max-w-md">{error}</p>
+            </div>
+        );
+    }
+
+    if (!contact) {
+        // If we have a selected email but no contact, show a warning
+        if (contactState.selected) {
+            return (
+                <div className="flex flex-col justify-center items-center p-8 h-full">
+                    <div className="flex justify-center items-center bg-yellow-100 text-yellow-700 mb-4 rounded-full w-16 h-16">
+                        <AlertTriangle className="w-8 h-8" />
+                    </div>
+                    <h3 className="text-xl font-medium mb-2 text-foreground">
+                        Contact Not Found
+                    </h3>
+                    <p className="text-sm text-center max-w-md">
+                        The selected contact with email &ldquo;
+                        {contactState.selected}&rdquo; could not be found.
+                    </p>
+                    <p className="text-xs text-center mt-2 text-muted-foreground">
+                        This may happen if the contact is on another page or has
+                        been deleted.
+                    </p>
+                </div>
+            );
+        }
+
+        // No selection at all
+        return (
+            <div className="flex flex-col justify-center items-center p-8 h-full">
+                <div className="flex justify-center items-center bg-muted mb-4 rounded-full w-16 h-16">
+                    <User className="w-8 h-8 text-muted-foreground" />
+                </div>
+                <h3 className="text-xl font-medium mb-2 text-foreground">
+                    No Contact Selected
+                </h3>
+                <p className="text-sm text-center text-muted-foreground">
                     Select a contact from the list to view their details
                 </p>
             </div>
@@ -33,186 +183,331 @@ export default function ContactDisplay({ contact }: ContactDisplayProps) {
     }
 
     return (
-        <div className="flex flex-col p-6 h-full min-h-0 overflow-auto">
-            <div className="flex flex-col gap-4 mb-6">
-                <div className="flex justify-between items-center">
-                    <div className="flex flex-col gap-1">
-                        <h2 className="font-semibold text-2xl">
-                            {contact.first_name} {contact.last_name}
-                        </h2>
-                        <div className="flex items-center gap-2">
-                            <p className="text-muted-foreground">
-                                {contact.position}
-                            </p>
-                            <div className="flex items-center gap-2">
-                                <Badge variant="outline" className="capitalize">
-                                    {contact.type}
-                                </Badge>
-                                {contact.been_contacted && (
-                                    <Badge variant="default">Contacted</Badge>
+        <div className="flex flex-col h-full bg-background overflow-auto">
+            <div className="sticky top-0 z-10 bg-background px-8 py-6 border-b">
+                <div className="flex justify-between items-start mb-4">
+                    <div className="flex items-center gap-4">
+                        <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center text-2xl relative">
+                            {contact.contact_name?.charAt(0).toUpperCase() ||
+                                contact.email_address.charAt(0).toUpperCase()}
+                            {contact.status === "Contacted" && (
+                                <div className="absolute -top-1 -right-1 bg-primary rounded-full h-5 w-5 flex items-center justify-center">
+                                    <Check className="h-3 w-3 text-primary-foreground" />
+                                </div>
+                            )}
+                        </div>
+                        <div>
+                            <h1 className="text-2xl font-bold">
+                                {contact.contact_name || "Unnamed Contact"}
+                            </h1>
+                            <div className="flex items-center gap-2 text-muted-foreground">
+                                {contact.position && (
+                                    <span className="flex items-center gap-1 text-sm">
+                                        <Briefcase className="h-3.5 w-3.5" />
+                                        {contact.position}
+                                    </span>
+                                )}
+                                {contact.company && (
+                                    <>
+                                        <span className="text-xs">•</span>
+                                        <span className="flex items-center gap-1 text-sm">
+                                            <Building className="h-3.5 w-3.5" />
+                                            {contact.company}
+                                        </span>
+                                    </>
                                 )}
                             </div>
                         </div>
                     </div>
-                    <Button
-                        onClick={handleSendEmail}
-                        size="sm"
-                        variant="outline"
-                        className="flex items-center gap-2"
-                    >
-                        <Mail className="w-4 h-4" />
-                        Send Email
-                    </Button>
+                    <div className="flex gap-2">
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            className="h-9"
+                            onClick={handleSendEmail}
+                        >
+                            <Mail className="h-4 w-4 mr-2" />
+                            Send Email
+                        </Button>
+                    </div>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                    {contact.status && (
+                        <Badge variant="default">
+                            <Check className="h-3 w-3 mr-1" />
+                            {contact.status}
+                        </Badge>
+                    )}
                 </div>
             </div>
 
-            <div className="gap-6 grid">
-                <Card>
-                    <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                            <User className="w-4 h-4" />
+            <div className="px-8 py-6 flex-1 space-y-6">
+                <Card className="overflow-hidden border-none shadow-sm">
+                    <CardHeader className="pb-3 bg-muted/30 border-b">
+                        <CardTitle className="text-md font-medium flex items-center">
+                            <User className="w-4 h-4 mr-2 text-primary" />
                             Contact Information
                         </CardTitle>
                     </CardHeader>
-                    <CardContent className="gap-4 grid">
-                        <div className="gap-1 grid">
-                            <div className="flex items-center gap-2 text-sm">
-                                <Mail className="w-4 h-4 text-muted-foreground" />
-                                <span>{contact.email}</span>
+                    <CardContent className="space-y-4 p-5">
+                        <TooltipProvider delayDuration={300}>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                {contact.email_address && (
+                                    <div className="flex items-center gap-2 p-2 rounded-md hover:bg-muted/50 transition-colors">
+                                        <Mail className="h-4 w-4 text-primary flex-shrink-0" />
+                                        <div className="truncate flex-1">
+                                            {contact.email_address}
+                                        </div>
+                                        <Tooltip>
+                                            <TooltipTrigger asChild>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    className="h-6 w-6"
+                                                    onClick={() =>
+                                                        copyToClipboard(
+                                                            contact.email_address,
+                                                            "email"
+                                                        )
+                                                    }
+                                                >
+                                                    {copied === "email" ? (
+                                                        <Check className="h-3.5 w-3.5 text-green-500" />
+                                                    ) : (
+                                                        <Copy className="h-3.5 w-3.5 text-muted-foreground" />
+                                                    )}
+                                                </Button>
+                                            </TooltipTrigger>
+                                            <TooltipContent>
+                                                {copied === "email"
+                                                    ? "Copied!"
+                                                    : "Copy email"}
+                                            </TooltipContent>
+                                        </Tooltip>
+                                    </div>
+                                )}
+
+                                {contact.phone_number && (
+                                    <div className="flex items-center gap-2 p-2 rounded-md hover:bg-muted/50 transition-colors">
+                                        <Phone className="h-4 w-4 text-primary flex-shrink-0" />
+                                        <div className="truncate flex-1">
+                                            {contact.phone_number}
+                                        </div>
+                                        <Tooltip>
+                                            <TooltipTrigger asChild>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    className="h-6 w-6"
+                                                    onClick={() =>
+                                                        copyToClipboard(
+                                                            contact.phone_number,
+                                                            "phone"
+                                                        )
+                                                    }
+                                                >
+                                                    {copied === "phone" ? (
+                                                        <Check className="h-3.5 w-3.5 text-green-500" />
+                                                    ) : (
+                                                        <Copy className="h-3.5 w-3.5 text-muted-foreground" />
+                                                    )}
+                                                </Button>
+                                            </TooltipTrigger>
+                                            <TooltipContent>
+                                                {copied === "phone"
+                                                    ? "Copied!"
+                                                    : "Copy phone"}
+                                            </TooltipContent>
+                                        </Tooltip>
+                                    </div>
+                                )}
+
+                                {contact.linkedin && (
+                                    <div className="flex items-center gap-2 p-2 rounded-md hover:bg-muted/50 transition-colors">
+                                        <LinkIcon className="h-4 w-4 text-primary flex-shrink-0" />
+                                        <a
+                                            href={contact.linkedin}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="text-primary hover:underline truncate flex-1"
+                                        >
+                                            LinkedIn Profile
+                                        </a>
+                                        <Tooltip>
+                                            <TooltipTrigger asChild>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    className="h-6 w-6"
+                                                    onClick={() =>
+                                                        copyToClipboard(
+                                                            contact.linkedin,
+                                                            "linkedin"
+                                                        )
+                                                    }
+                                                >
+                                                    {copied === "linkedin" ? (
+                                                        <Check className="h-3.5 w-3.5 text-green-500" />
+                                                    ) : (
+                                                        <Copy className="h-3.5 w-3.5 text-muted-foreground" />
+                                                    )}
+                                                </Button>
+                                            </TooltipTrigger>
+                                            <TooltipContent>
+                                                {copied === "linkedin"
+                                                    ? "Copied!"
+                                                    : "Copy URL"}
+                                            </TooltipContent>
+                                        </Tooltip>
+                                    </div>
+                                )}
+
+                                {contact.website && (
+                                    <div className="flex items-center gap-2 p-2 rounded-md hover:bg-muted/50 transition-colors">
+                                        <LinkIcon className="h-4 w-4 text-primary flex-shrink-0" />
+                                        <a
+                                            href={contact.website}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="text-primary hover:underline truncate flex-1"
+                                        >
+                                            Website
+                                        </a>
+                                        <Tooltip>
+                                            <TooltipTrigger asChild>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    className="h-6 w-6"
+                                                    onClick={() =>
+                                                        copyToClipboard(
+                                                            contact.website,
+                                                            "website"
+                                                        )
+                                                    }
+                                                >
+                                                    {copied === "website" ? (
+                                                        <Check className="h-3.5 w-3.5 text-green-500" />
+                                                    ) : (
+                                                        <Copy className="h-3.5 w-3.5 text-muted-foreground" />
+                                                    )}
+                                                </Button>
+                                            </TooltipTrigger>
+                                            <TooltipContent>
+                                                {copied === "website"
+                                                    ? "Copied!"
+                                                    : "Copy URL"}
+                                            </TooltipContent>
+                                        </Tooltip>
+                                    </div>
+                                )}
                             </div>
-                            {contact.phone_number && (
-                                <div className="flex items-center gap-2 text-sm">
-                                    <Phone className="w-4 h-4 text-muted-foreground" />
-                                    <span>{contact.phone_number}</span>
-                                </div>
-                            )}
-                            {contact.linkedin_url && (
-                                <div className="flex items-center gap-2 text-sm">
-                                    <svg
-                                        className="w-4 h-4 text-muted-foreground"
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        viewBox="0 0 24 24"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        strokeWidth="2"
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                    >
-                                        <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" />
-                                        <rect
-                                            width="4"
-                                            height="12"
-                                            x="2"
-                                            y="9"
-                                        />
-                                        <circle cx="4" cy="4" r="2" />
-                                    </svg>
-                                    <a
-                                        href={contact.linkedin_url}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="text-primary hover:underline"
-                                    >
-                                        LinkedIn Profile
-                                    </a>
-                                </div>
-                            )}
-                        </div>
+                        </TooltipProvider>
                     </CardContent>
                 </Card>
 
-                <Card>
-                    <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                            <Building2 className="w-4 h-4" />
+                <Card className="overflow-hidden border-none shadow-sm">
+                    <CardHeader className="pb-3 bg-muted/30 border-b">
+                        <CardTitle className="text-md font-medium flex items-center">
+                            <Building2 className="w-4 h-4 mr-2 text-primary" />
                             Organization Details
                         </CardTitle>
                     </CardHeader>
-                    <CardContent className="gap-4 grid">
-                        <div className="gap-1 grid">
-                            <p className="font-medium text-sm">Organization</p>
-                            <p className="text-muted-foreground text-sm">
-                                {contact.organization}
-                            </p>
-                        </div>
-                        <div className="gap-4 grid grid-cols-2">
-                            {contact.department && (
-                                <div className="gap-1 grid">
-                                    <p className="font-medium text-sm">
-                                        Department
-                                    </p>
+                    <CardContent className="p-5">
+                        <div className="space-y-4">
+                            {contact.company && (
+                                <div className="space-y-1">
+                                    <div className="text-sm font-medium">
+                                        Company
+                                    </div>
+                                    <div className="text-sm text-muted-foreground flex items-center">
+                                        {contact.company}
+                                    </div>
+                                </div>
+                            )}
 
-                                    <p className="text-muted-foreground text-sm">
-                                        {contact.department}
-                                    </p>
-                                </div>
-                            )}
-                            {contact.industry && (
-                                <div className="gap-1 grid">
-                                    <p className="font-medium text-sm">
-                                        Industry
-                                    </p>
-                                    <p className="text-muted-foreground text-sm">
-                                        {contact.industry}
-                                    </p>
-                                </div>
-                            )}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                {contact.position && (
+                                    <div className="space-y-1 p-2 rounded-md hover:bg-muted/50 transition-colors">
+                                        <div className="text-sm font-medium flex items-center gap-1">
+                                            <span className="h-1.5 w-1.5 rounded-full bg-primary/60"></span>
+                                            Position
+                                        </div>
+                                        <div className="text-sm text-muted-foreground">
+                                            {contact.position}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {contact.meeting_method && (
+                                    <div className="space-y-1 p-2 rounded-md hover:bg-muted/50 transition-colors">
+                                        <div className="text-sm font-medium flex items-center gap-1">
+                                            <span className="h-1.5 w-1.5 rounded-full bg-primary/60"></span>
+                                            Meeting Method
+                                        </div>
+                                        <div className="text-sm text-muted-foreground">
+                                            {contact.meeting_method}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {contact.liaison && (
+                                    <div className="space-y-1 p-2 rounded-md hover:bg-muted/50 transition-colors">
+                                        <div className="text-sm font-medium flex items-center gap-1">
+                                            <span className="h-1.5 w-1.5 rounded-full bg-primary/60"></span>
+                                            Liaison
+                                        </div>
+                                        <div className="text-sm text-muted-foreground">
+                                            {contact.liaison}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
                         </div>
                     </CardContent>
                 </Card>
 
-                {contact.country && (
-                    <Card>
-                        <CardHeader>
-                            <CardTitle className="flex items-center gap-2">
-                                <MapPin className="w-4 h-4" />
-                                Location
+                {contact.confidence_score !== undefined && (
+                    <Card className="overflow-hidden border-none shadow-sm">
+                        <CardHeader className="pb-3 bg-muted/30 border-b">
+                            <CardTitle className="text-md font-medium flex items-center">
+                                <Clipboard className="w-4 h-4 mr-2 text-primary" />
+                                Additional Information
                             </CardTitle>
                         </CardHeader>
-                        <CardContent className="gap-4 grid">
-                            <div className="gap-1 grid">
-                                {contact.street && (
-                                    <p className="text-sm">{contact.street}</p>
-                                )}
-                                <p className="text-sm">
-                                    {contact.city &&
-                                        contact.state &&
-                                        contact.postal_code &&
-                                        `${contact.city}, ${contact.state} ${contact.postal_code}`}
-                                </p>
-                                <p className="text-sm">{contact.country}</p>
+                        <CardContent className="p-5">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="space-y-1">
+                                    <div className="text-sm font-medium">
+                                        Confidence Score
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <div className="h-2 flex-1 bg-muted rounded-full overflow-hidden">
+                                            <div
+                                                className={cn(
+                                                    "h-full",
+                                                    contact.confidence_score >
+                                                        70
+                                                        ? "bg-green-500"
+                                                        : contact.confidence_score >
+                                                            40
+                                                          ? "bg-amber-500"
+                                                          : "bg-red-500"
+                                                )}
+                                                style={{
+                                                    width: `${contact.confidence_score}%`,
+                                                }}
+                                            />
+                                        </div>
+                                        <span className="text-sm font-medium">
+                                            {contact.confidence_score}%
+                                        </span>
+                                    </div>
+                                </div>
                             </div>
                         </CardContent>
                     </Card>
                 )}
-
-                <Card>
-                    <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                            <Globe className="w-4 h-4" />
-                            Additional Information
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent className="gap-4 grid">
-                        <div className="gap-4 grid grid-cols-2">
-                            <div className="gap-1 grid">
-                                <p className="font-medium text-sm">
-                                    Confidence Score
-                                </p>
-                                <div>
-                                    {contact.confidence_score != null && (
-                                        <span>
-                                            {contact.confidence_score.toFixed(
-                                                0
-                                            )}
-                                            %
-                                        </span>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
             </div>
         </div>
     );

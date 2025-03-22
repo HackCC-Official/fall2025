@@ -6,8 +6,6 @@ import {
     Head,
     Heading,
     Html,
-    Img,
-    Link,
     Preview,
     Row,
     Section,
@@ -16,85 +14,43 @@ import {
 import { OutreachTeamDto } from "../../features/outreach/types/outreach-team";
 
 interface ConfirmationEmailProps {
-    /**
-     * The name of the company being contacted
-     */
     companyName: string;
-
-    /**
-     * The name of the person being contacted at the company
-     */
     recipientName: string;
-
-    /**
-     * Information about the outreach team member sending the email
-     */
     sender: OutreachTeamDto;
-
-    /**
-     * The position of the sender at HackCC
-     */
-    positionAtHackCC: string;
-
-    /**
-     * Organization's logo URL
-     */
-    organizationLogo?: string;
-
-    /**
-     * Social media links to include in the signature
-     */
+    subject: string;
     socialLinks: {
-        /**
-         * URLs to various social media profiles
-         */
         [key: string]: string;
     };
 
-    /**
-     * Optional custom email body content
-     * When provided, will replace the default email body while preserving variable replacements
-     */
     customEmailBody?: string;
 }
 
-const baseUrl = process.env.VERCEL_URL
-    ? `https://${process.env.VERCEL_URL}`
-    : "";
-
-/**
- * ConfirmationEmail component for HackCC outreach
- *
- * This template is designed for sending confirmation emails to sponsors
- * who have agreed to sponsor a HackCC event.
- */
 export const ConfirmationEmail = ({
     companyName,
     recipientName,
     sender,
-    socialLinks,
+    subject,
     customEmailBody,
 }: ConfirmationEmailProps) => {
-    // Format the sender's year and major for better readability
     const formattedYearAndMajor = `${sender.year} ${sender.major}`;
 
-    // Parse custom email body if provided
-    const renderCustomEmailBody = () => {
-        if (!customEmailBody) return null;
-
-        // Replace variable placeholders with actual values
-        const parsedContent = customEmailBody
+    const parseContent = (content: string): string => {
+        return content
             .replace(/\[recipient_name\]/g, recipientName)
             .replace(/\[company_name\]/g, companyName)
             .replace(/\[sender_name\]/g, sender.name)
             .replace(/\[sender_year_and_major\]/g, formattedYearAndMajor)
             .replace(/\[sender_school\]/g, sender.school);
+    };
 
-        // Split the content into sections
+    const renderCustomEmailBody = () => {
+        if (!customEmailBody) return null;
+
+        const parsedContent = parseContent(customEmailBody);
+
         const sections = parsedContent.split("\n\n");
 
         return sections.map((section, index) => {
-            // Check if this is a section header (like "Next Steps:")
             if (section.endsWith(":")) {
                 return (
                     <Text key={`header-${index}`} style={paragraphBold}>
@@ -103,17 +59,13 @@ export const ConfirmationEmail = ({
                 );
             }
 
-            // Check if this section contains bullet points
             if (section.includes("•") || section.includes("-")) {
-                // Split by lines to handle each bullet point separately
                 const lines = section.split("\n");
                 return (
                     <React.Fragment key={`bullets-${index}`}>
                         {lines.map((line, lineIndex) => {
-                            // Skip empty lines
                             if (!line.trim()) return null;
 
-                            // If this is a bullet point (starts with • or -), use bullet point styling
                             if (
                                 line.trim().startsWith("•") ||
                                 line.trim().startsWith("-")
@@ -151,28 +103,21 @@ export const ConfirmationEmail = ({
         });
     };
 
+    const parsedSubject = parseContent(subject);
+
     return (
         <Html>
             <Head />
             <Preview>HackCC x {companyName} Sponsorship Confirmation!</Preview>
             <Body style={main}>
                 <Container style={container}>
-                    {/* Header */}
                     <Section style={header}>
-                        <Img
-                            src={`${baseUrl}/static/hackcc-logo.png`}
-                            width={120}
-                            height={45}
-                            alt="HackCC Logo"
-                            style={logo}
-                        />
+                        <Text style={headerText}>HackCC</Text>
                     </Section>
 
                     <Section style={content}>
                         {/* Email Subject */}
-                        <Heading style={subjectLine}>
-                            HackCC x {companyName} Sponsorship Confirmation!
-                        </Heading>
+                        <Heading style={subjectLine}>{parsedSubject}</Heading>
 
                         {/* Email Body */}
                         {customEmailBody ? (
@@ -227,7 +172,7 @@ export const ConfirmationEmail = ({
                                         {sender.position &&
                                             `- ${sender.position}`}
                                     </Text>
-                                    <Text style={signaturePosition}>
+                                    <Text style={signatureDetails}>
                                         {formattedYearAndMajor}
                                     </Text>
                                 </Column>
@@ -237,27 +182,6 @@ export const ConfirmationEmail = ({
                                     </Text>
                                 </Column>
                             </Row>
-
-                            {/* Social Media Links */}
-                            {Object.keys(socialLinks).length > 0 && (
-                                <Row style={socialLinksContainer}>
-                                    {Object.entries(socialLinks).map(
-                                        ([platform, url]) => (
-                                            <Column
-                                                key={platform}
-                                                style={socialLinkColumn}
-                                            >
-                                                <Link
-                                                    href={url}
-                                                    style={socialLink}
-                                                >
-                                                    {platform}
-                                                </Link>
-                                            </Column>
-                                        )
-                                    )}
-                                </Row>
-                            )}
                         </Section>
                     </Section>
 
@@ -296,12 +220,16 @@ const header = {
     backgroundColor: "#1e40af", // Deep blue header
     padding: "20px 30px",
     display: "flex",
-    justifyContent: "space-between",
+    justifyContent: "center",
     alignItems: "center",
 };
 
-const logo = {
+const headerText = {
+    fontSize: "20px",
+    fontWeight: "700",
+    color: "#ffffff",
     margin: "0",
+    textAlign: "center" as const,
 };
 
 const content = {
@@ -358,25 +286,10 @@ const signatureName = {
     margin: "0 0 4px",
 };
 
-const signaturePosition = {
+const signatureDetails = {
     fontSize: "14px",
     color: "#4b5563",
     margin: "0 0 8px",
-    textAlign: "right" as const,
-};
-
-const socialLinksContainer = {
-    marginTop: "12px",
-};
-
-const socialLinkColumn = {
-    paddingRight: "12px",
-};
-
-const socialLink = {
-    fontSize: "14px",
-    color: "#2563eb",
-    textDecoration: "none",
 };
 
 const footer = {

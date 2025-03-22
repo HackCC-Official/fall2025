@@ -4,48 +4,39 @@ import {
     Container,
     Column,
     Head,
-    Heading,
     Html,
+    Preview,
     Row,
     Section,
     Text,
 } from "@react-email/components";
-import { OutreachTeamDto } from "../../features/outreach/types/outreach-team";
+import { OutreachTeamDto } from "../features/outreach/types/outreach-team";
 
-interface SponsorshipEmailProps {
-    companyName: string;
+interface InterestedEmailProps {
     recipientName: string;
-    venue: string;
+    emailContent: string;
     sender: OutreachTeamDto;
-    subject: string;
-    positionAtHackCC: string;
-    customEmailBody?: string;
+    organizationLogo?: string;
+    socialLinks?: {
+        [key: string]: string;
+    };
 }
 
-export const SponsorshipEmail = ({
-    companyName,
-    recipientName,
-    venue,
+export const InterestedEmail = ({
+    emailContent,
     sender,
-    subject,
-    customEmailBody,
-}: SponsorshipEmailProps) => {
+    recipientName,
+}: InterestedEmailProps) => {
     const formattedYearAndMajor = `${sender.year} ${sender.major}`;
 
-    const parseContent = (content: string): string => {
-        return content
+    const renderCustomEmailBody = () => {
+        if (!emailContent) return null;
+
+        const parsedContent = emailContent
             .replace(/\[recipient_name\]/g, recipientName)
-            .replace(/\[company_name\]/g, companyName)
             .replace(/\[sender_name\]/g, sender.name)
             .replace(/\[sender_year_and_major\]/g, formattedYearAndMajor)
-            .replace(/\[sender_school\]/g, sender.school)
-            .replace(/\[venue\]/g, venue);
-    };
-
-    const renderCustomEmailBody = () => {
-        if (!customEmailBody) return null;
-
-        const parsedContent = parseContent(customEmailBody);
+            .replace(/\[sender_school\]/g, sender.school);
 
         return parsedContent.split("\n\n").map((paragraphText, index) => (
             <Text key={index} style={paragraph}>
@@ -54,55 +45,18 @@ export const SponsorshipEmail = ({
         ));
     };
 
-    const parsedSubject = parseContent(subject);
-
     return (
         <Html>
             <Head />
+            <Preview>Message from HackCC</Preview>
             <Body style={main}>
                 <Container style={container}>
-                    {/* Header */}
                     <Section style={header}>
                         <Text style={headerText}>HackCC</Text>
                     </Section>
 
                     <Section style={content}>
-                        {/* Email Subject */}
-                        <Heading style={subjectLine}>{parsedSubject}</Heading>
-
-                        {/* Email Body */}
-                        {customEmailBody ? (
-                            renderCustomEmailBody()
-                        ) : (
-                            <>
-                                <Text style={paragraph}>
-                                    Hello {recipientName},
-                                </Text>
-
-                                <Text style={paragraph}>
-                                    I hope this email finds you well. My name is{" "}
-                                    {sender.name}, and I am a{" "}
-                                    {formattedYearAndMajor} student at{" "}
-                                    {sender.school}. I am also a sponsorship
-                                    coordinator with HackCC, a student-led
-                                    initiative providing California community
-                                    college students with the opportunity to
-                                    compete in weekend-long invention marathons.
-                                    Taking place May 2nd-4th at {venue},
-                                    we&apos;re expecting 250 hackers this year!
-                                </Text>
-
-                                <Text style={paragraph}>
-                                    I am reaching out to inquire about getting{" "}
-                                    {companyName} on board as a sponsor for one
-                                    (or more!) of our hackathons. I was
-                                    wondering if {companyName} has any interest
-                                    in sponsoring hackathons at this time?
-                                </Text>
-
-                                <Text style={paragraph}>Best regards,</Text>
-                            </>
-                        )}
+                        {renderCustomEmailBody()}
 
                         {/* Signature */}
                         <Section style={signatureContainer}>
@@ -138,7 +92,7 @@ export const SponsorshipEmail = ({
     );
 };
 
-export default SponsorshipEmail;
+export default InterestedEmail;
 
 // Styles
 const main = {
@@ -158,7 +112,7 @@ const container = {
 };
 
 const header = {
-    backgroundColor: "#1e40af",
+    backgroundColor: "#1e40af", // Deep blue header
     padding: "20px 30px",
     display: "flex",
     justifyContent: "center",
@@ -175,14 +129,6 @@ const headerText = {
 
 const content = {
     padding: "30px",
-};
-
-const subjectLine = {
-    fontSize: "24px",
-    lineHeight: "1.3",
-    fontWeight: "700",
-    color: "#1e40af",
-    margin: "0 0 24px",
 };
 
 const paragraph = {

@@ -24,6 +24,7 @@ import AddContactDrawer from "./add-contact-drawer";
 import Inbox from "./inbox";
 import type { SendEmailDto } from "@/features/outreach/types/email.dto";
 import SentDisplay from "./sent-display";
+import { useContacts } from "@/hooks/use-contacts";
 
 interface MailProps {
     accounts: {
@@ -42,7 +43,7 @@ interface MailProps {
 
 export default function Mail({
     mails = [],
-    contacts = [],
+    contacts: initialContacts = [],
     defaultLayout = [20, 32, 48],
     defaultCollapsed = false,
     navCollapsedSize,
@@ -50,10 +51,10 @@ export default function Mail({
     emailsCount = 0,
 }: MailProps) {
     // Debug log
-    console.log("Mail component received contacts:", contacts);
+    console.log("Mail component received initial contacts:", initialContacts);
     console.log("Mail component received emails:", emails);
 
-    const [isCollapsed, setIsCollapsed] = React.useState(defaultCollapsed);
+    const [isCollapsed] = React.useState(defaultCollapsed);
     const [mail] = useMail();
     const [contact] = useContact();
     const [isUploadModalOpen, setIsUploadModalOpen] = React.useState(false);
@@ -62,14 +63,31 @@ export default function Mail({
 
     const selectedMail =
         mails?.find((item) => item.id === mail.selected) || null;
-    const selectedContact =
-        contacts?.find((item) => item.email === contact.selected) || null;
     const selectedEmail =
         emails?.find((item) => item.id === mail.selected) || null;
 
     const [activeView, setActiveView] = React.useState<"mail" | "contacts">(
         "mail"
     );
+
+    // Fetch contacts data with pagination
+    const {
+        data: contactsData,
+        // We don't need these pagination details in Mail component
+    } = useContacts();
+
+    const contacts = contactsData?.data || initialContacts;
+    const totalContacts = contactsData?.total || 0;
+
+    // Debug contact selection
+    React.useEffect(() => {
+        if (contact.selected) {
+            console.log("Current contact selection:", {
+                email: contact.selected,
+                id: contact.selectedId,
+            });
+        }
+    }, [contact.selected, contact.selectedId]);
 
     React.useEffect(() => {
         // Open upload modal when navigating to /panel/email/contacts
@@ -102,23 +120,12 @@ export default function Mail({
                             defaultSize={defaultLayout[0]}
                             collapsedSize={navCollapsedSize}
                             collapsible={true}
-                            minSize={15}
-                            maxSize={20}
-                            onCollapse={() => {
-                                setIsCollapsed(true);
-                                document.cookie = `react-resizable-panels:collapsed=${JSON.stringify(
-                                    true
-                                )}`;
-                            }}
-                            onResize={() => {
-                                setIsCollapsed(false);
-                                document.cookie = `react-resizable-panels:collapsed=${JSON.stringify(
-                                    false
-                                )}`;
-                            }}
+                            maxSize={4.5}
                             className={cn(
                                 isCollapsed &&
-                                    "min-w-[50px] transition-all duration-300 ease-in-out"
+                                    `min-w-[50px] transition-all duration-300 ease-in-out react-resizable-panels:collapsed=${JSON.stringify(
+                                        false
+                                    )}`
                             )}
                         >
                             <Separator />
@@ -127,7 +134,6 @@ export default function Mail({
                                 isCollapsed={isCollapsed}
                                 links={[
                                     {
-                                        title: "Sent",
                                         label: emailsCount.toString(),
                                         icon: Send,
                                         variant:
@@ -137,10 +143,7 @@ export default function Mail({
                                         onClick: () => setActiveView("mail"),
                                     },
                                     {
-                                        title: "Contacts",
-                                        label: Array.isArray(contacts)
-                                            ? contacts.length.toString()
-                                            : "0",
+                                        label: totalContacts.toString(),
                                         icon: Users,
                                         variant:
                                             activeView === "contacts"
@@ -171,7 +174,7 @@ export default function Mail({
                             {activeView === "mail" ? (
                                 <SentDisplay email={selectedEmail} />
                             ) : (
-                                <ContactDisplay contact={selectedContact} />
+                                <ContactDisplay contact={null} />
                             )}
                         </ResizablePanel>
                     </ResizablePanelGroup>

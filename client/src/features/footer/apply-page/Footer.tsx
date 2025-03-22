@@ -6,6 +6,7 @@ import BalloonCat from "../../../../public/Baloon Cat 4.png"
 import DarkCloud from "../../../../public/DarkCloudGroup.png"
 import { ApplyButton } from "@/components/applybutton"
 import Logo from '../../../../public/Logo.svg'
+import FooterBg from '../../../../public/footerbg.png'
 
 
 //<Image className="" src={BackgroundDarkCloud} alt="Back CLoud"></Image>
@@ -13,7 +14,7 @@ export default function Footer() {
     return (
         <div className="relative bg-bgpurple -mt-[5px] w-full overflow-hidden">
             
-            <Image src={"/footerbg.png"} className='z-0 absolute w-screen max-w-full object-cover 2xl:object-fill pointer-events-none' alt="bg" fill/>
+            <Image src={FooterBg} className='z-0 absolute w-screen max-w-full object-cover 2xl:object-fill pointer-events-none' alt="bg" fill/>
             <div className="flex justify-center mx-auto py-[200px] md:py-[300px]">
                 <div className="relative">
                 <Image className="-top-[100px] md:-top-[125px] lg:-top-[125px] -left-32 md:-left-48 z-10 absolute w-48 md:w-52 lg:w-72 h-auto animate-bobbing ease-linear pointer-events-none" src={BalloonCat} alt="cat" />

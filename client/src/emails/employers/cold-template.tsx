@@ -12,24 +12,30 @@ import {
 } from "@react-email/components";
 import { OutreachTeamDto } from "../../features/outreach/types/outreach-team";
 
-interface SponsorshipEmailProps {
+interface ColdEmailProps {
     companyName: string;
     recipientName: string;
     venue: string;
     sender: OutreachTeamDto;
     subject: string;
     positionAtHackCC: string;
+    socialLinks: {
+        linkedin?: string;
+        twitter?: string;
+        github?: string;
+    };
+
     customEmailBody?: string;
 }
 
-export const SponsorshipEmail = ({
+export const ColdEmail = ({
     companyName,
     recipientName,
     venue,
     sender,
     subject,
     customEmailBody,
-}: SponsorshipEmailProps) => {
+}: ColdEmailProps) => {
     const formattedYearAndMajor = `${sender.year} ${sender.major}`;
 
     const parseContent = (content: string): string => {
@@ -54,7 +60,9 @@ export const SponsorshipEmail = ({
         ));
     };
 
-    const parsedSubject = parseContent(subject);
+    const parsedSubject = parseContent(
+        subject || "Meet the best students in X town this May"
+    );
 
     return (
         <Html>
@@ -138,7 +146,7 @@ export const SponsorshipEmail = ({
     );
 };
 
-export default SponsorshipEmail;
+export default ColdEmail;
 
 // Styles
 const main = {
