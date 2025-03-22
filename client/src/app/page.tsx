@@ -10,7 +10,8 @@ import VolunteerJudgeContainer from "../features/volunteer-judge/VolunteerJudgeC
 import { Navbar } from "@/components/navbar";
 import About from "@/features/about/about";
 import Collage from "@/features/collage/Collage";
-
+import Slider from "@/features/organizers/Slider";
+import Carousel from "@/features/events/carosoul";
 
 export default function HomePage() {
   return (
@@ -19,10 +20,13 @@ export default function HomePage() {
       <FrontPage></FrontPage>
       <About></About>
       <Collage></Collage>
+      <Carousel></Carousel>
       <AttendeeContainer/>
-      {/* <Venue></Venue> */}
+      <Slider></Slider>
+      <Venue></Venue>
       <VolunteerJudgeContainer></VolunteerJudgeContainer>
       <Footer></Footer>
+
     </div>
   )
 }
