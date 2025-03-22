@@ -1,8 +1,7 @@
 "use client"
 
 import * as React from "react"
-import Image from "next/image"
-import { FileText, ImageIcon, X } from "lucide-react"
+import { File, X } from "lucide-react" // Use File icon for PDF
 import Dropzone, {
   type DropzoneProps,
   type FileRejection,
@@ -15,83 +14,14 @@ import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { ScrollArea } from "@/components/ui/scroll-area"
 
-/**
- * https://github.com/sadmann7/file-uploader/blob/main/src/hooks/use-upload-file.ts
- */
 interface FileUploaderProps extends React.HTMLAttributes<HTMLDivElement> {
-  /**
-   * Value of the uploader.
-   * @type File[]
-   * @default undefined
-   * @example value={files}
-   */
   value?: File[]
-
-  /**
-   * Function to be called when the value changes.
-   * @type (files: File[]) => void
-   * @default undefined
-   * @example onValueChange={(files) => setFiles(files)}
-   */
   onValueChange?: (files: File[]) => void
-
-  /**
-   * Function to be called when files are uploaded.
-   * @type (files: File[]) => Promise<void>
-   * @default undefined
-   * @example onUpload={(files) => uploadFiles(files)}
-   */
   onUpload?: (files: File[]) => Promise<void>
-
-  /**
-   * Progress of the uploaded files.
-   * @type Record<string, number> | undefined
-   * @default undefined
-   * @example progresses={{ "file1.png": 50 }}
-   */
   progresses?: Record<string, number>
-
-  /**
-   * Accepted file types for the uploader.
-   * @type { [key: string]: string[]}
-   * @default
-   * ```ts
-   * { "image/*": [] }
-   * ```
-   * @example accept={["image/png", "image/jpeg"]}
-   */
-  accept?: DropzoneProps["accept"]
-
-  /**
-   * Maximum file size for the uploader.
-   * @type number | undefined
-   * @default 1024 * 1024 * 2 // 2MB
-   * @example maxSize={1024 * 1024 * 2} // 2MB
-   */
   maxSize?: DropzoneProps["maxSize"]
-
-  /**
-   * Maximum number of files for the uploader.
-   * @type number | undefined
-   * @default 1
-   * @example maxFileCount={4}
-   */
   maxFileCount?: DropzoneProps["maxFiles"]
-
-  /**
-   * Whether the uploader should accept multiple files.
-   * @type boolean
-   * @default false
-   * @example multiple
-   */
   multiple?: boolean
-
-  /**
-   * Whether the uploader is disabled.
-   * @type boolean
-   * @default false
-   * @example disabled
-   */
   disabled?: boolean
 }
 
@@ -101,10 +31,7 @@ export function FileUploader(props: FileUploaderProps) {
     onValueChange,
     onUpload,
     progresses,
-    accept = {
-      "image/*": [],
-    },
-    maxSize = 1024 * 1024 * 2,
+    maxSize = 1024 * 1024 * 2, // 2MB
     maxFileCount = 1,
     multiple = false,
     disabled = false,
@@ -151,7 +78,7 @@ export function FileUploader(props: FileUploaderProps) {
         updatedFiles.length <= maxFileCount
       ) {
         const target =
-          updatedFiles.length > 0 ? `${updatedFiles.length} files` : `file`
+          updatedFiles.length > 1 ? `${updatedFiles.length} files` : `file`
 
         toast.promise(onUpload(updatedFiles), {
           loading: `Uploading ${target}...`,
@@ -163,7 +90,6 @@ export function FileUploader(props: FileUploaderProps) {
         })
       }
     },
-
     [files, maxFileCount, multiple, onUpload, setFiles]
   )
 
@@ -174,26 +100,13 @@ export function FileUploader(props: FileUploaderProps) {
     onValueChange?.(newFiles)
   }
 
-  // Revoke preview url when component unmounts
-  React.useEffect(() => {
-    return () => {
-      if (!files) return
-      files.forEach((file) => {
-        if (isFileWithPreview(file)) {
-          URL.revokeObjectURL(file.preview)
-        }
-      })
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-
   const isDisabled = disabled || (files?.length ?? 0) >= maxFileCount
 
   return (
     <div className="relative flex flex-col gap-6 overflow-hidden">
       <Dropzone
         onDrop={onDrop}
-        accept={accept}
+        accept={{ "application/pdf": [] }} // Only accept PDF files
         maxSize={maxSize}
         maxFiles={maxFileCount}
         multiple={maxFileCount > 1 || multiple}
@@ -214,25 +127,28 @@ export function FileUploader(props: FileUploaderProps) {
             <input {...getInputProps()} />
             {isDragActive ? (
               <div className="flex flex-col justify-center items-center gap-4 sm:px-5">
-                <ImageIcon
+                <File
                   strokeWidth={1}
                   className="opacity-50 size-[64px] text-muted-foreground"
                   aria-hidden="true"
                 />
                 <p className="font-medium text-muted-foreground">
-                  Drop the files here
+                  Drop the PDF file here
                 </p>
               </div>
             ) : (
               <div className="flex flex-col justify-center items-center gap-4 sm:px-5">
-                <ImageIcon
+                <File
                   strokeWidth={1}
                   className="opacity-50 size-[64px] text-muted-foreground"
                   aria-hidden="true"
                 />
                 <div className="flex flex-col gap-px">
                   <p className="font-mont font-semibold text-[#696E75]">
-                    Drag & Drop or <span className='text-royalpurple'>Select File</span>
+                    Drag & Drop or <span className="text-royalpurple">Select PDF</span>
+                  </p>
+                  <p className="text-muted-foreground text-xs">
+                    Max file size: {formatBytes(maxSize)}
                   </p>
                 </div>
               </div>
@@ -268,7 +184,6 @@ function FileCard({ file, progress, onRemove }: FileCardProps) {
   return (
     <div className="relative flex items-center gap-2.5">
       <div className="flex flex-1 gap-2.5">
-        {isFileWithPreview(file) ? <FilePreview file={file} /> : null}
         <div className="flex flex-col gap-2 w-full">
           <div className="flex flex-col gap-px">
             <p className="font-medium text-foreground/80 text-sm line-clamp-1">
@@ -294,32 +209,5 @@ function FileCard({ file, progress, onRemove }: FileCardProps) {
         </Button>
       </div>
     </div>
-  )
-}
-
-function isFileWithPreview(file: File): file is File & { preview: string } {
-  return "preview" in file && typeof file.preview === "string"
-}
-
-interface FilePreviewProps {
-  file: File & { preview: string }
-}
-
-function FilePreview({ file }: FilePreviewProps) {
-  if (file.type.startsWith("image/")) {
-    return (
-      <Image
-        src={file.preview}
-        alt={file.name}
-        width={48}
-        height={48}
-        loading="lazy"
-        className="rounded-md object-cover aspect-square shrink-0"
-      />
-    )
-  }
-
-  return (
-    <FileText className="size-10 text-muted-foreground" aria-hidden="true" />
   )
 }
