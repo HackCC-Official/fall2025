@@ -1,5 +1,6 @@
 import { applyClient } from "@/api/apply-client";
 import { ApplicationRequestDTO } from "../types/application";
+import { ApplicationStatus } from "../types/status.enum";
 
 export interface Document {
   resume: File | undefined;
@@ -35,4 +36,14 @@ export async function createApplication(applicationDTO: ApplicationRequestDTO, d
       },
     })
   ).data;
+}
+
+export async function getApplicationByUserId(userId: string) : Promise<{ status: ApplicationStatus }> {
+    // Make the POST request with formData
+    return (
+      await applyClient.request({
+        method: "GET",
+        url: "applications/user/" + userId,
+      })
+    ).data;
 }

@@ -14,7 +14,7 @@ import { ApplicationSelect } from "@/features/application/components/application
 import { FormCard } from "@/features/application/components/form-card";
 import schools from '@/features/application/data/schools.json';
 import residences from '@/features/application/data/residences.json';
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQueries, useQuery } from "@tanstack/react-query";
 import { getQuestions } from "@/features/question/api/question";
 import { QuestionResponseDto } from "@/features/question/types/question-response.dto";
 import { QuestionType } from "@/features/question/types/question-type.enum";
@@ -22,8 +22,10 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { ApplicationRequestDTO } from "@/features/application/types/application";
 import { ApplicationStatus } from "@/features/application/types/status.enum";
-import { createApplication, Document } from "@/features/application/api/application";
+import { createApplication, Document, getApplicationByUserId } from "@/features/application/api/application";
 import { User } from "@supabase/supabase-js";
+import { DarkCard } from "@/components/dark-card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 
 interface QuestionGroupNode {
     type: 'GROUP';
@@ -48,10 +50,21 @@ export default function ApplyPage() {
     const supabase = getBrowserClient()
     const router = useRouter();
     const [authCheck, setAuthChecked] = useState(false);
-    const { data } = useQuery({
-        queryKey: ['questions'],
-        queryFn: () => getQuestions()
-    });
+
+    const [applicationQuery, questionQuery] = useQueries({
+        queries: [
+            {
+                queryKey: ['application-user', user ? user.id : ''],
+                queryFn: () => getApplicationByUserId(user ? user.id : ''),
+                enabled: () => !!(user && user.id)
+            },
+            {
+                queryKey: ['questions'],
+                queryFn: () => getQuestions()
+            }
+        ]
+    })
+
     const applicationMutation = useMutation({
         mutationFn: (
             { 
@@ -82,9 +95,9 @@ export default function ApplyPage() {
         };
 
         checkAuth();
-    }, [router]);
+    }, [router, supabase.auth]);
 
-    if (!authCheck) {
+    if (!authCheck || applicationQuery.isLoading || questionQuery.isLoading) {
         return (
             <div className="relative w-screen h-screen overflow-x-hidden">
                 <SkyFixed />
@@ -92,7 +105,29 @@ export default function ApplyPage() {
         );
     }
 
-    const nodes: QuestionNodes[] = data ? data.reduce<QuestionNodes[]>((prev, curr) => {
+    if (applicationQuery && applicationQuery.data && applicationQuery.data.status === ApplicationStatus.SUBMITTED) {
+        return (
+            <div className="relative w-screen h-screen overflow-x-hidden">
+                <SkyFixed />
+                <div className="flex flex-col justify-center items-center mx-auto mt-24 md:mt-16 2xl:mt-20 xl:mt-16 text-white">
+                    <div className="relative flex">
+                        <Logo />
+                    </div>
+                    <div className="z-10 flex sm:flex-row flex-col mt-4 mb-8 lg:mb-12 xl:mb-16 font-bagel text-2xl sm:text-3xl md:text-4xl text-center md:md-8">
+                        <p>2025 Application</p>
+                    </div>
+                    <DarkCard className="flex flex-col items-center 2xl:p-20 xl:p-16 w-[350px] sm:w-[350px] md:w-[700px] lg:w-[800px] xl:w-[1080px]">
+                        <h1 className="font-bagel 2xl:text-[40px] xl:text-[36px] text-2xl">Thank you for Applying!</h1>
+                        <div className="inline-block bg-white mt-8 md:mt-8 lg:mt-10 xl:mt-12 p-10 rounded-2xl text-[#696E75] text-sm md:text-base lg:text-lg xl:text-xl">
+                            Application Status: <span className="block md:inline font-semibold text-[#4C27A0] text-base md:text-base lg:text-lg xl:text-xl">Under Review</span>
+                        </div>
+                    </DarkCard>
+                </div>
+            </div>
+        )
+    }
+
+    const nodes: QuestionNodes[] = questionQuery.data ? questionQuery.data.reduce<QuestionNodes[]>((prev, curr) => {
         if (curr.group) {
             const groupNodeIndex = prev.findIndex(n => n.type === 'GROUP' && n.label === curr.group);
             if (groupNodeIndex === -1) {
@@ -129,9 +164,9 @@ export default function ApplyPage() {
             school: "",
             submissions: [],
         };
-        if (values && data) {
+        if (values && questionQuery.data) {
             Object.entries(values).forEach(([key, value]) => {
-                const question = data.find(q => q.id === Number(key.split('_')[1])) as QuestionResponseDto;
+                const question = questionQuery.data.find(q => q.id === Number(key.split('_')[1])) as QuestionResponseDto;
                 if (question?.isApplicationField) {
                     // Assign the value to the application field
                     switch (question.applicationField) {
