@@ -10,7 +10,6 @@ import { useQueries } from '@tanstack/react-query'
 import { getAttendances } from "@/features/attendance/api/attendance"
 import { AttendanceStatus } from "@/features/attendance/types/attendance-dto"
 import { useDebounce } from 'use-debounce';
-import { PanelHeader } from "@/components/panel-header"
 export default function AttendancePage() {
   const [q, setQ] = useState('');
   const [debouncedSetQ] = useDebounce(setQ, 500);
@@ -50,8 +49,8 @@ export default function AttendancePage() {
   );
 
   return (
-    <div>
-      <PanelHeader>Events</PanelHeader>
+    <div className="py-10">
+      <h1 className="font-bold text-3xl">Attendance</h1>
       <div className="flex justify-between items-center mt-8">
         <AttendanceSearch q={q} setQ={debouncedSetQ} />
         <EventSelect events={eventQuery.data || []} value={event} onClick={setEvent} />

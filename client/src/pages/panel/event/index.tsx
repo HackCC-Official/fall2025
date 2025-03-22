@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { useRouter } from "next/router";
 import { useQuery } from "@tanstack/react-query";
-import { PanelHeader } from "@/components/panel-header";
 export default function EventPage() {
   const router = useRouter()
   const { isLoading, data } = useQuery({
@@ -14,8 +13,8 @@ export default function EventPage() {
   })
 
   return (
-    <div>
-      <PanelHeader>Events</PanelHeader>
+    <div className="py-10">
+      <h1 className="font-bold text-3xl">Event</h1>
       <div className="flex space-x-4 my-4">
         <Button onClick={() => router.push('/panel/event/create')}>
           <Plus />
