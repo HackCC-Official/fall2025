@@ -1,10 +1,9 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { cn } from '@/lib/utils';
-import { a } from 'node_modules/framer-motion/dist/types.d-B50aGbjN';
 import React from 'react'
 
 export const ApplyButton = (props: any) => {
-    const { text, size, directory, bypassDisable = false } = props;
-    const isDisabled = process.env.NEXT_PUBLIC_PRODUCTION === 'true'
+    const { text, size } = props;
     let sizing = ""
     let newWindow = ''
     switch (size) {
@@ -24,13 +23,10 @@ export const ApplyButton = (props: any) => {
 
     return (
         <a 
-
-            href={(!isDisabled || bypassDisable) ? directory : ''} 
             target={newWindow} 
             className={cn([
                 sizing,
                 'cursor-pointer font-mont rounded-[30px] font-extrabold text-hoverpurple active:bg-activeyellow bg-vibrantyellow',
-                !(!isDisabled || bypassDisable ) && '!cursor-not-allowed opacity-40 pointer-events-none'
             ])}
             >
             {text}
