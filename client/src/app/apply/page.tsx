@@ -221,7 +221,7 @@ export default function ApplyPage() {
             <FormCard className="p-4 md:p-16 font-mont">
                 <h1 className="font-bagel md:text-[2rem] text-xl text-center">Thank you for Applying!</h1>
                 <p className="mt-2 md:mt-4 px-4 md:px-20 font-semibold text-muted-foreground text-xs md:text-sm text-center">
-                    Please tell us a little about you, your team and the project you have in mind to work on. Our team will collect applications from March 10 - April 22, 2025.
+                    Please tell us a little about you, your team and the project you have in mind to work on. Our team will collect applications from March 22 - April 18, 2025.
                 </p>
                 <p className="mt-4 text-xs md:text-sm text-center italic">
                     All Fields Required
