@@ -1,9 +1,9 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { cn } from '@/lib/utils';
+import { a } from 'node_modules/framer-motion/dist/types.d-B50aGbjN';
 import React from 'react'
 
 export const ApplyButton = (props: any) => {
-    const { text, size } = props;
+    const { text, size, directory} = props;
     let sizing = ""
     let newWindow = ''
     switch (size) {
@@ -23,6 +23,7 @@ export const ApplyButton = (props: any) => {
 
     return (
         <a 
+            href={directory} 
             target={newWindow} 
             className={cn([
                 sizing,
