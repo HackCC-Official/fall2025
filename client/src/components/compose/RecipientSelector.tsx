@@ -733,6 +733,11 @@ export const RecipientSelectionTable = ({
                 <div className="flex items-center justify-between mt-4">
                     <p className="text-sm text-muted-foreground">
                         Page {currentPage} of {totalPages}
+                        {contacts.length > 0 && (
+                            <span className="ml-1">
+                                (showing {contacts.length} items)
+                            </span>
+                        )}
                     </p>
                     <div className="flex items-center gap-2">
                         <Button
@@ -1023,6 +1028,12 @@ export const RecipientSelector: React.FC<RecipientSelectorProps> = ({
         !!globalFilters.search
     );
 
+    // Add state to store filtered contacts
+    const [filteredContactsCache, setFilteredContactsCache] = React.useState<
+        ContactDto[]
+    >([]);
+    const [totalFilteredCount, setTotalFilteredCount] = React.useState(0);
+
     // Log when selected recipients changes
     React.useEffect(() => {
         console.log(
@@ -1223,20 +1234,139 @@ export const RecipientSelector: React.FC<RecipientSelectorProps> = ({
         }
     };
 
-    // Get the contacts to display based on search mode
+    // Get the contacts to display based on search mode and filters
     const contactsToDisplay = React.useMemo(() => {
         if (inSearchMode && searchResults.length > 0) {
             return searchResults;
         }
+
+        // If we have global filters active, apply them client-side
+        if (globalFilters.liaison || globalFilters.status) {
+            // Use allContacts as the data source when filters are applied
+            let filtered = [...allContacts];
+
+            // Apply liaison filter
+            if (globalFilters.liaison) {
+                filtered = filtered.filter(
+                    (contact) => contact.liaison === globalFilters.liaison
+                );
+            }
+
+            // Apply status filter
+            if (globalFilters.status) {
+                filtered = filtered.filter(
+                    (contact) => contact.status === globalFilters.status
+                );
+            }
+
+            // Apply search filter
+            if (globalFilters.search && globalFilters.search.length > 1) {
+                const searchLower = globalFilters.search.toLowerCase();
+                filtered = filtered.filter(
+                    (contact) =>
+                        contact.contact_name
+                            ?.toLowerCase()
+                            .includes(searchLower) ||
+                        contact.email_address
+                            ?.toLowerCase()
+                            .includes(searchLower) ||
+                        contact.company?.toLowerCase().includes(searchLower)
+                );
+            }
+
+            // Store the total filtered count for logging and debugging
+            if (filtered.length !== totalFilteredCount) {
+                setTotalFilteredCount(filtered.length);
+                console.log(`Total filtered contacts: ${filtered.length}`);
+            }
+
+            // Store the complete filtered list for reference
+            if (
+                JSON.stringify(filtered) !==
+                JSON.stringify(filteredContactsCache)
+            ) {
+                setFilteredContactsCache(filtered);
+            }
+
+            // Implement client-side pagination for filtered results
+            const pageSize = 50; // Match the API page size
+            const startIndex = (contactsPage - 1) * pageSize;
+            const endIndex = startIndex + pageSize;
+
+            console.log(
+                `Displaying filtered contacts from index ${startIndex} to ${endIndex} (Page ${contactsPage})`
+            );
+
+            return filtered.slice(startIndex, endIndex);
+        }
+
         return contacts;
-    }, [inSearchMode, searchResults, contacts]);
+    }, [
+        inSearchMode,
+        searchResults,
+        contacts,
+        allContacts,
+        globalFilters,
+        contactsPage,
+        filteredContactsCache,
+        totalFilteredCount,
+    ]);
+
+    // Calculate total pages for client-side pagination when filters are applied
+    const effectiveTotalPages = React.useMemo(() => {
+        if (globalFilters.liaison || globalFilters.status) {
+            // Use the cached filtered contacts to calculate pages
+            const filteredLength =
+                filteredContactsCache.length > 0
+                    ? filteredContactsCache.length
+                    : totalFilteredCount;
+
+            const pageSize = 50; // Match the API page size
+            const calculatedPages = Math.max(
+                1,
+                Math.ceil(filteredLength / pageSize)
+            );
+            console.log(
+                `Calculated ${calculatedPages} total pages for ${filteredLength} filtered contacts`
+            );
+            return calculatedPages;
+        }
+
+        return inSearchMode ? 1 : contactsTotalPages || 1;
+    }, [
+        globalFilters,
+        filteredContactsCache,
+        inSearchMode,
+        contactsTotalPages,
+        totalFilteredCount,
+    ]);
 
     const handleContactsPageChange = (newPage: number) => {
         // Don't trigger pagination when in search mode
         if (inSearchMode) return;
 
+        console.log(`Changing page from ${contactsPage} to ${newPage}`);
+
+        // For client-side pagination (filtered results)
+        if (globalFilters.liaison || globalFilters.status) {
+            // Log page change event to help with debugging
+            const pageSize = 50;
+            const startIndex = (newPage - 1) * pageSize;
+            const endIndex = Math.min(
+                startIndex + pageSize,
+                totalFilteredCount
+            );
+            console.log(
+                `Will display items ${startIndex}-${endIndex} of ${totalFilteredCount} filtered contacts`
+            );
+        }
+
         setContactsPage(newPage);
-        setContactsApiPage(newPage);
+
+        // Only call API pagination when no filters are applied
+        if (!globalFilters.liaison && !globalFilters.status) {
+            setContactsApiPage(newPage);
+        }
     };
 
     const handleSelectAll = (checked: boolean) => {
@@ -1469,43 +1599,107 @@ export const RecipientSelector: React.FC<RecipientSelectorProps> = ({
 
     // Handle global liaison filter change
     const handleGlobalLiaisonChange = (value: string) => {
+        // Reset pagination when filter changes
+        setContactsPage(1);
+        setContactsApiPage(1);
+
+        // Clear cached filter results to force recalculation
+        setFilteredContactsCache([]);
+        setTotalFilteredCount(0);
+
+        const newLiaison = value === "all" ? null : value;
+
         setGlobalFilters((prev) => ({
             ...prev,
-            liaison: value === "all" ? null : value,
+            liaison: newLiaison,
         }));
 
         if (value !== "all") {
             toast.info(
                 `Filtering to show only contacts with liaison: ${value}`
             );
+
+            // When applying a liaison filter, we need to fetch all contacts
+            // since the API doesn't support filtering by liaison
+            if (!isLoadingAllContacts && allContacts.length === 0) {
+                setIsLoadingAllContacts(true);
+                fetchAllContacts(1000, "")
+                    .then((contacts) => {
+                        console.log(
+                            `Loaded ${contacts.length} contacts for filtering`
+                        );
+                        setIsLoadingAllContacts(false);
+                    })
+                    .catch((error) => {
+                        console.error("Error loading all contacts:", error);
+                        toast.error(
+                            "Failed to load all contacts for filtering"
+                        );
+                        setIsLoadingAllContacts(false);
+                    });
+            }
         } else {
             toast.info("Showing contacts for all liaisons");
+            // If we're removing the filter, refresh the normal paginated view
+            refetchContacts();
         }
 
         // Update active filters as well for consistency
         setActiveFilters((prev) => ({
             ...prev,
-            liaison: value === "all" ? null : value,
+            liaison: newLiaison,
         }));
     };
 
     // Add handler for status filter change
     const handleGlobalStatusChange = (value: string) => {
+        // Reset pagination when filter changes
+        setContactsPage(1);
+        setContactsApiPage(1);
+
+        // Clear cached filter results to force recalculation
+        setFilteredContactsCache([]);
+        setTotalFilteredCount(0);
+
+        const newStatus = value === "all" ? null : value;
+
         setGlobalFilters((prev) => ({
             ...prev,
-            status: value === "all" ? null : value,
+            status: newStatus,
         }));
 
         if (value !== "all") {
             toast.info(`Filtering to show only contacts with status: ${value}`);
+
+            // When applying a status filter, we need to fetch all contacts
+            // since the API doesn't support filtering by status
+            if (!isLoadingAllContacts && allContacts.length === 0) {
+                setIsLoadingAllContacts(true);
+                fetchAllContacts(1000, "")
+                    .then((contacts) => {
+                        console.log(
+                            `Loaded ${contacts.length} contacts for filtering`
+                        );
+                        setIsLoadingAllContacts(false);
+                    })
+                    .catch((error) => {
+                        console.error("Error loading all contacts:", error);
+                        toast.error(
+                            "Failed to load all contacts for filtering"
+                        );
+                        setIsLoadingAllContacts(false);
+                    });
+            }
         } else {
             toast.info("Showing contacts with all statuses");
+            // If we're removing the filter, refresh the normal paginated view
+            refetchContacts();
         }
 
         // Update active filters as well for consistency
         setActiveFilters((prev) => ({
             ...prev,
-            status: value === "all" ? null : value,
+            status: newStatus,
         }));
     };
 
@@ -1920,9 +2114,14 @@ export const RecipientSelector: React.FC<RecipientSelectorProps> = ({
             </div>
 
             {/* Loading indicator */}
-            {isSelectingAll && (
-                <div className="w-full bg-muted rounded-full h-2.5">
+            {(isSelectingAll || isLoadingAllContacts) && (
+                <div className="w-full bg-muted rounded-full h-2.5 mb-4">
                     <div className="bg-primary h-2.5 rounded-full animate-pulse w-full"></div>
+                    {isLoadingAllContacts && (
+                        <p className="text-xs text-center mt-1 text-muted-foreground">
+                            Loading all contacts for filtering...
+                        </p>
+                    )}
                 </div>
             )}
 
@@ -1997,14 +2196,18 @@ export const RecipientSelector: React.FC<RecipientSelectorProps> = ({
             {recipientType === "employers" &&
                 contactsView === "individuals" && (
                     <RecipientSelectionTable
+                        key={`page-${contactsPage}-filter-${globalFilters.liaison || "none"}-${globalFilters.status || "none"}`}
                         contacts={contactsToDisplay}
                         currentPage={contactsPage}
-                        totalPages={inSearchMode ? 1 : contactsTotalPages || 1}
+                        totalPages={effectiveTotalPages}
                         selectedRecipients={selectedRecipients}
                         onSelectRecipient={handleRecipientToggle}
                         onSelectAll={handleSelectAll}
                         onPageChange={handleContactsPageChange}
-                        loading={isContactsLoading && !inSearchMode}
+                        loading={
+                            (isContactsLoading && !inSearchMode) ||
+                            isLoadingAllContacts
+                        }
                         areAllSelected={areAllFilteredSelected}
                         areSomeSelected={areSomeFilteredSelected}
                     />
