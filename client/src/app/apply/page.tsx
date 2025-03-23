@@ -14,7 +14,7 @@ import { ApplicationSelect } from "@/features/application/components/application
 import { FormCard } from "@/features/application/components/form-card";
 import schools from '@/features/application/data/schools.json';
 import residences from '@/features/application/data/residences.json';
-import { useMutation, useQueries } from "@tanstack/react-query";
+import { useMutation, useQueries, useQueryClient } from "@tanstack/react-query";
 import { getQuestions } from "@/features/question/api/question";
 import { QuestionResponseDto } from "@/features/question/types/question-response.dto";
 import { QuestionType } from "@/features/question/types/question-type.enum";
@@ -45,6 +45,7 @@ interface FormValues {
 }
 
 export default function ApplyPage() {
+    const queryClient = useQueryClient();
     const [user, setUser] = useState<User | null>(null);
     const supabase = getBrowserClient()
     const router = useRouter();
@@ -77,6 +78,10 @@ export default function ApplyPage() {
             }
             ) => 
                 createApplication(applicationDTO, document)
+        ,
+        onSettled: () => {
+            queryClient.invalidateQueries({ queryKey: ['application-user', user ? user.id : ''] })
+        }
     })
 
     const { control, handleSubmit } = useForm<FormValues>();
