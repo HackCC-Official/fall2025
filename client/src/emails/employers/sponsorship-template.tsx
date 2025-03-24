@@ -6,9 +6,6 @@ import {
     Head,
     Heading,
     Html,
-    Img,
-    Link,
-    Preview,
     Row,
     Section,
     Text,
@@ -20,13 +17,8 @@ interface SponsorshipEmailProps {
     recipientName: string;
     venue: string;
     sender: OutreachTeamDto;
+    subject: string;
     positionAtHackCC: string;
-    socialLinks: {
-        linkedin?: string;
-        twitter?: string;
-        github?: string;
-    };
-
     customEmailBody?: string;
 }
 
@@ -35,25 +27,25 @@ export const SponsorshipEmail = ({
     recipientName,
     venue,
     sender,
-    // positionAtHackCC,
-    socialLinks,
+    subject,
     customEmailBody,
 }: SponsorshipEmailProps) => {
     const formattedYearAndMajor = `${sender.year} ${sender.major}`;
 
-    const today = new Date();
-    const isCurrentDayTuesday = today.getDay() === 2;
-
-    const renderCustomEmailBody = () => {
-        if (!customEmailBody) return null;
-
-        const parsedContent = customEmailBody
+    const parseContent = (content: string): string => {
+        return content
             .replace(/\[recipient_name\]/g, recipientName)
             .replace(/\[company_name\]/g, companyName)
             .replace(/\[sender_name\]/g, sender.name)
             .replace(/\[sender_year_and_major\]/g, formattedYearAndMajor)
             .replace(/\[sender_school\]/g, sender.school)
             .replace(/\[venue\]/g, venue);
+    };
+
+    const renderCustomEmailBody = () => {
+        if (!customEmailBody) return null;
+
+        const parsedContent = parseContent(customEmailBody);
 
         return parsedContent.split("\n\n").map((paragraphText, index) => (
             <Text key={index} style={paragraph}>
@@ -62,31 +54,21 @@ export const SponsorshipEmail = ({
         ));
     };
 
+    const parsedSubject = parseContent(subject);
+
     return (
         <Html>
             <Head />
-            <Preview>{companyName} and HackCC Sponsorship</Preview>
             <Body style={main}>
                 <Container style={container}>
                     {/* Header */}
                     <Section style={header}>
-                        <Img
-                            src={`https://minio.hackcc.net/public-bucket/logo.svg`}
-                            width={120}
-                            height={45}
-                            alt="HackCC Logo"
-                            style={logo}
-                        />
-                        {isCurrentDayTuesday && (
-                            <Text style={scheduleNote}>Sent on Tuesday</Text>
-                        )}
+                        <Text style={headerText}>HackCC</Text>
                     </Section>
 
                     <Section style={content}>
                         {/* Email Subject */}
-                        <Heading style={subjectLine}>
-                            {companyName} and HackCC Sponsorship
-                        </Heading>
+                        <Heading style={subjectLine}>{parsedSubject}</Heading>
 
                         {/* Email Body */}
                         {customEmailBody ? (
@@ -141,44 +123,6 @@ export const SponsorshipEmail = ({
                                     </Text>
                                 </Column>
                             </Row>
-
-                            {/* Social Media Links */}
-                            {(socialLinks.linkedin ||
-                                socialLinks.twitter ||
-                                socialLinks.github) && (
-                                <Row style={socialLinksContainer}>
-                                    {socialLinks.linkedin && (
-                                        <Column style={socialLinkColumn}>
-                                            <Link
-                                                href={socialLinks.linkedin}
-                                                style={socialLink}
-                                            >
-                                                LinkedIn
-                                            </Link>
-                                        </Column>
-                                    )}
-                                    {socialLinks.twitter && (
-                                        <Column style={socialLinkColumn}>
-                                            <Link
-                                                href={socialLinks.twitter}
-                                                style={socialLink}
-                                            >
-                                                Twitter
-                                            </Link>
-                                        </Column>
-                                    )}
-                                    {socialLinks.github && (
-                                        <Column style={socialLinkColumn}>
-                                            <Link
-                                                href={socialLinks.github}
-                                                style={socialLink}
-                                            >
-                                                GitHub
-                                            </Link>
-                                        </Column>
-                                    )}
-                                </Row>
-                            )}
                         </Section>
                     </Section>
 
@@ -217,22 +161,16 @@ const header = {
     backgroundColor: "#1e40af",
     padding: "20px 30px",
     display: "flex",
-    justifyContent: "space-between",
+    justifyContent: "center",
     alignItems: "center",
 };
 
-const logo = {
-    margin: "0",
-};
-
-const scheduleNote = {
+const headerText = {
+    fontSize: "20px",
+    fontWeight: "700",
     color: "#ffffff",
-    fontSize: "14px",
-    fontWeight: "500",
     margin: "0",
-    padding: "4px 8px",
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
-    borderRadius: "4px",
+    textAlign: "center" as const,
 };
 
 const content = {
@@ -278,20 +216,6 @@ const signatureSchool = {
     color: "#4b5563",
     margin: "0",
     textAlign: "right" as const,
-};
-
-const socialLinksContainer = {
-    marginTop: "12px",
-};
-
-const socialLinkColumn = {
-    paddingRight: "12px",
-};
-
-const socialLink = {
-    fontSize: "14px",
-    color: "#2563eb",
-    textDecoration: "none",
 };
 
 const footer = {

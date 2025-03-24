@@ -12,8 +12,7 @@ import {
 interface NavProps {
     isCollapsed: boolean;
     links: {
-        title: string;
-        label?: string;
+        label: string;
         icon: LucideIcon;
         variant: "default" | "ghost";
         onClick?: () => void;
@@ -44,22 +43,12 @@ export default function Nav({ isCollapsed, links = [] }: NavProps) {
                                     )}
                                 >
                                     <link.icon className="h-4 w-4" />
-                                    <span className="sr-only">
-                                        {link.title}
-                                    </span>
                                 </button>
                             </TooltipTrigger>
                             <TooltipContent
                                 side="right"
                                 className="flex items-center gap-4"
-                            >
-                                {link.title}
-                                {link.label && (
-                                    <span className="ml-auto text-muted-foreground">
-                                        {link.label}
-                                    </span>
-                                )}
-                            </TooltipContent>
+                            ></TooltipContent>
                         </Tooltip>
                     ) : (
                         <button
@@ -76,18 +65,6 @@ export default function Nav({ isCollapsed, links = [] }: NavProps) {
                             )}
                         >
                             <link.icon className="mr-2 h-4 w-4" />
-                            {link.title}
-                            {link.label && (
-                                <span
-                                    className={cn(
-                                        "ml-auto",
-                                        link.variant === "default" &&
-                                            "text-background dark:text-white"
-                                    )}
-                                >
-                                    {link.label}
-                                </span>
-                            )}
                         </button>
                     )
                 )}

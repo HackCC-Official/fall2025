@@ -11,8 +11,6 @@ import {
     Sliders,
     X,
     Check,
-    Building,
-    Briefcase,
     Mail,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -20,6 +18,7 @@ import { useContact } from "@/hooks/use-contact";
 import type { ContactDto } from "@/features/outreach/types/contact.dto";
 import { cn } from "@/lib/utils";
 import EditContactDrawer from "./edit-contact-drawer";
+import FilterContactsDrawer, { FilterOptions } from "./filter-contacts-drawer";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -28,7 +27,10 @@ import {
     DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { deleteContact } from "@/features/outreach/api/outreach";
+import {
+    deleteContact,
+    searchContacts,
+} from "@/features/outreach/api/outreach";
 import { useQueryClient } from "@tanstack/react-query";
 import {
     AlertDialog,
@@ -51,14 +53,7 @@ import {
 } from "@/components/ui/select";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { useRouter } from "next/navigation";
-
-import {
-    Sheet,
-    SheetContent,
-    SheetDescription,
-    SheetHeader,
-    SheetTitle,
-} from "@/components/ui/sheet";
+import { toast } from "sonner";
 
 import {
     Tooltip,
@@ -66,20 +61,6 @@ import {
     TooltipProvider,
     TooltipTrigger,
 } from "@/components/ui/tooltip";
-
-import { Checkbox } from "@/components/ui/checkbox";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-
-type FilterOptions = {
-    hasEmail: boolean;
-    hasName: boolean;
-    organization?: string;
-    department?: string;
-    industry?: string;
-    contactType?: string;
-    status?: "all" | "contacted" | "not-contacted";
-    sortBy?: "name" | "email" | "organization" | "recent";
-};
 
 export default function ContactsList({
     contacts: initialContacts,
@@ -90,74 +71,224 @@ export default function ContactsList({
     const containerRef = React.useRef<HTMLDivElement>(null);
     const [contact, setContact] = useContact();
     const [searchText, setSearchText] = React.useState("");
+    const [searchResults, setSearchResults] = React.useState<ContactDto[]>([]);
+    const [isSearching, setIsSearching] = React.useState(false);
     const [editingContact, setEditingContact] =
         React.useState<ContactDto | null>(null);
     const [filters, setFilters] = React.useState<FilterOptions>({
         hasEmail: false,
         hasName: false,
+        hasLinkedIn: false,
+        hasPhone: false,
+        hasWebsite: false,
         status: "all",
         sortBy: "name",
+        confidenceScore: undefined,
     });
     const [isFilterOpen, setIsFilterOpen] = React.useState(false);
     const queryClient = useQueryClient();
     const [deleteId, setDeleteId] = React.useState<number | null>(null);
-    const [debouncedSearch, setDebouncedSearch] = React.useState("");
+    const [allContacts, setAllContacts] = React.useState<ContactDto[]>([]);
+    const [isLoadingAllContacts, setIsLoadingAllContacts] =
+        React.useState(false);
+    const [hasAppliedFilters, setHasAppliedFilters] = React.useState(false);
+
+    // Calculate active filter count early in the component
+    const activeFilterCount = Object.entries(filters).filter(([key, value]) => {
+        if (key === "status" && value === "all") return false;
+        if (key === "sortBy") return false;
+        return !!value;
+    }).length;
 
     const {
         data,
         isLoading,
-        pagination: { page, setPage, limit, setLimit, setSearch, totalPages },
+        pagination: { page, setPage, limit, setLimit, totalPages },
+        fetchAllContacts: fetchAllContactsFromHook,
     } = useContacts({
         initialLimit: 50,
-        initialSearch: debouncedSearch,
     });
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
     const contacts = data?.data || initialContacts || [];
     const totalContacts = data?.total || 0;
 
+    /**
+     * Fetch all contacts across all pages when filters are applied
+     */
+    const loadAllContacts = React.useCallback(async () => {
+        if (activeFilterCount > 0 && !hasAppliedFilters) {
+            setIsLoadingAllContacts(true);
+            try {
+                const allContactsData = await fetchAllContactsFromHook(100);
+                setAllContacts(allContactsData);
+                setHasAppliedFilters(true);
+            } catch (error) {
+                console.error(
+                    "Error loading all contacts for filtering:",
+                    error
+                );
+                toast.error("Failed to load all contacts for filtering");
+            } finally {
+                setIsLoadingAllContacts(false);
+            }
+        }
+    }, [activeFilterCount, fetchAllContactsFromHook, hasAppliedFilters]);
+
+    // Fetch all contacts when filters change
     React.useEffect(() => {
-        const timer = setTimeout(() => {
-            setSearch(searchText);
-            setDebouncedSearch(searchText);
+        if (activeFilterCount > 0) {
+            loadAllContacts();
+        } else {
+            setHasAppliedFilters(false);
+        }
+    }, [activeFilterCount, loadAllContacts]);
+
+    React.useEffect(() => {
+        const timer = setTimeout(async () => {
+            if (searchText.trim()) {
+                setIsSearching(true);
+                try {
+                    const results = await searchContacts(searchText);
+                    setSearchResults(results);
+                } catch (error) {
+                    console.error("Error searching contacts:", error);
+                    setSearchResults([]);
+                } finally {
+                    setIsSearching(false);
+                }
+            } else {
+                setSearchResults([]);
+            }
         }, 300);
         return () => clearTimeout(timer);
-    }, [searchText, setSearch]);
+    }, [searchText]);
 
-    const organizations = React.useMemo(() => {
-        const uniqueOrgs = new Set<string>();
-        contacts.forEach((c) => {
-            if (c.organization) uniqueOrgs.add(c.organization);
-        });
-        return Array.from(uniqueOrgs).sort();
-    }, [contacts]);
+    const filteredContacts = React.useMemo(() => {
+        // If searching, use search results
+        if (searchText.trim()) {
+            return searchResults;
+        }
 
-    const departments = React.useMemo(() => {
-        const uniqueDepts = new Set<string>();
-        contacts.forEach((c) => {
-            if (c.department) uniqueDepts.add(c.department);
-        });
-        return Array.from(uniqueDepts).sort();
-    }, [contacts]);
+        // Use the appropriate data source based on filter status
+        const dataSource =
+            activeFilterCount > 0 && hasAppliedFilters ? allContacts : contacts;
 
-    const industries = React.useMemo(() => {
-        const uniqueIndustries = new Set<string>();
-        contacts.forEach((c) => {
-            if (c.industry) uniqueIndustries.add(c.industry);
-        });
-        return Array.from(uniqueIndustries).sort();
-    }, [contacts]);
+        let filtered = [...dataSource];
 
-    const contactTypes = React.useMemo(() => {
-        const uniqueTypes = new Set<string>();
-        contacts.forEach((c) => {
-            if (c.type) uniqueTypes.add(c.type);
-        });
-        return Array.from(uniqueTypes).sort();
-    }, [contacts]);
+        if (filters.hasEmail) {
+            filtered = filtered.filter((c) => !!c.email_address);
+        }
+
+        if (filters.hasName) {
+            filtered = filtered.filter((c) => !!c.contact_name);
+        }
+
+        if (filters.hasLinkedIn) {
+            filtered = filtered.filter((c) => !!c.linkedin);
+        }
+
+        if (filters.hasPhone) {
+            filtered = filtered.filter((c) => !!c.phone_number);
+        }
+
+        if (filters.hasWebsite) {
+            filtered = filtered.filter((c) => !!c.website);
+        }
+
+        if (filters.company) {
+            filtered = filtered.filter((c) => c.company === filters.company);
+        }
+
+        if (filters.country) {
+            filtered = filtered.filter((c) => c.country === filters.country);
+        }
+
+        if (filters.position) {
+            filtered = filtered.filter((c) => c.position === filters.position);
+        }
+
+        if (filters.liaison) {
+            filtered = filtered.filter((c) => c.liaison === filters.liaison);
+        }
+
+        if (filters.status && filters.status !== "all") {
+            filtered = filtered.filter((c) => c.status === filters.status);
+        } else if (filters.status === "all") {
+            // Keep all contacts
+        }
+
+        if (filters.meetingMethod) {
+            filtered = filtered.filter(
+                (c) => c.meeting_method === filters.meetingMethod
+            );
+        }
+
+        if (filters.confidenceScore) {
+            filtered = filtered.filter((c) => {
+                const score = c.confidence_score || 0;
+                return (
+                    score >= (filters.confidenceScore?.min || 0) &&
+                    score <= (filters.confidenceScore?.max || 100)
+                );
+            });
+        }
+
+        if (filters.sortBy === "name") {
+            filtered.sort((a, b) => {
+                const nameA = a.contact_name || "";
+                const nameB = b.contact_name || "";
+                return nameA.localeCompare(nameB);
+            });
+        } else if (filters.sortBy === "email") {
+            filtered.sort((a, b) =>
+                (a.email_address || "").localeCompare(b.email_address || "")
+            );
+        } else if (filters.sortBy === "company") {
+            filtered.sort((a, b) =>
+                (a.company || "").localeCompare(b.company || "")
+            );
+        } else if (filters.sortBy === "confidence") {
+            filtered.sort((a, b) => {
+                const scoreA = a.confidence_score || 0;
+                const scoreB = b.confidence_score || 0;
+                return scoreB - scoreA; // Higher scores first
+            });
+        }
+
+        return filtered;
+    }, [
+        contacts,
+        allContacts,
+        searchText,
+        filters,
+        searchResults,
+        activeFilterCount,
+        hasAppliedFilters,
+    ]);
+
+    // Calculate total filtered count for display
+    const displayedContactsCount = React.useMemo(() => {
+        if (searchText.trim()) {
+            return searchResults.length;
+        }
+
+        if (activeFilterCount > 0 && hasAppliedFilters) {
+            return filteredContacts.length;
+        }
+
+        return totalContacts;
+    }, [
+        activeFilterCount,
+        filteredContacts.length,
+        hasAppliedFilters,
+        searchResults.length,
+        searchText,
+        totalContacts,
+    ]);
 
     const virtualizer = useVirtualizer({
-        count: contacts.length,
+        count: filteredContacts.length,
         getScrollElement: () => containerRef.current,
         estimateSize: () => 85,
         overscan: 10,
@@ -167,6 +298,13 @@ export default function ContactsList({
         try {
             await deleteContact(contactId.toString());
             queryClient.invalidateQueries({ queryKey: ["contacts"] });
+            setSearchResults([]);
+            setSearchText("");
+            // Reset filter application state when deleting a contact
+            if (hasAppliedFilters) {
+                setHasAppliedFilters(false);
+                setAllContacts([]);
+            }
         } catch (error) {
             console.error("Failed to delete contact:", error);
         }
@@ -176,7 +314,14 @@ export default function ContactsList({
         if (newPage >= 1 && newPage <= totalPages) {
             const currentSelection = contact.selected;
             const currentId = contact.selectedId;
-            setPage(newPage);
+
+            // Only change page if we're not using filters
+            if (activeFilterCount === 0) {
+                setPage(newPage);
+            }
+            setSearchText("");
+            setSearchResults([]);
+
             if (currentSelection) {
                 console.log("Changing page, preserving selection:", {
                     email: currentSelection,
@@ -186,81 +331,62 @@ export default function ContactsList({
         }
     };
 
-    const filteredContacts = React.useMemo(() => {
-        let filtered = [...contacts];
-
-        if (filters.hasEmail) {
-            filtered = filtered.filter((c) => !!c.email);
-        }
-
-        if (filters.hasName) {
-            filtered = filtered.filter((c) => !!(c.first_name || c.last_name));
-        }
-
-        if (filters.organization) {
-            filtered = filtered.filter(
-                (c) => c.organization === filters.organization
-            );
-        }
-
-        if (filters.department) {
-            filtered = filtered.filter(
-                (c) => c.department === filters.department
-            );
-        }
-
-        if (filters.industry) {
-            filtered = filtered.filter((c) => c.industry === filters.industry);
-        }
-
-        if (filters.contactType) {
-            filtered = filtered.filter((c) => c.type === filters.contactType);
-        }
-
-        if (filters.status === "contacted") {
-            filtered = filtered.filter((c) => c.been_contacted);
-        } else if (filters.status === "not-contacted") {
-            filtered = filtered.filter((c) => !c.been_contacted);
-        }
-
-        // Apply sorting
-        if (filters.sortBy === "name") {
-            filtered.sort((a, b) => {
-                const nameA =
-                    `${a.first_name || ""} ${a.last_name || ""}`.trim();
-                const nameB =
-                    `${b.first_name || ""} ${b.last_name || ""}`.trim();
-                return nameA.localeCompare(nameB);
-            });
-        } else if (filters.sortBy === "email") {
-            filtered.sort((a, b) => a.email.localeCompare(b.email));
-        } else if (filters.sortBy === "organization") {
-            filtered.sort((a, b) =>
-                (a.organization || "").localeCompare(b.organization || "")
-            );
-        }
-
-        return filtered;
-    }, [contacts, filters]);
-
     const clearFilters = () => {
         setFilters({
             hasEmail: false,
             hasName: false,
-            organization: undefined,
-            department: undefined,
-            industry: undefined,
-            contactType: undefined,
+            hasLinkedIn: false,
+            hasPhone: false,
+            hasWebsite: false,
+            company: undefined,
+            country: undefined,
+            position: undefined,
+            liaison: undefined,
             status: "all",
+            confidenceScore: undefined,
+            meetingMethod: undefined,
             sortBy: "name",
         });
+        setHasAppliedFilters(false);
+        setAllContacts([]);
     };
 
-    const activeFilterCount = Object.entries(filters).filter(([key, value]) => {
-        if (key === "status" && value === "all") return false;
-        if (key === "sortBy") return false;
-        return !!value;
-    }).length;
+    const handleContactUpdate = React.useCallback(() => {
+        // Invalidate both contacts and search queries
+        queryClient.invalidateQueries({ queryKey: ["contacts"] });
+
+        // If we're currently filtering, reload all contacts
+        if (activeFilterCount > 0 && hasAppliedFilters) {
+            loadAllContacts();
+        }
+
+        // If we're currently searching, re-trigger the search
+        if (searchText.trim()) {
+            setIsSearching(true);
+            searchContacts(searchText)
+                .then((results) => {
+                    setSearchResults(results);
+                })
+                .catch((error) => {
+                    console.error("Error refreshing search results:", error);
+                    setSearchResults([]);
+                })
+                .finally(() => {
+                    setIsSearching(false);
+                });
+        }
+    }, [
+        queryClient,
+        searchText,
+        activeFilterCount,
+        hasAppliedFilters,
+        loadAllContacts,
+    ]);
+
+    // For use in the FilterContactsDrawer to synchronize filter application
+    const handleFilterApply = () => {
+        setHasAppliedFilters(true);
+    };
 
     return (
         <div className="flex flex-col h-full bg-background">
@@ -270,16 +396,34 @@ export default function ContactsList({
                         <h1 className="text-xl font-bold">Contacts</h1>
                         <div className="text-sm text-muted-foreground flex items-center gap-2">
                             <span className="bg-primary/10 text-primary px-2 py-1 rounded-md font-medium">
-                                {totalContacts.toLocaleString()}
+                                {displayedContactsCount.toLocaleString()}
                             </span>
-                            <span>total contacts</span>
+                            <span>
+                                {searchText.trim()
+                                    ? "found"
+                                    : activeFilterCount > 0 && hasAppliedFilters
+                                      ? "filtered"
+                                      : "total"}{" "}
+                                contacts
+                            </span>
                         </div>
                     </div>
                     <div className="flex gap-2 items-center">
                         <div className="relative flex-1">
-                            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                            <Search
+                                className={cn(
+                                    "absolute left-2.5 top-2.5 h-4 w-4",
+                                    isSearching
+                                        ? "text-primary animate-pulse"
+                                        : "text-muted-foreground"
+                                )}
+                            />
                             <Input
-                                placeholder="Search contacts..."
+                                placeholder={
+                                    isSearching
+                                        ? "Searching..."
+                                        : "Search contacts..."
+                                }
                                 className="pl-9 pr-4 py-2 h-10"
                                 value={searchText}
                                 onChange={(e) => setSearchText(e.target.value)}
@@ -381,12 +525,12 @@ export default function ContactsList({
                                     </Button>
                                 </Badge>
                             )}
-                            {filters.organization && (
+                            {filters.hasLinkedIn && (
                                 <Badge
                                     variant="outline"
                                     className="bg-primary/5 gap-1 pl-2"
                                 >
-                                    {filters.organization}
+                                    Has LinkedIn
                                     <Button
                                         variant="ghost"
                                         size="icon"
@@ -394,7 +538,7 @@ export default function ContactsList({
                                         onClick={() =>
                                             setFilters({
                                                 ...filters,
-                                                organization: undefined,
+                                                hasLinkedIn: false,
                                             })
                                         }
                                     >
@@ -402,12 +546,12 @@ export default function ContactsList({
                                     </Button>
                                 </Badge>
                             )}
-                            {filters.department && (
+                            {filters.hasPhone && (
                                 <Badge
                                     variant="outline"
                                     className="bg-primary/5 gap-1 pl-2"
                                 >
-                                    Dept: {filters.department}
+                                    Has Phone
                                     <Button
                                         variant="ghost"
                                         size="icon"
@@ -415,7 +559,7 @@ export default function ContactsList({
                                         onClick={() =>
                                             setFilters({
                                                 ...filters,
-                                                department: undefined,
+                                                hasPhone: false,
                                             })
                                         }
                                     >
@@ -423,12 +567,12 @@ export default function ContactsList({
                                     </Button>
                                 </Badge>
                             )}
-                            {filters.industry && (
+                            {filters.hasWebsite && (
                                 <Badge
                                     variant="outline"
                                     className="bg-primary/5 gap-1 pl-2"
                                 >
-                                    Industry: {filters.industry}
+                                    Has Website
                                     <Button
                                         variant="ghost"
                                         size="icon"
@@ -436,7 +580,7 @@ export default function ContactsList({
                                         onClick={() =>
                                             setFilters({
                                                 ...filters,
-                                                industry: undefined,
+                                                hasWebsite: false,
                                             })
                                         }
                                     >
@@ -444,12 +588,12 @@ export default function ContactsList({
                                     </Button>
                                 </Badge>
                             )}
-                            {filters.contactType && (
+                            {filters.company && (
                                 <Badge
                                     variant="outline"
                                     className="bg-primary/5 gap-1 pl-2"
                                 >
-                                    Type: {filters.contactType}
+                                    {filters.company}
                                     <Button
                                         variant="ghost"
                                         size="icon"
@@ -457,7 +601,70 @@ export default function ContactsList({
                                         onClick={() =>
                                             setFilters({
                                                 ...filters,
-                                                contactType: undefined,
+                                                company: undefined,
+                                            })
+                                        }
+                                    >
+                                        <X className="h-3 w-3" />
+                                    </Button>
+                                </Badge>
+                            )}
+                            {filters.country && (
+                                <Badge
+                                    variant="outline"
+                                    className="bg-primary/5 gap-1 pl-2"
+                                >
+                                    {filters.country}
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="h-4 w-4 ml-1"
+                                        onClick={() =>
+                                            setFilters({
+                                                ...filters,
+                                                country: undefined,
+                                            })
+                                        }
+                                    >
+                                        <X className="h-3 w-3" />
+                                    </Button>
+                                </Badge>
+                            )}
+                            {filters.position && (
+                                <Badge
+                                    variant="outline"
+                                    className="bg-primary/5 gap-1 pl-2"
+                                >
+                                    {filters.position}
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="h-4 w-4 ml-1"
+                                        onClick={() =>
+                                            setFilters({
+                                                ...filters,
+                                                position: undefined,
+                                            })
+                                        }
+                                    >
+                                        <X className="h-3 w-3" />
+                                    </Button>
+                                </Badge>
+                            )}
+                            {filters.liaison && (
+                                <Badge
+                                    variant="outline"
+                                    className="bg-primary/5 gap-1 pl-2"
+                                >
+                                    Liaison: {filters.liaison}
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="h-4 w-4 ml-1"
+                                        onClick={() =>
+                                            setFilters({
+                                                ...filters,
+                                                liaison: undefined,
                                             })
                                         }
                                     >
@@ -470,9 +677,7 @@ export default function ContactsList({
                                     variant="outline"
                                     className="bg-primary/5 gap-1 pl-2"
                                 >
-                                    {filters.status === "contacted"
-                                        ? "Contacted"
-                                        : "Not Contacted"}
+                                    {filters.status}
                                     <Button
                                         variant="ghost"
                                         size="icon"
@@ -481,6 +686,50 @@ export default function ContactsList({
                                             setFilters({
                                                 ...filters,
                                                 status: "all",
+                                            })
+                                        }
+                                    >
+                                        <X className="h-3 w-3" />
+                                    </Button>
+                                </Badge>
+                            )}
+                            {filters.meetingMethod && (
+                                <Badge
+                                    variant="outline"
+                                    className="bg-primary/5 gap-1 pl-2"
+                                >
+                                    {filters.meetingMethod}
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="h-4 w-4 ml-1"
+                                        onClick={() =>
+                                            setFilters({
+                                                ...filters,
+                                                meetingMethod: undefined,
+                                            })
+                                        }
+                                    >
+                                        <X className="h-3 w-3" />
+                                    </Button>
+                                </Badge>
+                            )}
+                            {filters.confidenceScore && (
+                                <Badge
+                                    variant="outline"
+                                    className="bg-primary/5 gap-1 pl-2"
+                                >
+                                    Confidence:{" "}
+                                    {filters.confidenceScore?.min ?? 0}-
+                                    {filters.confidenceScore?.max ?? 100}
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="h-4 w-4 ml-1"
+                                        onClick={() =>
+                                            setFilters({
+                                                ...filters,
+                                                confidenceScore: undefined,
                                             })
                                         }
                                     >
@@ -503,39 +752,65 @@ export default function ContactsList({
 
             <div className="flex items-center justify-between px-4 py-2 border-b bg-muted/30">
                 <div className="text-sm font-medium">
-                    Showing{" "}
-                    <span className="font-semibold text-primary">
-                        {filteredContacts.length > 0
-                            ? (page - 1) * limit + 1
-                            : 0}
-                    </span>{" "}
-                    -{" "}
-                    <span className="font-semibold text-primary">
-                        {Math.min(page * limit, totalContacts)}
-                    </span>{" "}
-                    of{" "}
-                    <span className="font-semibold text-primary">
-                        {totalContacts}
-                    </span>
+                    {activeFilterCount > 0 && hasAppliedFilters ? (
+                        <span>
+                            Showing filtered results:{" "}
+                            <span className="font-semibold text-primary">
+                                {filteredContacts.length}
+                            </span>{" "}
+                            contacts
+                        </span>
+                    ) : (
+                        <span>
+                            Showing{" "}
+                            <span className="font-semibold text-primary">
+                                {filteredContacts.length > 0
+                                    ? (page - 1) * limit + 1
+                                    : 0}
+                            </span>{" "}
+                            -{" "}
+                            <span className="font-semibold text-primary">
+                                {Math.min(page * limit, totalContacts)}
+                            </span>{" "}
+                            of{" "}
+                            <span className="font-semibold text-primary">
+                                {totalContacts}
+                            </span>
+                        </span>
+                    )}
                 </div>
                 <div className="flex items-center space-x-2">
                     <Button
                         variant="outline"
                         size="icon"
                         onClick={() => handlePageChange(page - 1)}
-                        disabled={page <= 1 || isLoading}
+                        disabled={
+                            page <= 1 ||
+                            isLoading ||
+                            (activeFilterCount > 0 && hasAppliedFilters)
+                        }
                         className="h-8 w-8"
                     >
                         <ChevronLeft className="h-4 w-4" />
                     </Button>
                     <div className="text-sm font-medium bg-background px-3 py-1 rounded-md border">
-                        Page {page} of {totalPages || 1}
+                        {activeFilterCount > 0 && hasAppliedFilters ? (
+                            <span>Filtered View</span>
+                        ) : (
+                            <span>
+                                Page {page} of {totalPages || 1}
+                            </span>
+                        )}
                     </div>
                     <Button
                         variant="outline"
                         size="icon"
                         onClick={() => handlePageChange(page + 1)}
-                        disabled={page >= totalPages || isLoading}
+                        disabled={
+                            page >= totalPages ||
+                            isLoading ||
+                            (activeFilterCount > 0 && hasAppliedFilters)
+                        }
                         className="h-8 w-8"
                     >
                         <ChevronRight className="h-4 w-4" />
@@ -543,12 +818,18 @@ export default function ContactsList({
                 </div>
             </div>
 
-            {isLoading ? (
+            {isLoading ||
+            isLoadingAllContacts ||
+            (searchText.trim() && isSearching) ? (
                 <div className="flex-1 flex items-center justify-center">
                     <div className="flex flex-col items-center">
                         <div className="animate-spin h-10 w-10 border-3 border-primary rounded-full border-t-transparent mb-4"></div>
                         <p className="text-muted-foreground">
-                            Loading contacts...
+                            {searchText.trim()
+                                ? "Searching contacts..."
+                                : isLoadingAllContacts
+                                  ? "Loading all contacts for filtering..."
+                                  : "Loading contacts..."}
                         </p>
                     </div>
                 </div>
@@ -616,12 +897,14 @@ export default function ContactsList({
                     >
                         {virtualizer.getVirtualItems().map((virtualItem) => {
                             const item = filteredContacts[virtualItem.index];
+                            if (!item) return null;
                             return (
                                 <div
-                                    key={`${item.id}-${virtualItem.index}`}
+                                    key={virtualItem.key}
                                     className={cn(
                                         "absolute top-0 left-0 w-full",
-                                        contact.selected === item.email &&
+                                        contact.selected ===
+                                            (item?.email_address || "") &&
                                             "bg-accent"
                                     )}
                                     style={{
@@ -632,70 +915,57 @@ export default function ContactsList({
                                     <div
                                         className={cn(
                                             "flex items-center gap-3 px-4 py-3 h-full border-b transition-colors mx-2 rounded-md",
-                                            contact.selected === item.email
+                                            contact.selected ===
+                                                (item?.email_address || "")
                                                 ? "bg-accent border-accent shadow-sm"
                                                 : "hover:bg-accent/40 border-border"
                                         )}
+                                        onClick={() => {
+                                            setContact({
+                                                selected:
+                                                    item?.email_address || "",
+                                                selectedId: item?.id,
+                                            });
+                                        }}
+                                        tabIndex={0}
                                     >
-                                        <button
-                                            onClick={() => {
-                                                setContact({
-                                                    selected: item.email,
-                                                    selectedId: item.id,
-                                                });
-                                            }}
-                                            className="flex-1 text-left flex items-center gap-3"
-                                        >
-                                            <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center text-lg flex-shrink-0 relative">
-                                                {item.first_name
+                                        <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center text-lg flex-shrink-0 relative">
+                                            {item?.contact_name
+                                                ?.charAt(0)
+                                                .toUpperCase() ||
+                                                item?.email_address
                                                     ?.charAt(0)
-                                                    .toUpperCase() ||
-                                                    item.email
-                                                        .charAt(0)
-                                                        .toUpperCase()}
-                                                {item.been_contacted && (
-                                                    <div className="absolute -top-1 -right-1 bg-primary rounded-full h-4 w-4 flex items-center justify-center">
-                                                        <Check className="h-3 w-3 text-primary-foreground" />
+                                                    ?.toUpperCase() ||
+                                                "?"}
+                                            {item.status === "Contacted" && (
+                                                <div className="absolute -top-1 -right-1 bg-primary rounded-full h-4 w-4 flex items-center justify-center">
+                                                    <Check className="h-3 w-3 text-primary-foreground" />
+                                                </div>
+                                            )}
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <div className="font-medium text-base truncate">
+                                                {item.contact_name ||
+                                                    item.email_address}
+                                            </div>
+                                            <div className="flex flex-wrap items-center gap-x-2 text-sm text-muted-foreground">
+                                                <span className="truncate max-w-[200px] flex items-center gap-1">
+                                                    <Mail className="h-3 w-3 text-muted-foreground/60" />
+                                                    {item?.email_address ||
+                                                        "No email"}
+                                                </span>
+                                                {item.company && (
+                                                    <div className="flex items-center gap-1 text-xs">
+                                                        <span className="text-muted-foreground/60">
+                                                            •
+                                                        </span>
+                                                        <span className="truncate max-w-[150px]">
+                                                            {item.company}
+                                                        </span>
                                                     </div>
                                                 )}
                                             </div>
-                                            <div className="flex-1 min-w-0">
-                                                <div className="font-medium text-base truncate">
-                                                    {`${item.first_name || ""} ${item.last_name || ""}`.trim() ||
-                                                        item.email}
-                                                </div>
-                                                <div className="flex flex-wrap items-center gap-x-2 text-sm text-muted-foreground">
-                                                    <span className="truncate max-w-[200px] flex items-center gap-1">
-                                                        <Mail className="h-3 w-3 text-muted-foreground/60" />
-                                                        {item.email}
-                                                    </span>
-                                                    {item.organization && (
-                                                        <div className="flex items-center gap-1 text-xs">
-                                                            <span className="text-muted-foreground/60">
-                                                                •
-                                                            </span>
-                                                            <Building className="h-3 w-3 text-muted-foreground/60" />
-                                                            <span className="truncate max-w-[150px]">
-                                                                {
-                                                                    item.organization
-                                                                }
-                                                            </span>
-                                                        </div>
-                                                    )}
-                                                    {item.position && (
-                                                        <div className="flex items-center gap-1 text-xs">
-                                                            <span className="text-muted-foreground/60">
-                                                                •
-                                                            </span>
-                                                            <Briefcase className="h-3 w-3 text-muted-foreground/60" />
-                                                            <span className="truncate max-w-[120px]">
-                                                                {item.position}
-                                                            </span>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        </button>
+                                        </div>
                                         <DropdownMenu>
                                             <DropdownMenuTrigger asChild>
                                                 <Button
@@ -712,13 +982,18 @@ export default function ContactsList({
                                                 <DropdownMenuItem
                                                     onClick={() =>
                                                         router.push(
-                                                            `/panel/email/compose?to=${item.email}`
+                                                            `/panel/email/compose?to=${item?.email_address || ""}`
                                                         )
                                                     }
                                                     className="cursor-pointer"
+                                                    disabled={
+                                                        !item?.email_address
+                                                    }
                                                 >
                                                     <Mail className="mr-2 h-4 w-4" />
-                                                    Send Email
+                                                    {item?.email_address
+                                                        ? "Send Email"
+                                                        : "No email available"}
                                                 </DropdownMenuItem>
                                                 <DropdownMenuItem
                                                     onClick={() =>
@@ -750,365 +1025,103 @@ export default function ContactsList({
             )}
 
             <div className="flex items-center justify-between px-4 py-3 border-t bg-muted/30">
-                <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handlePageChange(1)}
-                    disabled={page <= 1 || isLoading}
-                    className="h-8 px-3"
-                >
-                    First
-                </Button>
-                <div className="flex items-center space-x-1">
-                    {Array.from({ length: Math.min(5, totalPages) }).map(
-                        (_, i) => {
-                            const pageNumber = page <= 2 ? i + 1 : page - 2 + i;
-                            if (pageNumber > totalPages) return null;
+                {activeFilterCount > 0 && hasAppliedFilters ? (
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={clearFilters}
+                        className="h-8 px-3"
+                    >
+                        Clear Filters
+                    </Button>
+                ) : (
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handlePageChange(1)}
+                        disabled={page <= 1 || isLoading}
+                        className="h-8 px-3"
+                    >
+                        First
+                    </Button>
+                )}
 
-                            return (
-                                <Button
-                                    key={pageNumber}
-                                    variant={
-                                        pageNumber === page
-                                            ? "default"
-                                            : "outline"
-                                    }
-                                    size="sm"
-                                    onClick={() => handlePageChange(pageNumber)}
-                                    disabled={isLoading}
-                                    className="h-8 w-8"
-                                >
-                                    {pageNumber}
-                                </Button>
-                            );
-                        }
-                    )}
-                </div>
-                <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handlePageChange(totalPages)}
-                    disabled={page >= totalPages || isLoading}
-                    className="h-8 px-3"
-                >
-                    Last
-                </Button>
+                {activeFilterCount > 0 && hasAppliedFilters ? (
+                    <div className="text-sm text-muted-foreground">
+                        Showing all {filteredContacts.length} filtered contacts
+                    </div>
+                ) : (
+                    <div className="flex items-center space-x-1">
+                        {Array.from({ length: Math.min(5, totalPages) }).map(
+                            (_, i) => {
+                                const pageNumber =
+                                    page <= 2 ? i + 1 : page - 2 + i;
+                                if (pageNumber > totalPages) return null;
+
+                                return (
+                                    <Button
+                                        key={pageNumber}
+                                        variant={
+                                            pageNumber === page
+                                                ? "default"
+                                                : "outline"
+                                        }
+                                        size="sm"
+                                        onClick={() =>
+                                            handlePageChange(pageNumber)
+                                        }
+                                        disabled={isLoading}
+                                        className="h-8 w-8"
+                                    >
+                                        {pageNumber}
+                                    </Button>
+                                );
+                            }
+                        )}
+                    </div>
+                )}
+
+                {activeFilterCount > 0 && hasAppliedFilters ? (
+                    <div className="text-sm text-primary">Filter Active</div>
+                ) : (
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handlePageChange(totalPages)}
+                        disabled={page >= totalPages || isLoading}
+                        className="h-8 px-3"
+                    >
+                        Last
+                    </Button>
+                )}
             </div>
 
-            <Sheet open={isFilterOpen} onOpenChange={setIsFilterOpen}>
-                <SheetContent
-                    className="w-[400px] sm:max-w-md overflow-y-auto"
-                    side="right"
-                >
-                    <SheetHeader className="pb-4">
-                        <SheetTitle>Filter Contacts</SheetTitle>
-                        <SheetDescription>
-                            Refine your contact list with multiple criteria
-                        </SheetDescription>
-                    </SheetHeader>
-
-                    <Tabs defaultValue="basic" className="w-full">
-                        <TabsList className="grid w-full grid-cols-3 mb-4">
-                            <TabsTrigger value="basic">Basic</TabsTrigger>
-                            <TabsTrigger value="organization">
-                                Organization
-                            </TabsTrigger>
-                            <TabsTrigger value="advanced">Advanced</TabsTrigger>
-                        </TabsList>
-
-                        <TabsContent value="basic" className="space-y-4">
-                            <div className="space-y-2">
-                                <h3 className="text-sm font-medium">Sort By</h3>
-                                <Select
-                                    value={filters.sortBy || "name"}
-                                    onValueChange={(value) =>
-                                        setFilters({
-                                            ...filters,
-                                            sortBy: value as
-                                                | "name"
-                                                | "email"
-                                                | "organization"
-                                                | "recent",
-                                        })
-                                    }
-                                >
-                                    <SelectTrigger className="w-full">
-                                        <SelectValue placeholder="Sort by" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="name">
-                                            Name
-                                        </SelectItem>
-                                        <SelectItem value="email">
-                                            Email
-                                        </SelectItem>
-                                        <SelectItem value="organization">
-                                            Organization
-                                        </SelectItem>
-                                        <SelectItem value="recent">
-                                            Recently Added
-                                        </SelectItem>
-                                    </SelectContent>
-                                </Select>
-                            </div>
-
-                            <div className="space-y-2">
-                                <h3 className="text-sm font-medium">Status</h3>
-                                <Select
-                                    value={filters.status || "all"}
-                                    onValueChange={(value) =>
-                                        setFilters({
-                                            ...filters,
-                                            status: value as
-                                                | "all"
-                                                | "contacted"
-                                                | "not-contacted",
-                                        })
-                                    }
-                                >
-                                    <SelectTrigger className="w-full">
-                                        <SelectValue placeholder="Status" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="all">
-                                            All Contacts
-                                        </SelectItem>
-                                        <SelectItem value="contacted">
-                                            Contacted
-                                        </SelectItem>
-                                        <SelectItem value="not-contacted">
-                                            Not Contacted
-                                        </SelectItem>
-                                    </SelectContent>
-                                </Select>
-                            </div>
-
-                            <div className="space-y-2">
-                                <h3 className="text-sm font-medium">
-                                    Contact Type
-                                </h3>
-                                <Select
-                                    value={filters.contactType || "any-type"}
-                                    onValueChange={(value) =>
-                                        setFilters({
-                                            ...filters,
-                                            contactType:
-                                                value === "any-type"
-                                                    ? undefined
-                                                    : value,
-                                        })
-                                    }
-                                >
-                                    <SelectTrigger className="w-full">
-                                        <SelectValue placeholder="Contact Type" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="any-type">
-                                            Any Type
-                                        </SelectItem>
-                                        {contactTypes.map((type) => (
-                                            <SelectItem key={type} value={type}>
-                                                {type}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                            </div>
-
-                            <div className="space-y-2">
-                                <h3 className="text-sm font-medium">
-                                    Data Quality
-                                </h3>
-                                <div className="flex flex-col gap-3 pt-1">
-                                    <div className="flex items-center space-x-2">
-                                        <Checkbox
-                                            id="hasEmail"
-                                            checked={filters.hasEmail}
-                                            onCheckedChange={(checked) =>
-                                                setFilters({
-                                                    ...filters,
-                                                    hasEmail: checked === true,
-                                                })
-                                            }
-                                        />
-                                        <label
-                                            htmlFor="hasEmail"
-                                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                                        >
-                                            Has Email
-                                        </label>
-                                    </div>
-                                    <div className="flex items-center space-x-2">
-                                        <Checkbox
-                                            id="hasName"
-                                            checked={filters.hasName}
-                                            onCheckedChange={(checked) =>
-                                                setFilters({
-                                                    ...filters,
-                                                    hasName: checked === true,
-                                                })
-                                            }
-                                        />
-                                        <label
-                                            htmlFor="hasName"
-                                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                                        >
-                                            Has Name
-                                        </label>
-                                    </div>
-                                </div>
-                            </div>
-                        </TabsContent>
-
-                        <TabsContent value="organization" className="space-y-4">
-                            <div className="space-y-2">
-                                <h3 className="text-sm font-medium">
-                                    Organization
-                                </h3>
-                                <Select
-                                    value={
-                                        filters.organization ||
-                                        "any-organization"
-                                    }
-                                    onValueChange={(value) =>
-                                        setFilters({
-                                            ...filters,
-                                            organization:
-                                                value === "any-organization"
-                                                    ? undefined
-                                                    : value,
-                                        })
-                                    }
-                                >
-                                    <SelectTrigger className="w-full">
-                                        <SelectValue placeholder="Organization" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="any-organization">
-                                            Any Organization
-                                        </SelectItem>
-                                        {organizations.map((org) => (
-                                            <SelectItem key={org} value={org}>
-                                                {org}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                            </div>
-
-                            <div className="space-y-2">
-                                <h3 className="text-sm font-medium">
-                                    Department
-                                </h3>
-                                <Select
-                                    value={
-                                        filters.department || "any-department"
-                                    }
-                                    onValueChange={(value) =>
-                                        setFilters({
-                                            ...filters,
-                                            department:
-                                                value === "any-department"
-                                                    ? undefined
-                                                    : value,
-                                        })
-                                    }
-                                >
-                                    <SelectTrigger className="w-full">
-                                        <SelectValue placeholder="Department" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="any-department">
-                                            Any Department
-                                        </SelectItem>
-                                        {departments.map((dept) => (
-                                            <SelectItem key={dept} value={dept}>
-                                                {dept}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                            </div>
-
-                            <div className="space-y-2">
-                                <h3 className="text-sm font-medium">
-                                    Industry
-                                </h3>
-                                <Select
-                                    value={filters.industry || "any-industry"}
-                                    onValueChange={(value) =>
-                                        setFilters({
-                                            ...filters,
-                                            industry:
-                                                value === "any-industry"
-                                                    ? undefined
-                                                    : value,
-                                        })
-                                    }
-                                >
-                                    <SelectTrigger className="w-full">
-                                        <SelectValue placeholder="Industry" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="any-industry">
-                                            Any Industry
-                                        </SelectItem>
-                                        {industries.map((industry) => (
-                                            <SelectItem
-                                                key={industry}
-                                                value={industry}
-                                            >
-                                                {industry}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                            </div>
-                        </TabsContent>
-
-                        <TabsContent value="advanced" className="space-y-4">
-                            <div className="bg-muted/30 rounded-lg p-4">
-                                <h3 className="text-sm font-medium mb-2">
-                                    Coming Soon
-                                </h3>
-                                <p className="text-sm text-muted-foreground">
-                                    Advanced filtering options will be available
-                                    in a future update.
-                                </p>
-                            </div>
-                        </TabsContent>
-                    </Tabs>
-
-                    <div className="space-y-4 pt-6 mt-4 border-t">
-                        <div className="flex items-center justify-between">
-                            <div className="text-sm">
-                                {activeFilterCount > 0
-                                    ? `${activeFilterCount} active filters`
-                                    : "No filters applied"}
-                            </div>
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={clearFilters}
-                            >
-                                Reset All
-                            </Button>
-                        </div>
-                        <Button
-                            className="w-full"
-                            onClick={() => setIsFilterOpen(false)}
-                        >
-                            Apply Filters
-                        </Button>
-                    </div>
-                </SheetContent>
-            </Sheet>
+            <FilterContactsDrawer
+                open={isFilterOpen}
+                onOpenChange={(isOpen) => {
+                    setIsFilterOpen(isOpen);
+                    if (!isOpen && activeFilterCount > 0) {
+                        // When drawer closes and filters are active, ensure they're applied
+                        handleFilterApply();
+                    }
+                }}
+                filters={filters}
+                setFilters={setFilters}
+                contacts={contacts}
+                activeFilterCount={activeFilterCount}
+                clearFilters={clearFilters}
+            />
 
             {editingContact && (
                 <EditContactDrawer
                     contact={editingContact}
                     open={!!editingContact}
-                    onOpenChange={(open) => !open && setEditingContact(null)}
+                    onOpenChange={(open) => {
+                        if (!open) {
+                            setEditingContact(null);
+                            handleContactUpdate();
+                        }
+                    }}
                 />
             )}
             <AlertDialog

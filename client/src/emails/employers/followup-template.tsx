@@ -6,9 +6,6 @@ import {
     Head,
     Heading,
     Html,
-    Img,
-    Link,
-    Preview,
     Row,
     Section,
     Text,
@@ -18,6 +15,7 @@ import { OutreachTeamDto } from "../../features/outreach/types/outreach-team";
 interface FollowUpEmailProps {
     companyName: string;
     recipientName: string;
+    subject: string;
     venue: string;
     sender: OutreachTeamDto;
     positionAtHackCC: string;
@@ -32,18 +30,16 @@ interface FollowUpEmailProps {
 export const FollowUpEmail = ({
     companyName,
     recipientName,
+    subject,
     venue,
     sender,
     location,
-    socialLinks,
     customEmailBody,
 }: FollowUpEmailProps) => {
     const formattedYearAndMajor = `${sender.year} ${sender.major}`;
 
-    const renderCustomEmailBody = () => {
-        if (!customEmailBody) return null;
-
-        const parsedContent = customEmailBody
+    const parseContent = (content: string): string => {
+        return content
             .replace(/\[recipient_name\]/g, recipientName)
             .replace(/\[company_name\]/g, companyName)
             .replace(/\[sender_name\]/g, sender.name)
@@ -51,6 +47,12 @@ export const FollowUpEmail = ({
             .replace(/\[sender_school\]/g, sender.school)
             .replace(/\[venue\]/g, venue)
             .replace(/\[location\]/g, location);
+    };
+
+    const renderCustomEmailBody = () => {
+        if (!customEmailBody) return null;
+
+        const parsedContent = parseContent(customEmailBody);
 
         return parsedContent.split("\n\n").map((paragraphText, index) => (
             <Text key={index} style={paragraph}>
@@ -59,26 +61,19 @@ export const FollowUpEmail = ({
         ));
     };
 
+    const parsedSubject = parseContent(subject);
+
     return (
         <Html>
             <Head />
-            <Preview>Meet the best students in {location} this May</Preview>
             <Body style={main}>
                 <Container style={container}>
                     <Section style={header}>
-                        <Img
-                            src={`https://minio.hackcc.net/public-bucket/logo.svg`}
-                            width={120}
-                            height={45}
-                            alt="HackCC Logo"
-                            style={logo}
-                        />
+                        <Text style={headerText}>HackCC</Text>
                     </Section>
 
                     <Section style={content}>
-                        <Heading style={subjectLine}>
-                            Re: Meet the best students in {location} this May
-                        </Heading>
+                        <Heading style={subjectLine}>{parsedSubject}</Heading>
 
                         {/* Email Body */}
                         {customEmailBody ? (
@@ -112,8 +107,6 @@ export const FollowUpEmail = ({
                             </>
                         )}
 
-                        <Text style={paragraph}>Best regards,</Text>
-
                         {/* Signature */}
                         <Section style={signatureContainer}>
                             <Row>
@@ -133,27 +126,6 @@ export const FollowUpEmail = ({
                                     </Text>
                                 </Column>
                             </Row>
-
-                            {/* Social Media Links */}
-                            {Object.keys(socialLinks).length > 0 && (
-                                <Row style={socialLinksContainer}>
-                                    {Object.entries(socialLinks).map(
-                                        ([platform, url]) => (
-                                            <Column
-                                                key={platform}
-                                                style={socialLinkColumn}
-                                            >
-                                                <Link
-                                                    href={url}
-                                                    style={socialLink}
-                                                >
-                                                    {platform}
-                                                </Link>
-                                            </Column>
-                                        )
-                                    )}
-                                </Row>
-                            )}
                         </Section>
                     </Section>
 
@@ -192,12 +164,16 @@ const header = {
     backgroundColor: "#1e40af",
     padding: "20px 30px",
     display: "flex",
-    justifyContent: "space-between",
+    justifyContent: "center",
     alignItems: "center",
 };
 
-const logo = {
+const headerText = {
+    fontSize: "20px",
+    fontWeight: "700",
+    color: "#ffffff",
     margin: "0",
+    textAlign: "center" as const,
 };
 
 const content = {
@@ -244,21 +220,6 @@ const signaturePosition = {
     color: "#4b5563",
     margin: "0 0 8px",
 };
-
-const socialLinksContainer = {
-    marginTop: "12px",
-};
-
-const socialLinkColumn = {
-    paddingRight: "12px",
-};
-
-const socialLink = {
-    fontSize: "14px",
-    color: "#2563eb",
-    textDecoration: "none",
-};
-
 const footer = {
     backgroundColor: "#f3f4f6",
     padding: "16px 30px",
