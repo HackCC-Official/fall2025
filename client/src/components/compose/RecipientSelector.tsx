@@ -1314,10 +1314,76 @@ export const RecipientSelector: React.FC<RecipientSelectorProps> = ({
         }
     };
 
+    // Add advanced filter state
+    const [isAdvancedFilterOpen, setIsAdvancedFilterOpen] =
+        React.useState(false);
+    const [advancedFilterConditions, setAdvancedFilterConditions] =
+        React.useState<FilterCondition[]>([]);
+    const [isUsingAdvancedFilter, setIsUsingAdvancedFilter] =
+        React.useState(false);
+
+    // Apply advanced filters
+    const applyAdvancedFilters = (conditions: FilterCondition[]) => {
+        setAdvancedFilterConditions(conditions);
+        setIsUsingAdvancedFilter(conditions.length > 0);
+
+        if (conditions.length > 0) {
+            // Clear other filters when using advanced filters
+            setGlobalFilters({
+                liaison: null,
+                status: null,
+                search: "",
+            });
+
+            toast.success(
+                `Advanced filter with ${conditions.length} condition${conditions.length !== 1 ? "s" : ""} applied`
+            );
+        } else {
+            setIsUsingAdvancedFilter(false);
+            toast.info("Advanced filters cleared");
+        }
+    };
+
     // Get the contacts to display based on search mode and filters
     const contactsToDisplay = React.useMemo(() => {
         if (inSearchMode && searchResults.length > 0) {
             return searchResults;
+        }
+
+        // If we are using advanced filters, apply those first
+        if (isUsingAdvancedFilter && advancedFilterConditions.length > 0) {
+            // Use allContacts as the data source for advanced filtering
+            const filtered = applyFilterConditions(
+                allContacts,
+                advancedFilterConditions
+            );
+
+            // Store the total filtered count for logging and debugging
+            if (filtered.length !== totalFilteredCount) {
+                setTotalFilteredCount(filtered.length);
+                console.log(
+                    `Total filtered contacts (advanced): ${filtered.length}`
+                );
+            }
+
+            // Store the complete filtered list for reference
+            if (
+                JSON.stringify(filtered) !==
+                JSON.stringify(filteredContactsCache)
+            ) {
+                setFilteredContactsCache(filtered);
+            }
+
+            // Implement client-side pagination for filtered results
+            const pageSize = 50; // Match the API page size
+            const startIndex = (contactsPage - 1) * pageSize;
+            const endIndex = startIndex + pageSize;
+
+            console.log(
+                `Displaying filtered contacts from index ${startIndex} to ${endIndex} (Page ${contactsPage})`
+            );
+
+            return filtered.slice(startIndex, endIndex);
         }
 
         // If we have global filters active, apply them client-side
@@ -1390,11 +1456,17 @@ export const RecipientSelector: React.FC<RecipientSelectorProps> = ({
         contactsPage,
         filteredContactsCache,
         totalFilteredCount,
+        isUsingAdvancedFilter,
+        advancedFilterConditions,
     ]);
 
     // Calculate total pages for client-side pagination when filters are applied
     const effectiveTotalPages = React.useMemo(() => {
-        if (globalFilters.liaison || globalFilters.status) {
+        if (
+            isUsingAdvancedFilter ||
+            globalFilters.liaison ||
+            globalFilters.status
+        ) {
             // Use the cached filtered contacts to calculate pages
             const filteredLength =
                 filteredContactsCache.length > 0
@@ -1419,6 +1491,7 @@ export const RecipientSelector: React.FC<RecipientSelectorProps> = ({
         inSearchMode,
         contactsTotalPages,
         totalFilteredCount,
+        isUsingAdvancedFilter,
     ]);
 
     const handleContactsPageChange = (newPage: number) => {
@@ -1486,36 +1559,6 @@ export const RecipientSelector: React.FC<RecipientSelectorProps> = ({
         }
 
         setSelectedRecipients(newSelected);
-    };
-
-    // Add advanced filter state
-    const [isAdvancedFilterOpen, setIsAdvancedFilterOpen] =
-        React.useState(false);
-    const [advancedFilterConditions, setAdvancedFilterConditions] =
-        React.useState<FilterCondition[]>([]);
-    const [isUsingAdvancedFilter, setIsUsingAdvancedFilter] =
-        React.useState(false);
-
-    // Apply advanced filters
-    const applyAdvancedFilters = (conditions: FilterCondition[]) => {
-        setAdvancedFilterConditions(conditions);
-        setIsUsingAdvancedFilter(conditions.length > 0);
-
-        if (conditions.length > 0) {
-            // Clear other filters when using advanced filters
-            setGlobalFilters({
-                liaison: null,
-                status: null,
-                search: "",
-            });
-
-            toast.success(
-                `Advanced filter with ${conditions.length} condition${conditions.length !== 1 ? "s" : ""} applied`
-            );
-        } else {
-            setIsUsingAdvancedFilter(false);
-            toast.info("Advanced filters cleared");
-        }
     };
 
     // Modify handleSelectAllContacts to handle advanced filters
