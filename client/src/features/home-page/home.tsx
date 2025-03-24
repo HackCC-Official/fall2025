@@ -23,8 +23,7 @@ export default function home() {
                 <div className="z-10 flex sm:flex-row flex-col mt-4 mb-10 sm:mb-16 font-bagel text-2xl sm:text-3xl md:text-4xl text-center">
                     <p>May 2-4, 2025 </p> <span className="hidden sm:inline font-mono font-thin">|</span> <p> TBD, California</p>
                 </div>
-                <Interest></Interest>
-                {/* <ApplyButton text="Apply to Attend" size="xl" directory="/apply"></ApplyButton> */}
+                <ApplyButton text="Apply to Attend" size="xl" directory="/apply"></ApplyButton>
             </div>
         </div>
     )
