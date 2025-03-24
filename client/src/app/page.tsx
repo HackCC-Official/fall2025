@@ -23,7 +23,6 @@ export default function HomePage() {
       <Carousel></Carousel>
       <AttendeeContainer/>
       <Slider></Slider>
-      <Venue></Venue>
       <VolunteerJudgeContainer></VolunteerJudgeContainer>
       <Footer></Footer>
 
