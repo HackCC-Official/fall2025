@@ -8,4 +8,3 @@ export default function Collage() {
         <Image className="sm:hidden block mx-16 scale-75" src={CollageCenter} alt="Center Collage"/>
     </div>
 }
-
