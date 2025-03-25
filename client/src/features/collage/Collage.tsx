@@ -1,5 +1,5 @@
-import CollageFull from '../../../public/CollageFull.png'
-import CollageCenter from '../../../public/CollageCenter.png'
+import CollageFull from '../../../public/CollageFull.webp'
+import CollageCenter from '../../../public/CollageCenter.webp'
 
 import Image from 'next/image'
 //<Image src={Texture} alt="bg" className='w-full h-auto'></Image>

@@ -1,6 +1,6 @@
 import React from 'react'
 import Image from "next/image";
-import skybg from '../../../../public/BG.png'
+import skybg from '../../../../public/Hero Background.webp'
 // width: 100vw;
 //     max-width: 100%;
 //     height: 100vh;

@@ -1,11 +1,11 @@
 
-import CloudCluster from "../../../public/Purple Cloud Cluster 3.png"
-import Cluster from "../../../public/Violet Cloud Cluster Opaque 2.png"
+import CloudCluster from "../../../public/Purple Cloud Cluster 3.webp"
+import Cluster from "../../../public/Violet Cloud Cluster Opaque 2.webp"
 import Image from "next/image"
-import PinkClusterL from "../../../public/Pink Cloud Cluster 3.png"
-import PinkClusterR from "../../../public/Pink Cloud Cluster 2.png"
-import PinkPawL from "../../../public/Pink Paw.png"
-import PinkPawR from "../../../public/Pink Paw 2.png"
+import PinkClusterL from "../../../public/Pink Cloud Cluster 3.webp"
+import PinkClusterR from "../../../public/Pink Cloud Cluster 2.webp"
+import PinkPawL from "../../../public/Pink Paw.webp"
+import PinkPawR from "../../../public/Pink Paw 2.webp"
 
 import { ApplyButton } from "@/components/applybutton"
 import { Title } from "@/components/title"

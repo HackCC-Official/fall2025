@@ -1,12 +1,12 @@
 import Image from "next/image"
 import React from "react"
 import { Socials } from "../../../components/socials"
-import CatCloudCluster from "../../../../public/Cat Cloud.png"
-import BalloonCat from "../../../../public/Balloon Cat.png"
-import DarkCloud from "../../../../public/Violet Cloud Cluster 3.png"
+import CatCloudCluster from "../../../../public/Cat Cloud.webp"
+import BalloonCat from "../../../../public/Balloon Cat.webp"
+import DarkCloud from "../../../../public/Violet Cloud Cluster 3.webp"
 import { ApplyButton } from "@/components/applybutton"
-import Logo from '../../../../public/Logo.svg'
-import FooterBg from '../../../../public/Footer Background.png'
+import Logo from '../../../../public/Logo.webp'
+import FooterBg from '../../../../public/Footer Background.webp'
 
 
 //<Image className="" src={BackgroundDarkCloud} alt="Back CLoud"></Image>

@@ -1,6 +1,6 @@
 
 import Image, { StaticImageData } from "next/image"
-import quote from "../../../../public/Quote.png"
+import quote from "../../../../public/Quote.webp"
 interface Props {
     imgPath: StaticImageData;
     name: string;

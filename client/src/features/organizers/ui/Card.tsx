@@ -1,6 +1,6 @@
 
 import Image, { StaticImageData } from "next/image"
-import placeholder from "../../../../public/Headshot Placeholder.png"
+import placeholder from "../../../../public/Headshot Placeholder.webp"
 
 interface props {
     path?: StaticImageData;

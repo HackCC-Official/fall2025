@@ -1,11 +1,11 @@
 import React from 'react'
 import Image from 'next/image'
-import ShootingStar from '../../../public/Shooting Star.png'
-import Paw from '../../../public/Pink Paw.png'
+import ShootingStar from '../../../public/Shooting Star.webp'
+import Paw from '../../../public/Pink Paw.webp'
 import {Title} from '@/components/title'
-import cloudL from "../../../public/Purple Cloud Cluster 2.png"
-import cloudR from "../../../public/Pink Cloud Cluster 4.png"
-import texture from "../../../public/About Texture.png"
+import cloudL from "../../../public/Purple Cloud Cluster 2.webp"
+import cloudR from "../../../public/Pink Cloud Cluster 4.webp"
+import texture from "../../../public/About Texture.webp"
 export default function About () {
     return (
         <div className='-z-20 relative bg-gradient-to-b from-bgpurple to-richpurple -mt-[5px] w-full h-auto overflow-x-clip' id='aboutTab'>

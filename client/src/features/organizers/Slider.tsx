@@ -4,9 +4,8 @@ import useEmblaCarousel from 'embla-carousel-react'
 import Image from 'next/image'
 
 import Slide from './ui/Slide'
-import placeholder from "../../../public/minh.jpg"
-import left from "../../../public/Left Arrow.png"
-import right from "../../../public/Right Arrow.png"
+import left from "../../../public/Left Arrow.webp"
+import right from "../../../public/Right Arrow.webp"
 
 
 
@@ -26,7 +25,7 @@ export default function Slider () {
                 <div className='mx-auto pb-10 max-w-[1350px] embla'>
                     <div className="max-w-[1350px] embla__viewport" ref={emblaRef} >
                         <div className="w-[100%] max-w-[1350px] embla__container">
-                            <div className="embla__slide"><Slide indvidualName1='Yasir White' indvidualRole1='HackCC founder' indviduaImageVaraible1={placeholder}></Slide></div>
+                            <div className="embla__slide"><Slide indvidualName1='Yasir White' indvidualRole1='HackCC founder'></Slide></div>
                             <div className="embla__slide"><Slide></Slide></div>
                             <div className="embla__slide"><Slide></Slide></div>
                             <div className="embla__slide"><Slide></Slide></div>

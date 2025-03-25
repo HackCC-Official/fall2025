@@ -1,6 +1,6 @@
 import Image from "next/image";
-import Logo from "../../../public/Logo.svg"
-import HotAirBalloon from "../../../public/Hot Air Balloon.png"
+import Logo from "../../../public/Logo.webp"
+import HotAirBalloon from "../../../public/Hot Air Balloon.webp"
 import { Homebg } from "./components/homebg";
 import { ApplyButton } from "@/components/applybutton";
 

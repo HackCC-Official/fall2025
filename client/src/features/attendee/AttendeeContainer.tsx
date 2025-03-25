@@ -1,11 +1,11 @@
 //flex 2xl:flex-row flex-col 2xl:justify-around items-center bg-gradient-to-t from-blue-500 via-transparent to-red-500 mx-auto  
 import Image from "next/image";
-import cloud from "../../../public/Violet Cloud Cluster 2.png"
-import cloud2 from "../../../public/Violet Cloud Cluster 1.png"
+import cloud from "../../../public/Violet Cloud Cluster 2.webp"
+import cloud2 from "../../../public/Violet Cloud Cluster 1.webp"
 import AttendeeCard from "./ui/AttendeeCard"
 import { Title } from "@/components/title";
-import minh from "../../../public/minh.jpg"
-import ethan from "../../../public/ethan.png"
+import minh from "../../../public/minh.webp"
+import ethan from "../../../public/ethan.webp"
 
 
 
