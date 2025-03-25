@@ -14,12 +14,16 @@ import {
 } from "@/lib/email/email-renderer";
 import type { SendBatchEmailsDto } from "@/features/outreach/types/email.dto";
 import type { OutreachTeamDto } from "@/features/outreach/types/outreach-team";
-import type { ContactDto } from "@/features/outreach/types/contact.dto";
+import type {
+    ContactDto,
+    ContactStatus,
+} from "@/features/outreach/types/contact.dto";
 import { EmailTemplate } from "@/lib/email/types";
 import type { RecipientType } from "@/components/compose/ComposeView";
 import { EmptyEmail } from "@/emails/empty-template";
 import { InterestedEmail } from "@/emails/interested-template";
 import { ColdEmail } from "@/emails/employers/cold-template";
+import { createEmailBatches } from "@/utils/email-batcher.util";
 
 interface UseEmailSenderProps {
     recipientType: RecipientType;
@@ -38,6 +42,7 @@ interface Recipient {
     id: string;
     to: { name: string; email: string }[];
     company?: string;
+    status?: ContactStatus;
 }
 
 export function useEmailSender({
@@ -63,13 +68,54 @@ export function useEmailSender({
         return "";
     };
 
+    /**
+     * Attempts to send an API request with timeout handling
+     * @param requestFn - The API request function to call
+     * @param data - The data to pass to the request function
+     * @param timeoutMs - Timeout in milliseconds
+     */
+    const sendWithTimeout = async <T, D>(
+        requestFn: (data: D) => Promise<T>,
+        data: D,
+        timeoutMs = 30000
+    ): Promise<T> => {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
+        try {
+            const response = await Promise.race([
+                requestFn(data),
+                new Promise<never>((_, reject) =>
+                    setTimeout(
+                        () => reject(new Error("Request timeout")),
+                        timeoutMs
+                    )
+                ),
+            ]);
+            clearTimeout(timeoutId);
+            return response;
+        } catch (error) {
+            clearTimeout(timeoutId);
+            throw error;
+        }
+    };
+
     const handleSendEmails = async () => {
         if (!selectedTeamMember) {
             toast.error("Could not find selected team member information");
             return;
         }
 
+        // Check if we're already sending emails
+        if (isSending) {
+            toast.error(
+                "Already sending emails. Please wait for the current batch to complete."
+            );
+            return;
+        }
+
         setIsSending(true);
+        let toastId: string | number = "";
 
         try {
             const allRecipients = recipientLists[recipientType];
@@ -99,7 +145,6 @@ export function useEmailSender({
                 allRecipients.slice(0, 3).map((r) => r.id)
             );
 
-            // Safety check - if we have no recipients but the set isn't empty
             if (
                 selectedRecipientsData.length === 0 &&
                 selectedRecipients.size > 0
@@ -108,7 +153,6 @@ export function useEmailSender({
                     "Recipients mismatch: Set has items but filter returned none"
                 );
 
-                // Try with string IDs as a fallback
                 const stringIdRecipientsData = allRecipients.filter(
                     (recipient: Recipient) =>
                         selectedRecipients.has(String(recipient.id))
@@ -128,15 +172,18 @@ export function useEmailSender({
                 }
             }
 
-            // Create a notification that stays open during the entire sending process
-            const toastId = toast.loading(
-                `Preparing to send ${selectedRecipientsData.length} emails. Please do not close this tab.`,
-                { duration: Infinity }
-            );
+            // Validate recipient count
+            if (selectedRecipientsData.length === 0) {
+                toast.error("No recipients selected");
+                setIsSending(false);
+                return;
+            }
 
-            // If we have more than 100 recipients, send in batches
-            const BATCH_SIZE = 100;
-            const needsBatching = selectedRecipientsData.length > BATCH_SIZE;
+            // Create a notification that stays open during the entire sending process
+            toastId = toast.loading(
+                `Preparing to send ${selectedRecipientsData.length} emails. Please wait...`,
+                { duration: 60000 } // Set a max duration of 1 minute instead of Infinity
+            );
 
             let renderedEmails: string[] = [];
 
@@ -275,99 +322,154 @@ export function useEmailSender({
                 };
             });
 
-            // Update toast to show we're starting to send
             toast.loading(
-                `Sending emails to ${selectedRecipientsData.length} recipients. Please do not close this tab.`,
-                { id: toastId }
+                `Sending emails to ${selectedRecipientsData.length} recipients...`,
+                { id: toastId, duration: 60000 }
             );
 
-            if (needsBatching) {
-                // Split into batches
-                const batches = [];
-                for (let i = 0; i < allEmails.length; i += BATCH_SIZE) {
-                    batches.push(allEmails.slice(i, i + BATCH_SIZE));
-                }
+            // Use createEmailBatches utility to create optimally sized batches
+            const batches = createEmailBatches(allEmails, { verbose: true });
 
-                let batchCounter = 1;
-                const totalBatches = batches.length;
+            // Special case for single email
+            if (allEmails.length === 1) {
+                console.log("Using single email API with email:", allEmails[0]);
+                await sendWithTimeout(sendEmail, allEmails[0], 30000);
+                toast.success("Email sent successfully!", {
+                    id: toastId,
+                    duration: 5000,
+                });
+            } else {
+                let successCount = 0;
+                let failureCount = 0;
 
-                // Send each batch with a delay
-                for (const batch of batches) {
-                    // Update toast with current batch info
+                for (let i = 0; i < batches.length; i++) {
+                    const batch = batches[i];
                     toast.loading(
-                        `Sending batch ${batchCounter} of ${totalBatches} (${batch.length} emails). Please do not close this tab.`,
-                        { id: toastId }
+                        `Sending batch ${i + 1} of ${batches.length} (${batch.length} emails)...`,
+                        { id: toastId, duration: 60000 }
                     );
 
                     try {
-                        // Send the current batch
-                        await sendBatchEmails({
-                            emails: batch,
-                        } as SendBatchEmailsDto);
+                        await sendWithTimeout(
+                            sendBatchEmails,
+                            { emails: batch } as SendBatchEmailsDto,
+                            45000 // 45 second timeout
+                        );
 
-                        // Update toast with success for this batch
+                        successCount += batch.length;
                         toast.success(
-                            `Batch ${batchCounter} of ${totalBatches} sent successfully! (${batch.length} emails)`,
+                            `Batch ${i + 1} of ${batches.length} sent successfully`,
                             { duration: 3000 }
                         );
 
-                        // If we have more batches to go, update the main toast
-                        if (batchCounter < totalBatches) {
-                            toast.loading(
-                                `Sending email batches: ${batchCounter} of ${totalBatches} completed. Please do not close this tab.`,
-                                { id: toastId }
-                            );
-
-                            // Wait for 5 seconds before sending the next batch
+                        // Add delay between batches
+                        if (i < batches.length - 1) {
                             await new Promise((resolve) =>
                                 setTimeout(resolve, 5000)
                             );
                         }
                     } catch (error) {
-                        console.error(
-                            `Error sending batch ${batchCounter}:`,
-                            error
-                        );
+                        failureCount += batch.length;
+                        console.error(`Error sending batch ${i + 1}:`, error);
                         toast.error(
-                            `Failed to send batch ${batchCounter}. Continuing with remaining batches.`
+                            `Failed to send batch ${i + 1}. Continuing with remaining batches.`
+                        );
+
+                        // Longer delay after error
+                        await new Promise((resolve) =>
+                            setTimeout(resolve, 10000)
                         );
                     }
-
-                    batchCounter++;
                 }
-            } else {
-                // For small batches, send directly
-                if (allEmails.length === 1) {
-                    console.log(
-                        "Using single email API with email:",
-                        allEmails[0]
+
+                if (failureCount === 0) {
+                    toast.success(
+                        `All ${successCount} emails sent successfully!`,
+                        {
+                            id: toastId,
+                            duration: 5000,
+                        }
                     );
-                    await sendEmail(allEmails[0]);
                 } else {
-                    console.log(
-                        "Using batch email API with count:",
-                        allEmails.length
+                    toast.error(
+                        `Completed with errors: ${failureCount} of ${successCount + failureCount} emails failed`,
+                        { id: toastId, duration: 5000 }
                     );
-                    await sendBatchEmails({
-                        emails: allEmails,
-                    } as SendBatchEmailsDto);
                 }
             }
 
-            // Update recipients as contacted if they're employers
             if (recipientType === "employers") {
                 try {
                     toast.loading("Updating contact statuses...", {
                         id: toastId,
+                        duration: 30000,
                     });
 
-                    await Promise.all(
-                        selectedRecipientsData.map(async (recipient) => {
-                            await updateContact(recipient.id, {
-                                status: "Contacted",
-                            });
-                        })
-                    );
+                    const updateBatchSize = 20;
+                    for (
+                        let i = 0;
+                        i < selectedRecipientsData.length;
+                        i += updateBatchSize
+                    ) {
+                        const updateBatch = selectedRecipientsData.slice(
+                            i,
+                            i + updateBatchSize
+                        );
+
+                        await Promise.all(
+                            updateBatch.map(async (recipient) => {
+                                try {
+                                    const templateName =
+                                        selectedTemplate?.name || "";
+                                    let newStatus: ContactStatus = "Contacted";
+
+                                    // Determine status based on template type
+                                    if (
+                                        templateName
+                                            .toLowerCase()
+                                            .includes("cold")
+                                    ) {
+                                        newStatus = "Cold";
+                                    } else if (
+                                        templateName
+                                            .toLowerCase()
+                                            .includes("followup")
+                                    ) {
+                                        newStatus = "Follow Up 1";
+                                    } else if (
+                                        templateName
+                                            .toLowerCase()
+                                            .includes("follow up 1")
+                                    ) {
+                                        newStatus = "Follow Up 2";
+                                    }
+
+                                    await updateContact(recipient.id, {
+                                        status: newStatus,
+                                    });
+                                } catch (error) {
+                                    console.error(
+                                        `Failed to update contact ${recipient.id}:`,
+                                        error
+                                    );
+                                }
+                            })
+                        );
+
+                        // Small delay between update batches
+                        if (
+                            i + updateBatchSize <
+                            selectedRecipientsData.length
+                        ) {
+                            await new Promise((resolve) =>
+                                setTimeout(resolve, 2000)
+                            );
+                        }
+                    }
+
+                    toast.success("Contact statuses updated successfully", {
+                        duration: 3000,
+                    });
                 } catch (error) {
                     console.error(
                         "Error updating employer contact status:",
@@ -377,19 +479,17 @@ export function useEmailSender({
                 }
             }
 
-            // Final success message
-            toast.success(
-                `All ${selectedRecipientsData.length} emails sent successfully!`,
-                {
-                    id: toastId,
-                    duration: 5000,
-                }
-            );
-
             onSuccess();
         } catch (error) {
-            console.error("Error sending emails:", error);
-            toast.error("Failed to send emails. Please try again.");
+            console.error("Error in email sending process:", error);
+            if (toastId) {
+                toast.error(
+                    `Failed to send emails: ${error instanceof Error ? error.message : "Unknown error"}`,
+                    { id: toastId, duration: 5000 }
+                );
+            } else {
+                toast.error("Failed to send emails. Please try again.");
+            }
         } finally {
             setIsSending(false);
         }

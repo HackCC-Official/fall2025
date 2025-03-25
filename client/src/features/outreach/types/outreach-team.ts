@@ -2,6 +2,7 @@
  * Represents a member of an outreach team
  */
 export type OutreachTeamDto = {
+    id?: string;
     email: string;
     name: string;
     major: string;

@@ -323,7 +323,7 @@ export async function deleteInterestedUser(email: string): Promise<void> {
 export async function getOutreachTeam(): Promise<OutreachTeamApiResponse> {
     return await outreachClient.request({
         method: "GET",
-        url: "outreach-team",
+        url: "outreach-team?take=100",
     });
 }
 
@@ -362,7 +362,7 @@ export async function updateOutreachTeamMember(
     outreachTeamDto: Partial<OutreachTeamDto>
 ): Promise<void> {
     await outreachClient.request({
-        method: "PUT",
+        method: "PATCH",
         url: `outreach-team/${id}`,
         data: outreachTeamDto,
     });
@@ -380,6 +380,27 @@ export async function getOutreachTeamMemberById(
         await outreachClient.request({
             method: "GET",
             url: `outreach-team/${id}`,
+        })
+    ).data;
+}
+
+/**
+ * Retrieves an outreach team member by email
+ * @param email - The email address of the outreach team member to retrieve
+ * @returns The outreach team member data
+ * @throws {Error} If the request fails or member is not found
+ */
+export async function getOutreachTeamMemberByEmail(
+    email: string
+): Promise<OutreachTeamDto> {
+    if (!email || !email.trim()) {
+        throw new Error("Email cannot be empty");
+    }
+
+    return (
+        await outreachClient.request({
+            method: "GET",
+            url: `outreach-team/email/${email}`,
         })
     ).data;
 }

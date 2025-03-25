@@ -48,13 +48,7 @@ import {
     FormLabel,
     FormMessage,
 } from "@/components/ui/form";
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select";
+
 import { Input } from "@/components/ui/input";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -65,10 +59,16 @@ const HACKER_SAMPLE_DATA: Mail[] = [];
 
 // Form schema for outreach team member
 const outreachTeamSchema = z.object({
+    id: z.string().optional(),
     email: z.string().email("Invalid email address"),
     name: z.string().min(2, "Name must be at least 2 characters"),
     major: z.string().min(1, "Major is required"),
-    year: z.enum(["Freshman", "Sophomore", "Junior", "Senior", "Graduate"]),
+    year: z.enum(["Freshman", "Sophomore", "Junior", "Senior", "Graduate"], {
+        errorMap: () => ({
+            message:
+                "Invalid year. Must be one of: Freshman, Sophomore, Junior, Senior, Graduate",
+        }),
+    }),
     school: z.string().min(1, "School is required"),
     position: z.string().min(1, "Position is required"),
 });
@@ -108,18 +108,35 @@ export default function EmailPage() {
         React.useState<OutreachTeamDto | null>(null);
     const [showForm, setShowForm] = React.useState<boolean>(false);
 
+    // Function to properly close the modal and reset state
+    const closeModal = () => {
+        setIsModalOpen(false);
+        setShowForm(false);
+        setEditingMember(null);
+    };
+
     // Form for creating/editing outreach team members
     const form = useForm<OutreachTeamFormValues>({
         resolver: zodResolver(outreachTeamSchema),
         defaultValues: {
+            id: "",
             email: "",
             name: "",
             major: "",
-            year: "Freshman",
             school: "",
             position: "",
         },
+        mode: "onChange",
     });
+
+    // Log form errors when they occur
+    React.useEffect(() => {
+        const subscription = form.formState.errors;
+        console.log("Form validation errors:", subscription);
+        return () => {
+            // No cleanup needed
+        };
+    }, [form.formState.errors]);
 
     React.useEffect(() => {
         const fetchEmails = async () => {
@@ -140,15 +157,14 @@ export default function EmailPage() {
     // Reset form when editing a new member
     React.useEffect(() => {
         if (editingMember) {
-            form.reset(editingMember);
-        } else {
             form.reset({
-                email: "",
-                name: "",
-                major: "",
-                year: "Freshman",
-                school: "",
-                position: "",
+                id: editingMember.id || "",
+                email: editingMember.email || "",
+                name: editingMember.name || "",
+                major: editingMember.major || "",
+                year: editingMember.year || "",
+                school: editingMember.school || "",
+                position: editingMember.position || "",
             });
         }
     }, [editingMember, form]);
@@ -170,6 +186,7 @@ export default function EmailPage() {
         return outreachTeamArray.map((member: OutreachTeamDto) => ({
             label: member.name,
             email: member.email,
+            id: member.id || member.email,
             icon: <CircleUser />,
         }));
     }, [outreachTeamResponse]);
@@ -227,9 +244,9 @@ export default function EmailPage() {
         setShowForm(true);
     };
 
-    const handleDeleteMember = async (email: string) => {
+    const handleDeleteMember = async (id: string) => {
         try {
-            await deleteOutreachTeamMember(email);
+            await deleteOutreachTeamMember(id);
             toast.success("Team member deleted successfully");
             refetchOutreachTeam();
         } catch (error) {
@@ -241,16 +258,60 @@ export default function EmailPage() {
     const onSubmit = async (data: OutreachTeamFormValues) => {
         try {
             if (editingMember) {
-                await updateOutreachTeamMember(editingMember.email, data);
+                console.log(
+                    "Updating member with ID:",
+                    editingMember.id || editingMember.email
+                );
+
+                // Create update data without the id property
+                const updateData = {
+                    email: data.email,
+                    name: data.name,
+                    major: data.major,
+                    year: data.year as
+                        | "Freshman"
+                        | "Sophomore"
+                        | "Junior"
+                        | "Senior"
+                        | "Graduate",
+                    school: data.school,
+                    position: data.position,
+                };
+
+                console.log("Update data (without id):", updateData);
+
+                await updateOutreachTeamMember(
+                    editingMember.id || editingMember.email,
+                    updateData
+                );
+                console.log("Member updated successfully");
                 toast.success("Team member updated successfully");
             } else {
-                await createOutreachTeamMember(data);
+                // For new team members, omit the id as it will be generated by the database
+                const memberData = {
+                    email: data.email,
+                    name: data.name,
+                    major: data.major,
+                    year: data.year as
+                        | "Freshman"
+                        | "Sophomore"
+                        | "Junior"
+                        | "Senior"
+                        | "Graduate",
+                    school: data.school,
+                    position: data.position,
+                };
+
+                console.log("Creating new member:", memberData);
+                await createOutreachTeamMember(memberData);
+                console.log("Member created successfully");
                 toast.success("New team member created successfully");
             }
 
-            refetchOutreachTeam();
-            setShowForm(false);
-            setEditingMember(null);
+            console.log("Refetching team data...");
+            await refetchOutreachTeam();
+            console.log("Team data refetched");
+            closeModal();
         } catch (error) {
             console.error("Error saving team member:", error);
             toast.error("Failed to save team member");
@@ -258,9 +319,14 @@ export default function EmailPage() {
     };
 
     const handleCancel = () => {
-        setEditingMember(null);
-        setShowForm(false);
-        form.reset();
+        closeModal();
+    };
+
+    const manualSubmit = async () => {
+        console.log("Manual submit triggered");
+        const formData = form.getValues();
+        console.log("Current form values:", formData);
+        await onSubmit(formData);
     };
 
     if (
@@ -297,7 +363,13 @@ export default function EmailPage() {
                         />
                         <Dialog
                             open={isModalOpen}
-                            onOpenChange={setIsModalOpen}
+                            onOpenChange={(open) => {
+                                if (!open) {
+                                    closeModal();
+                                } else {
+                                    setIsModalOpen(true);
+                                }
+                            }}
                         >
                             <DialogTrigger asChild>
                                 <Button
@@ -332,9 +404,14 @@ export default function EmailPage() {
                                     {showForm ? (
                                         <Form {...form}>
                                             <form
-                                                onSubmit={form.handleSubmit(
-                                                    onSubmit
-                                                )}
+                                                onSubmit={(e) => {
+                                                    console.log(
+                                                        "Form submit event triggered"
+                                                    );
+                                                    form.handleSubmit(onSubmit)(
+                                                        e
+                                                    );
+                                                }}
                                                 className="space-y-4"
                                             >
                                                 <div className="grid grid-cols-2 gap-4">
@@ -400,37 +477,12 @@ export default function EmailPage() {
                                                                 <FormLabel>
                                                                     Year
                                                                 </FormLabel>
-                                                                <Select
-                                                                    onValueChange={
-                                                                        field.onChange
-                                                                    }
-                                                                    defaultValue={
-                                                                        field.value
-                                                                    }
-                                                                >
-                                                                    <FormControl>
-                                                                        <SelectTrigger>
-                                                                            <SelectValue placeholder="Select year" />
-                                                                        </SelectTrigger>
-                                                                    </FormControl>
-                                                                    <SelectContent>
-                                                                        <SelectItem value="Freshman">
-                                                                            Freshman
-                                                                        </SelectItem>
-                                                                        <SelectItem value="Sophomore">
-                                                                            Sophomore
-                                                                        </SelectItem>
-                                                                        <SelectItem value="Junior">
-                                                                            Junior
-                                                                        </SelectItem>
-                                                                        <SelectItem value="Senior">
-                                                                            Senior
-                                                                        </SelectItem>
-                                                                        <SelectItem value="Graduate">
-                                                                            Graduate
-                                                                        </SelectItem>
-                                                                    </SelectContent>
-                                                                </Select>
+                                                                <FormControl>
+                                                                    <Input
+                                                                        placeholder="e.g. Senior, Graduate, etc."
+                                                                        {...field}
+                                                                    />
+                                                                </FormControl>
                                                                 <FormMessage />
                                                             </FormItem>
                                                         )}
@@ -480,7 +532,15 @@ export default function EmailPage() {
                                                     >
                                                         Cancel
                                                     </Button>
-                                                    <Button type="submit">
+                                                    <Button
+                                                        type="button"
+                                                        onClick={() => {
+                                                            console.log(
+                                                                "Submit button clicked"
+                                                            );
+                                                            manualSubmit();
+                                                        }}
+                                                    >
                                                         {editingMember
                                                             ? "Update Member"
                                                             : "Create Member"}
@@ -517,6 +577,7 @@ export default function EmailPage() {
                                                         ) => (
                                                             <TableRow
                                                                 key={
+                                                                    member.id ||
                                                                     member.email
                                                                 }
                                                             >
@@ -558,7 +619,8 @@ export default function EmailPage() {
                                                                             size="sm"
                                                                             onClick={() =>
                                                                                 handleDeleteMember(
-                                                                                    member.email
+                                                                                    member.id ||
+                                                                                        member.email
                                                                                 )
                                                                             }
                                                                         >

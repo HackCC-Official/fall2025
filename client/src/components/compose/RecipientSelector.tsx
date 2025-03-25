@@ -31,6 +31,7 @@ import {
     SlidersHorizontal,
     Plus,
     Filter,
+    Check,
 } from "lucide-react";
 import { toast } from "sonner";
 import { debounce } from "lodash";
@@ -57,6 +58,14 @@ import {
     PopoverTrigger,
 } from "@/components/ui/popover";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { cn } from "@/lib/utils";
+import {
+    Command,
+    CommandEmpty,
+    CommandGroup,
+    CommandInput,
+    CommandItem,
+} from "@/components/ui/command";
 
 // Export RecipientType for use in other components
 export type { RecipientType };
@@ -685,9 +694,21 @@ export const RecipientSelectionTable = ({
                             <TableRow
                                 key={contact.id}
                                 className={
-                                    "status" in contact &&
-                                    contact.status === "Contacted"
-                                        ? "bg-purple-100 dark:bg-purple-900/20"
+                                    contact.status
+                                        ? contact.status === "Cold"
+                                            ? "bg-blue-100 dark:bg-blue-900/20"
+                                            : contact.status ===
+                                                    "Follow Up 1" ||
+                                                contact.status === "Follow Up 2"
+                                              ? "bg-amber-100 dark:bg-amber-900/20"
+                                              : contact.status === "Accept"
+                                                ? "bg-green-100 dark:bg-green-900/20"
+                                                : contact.status === "Rejected"
+                                                  ? "bg-red-100 dark:bg-red-900/20"
+                                                  : contact.status ===
+                                                      "Contacted"
+                                                    ? "bg-purple-100 dark:bg-purple-900/20"
+                                                    : "bg-purple-100 dark:bg-purple-900/20"
                                         : "hover:bg-muted/50"
                                 }
                             >
@@ -721,6 +742,41 @@ export const RecipientSelectionTable = ({
                                 {"liaison" in contact && (
                                     <TableCell>
                                         {contact.liaison || "-"}
+                                    </TableCell>
+                                )}
+                                {contact.status && (
+                                    <TableCell>
+                                        <div
+                                            className={cn(
+                                                "absolute -top-1 -right-1 rounded-full h-4 w-4 flex items-center justify-center",
+                                                contact.status === "Cold" &&
+                                                    "bg-blue-500",
+                                                contact.status ===
+                                                    "Follow Up 1" &&
+                                                    "bg-amber-500",
+                                                contact.status ===
+                                                    "Follow Up 2" &&
+                                                    "bg-amber-600",
+                                                contact.status === "Accept" &&
+                                                    "bg-green-500",
+                                                contact.status === "Rejected" &&
+                                                    "bg-red-500",
+                                                contact.status ===
+                                                    "Contacted" &&
+                                                    "bg-purple-500",
+                                                ![
+                                                    "Cold",
+                                                    "Follow Up 1",
+                                                    "Follow Up 2",
+                                                    "Accept",
+                                                    "Rejected",
+                                                    "Contacted",
+                                                ].includes(contact.status) &&
+                                                    "bg-primary"
+                                            )}
+                                        >
+                                            <Check className="h-3 w-3 text-primary-foreground" />
+                                        </div>
                                     </TableCell>
                                 )}
                             </TableRow>
@@ -964,17 +1020,41 @@ export const OrganizationsView = ({
                                                 </div>
                                             </div>
                                             {contact.status && (
-                                                <Badge
-                                                    variant={
+                                                <div
+                                                    className={cn(
+                                                        "absolute -top-1 -right-1 rounded-full h-4 w-4 flex items-center justify-center",
                                                         contact.status ===
-                                                        "Contacted"
-                                                            ? "secondary"
-                                                            : "outline"
-                                                    }
-                                                    className="text-xs"
+                                                            "Cold" &&
+                                                            "bg-blue-500",
+                                                        contact.status ===
+                                                            "Follow Up 1" &&
+                                                            "bg-amber-500",
+                                                        contact.status ===
+                                                            "Follow Up 2" &&
+                                                            "bg-amber-600",
+                                                        contact.status ===
+                                                            "Accept" &&
+                                                            "bg-green-500",
+                                                        contact.status ===
+                                                            "Rejected" &&
+                                                            "bg-red-500",
+                                                        contact.status ===
+                                                            "Contacted" &&
+                                                            "bg-purple-500",
+                                                        ![
+                                                            "Cold",
+                                                            "Follow Up 1",
+                                                            "Follow Up 2",
+                                                            "Accept",
+                                                            "Rejected",
+                                                            "Contacted",
+                                                        ].includes(
+                                                            contact.status
+                                                        ) && "bg-primary"
+                                                    )}
                                                 >
-                                                    {contact.status}
-                                                </Badge>
+                                                    <Check className="h-3 w-3 text-primary-foreground" />
+                                                </div>
                                             )}
                                         </div>
                                     ))}
@@ -1234,10 +1314,76 @@ export const RecipientSelector: React.FC<RecipientSelectorProps> = ({
         }
     };
 
+    // Add advanced filter state
+    const [isAdvancedFilterOpen, setIsAdvancedFilterOpen] =
+        React.useState(false);
+    const [advancedFilterConditions, setAdvancedFilterConditions] =
+        React.useState<FilterCondition[]>([]);
+    const [isUsingAdvancedFilter, setIsUsingAdvancedFilter] =
+        React.useState(false);
+
+    // Apply advanced filters
+    const applyAdvancedFilters = (conditions: FilterCondition[]) => {
+        setAdvancedFilterConditions(conditions);
+        setIsUsingAdvancedFilter(conditions.length > 0);
+
+        if (conditions.length > 0) {
+            // Clear other filters when using advanced filters
+            setGlobalFilters({
+                liaison: null,
+                status: null,
+                search: "",
+            });
+
+            toast.success(
+                `Advanced filter with ${conditions.length} condition${conditions.length !== 1 ? "s" : ""} applied`
+            );
+        } else {
+            setIsUsingAdvancedFilter(false);
+            toast.info("Advanced filters cleared");
+        }
+    };
+
     // Get the contacts to display based on search mode and filters
     const contactsToDisplay = React.useMemo(() => {
         if (inSearchMode && searchResults.length > 0) {
             return searchResults;
+        }
+
+        // If we are using advanced filters, apply those first
+        if (isUsingAdvancedFilter && advancedFilterConditions.length > 0) {
+            // Use allContacts as the data source for advanced filtering
+            const filtered = applyFilterConditions(
+                allContacts,
+                advancedFilterConditions
+            );
+
+            // Store the total filtered count for logging and debugging
+            if (filtered.length !== totalFilteredCount) {
+                setTotalFilteredCount(filtered.length);
+                console.log(
+                    `Total filtered contacts (advanced): ${filtered.length}`
+                );
+            }
+
+            // Store the complete filtered list for reference
+            if (
+                JSON.stringify(filtered) !==
+                JSON.stringify(filteredContactsCache)
+            ) {
+                setFilteredContactsCache(filtered);
+            }
+
+            // Implement client-side pagination for filtered results
+            const pageSize = 50; // Match the API page size
+            const startIndex = (contactsPage - 1) * pageSize;
+            const endIndex = startIndex + pageSize;
+
+            console.log(
+                `Displaying filtered contacts from index ${startIndex} to ${endIndex} (Page ${contactsPage})`
+            );
+
+            return filtered.slice(startIndex, endIndex);
         }
 
         // If we have global filters active, apply them client-side
@@ -1310,11 +1456,17 @@ export const RecipientSelector: React.FC<RecipientSelectorProps> = ({
         contactsPage,
         filteredContactsCache,
         totalFilteredCount,
+        isUsingAdvancedFilter,
+        advancedFilterConditions,
     ]);
 
     // Calculate total pages for client-side pagination when filters are applied
     const effectiveTotalPages = React.useMemo(() => {
-        if (globalFilters.liaison || globalFilters.status) {
+        if (
+            isUsingAdvancedFilter ||
+            globalFilters.liaison ||
+            globalFilters.status
+        ) {
             // Use the cached filtered contacts to calculate pages
             const filteredLength =
                 filteredContactsCache.length > 0
@@ -1339,6 +1491,7 @@ export const RecipientSelector: React.FC<RecipientSelectorProps> = ({
         inSearchMode,
         contactsTotalPages,
         totalFilteredCount,
+        isUsingAdvancedFilter,
     ]);
 
     const handleContactsPageChange = (newPage: number) => {
@@ -1406,36 +1559,6 @@ export const RecipientSelector: React.FC<RecipientSelectorProps> = ({
         }
 
         setSelectedRecipients(newSelected);
-    };
-
-    // Add advanced filter state
-    const [isAdvancedFilterOpen, setIsAdvancedFilterOpen] =
-        React.useState(false);
-    const [advancedFilterConditions, setAdvancedFilterConditions] =
-        React.useState<FilterCondition[]>([]);
-    const [isUsingAdvancedFilter, setIsUsingAdvancedFilter] =
-        React.useState(false);
-
-    // Apply advanced filters
-    const applyAdvancedFilters = (conditions: FilterCondition[]) => {
-        setAdvancedFilterConditions(conditions);
-        setIsUsingAdvancedFilter(conditions.length > 0);
-
-        if (conditions.length > 0) {
-            // Clear other filters when using advanced filters
-            setGlobalFilters({
-                liaison: null,
-                status: null,
-                search: "",
-            });
-
-            toast.success(
-                `Advanced filter with ${conditions.length} condition${conditions.length !== 1 ? "s" : ""} applied`
-            );
-        } else {
-            setIsUsingAdvancedFilter(false);
-            toast.info("Advanced filters cleared");
-        }
     };
 
     // Modify handleSelectAllContacts to handle advanced filters
@@ -1703,37 +1826,6 @@ export const RecipientSelector: React.FC<RecipientSelectorProps> = ({
         }));
     };
 
-    // Get all unique statuses from contacts
-    const availableStatuses = React.useMemo(() => {
-        if (!allContacts.length) return [];
-
-        const statusSet = new Set<string>();
-        allContacts.forEach((contact) => {
-            if (
-                contact.status &&
-                typeof contact.status === "string" &&
-                contact.status.trim() !== ""
-            ) {
-                statusSet.add(contact.status);
-            }
-        });
-        return Array.from(statusSet).sort();
-    }, [allContacts]);
-
-    // Apply advanced filters to the search results when active
-    React.useEffect(() => {
-        // When advanced filters are active, we need to ensure the UI displays filtered results
-        if (isUsingAdvancedFilter && advancedFilterConditions.length > 0) {
-            const filteredContacts = applyFilterConditions(
-                allContacts,
-                advancedFilterConditions
-            );
-            console.log(
-                `Advanced filter applied: ${filteredContacts.length} contacts matched`
-            );
-        }
-    }, [isUsingAdvancedFilter, advancedFilterConditions, allContacts]);
-
     return (
         <div className="space-y-6">
             {/* Recipient Type Tabs */}
@@ -1826,22 +1918,53 @@ export const RecipientSelector: React.FC<RecipientSelectorProps> = ({
                                 </Button>
                             </Badge>
                         )}
-                        {activeFilters.status && (
+                        {globalFilters.status !== null && (
                             <Badge
-                                variant="secondary"
-                                className="flex items-center gap-1"
+                                variant="outline"
+                                className={cn(
+                                    "gap-1.5 pl-2",
+                                    globalFilters.status === "Cold" &&
+                                        "bg-blue-100 border-blue-200 dark:bg-blue-900/20 dark:border-blue-800",
+                                    globalFilters.status === "Follow Up 1" &&
+                                        "bg-amber-100 border-amber-200 dark:bg-amber-900/20 dark:border-amber-800",
+                                    globalFilters.status === "Follow Up 2" &&
+                                        "bg-amber-100 border-amber-200 dark:bg-amber-900/20 dark:border-amber-800",
+                                    globalFilters.status === "Accept" &&
+                                        "bg-green-100 border-green-200 dark:bg-green-900/20 dark:border-green-800",
+                                    globalFilters.status === "Rejected" &&
+                                        "bg-red-100 border-red-200 dark:bg-red-900/20 dark:border-red-800",
+                                    globalFilters.status === "Contacted" &&
+                                        "bg-purple-100 border-purple-200 dark:bg-purple-900/20 dark:border-purple-800"
+                                )}
                             >
-                                Status: {activeFilters.status}
+                                <div
+                                    className={cn(
+                                        "h-2 w-2 rounded-full mr-1",
+                                        globalFilters.status === "Cold" &&
+                                            "bg-blue-500",
+                                        globalFilters.status ===
+                                            "Follow Up 1" && "bg-amber-500",
+                                        globalFilters.status ===
+                                            "Follow Up 2" && "bg-amber-600",
+                                        globalFilters.status === "Accept" &&
+                                            "bg-green-500",
+                                        globalFilters.status === "Rejected" &&
+                                            "bg-red-500",
+                                        globalFilters.status === "Contacted" &&
+                                            "bg-purple-500"
+                                    )}
+                                />
+                                Status: {globalFilters.status}
                                 <Button
-                                    variant="ghost"
                                     size="sm"
-                                    onClick={() =>
-                                        setActiveFilters((prev) => ({
+                                    variant="ghost"
+                                    className="h-auto p-0 px-1.5 ml-1"
+                                    onClick={() => {
+                                        setGlobalFilters((prev) => ({
                                             ...prev,
                                             status: null,
-                                        }))
-                                    }
-                                    className="h-4 w-4 p-0 hover:bg-transparent"
+                                        }));
+                                    }}
                                 >
                                     <X className="h-3 w-3" />
                                 </Button>
@@ -2016,27 +2139,83 @@ export const RecipientSelector: React.FC<RecipientSelectorProps> = ({
                                 </Select>
 
                                 {/* Status filter dropdown */}
-                                <Select
-                                    value={globalFilters.status || "all"}
-                                    onValueChange={handleGlobalStatusChange}
-                                >
-                                    <SelectTrigger className="h-9 w-[180px]">
-                                        <SelectValue placeholder="Filter by status" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="all">
-                                            All Statuses
-                                        </SelectItem>
-                                        {availableStatuses.map((status) => (
-                                            <SelectItem
-                                                key={status}
-                                                value={status}
-                                            >
-                                                {status}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
+                                <Popover>
+                                    <PopoverTrigger asChild>
+                                        <Button
+                                            id="status"
+                                            variant="outline"
+                                            className={cn(
+                                                "w-full justify-start text-left font-normal",
+                                                globalFilters.status &&
+                                                    "border-primary"
+                                            )}
+                                        >
+                                            <Filter className="mr-2 h-4 w-4" />
+                                            {globalFilters.status || "Status"}
+                                        </Button>
+                                    </PopoverTrigger>
+                                    <PopoverContent className="p-0 w-[200px]">
+                                        <Command>
+                                            <CommandInput
+                                                placeholder="Search status..."
+                                                className="h-9"
+                                            />
+                                            <CommandEmpty>
+                                                No status found.
+                                            </CommandEmpty>
+                                            <CommandGroup className="max-h-[200px] overflow-auto">
+                                                {[
+                                                    "Cold",
+                                                    "Follow Up 1",
+                                                    "Follow Up 2",
+                                                    "Accept",
+                                                    "Rejected",
+                                                    "Contacted",
+                                                ].map((status) => (
+                                                    <CommandItem
+                                                        key={status}
+                                                        value={status}
+                                                        onSelect={() =>
+                                                            handleGlobalStatusChange(
+                                                                status
+                                                            )
+                                                        }
+                                                        className="flex items-center gap-2"
+                                                    >
+                                                        <div
+                                                            className={cn(
+                                                                "h-2 w-2 rounded-full",
+                                                                status ===
+                                                                    "Cold" &&
+                                                                    "bg-blue-500",
+                                                                status ===
+                                                                    "Follow Up 1" &&
+                                                                    "bg-amber-500",
+                                                                status ===
+                                                                    "Follow Up 2" &&
+                                                                    "bg-amber-600",
+                                                                status ===
+                                                                    "Accept" &&
+                                                                    "bg-green-500",
+                                                                status ===
+                                                                    "Rejected" &&
+                                                                    "bg-red-500",
+                                                                status ===
+                                                                    "Contacted" &&
+                                                                    "bg-purple-500"
+                                                            )}
+                                                        />
+                                                        <span>{status}</span>
+                                                        {globalFilters.status ===
+                                                            status && (
+                                                            <Check className="ml-auto h-4 w-4" />
+                                                        )}
+                                                    </CommandItem>
+                                                ))}
+                                            </CommandGroup>
+                                        </Command>
+                                    </PopoverContent>
+                                </Popover>
                             </div>
                         )}
 

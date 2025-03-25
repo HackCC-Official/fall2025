@@ -898,6 +898,8 @@ export default function ContactsList({
                         {virtualizer.getVirtualItems().map((virtualItem) => {
                             const item = filteredContacts[virtualItem.index];
                             if (!item) return null;
+
+                            console.log(item);
                             return (
                                 <div
                                     key={virtualItem.key}
@@ -937,8 +939,40 @@ export default function ContactsList({
                                                     ?.charAt(0)
                                                     ?.toUpperCase() ||
                                                 "?"}
-                                            {item.status === "Contacted" && (
-                                                <div className="absolute -top-1 -right-1 bg-primary rounded-full h-4 w-4 flex items-center justify-center">
+                                            {item.status && (
+                                                <div
+                                                    className={cn(
+                                                        "absolute -top-1 -right-1 rounded-full h-4 w-4 flex items-center justify-center",
+                                                        item.status ===
+                                                            "Cold" &&
+                                                            "bg-blue-500",
+                                                        item.status ===
+                                                            "Follow Up 1" &&
+                                                            "bg-amber-500",
+                                                        item.status ===
+                                                            "Follow Up 2" &&
+                                                            "bg-amber-600",
+                                                        item.status ===
+                                                            "Accept" &&
+                                                            "bg-green-500",
+                                                        item.status ===
+                                                            "Rejected" &&
+                                                            "bg-red-500",
+                                                        item.status ===
+                                                            "Contacted" &&
+                                                            "bg-purple-500",
+                                                        ![
+                                                            "Cold",
+                                                            "Follow Up 1",
+                                                            "Follow Up 2",
+                                                            "Accept",
+                                                            "Rejected",
+                                                            "Contacted",
+                                                        ].includes(
+                                                            item.status
+                                                        ) && "bg-primary"
+                                                    )}
+                                                >
                                                     <Check className="h-3 w-3 text-primary-foreground" />
                                                 </div>
                                             )}

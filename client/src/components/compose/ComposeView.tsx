@@ -21,7 +21,10 @@ import { EmptyEmail } from "@/emails/empty-template";
 import { InterestedEmail } from "@/emails/interested-template";
 import { ColdEmail } from "@/emails/employers/cold-template";
 import type { Mail } from "@/types/mail";
-import type { ContactDto } from "@/features/outreach/types/contact.dto";
+import type {
+    ContactDto,
+    ContactStatus,
+} from "@/features/outreach/types/contact.dto";
 import type { RecipientConfirmationDetails } from "@/features/outreach/types/contact.dto";
 import AccountSwitcher from "../../pages/panel/email/components/account-switcher";
 import PanelLayout from "../../pages/panel/layout";
@@ -49,7 +52,7 @@ interface RecipientItem {
     }>;
     company?: string;
     labels?: string[];
-    status?: string;
+    status?: ContactStatus;
 }
 
 interface ExtendedEmailTemplate extends EmailTemplate {

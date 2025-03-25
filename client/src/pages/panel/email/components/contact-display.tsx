@@ -12,6 +12,7 @@ import {
     Copy,
     Check,
     Building,
+    X,
 } from "lucide-react";
 import type { ContactDto } from "@/features/outreach/types/contact.dto";
 import { Button } from "@/components/ui/button";
@@ -190,8 +191,33 @@ export default function ContactDisplay({
                         <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center text-2xl relative">
                             {contact.contact_name?.charAt(0).toUpperCase() ||
                                 contact.email_address.charAt(0).toUpperCase()}
-                            {contact.status === "Contacted" && (
-                                <div className="absolute -top-1 -right-1 bg-primary rounded-full h-5 w-5 flex items-center justify-center">
+                            {contact.status && (
+                                <div
+                                    className={cn(
+                                        "absolute -top-1 -right-1 rounded-full h-5 w-5 flex items-center justify-center",
+                                        contact.status === "Cold" &&
+                                            "bg-blue-500",
+                                        contact.status === "Follow Up 1" &&
+                                            "bg-amber-500",
+                                        contact.status === "Follow Up 2" &&
+                                            "bg-amber-600",
+                                        contact.status === "Accept" &&
+                                            "bg-green-500",
+                                        contact.status === "Rejected" &&
+                                            "bg-red-500",
+                                        contact.status === "Contacted" &&
+                                            "bg-purple-500",
+                                        ![
+                                            "Cold",
+                                            "Follow Up 1",
+                                            "Follow Up 2",
+                                            "Accept",
+                                            "Rejected",
+                                            "Contacted",
+                                        ].includes(contact.status) &&
+                                            "bg-primary"
+                                    )}
+                                >
                                     <Check className="h-3 w-3 text-primary-foreground" />
                                 </div>
                             )}
@@ -233,8 +259,39 @@ export default function ContactDisplay({
                 </div>
                 <div className="flex flex-wrap gap-2">
                     {contact.status && (
-                        <Badge variant="default">
-                            <Check className="h-3 w-3 mr-1" />
+                        <Badge
+                            variant="default"
+                            className={cn(
+                                contact.status === "Cold" &&
+                                    "bg-blue-500 hover:bg-blue-500/80",
+                                contact.status === "Follow Up 1" &&
+                                    "bg-amber-500 hover:bg-amber-500/80",
+                                contact.status === "Follow Up 2" &&
+                                    "bg-amber-600 hover:bg-amber-600/80",
+                                contact.status === "Accept" &&
+                                    "bg-green-500 hover:bg-green-500/80",
+                                contact.status === "Rejected" &&
+                                    "bg-red-500 hover:bg-red-500/80",
+                                contact.status === "Contacted" &&
+                                    "bg-purple-500 hover:bg-purple-500/80"
+                            )}
+                        >
+                            {contact.status === "Cold" && (
+                                <Mail className="h-3 w-3 mr-1" />
+                            )}
+                            {(contact.status === "Follow Up 1" ||
+                                contact.status === "Follow Up 2") && (
+                                <AlertTriangle className="h-3 w-3 mr-1" />
+                            )}
+                            {contact.status === "Accept" && (
+                                <Check className="h-3 w-3 mr-1" />
+                            )}
+                            {contact.status === "Rejected" && (
+                                <X className="h-3 w-3 mr-1" />
+                            )}
+                            {contact.status === "Contacted" && (
+                                <Check className="h-3 w-3 mr-1" />
+                            )}
                             {contact.status}
                         </Badge>
                     )}
