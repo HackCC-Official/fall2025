@@ -1,9 +1,9 @@
 
-import CloudCluster from "../../../public/Purple Cloud Cluster.png"
-import Cluster from "../../../public/Purple Cloud Cluster2.png"
+import CloudCluster from "../../../public/Purple Cloud Cluster 3.png"
+import Cluster from "../../../public/Violet Cloud Cluster Opaque 2.png"
 import Image from "next/image"
-import PinkClusterL from "../../../public/Pink Cloud Cluster2.png"
-import PinkClusterR from "../../../public/Pink Cloud Cluster.png"
+import PinkClusterL from "../../../public/Pink Cloud Cluster 3.png"
+import PinkClusterR from "../../../public/Pink Cloud Cluster 2.png"
 import PinkPawL from "../../../public/Pink Paw.png"
 import PinkPawR from "../../../public/Pink Paw 2.png"
 

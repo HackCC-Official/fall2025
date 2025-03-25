@@ -1,6 +1,6 @@
 import React from 'react'
 import Image from "next/image";
-import skybg from '../../public/BG Image.png'
+import skybg from '../../public/Hero Background.png'
 import { cn } from '@/lib/utils';
 
 export const Sky = ({ className } : { className?: string }) => {

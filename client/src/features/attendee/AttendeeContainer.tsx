@@ -1,7 +1,7 @@
 //flex 2xl:flex-row flex-col 2xl:justify-around items-center bg-gradient-to-t from-blue-500 via-transparent to-red-500 mx-auto  
 import Image from "next/image";
-import cloud from "../../../public/Dark Purple Cloud Mid.png"
-import cloud2 from "../../../public/Dark Purple Cloud Back2.png"
+import cloud from "../../../public/Violet Cloud Cluster 2.png"
+import cloud2 from "../../../public/Violet Cloud Cluster 1.png"
 import AttendeeCard from "./ui/AttendeeCard"
 import { Title } from "@/components/title";
 import minh from "../../../public/minh.jpg"

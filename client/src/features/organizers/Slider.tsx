@@ -5,8 +5,8 @@ import Image from 'next/image'
 
 import Slide from './ui/Slide'
 import placeholder from "../../../public/minh.jpg"
-import left from "../../../public/leftarrow.png"
-import right from "../../../public/rightarrow.png"
+import left from "../../../public/Left Arrow.png"
+import right from "../../../public/Right Arrow.png"
 
 
 

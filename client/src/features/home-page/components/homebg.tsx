@@ -2,10 +2,10 @@
 
 import React from 'react'
 import Image from "next/image";
-import CatCloudCluster from "../../../../public/Cat Cloud Cluster.png"
-import CloudBack from "../../../../public/Dark Purple Cloud Back.png"
-import CloudMid from "../../../../public/Dark Purple Cloud Mid.png"
-import CloudFront from "../../../../public/Medium Purple Cloud.png"
+import CatCloudCluster from "../../../../public/Cat Cloud.png"
+import CloudBack from "../../../../public/Violet Cloud Cluster Opaque 1.png"
+import CloudMid from "../../../../public/Violet Cloud Cluster 2.png"
+import CloudFront from "../../../../public/Purple Cloud Cluster 1.png"
 import Moon from "../../../../public/Moon.png"
 import { Sky } from '@/components/sky';
 

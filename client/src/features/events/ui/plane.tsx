@@ -1,5 +1,5 @@
 import Image from "next/image"
-import spritesheet from "../../../../public/planesprite.png"
+import spritesheet from "../../../../public/Plane Sprite Sheet.png"
 import ropeimg from "../../../../public/Rope.png"
 
 export default function Plane() {

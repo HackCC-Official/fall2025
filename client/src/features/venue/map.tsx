@@ -1,6 +1,6 @@
 import Image from "next/image"
 import VenueCard from "./ui//VenueCard"
-import map from "../../../public/maps.png"
+import map from "../../../public/Map.png"
 
 //bg-gradient-to-t from-red-400 to-blue-400
 //<div className="bottom-0 z-30 absolute bg-gradient-to-t from-[#8F43D8] to-transparent opacity-[100%] w-full h-[100px]"></div>
