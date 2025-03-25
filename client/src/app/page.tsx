@@ -17,7 +17,7 @@ export default function HomePage() {
   return (
     <div className="flex flex-wrap w-screen h-screen">
       <Navbar></Navbar>
-      <FrontPage></FrontPage>
+      {<FrontPage></FrontPage>}
       <About></About>
       <Collage></Collage>
       <Carousel></Carousel>

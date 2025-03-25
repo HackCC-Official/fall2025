@@ -10,7 +10,7 @@ import { AuthButton } from "./auth-btn";
 import { AuthCardSkeletonDefault } from "./auth-card-skeleton";
 import { AuthInput } from "./auth-input";
 import Image from "next/image";
-import HotAirBalloon from "../../../../public/Hot Air Balloon.png";
+import HotAirBalloon from "../../../../public/Hot Air Balloon.webp";
 
 
 export function LoginFormPage() {
@@ -70,6 +70,7 @@ export function LoginFormPage() {
                                 className="-right-12 sm:-right-32 md:-right-40 2xl:-right-80 bottom-1/4 absolute w-auto h-28 sm:h-32 md:h-36 2xl:h-40 animate-bobbing ease-linear"
                                 src={HotAirBalloon}
                                 alt="Hot Air Balloon"
+                                sizes="(min-width: 1540px) 116px, (min-width: 780px) 104px, (min-width: 640px) 93px, 81px"
                             ></Image>
                         </div>
                         <div className="z-10 mt-4 mb-16 font-bagel text-white text-3xl md:text-4xl text-center">
