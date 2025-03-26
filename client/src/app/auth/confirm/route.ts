@@ -10,8 +10,6 @@ export async function GET(request: NextRequest) {
   const type = searchParams.get('type') as EmailOtpType | null
   const redirect_to = searchParams.get('redirect_to') ?? '/'
 
-  console.log(searchParams, redirect_to)
-
   if (token_hash && type) {
     const supabase = await getServerClient()
 

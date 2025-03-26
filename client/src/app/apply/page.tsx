@@ -25,6 +25,8 @@ import { ApplicationStatus } from "@/features/application/types/status.enum";
 import { createApplication, Document, getApplicationByUserId } from "@/features/application/api/application";
 import { User } from "@supabase/supabase-js";
 import { DarkCard } from "@/components/dark-card";
+import { ApplicationError } from "@/features/application/components/application-error";
+import { debounce } from "lodash";
 
 interface QuestionGroupNode {
     type: 'GROUP';
@@ -45,6 +47,55 @@ interface FormValues {
 }
 
 export default function ApplyPage() {
+<<<<<<< Updated upstream
+=======
+    const maxWordLength = 500;
+    const maxCharLength = 3000;
+    const maxFileSize = 1000000 * 25
+
+    const formRules = {
+        required: "your response is required for this field.", // Basic required validation
+        validate: {
+            maxFileSize: (value: unknown) => {
+                // Handle single file case
+                if (value instanceof File) {
+                    return value.size > maxFileSize 
+                    ? "File size must be under 25 MB."
+                    : true;
+                }
+                
+                if (Array.isArray(value)) {
+                    for (const file of value) {
+                        if (file instanceof File && file.size > maxFileSize) {
+                        return "File size must be under 25 MB.";
+                        }
+                    }
+                }
+                
+                // Handle case where value might be a FileList
+                if (value instanceof FileList) {
+                    for (let i = 0; i < value.length; i++) {
+                        if (value[i].size > maxFileSize) {
+                        return "File size must be under 25 MB.";
+                        }
+                    }
+                }
+                
+                return true;
+            },
+            maxLength: (value: File | string | number | null) => {
+                if (typeof value === 'string')  {
+                    if (debouncedLargerThanMaxWordLength(value)) {
+                        return "only a maximum of 500 words or 3000 characters are allowed."
+                    }
+                }
+                return true;
+            }
+        }
+    }
+
+    const queryClient = useQueryClient();
+>>>>>>> Stashed changes
     const [user, setUser] = useState<User | null>(null);
     const supabase = getBrowserClient()
     const router = useRouter();
@@ -79,7 +130,10 @@ export default function ApplyPage() {
                 createApplication(applicationDTO, document)
     })
 
-    const { control, handleSubmit } = useForm<FormValues>();
+    const { control, handleSubmit } = useForm<FormValues>({
+        mode: 'onChange', // This enables validation on change
+        reValidateMode: 'onChange', // This ensures re-validation happens on change
+      });
 
     useEffect(() => {
         const checkAuth = async () => {
@@ -207,6 +261,21 @@ export default function ApplyPage() {
         }
     };
 
+    function largerThanMaxWordLength(text: string) {
+        if (text.length > maxCharLength) {
+            return true;
+        }
+    
+        const len = text.split(/[\s]+/);
+        if(len.length > maxWordLength){
+            return true;
+        }
+
+        return false;
+    }
+
+    const debouncedLargerThanMaxWordLength = debounce((value: string) => largerThanMaxWordLength(value), 500)
+
     return (
         <div className="relative w-screen h-screen overflow-x-hidden">
             <SkyFixed />
@@ -237,39 +306,44 @@ export default function ApplyPage() {
                                         name={`question_${n.question.id}`}
                                         control={control}
                                         defaultValue=""
+                                        rules={formRules}
                                         render={({ field, fieldState: { error } }) => {
                                             switch (n.question.type) {
                                                 case QuestionType.TEXT:
                                                     return (
                                                         <div>
                                                             <ApplicationInput {...field} placeholder={n.question.prompt} type="text" />
-                                                            {error && <p className="text-red-500 text-sm">{error.message}</p>}
+                                                            {error && <ApplicationError>{error.message}</ApplicationError>}
                                                         </div>
                                                     )
                                                 case QuestionType.TEXTAREA:
                                                     return (
                                                         <div>
-                                                            <ApplicationTextarea {...field} />
-                                                            {error && <p className="text-red-500 text-sm">{error.message}</p>}
+                                                            <ApplicationTextarea
+                                                                maxWord={maxWordLength}
+                                                                {...field}
+                                                            />
+                                                            {error && <ApplicationError>{error.message}</ApplicationError>}
                                                         </div>
                                                     )
                                                 case QuestionType.DATE:
                                                     return (
                                                         <div>
                                                             <ApplicationCalendar {...field} value={field.value as unknown as Date} />
-                                                            {error && <p className="text-red-500 text-sm">{error.message}</p>}
+                                                            {error && <ApplicationError>{error.message}</ApplicationError>}
                                                         </div>
                                                     )
                                                 case QuestionType.FILE:
                                                     return (
                                                         <div>
                                                             <FileUploader
+                                                                {...field}
                                                                 value={field.value as unknown as File[]} // Cast field.value to File[]
                                                                 onValueChange={field.onChange} // Pass field.onChange directly
                                                                 maxFileCount={1} // Allow only 1 file (or adjust as needed)
                                                                 maxSize={1000000 * 25}
                                                             />
-                                                            {error && <p className="text-red-500 text-sm">{error.message}</p>}
+                                                            {error && <ApplicationError>{error.message}</ApplicationError>}
                                                         </div>
                                                     );
                                                 case QuestionType.SELECT:
@@ -282,7 +356,7 @@ export default function ApplyPage() {
                                                                     value={String(field.value)}
                                                                     values={schools.map(s => s.institution)}
                                                                 />
-                                                                {error && <p className="text-red-500 text-sm">{error.message}</p>}
+                                                            {error && <ApplicationError>{error.message}</ApplicationError>}
                                                             </div>
                                                         );
                                                     } else if (n.question.prompt === 'Your Residence') {
@@ -294,7 +368,7 @@ export default function ApplyPage() {
                                                                     value={String(field.value)}
                                                                     values={residences.map(r => r.city)}
                                                                 />
-                                                                {error && <p className="text-red-500 text-sm">{error.message}</p>}
+                                                            {error && <ApplicationError>{error.message}</ApplicationError>}
                                                             </div>
                                                         );
                                                     }
@@ -303,7 +377,7 @@ export default function ApplyPage() {
                                                     return (
                                                         <div>
                                                             <ApplicationInput {...field} placeholder={n.question.prompt} type="email" />
-                                                            {error && <p className="text-red-500 text-sm">{error.message}</p>}
+                                                            {error && <ApplicationError>{error.message}</ApplicationError>}
                                                         </div>
                                                     );
                                                 case QuestionType.MULTIPLE:
@@ -319,7 +393,7 @@ export default function ApplyPage() {
                                                                         ))
                                                                     }
                                                                 </ApplicationMultipleGroup>
-                                                                {error && <p className="text-red-500 text-sm">{error.message}</p>}
+                                                                {error && <ApplicationError>{error.message}</ApplicationError>}
                                                             </div>
                                                         );
                                                     } else if (n.question.prompt === 'Graduation Year') {
@@ -334,7 +408,7 @@ export default function ApplyPage() {
                                                                         ))
                                                                     }
                                                                 </ApplicationMultipleGroup>
-                                                                {error && <p className="text-red-500 text-sm">{error.message}</p>}
+                                                                {error && <ApplicationError>{error.message}</ApplicationError>}
                                                             </div>
                                                         );
                                                     }
@@ -361,21 +435,24 @@ export default function ApplyPage() {
                                                     name={`question_${q.id}`}
                                                     control={control}
                                                     defaultValue=""
-                                                    rules={{ required: "This field is required" }}
+                                                    rules={formRules}
                                                     render={({ field, fieldState: { error } }) => {
                                                         switch (q.type) {
                                                             case QuestionType.TEXT:
                                                                 return (
                                                                     <div>
                                                                         <ApplicationInput {...field} placeholder={q.prompt} type="text" />
-                                                                        {error && <p className="mt-4 text-red-500 text-sm">{error.message}</p>}
+                                                                        {error && <ApplicationError>{error.message}</ApplicationError>}
                                                                     </div>
                                                                 )
                                                             case QuestionType.TEXTAREA:
                                                                 return (
                                                                     <div>
-                                                                        <ApplicationTextarea {...field} />
-                                                                        {error && <p className="mt-4 text-red-500 text-sm">{error.message}</p>}
+                                                                        <ApplicationTextarea
+                                                                            maxWord={maxWordLength}
+                                                                            {...field} 
+                                                                        />
+                                                                        {error && <ApplicationError>{error.message}</ApplicationError>}
                                                                     </div>
                                                                 )
                                                             case QuestionType.DATE:
@@ -384,12 +461,13 @@ export default function ApplyPage() {
                                                                 return (
                                                                     <div>
                                                                         <FileUploader
+                                                                            {...field}
                                                                             value={field.value as unknown as File[]} // Cast field.value to File[]
                                                                             onValueChange={field.onChange} // Pass field.onChange directly
                                                                             maxFileCount={1} // Allow only 1 file (or adjust as needed)
                                                                             maxSize={1000000 * 25}
                                                                         />
-                                                                        {error && <p className="mt-4 text-red-500 text-sm">{error.message}</p>}
+                                                                        {error && <ApplicationError>{error.message}</ApplicationError>}
                                                                     </div>
                                                                 );
                                                             case QuestionType.SELECT:
@@ -402,7 +480,7 @@ export default function ApplyPage() {
                                                                                 value={String(field.value)}
                                                                                 values={schools.map(s => s.institution)}
                                                                             />
-                                                                            {error && <p className="mt-4 text-red-500 text-sm">{error.message}</p>}
+                                                                            {error && <ApplicationError>{error.message}</ApplicationError>}
                                                                         </div>
                                                                     );
                                                                 } else if (q.prompt === 'Your Residence') {
@@ -414,7 +492,7 @@ export default function ApplyPage() {
                                                                                 value={String(field.value)}
                                                                                 values={residences.map(r => r.city)}
                                                                             />
-                                                                            {error && <p className="mt-4 text-red-500 text-sm">{error.message}</p>}
+                                                                            {error && <ApplicationError>{error.message}</ApplicationError>}
                                                                         </div>
 
                                                                     );
@@ -424,7 +502,7 @@ export default function ApplyPage() {
                                                                 return (
                                                                     <div>
                                                                         <ApplicationInput {...field} placeholder={q.prompt} type="email" />
-                                                                        {error && <p className="mt-4 text-red-500 text-sm">{error.message}</p>}
+                                                                        {error && <ApplicationError>{error.message}</ApplicationError>}
                                                                     </div>
                                                                 );
                                                             case QuestionType.MULTIPLE:
@@ -440,7 +518,7 @@ export default function ApplyPage() {
                                                                                     ))
                                                                                 }
                                                                             </ApplicationMultipleGroup>
-                                                                            {error && <p className="mt-4 text-red-500 text-sm">{error.message}</p>}
+                                                                            {error && <ApplicationError>{error.message}</ApplicationError>}
                                                                         </div>
                                                                     );
                                                                 } else if (q.prompt === 'Graduation Year') {
@@ -453,7 +531,7 @@ export default function ApplyPage() {
                                                                                     <ApplicationMultipleItem key={'grad_year_' + i} id={'grad_year_' + i} {...field} value={p} />
                                                                                 ))
                                                                             }
-                                                                            {error && <p className="mt-4 text-red-500 text-sm">{error.message}</p>}
+                                                                            {error && <ApplicationError>{error.message}</ApplicationError>}
                                                                         </ApplicationMultipleGroup>
                                                                     );
                                                                 }
