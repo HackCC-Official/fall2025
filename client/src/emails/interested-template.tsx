@@ -5,8 +5,6 @@ import {
     Column,
     Head,
     Html,
-    Img,
-    Link,
     Preview,
     Row,
     Section,
@@ -27,7 +25,6 @@ interface InterestedEmailProps {
 export const InterestedEmail = ({
     emailContent,
     sender,
-    socialLinks = {},
     recipientName,
 }: InterestedEmailProps) => {
     const formattedYearAndMajor = `${sender.year} ${sender.major}`;
@@ -55,13 +52,7 @@ export const InterestedEmail = ({
             <Body style={main}>
                 <Container style={container}>
                     <Section style={header}>
-                        <Img
-                            src={`https://minio.hackcc.net/public-bucket/logo.svg`}
-                            width={120}
-                            height={45}
-                            alt="HackCC Logo"
-                            style={logo}
-                        />
+                        <Text style={headerText}>HackCC</Text>
                     </Section>
 
                     <Section style={content}>
@@ -86,27 +77,6 @@ export const InterestedEmail = ({
                                     </Text>
                                 </Column>
                             </Row>
-
-                            {/* Social Media Links */}
-                            {Object.keys(socialLinks).length > 0 && (
-                                <Row style={socialLinksContainer}>
-                                    {Object.entries(socialLinks).map(
-                                        ([platform, url]) => (
-                                            <Column
-                                                key={platform}
-                                                style={socialLinkColumn}
-                                            >
-                                                <Link
-                                                    href={url}
-                                                    style={socialLink}
-                                                >
-                                                    {platform}
-                                                </Link>
-                                            </Column>
-                                        )
-                                    )}
-                                </Row>
-                            )}
                         </Section>
                     </Section>
 
@@ -145,12 +115,16 @@ const header = {
     backgroundColor: "#1e40af", // Deep blue header
     padding: "20px 30px",
     display: "flex",
-    justifyContent: "space-between",
+    justifyContent: "center",
     alignItems: "center",
 };
 
-const logo = {
+const headerText = {
+    fontSize: "20px",
+    fontWeight: "700",
+    color: "#ffffff",
     margin: "0",
+    textAlign: "center" as const,
 };
 
 const content = {
@@ -188,20 +162,6 @@ const signatureSchool = {
     color: "#4b5563",
     margin: "0",
     textAlign: "right" as const,
-};
-
-const socialLinksContainer = {
-    marginTop: "12px",
-};
-
-const socialLinkColumn = {
-    paddingRight: "12px",
-};
-
-const socialLink = {
-    fontSize: "14px",
-    color: "#2563eb",
-    textDecoration: "none",
 };
 
 const footer = {

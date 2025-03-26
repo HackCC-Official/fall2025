@@ -53,11 +53,6 @@ export async function renderEmailTemplate({
                         venue="California Community College"
                         sender={templateData.sender}
                         positionAtHackCC={`${templateData.sender.year} ${templateData.sender.major} Student at ${templateData.sender.school}`}
-                        socialLinks={{
-                            linkedin: recipient.linkedin || "",
-                            twitter: "",
-                            github: "",
-                        }}
                         customEmailBody={templateData.emailContent}
                         subject={templateData.subject}
                     />

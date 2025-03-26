@@ -5,8 +5,6 @@ import {
     Column,
     Head,
     Html,
-    Img,
-    Link,
     Preview,
     Row,
     Section,
@@ -30,7 +28,6 @@ interface EmptyEmailProps {
 export const EmptyEmail = ({
     emailContent,
     sender,
-    socialLinks = {},
     recipientName,
     companyName,
     subject,
@@ -67,13 +64,7 @@ export const EmptyEmail = ({
             <Body style={main}>
                 <Container style={container}>
                     <Section style={header}>
-                        <Img
-                            src={`https://minio.hackcc.net/public-bucket/logo.svg`}
-                            width={120}
-                            height={45}
-                            alt="HackCC Logo"
-                            style={logo}
-                        />
+                        <Text style={headerText}>HackCC</Text>
                     </Section>
 
                     <Section style={content}>
@@ -101,27 +92,6 @@ export const EmptyEmail = ({
                                     </Text>
                                 </Column>
                             </Row>
-
-                            {/* Social Media Links */}
-                            {Object.keys(socialLinks).length > 0 && (
-                                <Row style={socialLinksContainer}>
-                                    {Object.entries(socialLinks).map(
-                                        ([platform, url]) => (
-                                            <Column
-                                                key={platform}
-                                                style={socialLinkColumn}
-                                            >
-                                                <Link
-                                                    href={url}
-                                                    style={socialLink}
-                                                >
-                                                    {platform}
-                                                </Link>
-                                            </Column>
-                                        )
-                                    )}
-                                </Row>
-                            )}
                         </Section>
                     </Section>
 
@@ -164,8 +134,12 @@ const header = {
     alignItems: "center",
 };
 
-const logo = {
+const headerText = {
+    fontSize: "20px",
+    fontWeight: "700",
+    color: "#ffffff",
     margin: "0",
+    textAlign: "center" as const,
 };
 
 const content = {
@@ -203,20 +177,6 @@ const signatureSchool = {
     color: "#4b5563",
     margin: "0",
     textAlign: "right" as const,
-};
-
-const socialLinksContainer = {
-    marginTop: "12px",
-};
-
-const socialLinkColumn = {
-    paddingRight: "12px",
-};
-
-const socialLink = {
-    fontSize: "14px",
-    color: "#2563eb",
-    textDecoration: "none",
 };
 
 const footer = {

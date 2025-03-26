@@ -73,9 +73,60 @@ export function useEmailSender({
 
         try {
             const allRecipients = recipientLists[recipientType];
+
+            // Debug log for recipient counts across all types
+            console.log("Recipient list sizes:", {
+                employers: recipientLists.employers?.length || 0,
+                registered: recipientLists.registered?.length || 0,
+                interested: recipientLists.interested?.length || 0,
+                currentType: recipientType,
+                selectedCount: selectedRecipients.size,
+            });
+
             const selectedRecipientsData = allRecipients.filter(
                 (recipient: Recipient) => selectedRecipients.has(recipient.id)
             );
+
+            // Debug logs
+            console.log("Selected recipients set:", [...selectedRecipients]);
+            console.log("All recipients count:", allRecipients.length);
+            console.log(
+                "Filtered recipients count:",
+                selectedRecipientsData.length
+            );
+            console.log(
+                "First few recipient IDs in list:",
+                allRecipients.slice(0, 3).map((r) => r.id)
+            );
+
+            // Safety check - if we have no recipients but the set isn't empty
+            if (
+                selectedRecipientsData.length === 0 &&
+                selectedRecipients.size > 0
+            ) {
+                console.error(
+                    "Recipients mismatch: Set has items but filter returned none"
+                );
+
+                // Try with string IDs as a fallback
+                const stringIdRecipientsData = allRecipients.filter(
+                    (recipient: Recipient) =>
+                        selectedRecipients.has(String(recipient.id))
+                );
+
+                if (stringIdRecipientsData.length > 0) {
+                    console.log(
+                        "Found recipients using string IDs, continuing with those"
+                    );
+                    selectedRecipientsData.push(...stringIdRecipientsData);
+                } else {
+                    toast.error(
+                        "Failed to match selected recipients to your contact list"
+                    );
+                    setIsSending(false);
+                    return;
+                }
+            }
 
             // Create a notification that stays open during the entire sending process
             const toastId = toast.loading(
@@ -287,8 +338,16 @@ export function useEmailSender({
             } else {
                 // For small batches, send directly
                 if (allEmails.length === 1) {
+                    console.log(
+                        "Using single email API with email:",
+                        allEmails[0]
+                    );
                     await sendEmail(allEmails[0]);
                 } else {
+                    console.log(
+                        "Using batch email API with count:",
+                        allEmails.length
+                    );
                     await sendBatchEmails({
                         emails: allEmails,
                     } as SendBatchEmailsDto);

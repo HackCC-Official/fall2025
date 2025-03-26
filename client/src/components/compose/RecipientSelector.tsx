@@ -1028,12 +1028,7 @@ export const RecipientSelector: React.FC<RecipientSelectorProps> = ({
         console.log(
             `RecipientSelector: selectedRecipients changed - count: ${selectedRecipients.size}`
         );
-
-        // Automatically switch to selected view when recipients are selected
-        if (selectedRecipients.size > 0 && recipientType === "employers") {
-            setContactsView("selected");
-        }
-    }, [selectedRecipients, recipientType, setContactsView]);
+    }, [selectedRecipients]);
 
     // Create a proper debounced search function that persists between renders
     const debouncedSearchContacts = React.useMemo(
