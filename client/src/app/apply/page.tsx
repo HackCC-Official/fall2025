@@ -47,8 +47,6 @@ interface FormValues {
 }
 
 export default function ApplyPage() {
-<<<<<<< Updated upstream
-=======
     const maxWordLength = 500;
     const maxCharLength = 3000;
     const maxFileSize = 1000000 * 25
@@ -94,8 +92,6 @@ export default function ApplyPage() {
         }
     }
 
-    const queryClient = useQueryClient();
->>>>>>> Stashed changes
     const queryClient = useQueryClient();
     const [user, setUser] = useState<User | null>(null);
     const supabase = getBrowserClient()
