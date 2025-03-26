@@ -27,6 +27,7 @@ import { User } from "@supabase/supabase-js";
 import { DarkCard } from "@/components/dark-card";
 import { ApplicationError } from "@/features/application/components/application-error";
 import { debounce } from "lodash";
+import { Spinner } from "@/components/ui/spinner";
 
 interface QuestionGroupNode {
     type: 'GROUP';
@@ -280,6 +281,12 @@ export default function ApplyPage() {
     return (
         <div className="relative w-screen h-screen overflow-x-hidden">
             <SkyFixed />
+            {
+                applicationMutation.status === 'pending' &&
+                <div className="z-40 fixed inset-0 place-content-center grid bg-gray-400/60 h-screen">
+                    <Spinner className="stroke-lightpurple w-40 h-40" />
+                </div>
+            }
             <div className="flex flex-col justify-center items-center mx-auto mt-24 text-white">
                 <div className="relative flex">
                     <Logo />
@@ -296,7 +303,6 @@ export default function ApplyPage() {
                 <p className="mt-4 text-xs md:text-sm text-center italic">
                     All Fields Required
                 </p>
-
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-10 mt-8">
                     {nodes.map(n => 
                         n.type === 'NODE' ? (
