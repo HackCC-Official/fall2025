@@ -27,7 +27,8 @@ const nextConfig: NextConfig = {
     images: {
         domains: [
           'hackcc.net',
-          'dev.hackcc.net'
+          'dev.hackcc.net',
+          'minio.hackcc.net'
         ]
       },
 };
