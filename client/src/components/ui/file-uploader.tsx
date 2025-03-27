@@ -100,6 +100,7 @@ export function FileUploader(props: FileUploaderProps) {
 
   const isDisabled = disabled || (files?.length ?? 0) >= maxFileCount
 
+
   return (
     <div className="relative flex flex-col gap-6 overflow-hidden">
       { files?.length ? <Button onClick={() => onRemove(0)} className="top-4 right-0 z-20 absolute bg-red-500 hover:bg-red-600 mt-[5vh] mr-[10vw] cursor-pointer" size='icon'><X /></Button> : ''}
@@ -122,9 +123,9 @@ export function FileUploader(props: FileUploaderProps) {
             )}
             {...dropzoneProps}
           >
-            <input {...getInputProps()} />
+            <input type='file' {...getInputProps()} />
             {
-              files?.length
+              files?.length && files instanceof Array
               ?
               files?.map((file, index) => (
                 <FileCard
