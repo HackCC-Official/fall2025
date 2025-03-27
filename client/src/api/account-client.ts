@@ -6,8 +6,6 @@ export const accountClient = axios.create({
   baseURL: process.env.NEXT_PUBLIC_ACCOUNT_SERVICE_URL
 });
 
-console.log(process.env.NEXT_PUBLIC_ACCOUNT_SERVICE_URL)
-
 // Get the Supabase client
 const supabase = getBrowserClient();
 

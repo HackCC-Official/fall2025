@@ -6,6 +6,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Button } from "@/components/ui/button"
 import { format } from "date-fns"
 import { CalendarIcon } from "lucide-react"
+import { Badge } from "@/components/ui/badge"
 
 interface ApplicationInputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'value'> {
   value?: string | number | File | null | readonly string[]; // Add support for readonly string[]
@@ -34,22 +35,39 @@ export { ApplicationInput }
 
 interface ApplicationTextareaProps extends Omit<React.ComponentProps<"textarea">, 'value'> {
   value?: string | number | File | null | readonly string[]; // Add support for readonly string[]
+  maxWord?: number;
 }
 
 const ApplicationTextarea = React.forwardRef<HTMLTextAreaElement, ApplicationTextareaProps>(
-  ({ className, value, ...props }, ref) => {
+  ({ className, maxWord = 150, value, ...props }, ref) => {
     const sanitizedValue = value === null || value instanceof File ? "" : value;
+    const len = value ? String(value).split(/[\s]+/).length : 0
+
+    const ALMOST_FULL_FACTOR = 0.8;
+
+    const showGreen = len / maxWord < ALMOST_FULL_FACTOR;
+    const showAmber = (len < maxWord) && len / maxWord >= ALMOST_FULL_FACTOR;
+    const showRed = len >= maxWord;
+
+    
     return (
-      <textarea
-      value={sanitizedValue}
-        rows={8}
-        className={cn(
-          "p-2 md:p-6 rounded-2xl placeholder:text-[#696E75] font-semibold w-full text-black bg-[#F9F9FB] border-0 focus:ring-1",
-          className
-        )}
-        ref={ref}
-        {...props} // This will accept {...field}
-      />
+      <>
+        <textarea
+          value={sanitizedValue}
+          rows={8}
+          className={cn(
+            "p-2 md:p-6 rounded-2xl placeholder:text-[#696E75] font-semibold w-full text-black bg-[#F9F9FB] border-0 focus:ring-1",
+            className
+          )}
+          ref={ref}
+          {...props} // This will accept {...field}
+        />
+        <Badge className={cn([
+          showGreen && 'bg-green-500 hover:bg-green-600',
+          showAmber && 'bg-amber-500 hover:bg-amber-600',
+          showRed && 'bg-red-500 hover:bg-red-600'
+        ])}>{len} / {maxWord}</Badge>
+      </>
     );
   }
 );
