@@ -28,6 +28,7 @@ import { DarkCard } from "@/components/dark-card";
 import { ApplicationError } from "@/features/application/components/application-error";
 import { debounce } from "lodash";
 import { Spinner } from "@/components/ui/spinner";
+import { BackButton } from "@/features/application/components/back-btn";
 
 interface QuestionGroupNode {
     type: 'GROUP';
@@ -135,7 +136,7 @@ export default function ApplyPage() {
     const { control, handleSubmit } = useForm<FormValues>({
         mode: 'onChange', // This enables validation on change
         reValidateMode: 'onChange', // This ensures re-validation happens on change
-      });
+    });
 
     useEffect(() => {
         const checkAuth = async () => {
@@ -171,7 +172,10 @@ export default function ApplyPage() {
                     <div className="z-10 flex sm:flex-row flex-col mt-4 mb-8 lg:mb-12 xl:mb-16 font-bagel text-2xl sm:text-3xl md:text-4xl text-center md:md-8">
                         <p>2025 Application</p>
                     </div>
-                    <DarkCard className="flex flex-col items-center 2xl:p-20 xl:p-16 w-[350px] sm:w-[350px] md:w-[700px] lg:w-[800px] xl:w-[1080px]">
+                    <DarkCard className="relative flex flex-col items-center 2xl:p-20 xl:p-16 w-[350px] sm:w-[350px] md:w-[700px] lg:w-[800px] xl:w-[1080px]">
+                        <BackButton className="top-[-3rem] left-[1rem] absolute">
+                            Go back home
+                        </BackButton>
                         <h1 className="font-bagel 2xl:text-[40px] xl:text-[36px] text-2xl">Thank you for Applying!</h1>
                         <div className="inline-block bg-white mt-8 md:mt-8 lg:mt-10 xl:mt-12 p-10 rounded-2xl text-[#696E75] text-sm md:text-base lg:text-lg xl:text-xl">
                             Application Status: <span className="block md:inline font-semibold text-[#4C27A0] text-base md:text-base lg:text-lg xl:text-xl">Under Review</span>
@@ -236,7 +240,6 @@ export default function ApplyPage() {
                             application.status = ApplicationStatus.SUBMITTED; // Default status
                             break;
                         case "transcript":
-                            console.log("HEY", value)
                             document.transcript = (value as unknown as File[])[0]
                             break;
                         case "resume":
@@ -253,13 +256,11 @@ export default function ApplyPage() {
                 }
             });
 
-            console.log(document)
             // Submit to your API here
-            const response = await applicationMutation.mutateAsync({ 
+            await applicationMutation.mutateAsync({ 
                 applicationDTO: application, 
                 document
             })
-            console.log(response)
         }
     };
 
@@ -295,7 +296,10 @@ export default function ApplyPage() {
                     <p>2025 Application</p>
                 </div>
             </div>
-            <FormCard className="p-4 md:p-16 font-mont">
+            <FormCard className="relative p-4 md:p-16 font-mont">
+                <BackButton className="top-[-3rem] left-[1rem] absolute">
+                    Not ready? Go back home
+                </BackButton>
                 <h1 className="font-bagel md:text-[2rem] text-xl text-center">Thank you for Applying!</h1>
                 <p className="mt-2 md:mt-4 px-4 md:px-20 font-semibold text-muted-foreground text-xs md:text-sm text-center">
                     Please tell us a little about you, your team and the project you have in mind to work on. Our team will collect applications from March 22 - April 18, 2025.
@@ -561,6 +565,9 @@ export default function ApplyPage() {
                         </Button>
                     </div>
                 </form>
+                <BackButton className="bottom-[-3rem] left-[1rem] absolute">
+                    Not ready? Go back home
+                </BackButton>
             </FormCard>
         </div>
     );
