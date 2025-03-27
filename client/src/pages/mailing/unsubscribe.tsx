@@ -11,8 +11,8 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import Logo from "../../../public/Logo.svg";
-import BGImage from "../../../public/BG Image.png";
+import Logo from "../../../public/Logo.webp";
+import BGImage from "../../../public/Hero Background.webp";
 import { Socials } from "@/components/socials";
 import {
     MailIcon,

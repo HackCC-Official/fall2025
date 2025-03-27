@@ -2,12 +2,12 @@ import { StaticImageData } from "next/image";
 import Card from "./Card"
 
 interface props {
-    indvidualName1: string;
-    indvidualRole1: string;
-    indviduaImageVaraible1: StaticImageData;
-    indvidualName2: string;
-    indvidualRole2: string;
-    indviduaImageVaraible2: StaticImageData;
+    indvidualName1?: string;
+    indvidualRole1?: string;
+    indviduaImageVaraible1?: StaticImageData;
+    indvidualName2?: string;
+    indvidualRole2?: string;
+    indviduaImageVaraible2?: StaticImageData;
 
 }
 export default function Slide({indvidualName1, indvidualRole1, indviduaImageVaraible1, indvidualName2, indvidualRole2, indviduaImageVaraible2}:props) {
