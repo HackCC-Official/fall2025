@@ -1,4 +1,4 @@
-// app/onboard/page.tsx
+// app/onboard/page.tsx 
 'use client'; // Mark this as a Client Component
 
 import { getBrowserClient } from '@/features/auth/lib/supabase-client';
