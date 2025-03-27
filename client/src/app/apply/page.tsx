@@ -49,8 +49,8 @@ interface FormValues {
 }
 
 export default function ApplyPage() {
-    const maxWordLength = 500;
-    const maxCharLength = 3000;
+    const maxWordLength = 150;
+    const maxCharLength = 900;
     const maxFileSize = 1000000 * 25
 
     const formRules = {
@@ -86,7 +86,7 @@ export default function ApplyPage() {
             maxLength: (value: File | string | number | null) => {
                 if (typeof value === 'string')  {
                     if (debouncedLargerThanMaxWordLength(value)) {
-                        return "only a maximum of 500 words or 3000 characters are allowed."
+                        return `only a maximum of ${maxWordLength} words or ${maxCharLength} characters are allowed.`
                     }
                 }
                 return true;
