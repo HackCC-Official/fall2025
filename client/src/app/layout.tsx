@@ -27,7 +27,7 @@ const montserratFont = Montserrat_Alternates({
 })
 
 export const metadata: Metadata = {
-  title: "HackCC - Hack Your Life",
+  title: "HackCC - Dream Big",
   description: "HackCC. Hackathon built by and for community college students",
 };
 

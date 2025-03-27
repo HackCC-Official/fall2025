@@ -34,12 +34,27 @@ theme: {
 				'0%': {transform: 'translateX(-12px)'},
 				'50%': {transform: 'translateX(12px)'},
 				'100%': {transform: 'translateX(-12px)'},
-			}
+			},
+			movingSpritelg:{
+				'0%': {transform: 'translateX(0px)'},
+				'100%': {transform: 'translateX(-2000px)'},
+			},
+			movingSpritesm:{
+				'0%': {transform: 'translateX(0px)'},
+				'100%': {transform: 'translateX(-1500px)'},
+			},
+			marquee:{
+				'0':{transform: 'translateX(0)'},
+				'100%':{transform: 'translateX(calc(-100vw - 1200px))'}
+			},
 		},
 		animation: {
 			'bobbing': 'bob 8s linear infinite',
 			'swaying': 'sway 8s linear infinite',
 			'inverseswaying': 'inverseSway 8s linear infinite',
+			'moveSpriteSheetlg': 'movingSpritelg steps(5) 1s infinite',
+			'moveSpriteSheetsm': 'movingSpritesm steps(5) 1s infinite',
+			'marqueeEffect': 'marquee linear 15s infinite'
 		},
 		colors: {
 			background: 'hsl(var(--background))',
@@ -56,6 +71,7 @@ theme: {
 			deepsky: '#371EAE',
 			bgpurple: '#9746db',
 			glass: 'rgba(46, 24, 138, .50)',
+			graytext: '#3C4146',
 			
 			card: {
 				DEFAULT: 'hsl(var(--card))',
