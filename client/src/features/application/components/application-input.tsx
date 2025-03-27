@@ -39,7 +39,7 @@ interface ApplicationTextareaProps extends Omit<React.ComponentProps<"textarea">
 }
 
 const ApplicationTextarea = React.forwardRef<HTMLTextAreaElement, ApplicationTextareaProps>(
-  ({ className, maxWord = 500, value, ...props }, ref) => {
+  ({ className, maxWord = 150, value, ...props }, ref) => {
     const sanitizedValue = value === null || value instanceof File ? "" : value;
     const len = value ? String(value).split(/[\s]+/).length : 0
 
