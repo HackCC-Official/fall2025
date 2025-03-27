@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { File, X } from "lucide-react" // Use File icon for PDF
+import { File, FileText, X } from "lucide-react" // Use File icon for PDF
 import Dropzone, {
   type DropzoneProps,
   type FileRejection,
@@ -11,8 +11,6 @@ import { toast } from "sonner"
 import { cn, formatBytes } from "@/lib/utils"
 import { useControllableState } from "@/hooks/use-controllable-state"
 import { Button } from "@/components/ui/button"
-import { Progress } from "@/components/ui/progress"
-import { ScrollArea } from "@/components/ui/scroll-area"
 
 interface FileUploaderProps extends React.HTMLAttributes<HTMLDivElement> {
   value?: File[]
@@ -104,10 +102,10 @@ export function FileUploader(props: FileUploaderProps) {
 
   return (
     <div className="relative flex flex-col gap-6 overflow-hidden">
+      { files?.length ? <Button onClick={() => onRemove(0)} className="top-4 right-0 z-20 absolute bg-red-500 hover:bg-red-600 mt-[5vh] mr-[10vw] cursor-pointer" size='icon'><X /></Button> : ''}
       <Dropzone
         onDrop={onDrop}
         accept={{ "application/pdf": [] }} // Only accept PDF files
-        maxSize={maxSize}
         maxFiles={maxFileCount}
         multiple={maxFileCount > 1 || multiple}
         disabled={isDisabled}
@@ -125,51 +123,50 @@ export function FileUploader(props: FileUploaderProps) {
             {...dropzoneProps}
           >
             <input {...getInputProps()} />
-            {isDragActive ? (
-              <div className="flex flex-col justify-center items-center gap-4 sm:px-5">
-                <File
-                  strokeWidth={1}
-                  className="opacity-50 size-[64px] text-muted-foreground"
-                  aria-hidden="true"
+            {
+              files?.length
+              ?
+              files?.map((file, index) => (
+                <FileCard
+                  key={index}
+                  file={file}
+                  onRemove={() => onRemove(index)}
+                  progress={progresses?.[file.name]}
                 />
-                <p className="font-medium text-muted-foreground">
-                  Drop the PDF file here
-                </p>
-              </div>
-            ) : (
-              <div className="flex flex-col justify-center items-center gap-4 sm:px-5">
-                <File
-                  strokeWidth={1}
-                  className="opacity-50 size-[64px] text-muted-foreground"
-                  aria-hidden="true"
-                />
-                <div className="flex flex-col gap-px">
-                  <p className="font-mont font-semibold text-[#696E75]">
-                    Drag & Drop or <span className="text-royalpurple">Select PDF</span>
-                  </p>
-                  <p className="text-muted-foreground text-xs">
-                    Max file size: {formatBytes(maxSize)}
+              ))
+              :
+              isDragActive ? (
+                <div className="flex flex-col justify-center items-center gap-4 sm:px-5">
+                  <File
+                    strokeWidth={1}
+                    className="opacity-50 size-[64px] text-muted-foreground"
+                    aria-hidden="true"
+                  />
+                  <p className="font-medium text-muted-foreground">
+                    Drop the PDF file here
                   </p>
                 </div>
-              </div>
-            )}
+              ) : (
+                <div className="flex flex-col justify-center items-center gap-4 sm:px-5">
+                  <File
+                    strokeWidth={1}
+                    className="opacity-50 size-[64px] text-muted-foreground"
+                    aria-hidden="true"
+                  />
+                  <div className="flex flex-col gap-px">
+                    <p className="font-mont font-semibold text-[#696E75]">
+                      Drag & Drop or <span className="text-royalpurple">Select PDF</span>
+                    </p>
+                    <p className="text-muted-foreground text-xs">
+                      Max file size: {formatBytes(maxSize)}
+                    </p>
+                  </div>
+                </div>
+              )
+            }
           </div>
         )}
       </Dropzone>
-      {files?.length ? (
-        <ScrollArea className="px-3 w-full h-fit">
-          <div className="flex flex-col gap-4 max-h-48">
-            {files?.map((file, index) => (
-              <FileCard
-                key={index}
-                file={file}
-                onRemove={() => onRemove(index)}
-                progress={progresses?.[file.name]}
-              />
-            ))}
-          </div>
-        </ScrollArea>
-      ) : null}
     </div>
   )
 }
@@ -180,33 +177,17 @@ interface FileCardProps {
   progress?: number
 }
 
-function FileCard({ file, progress, onRemove }: FileCardProps) {
+function FileCard({ file }: FileCardProps) {
   return (
-    <div className="relative flex items-center gap-2.5">
-      <div className="flex flex-1 gap-2.5">
-        <div className="flex flex-col gap-2 w-full">
-          <div className="flex flex-col gap-px">
-            <p className="font-medium text-foreground/80 text-sm line-clamp-1">
-              {file.name}
-            </p>
-            <p className="text-muted-foreground text-xs">
-              {formatBytes(file.size)}
-            </p>
-          </div>
-          {progress ? <Progress value={progress} /> : null}
+    <div className="relative place-content-center grid h-full">
+      <div className="flex flex-col items-center gap-2.5">
+        <FileText size={64} />
+        <div className="font-semibold text-xl">
+          {file.name}
         </div>
-      </div>
-      <div className="flex items-center gap-2">
-        <Button
-          type="button"
-          variant="outline"
-          size="icon"
-          className="size-7"
-          onClick={onRemove}
-        >
-          <X className="size-4" aria-hidden="true" />
-          <span className="sr-only">Remove file</span>
-        </Button>
+        <div>
+          File size: {formatBytes(file.size)}
+        </div>
       </div>
     </div>
   )
