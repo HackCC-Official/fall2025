@@ -16,12 +16,11 @@ export default function Footer() {
             
             <Image sizes="(min-width: 1520px) 100vw, (min-width: 1040px) calc(29.57vw + 1057px), (min-width: 780px) 1281px, 907px" src={FooterBg} className='z-0 absolute w-screen max-w-full object-cover 2xl:object-fill pointer-events-none' alt="bg" fill />
             <div className="flex justify-center mx-auto py-[200px] md:py-[300px]">
-                <div className="relative">
+                <div className="relative flex">
                 <Image sizes="(min-width: 1040px) 288px, (min-width: 780px) 208px, 177px" className="-top-[100px] md:-top-[125px] lg:-top-[125px] -left-32 md:-left-48 z-10 absolute w-48 md:w-52 lg:w-72 h-auto animate-bobbing ease-linear pointer-events-none" src={BalloonCat} alt="cat" />
-                    <div className="flex flex-col items-center overflow-hidden" >
+                    <div className="z-50 flex flex-col items-center overflow-hidden" >
                         <h2 className={`text-white  text-[3rem] font-bagel  z-10 md:text-[4rem] lg:text-[5rem] xl:text-[6rem]`}>Apply</h2>
-                        {/* <h3 className={`text-white text-[0.8rem] font-mont z-10 md:text-[1rem] lg:text-[1.4rem] xl:text-[1.6rem]`}>Apply to register as a participant</h3> */}
-                        <h3 className={`text-white text-[0.8rem] font-mont z-10 md:text-[1rem] lg:text-[1.4rem] xl:text-[1.6rem]`}>Applications opening soon.</h3>
+                        <h3 className={`text-white text-[0.8rem] font-mont z-10 md:text-[1rem] lg:text-[1.4rem] xl:text-[1.6rem]`}>Apply to register as a participant</h3>
                         <ApplyButton text="Apply now" size="lg" directory="/apply"></ApplyButton>
                     </div>
                 </div>
