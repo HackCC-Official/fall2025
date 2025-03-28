@@ -51,7 +51,7 @@ export default function Slider () {
                 <div className='relative mx-auto pb-10 max-w-[1350px] embla'>
                     <div className="max-w-[1350px] embla__viewport" ref={emblaRef} >
                         <div className="w-[100%] max-w-[1350px] embla__container">
-                            <div className="embla__slide"><Slide indvidualName1='Yasir White' indvidualRole1='Lead Organizer' indviduaImageVaraible1={Yasir} indvidualName2='Kairi Navratil' indvidualRole2='Operations' indviduaImageVaraible2={Kairi}></Slide></div>
+                            <div className="embla__slide"><Slide indvidualName1='Yasir White' indvidualRole1='Lead Organizer' indviduaImageVaraible1={Yasir} indvidualName2='Kairi Navratil' indvidualRole2='Operations Lead' indviduaImageVaraible2={Kairi}></Slide></div>
                             <div className="embla__slide"><Slide indvidualName1='Danish' indvidualRole1='Logistics Lead' indviduaImageVaraible1={Danish} indvidualName2='Brian Sawaya' indvidualRole2='Logistics' indviduaImageVaraible2={Brian}></Slide></div>
                             <div className="embla__slide"><Slide indvidualName1='Nataly Castillo' indvidualRole1='Logistics' indviduaImageVaraible1={Nataly} indvidualName2='Nihal' indvidualRole2='Logistics' indviduaImageVaraible2={Nihal}></Slide></div>
 
