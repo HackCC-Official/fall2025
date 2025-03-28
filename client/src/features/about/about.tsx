@@ -19,6 +19,7 @@ export default function About () {
                 </div>
                 <div className='z-10 my-0 sm:my-8 px-8 font-mont text-base sm:text-lg md:text-2xl 2xl:text-3xl sm:text-center'>
                     <p>A 250 person, 36 hour hackathon for <br className='hidden 2xl:hidden lg:inline' /> community college students across California.</p>
+
                 </div>
                 <div className='flex sm:flex-row flex-col justify-between'>
                     <div className='px-8 py-4 sm:py-8 w-full sm:w-1/2 font-mont text-xs md:text-base 2xl:text-lg'>
