@@ -11,7 +11,7 @@ export default function AttendeeCard({imgPath, text, name}:Props) {
     return (
         <div className="z-10 flex md:flex-row flex-col mx-auto my-10 w-[320px] sm:w-[500px] lg:w-[700px] max-w-[90%] h-auto md:h-[200px]">
             <div className="flex flex-col items-center md:px-4 min-w-[100px] sm:min-w-[150px] lg:min-w-[200px] h-[100%]">
-                <Image src={imgPath} alt="person" className="rounded-xl w-[100px] sm:w-[150px] md:w-[100px] lg:w-[200px] h-auto" sizes="(min-width: 1040px) 168px, (min-width: 780px) 100px, (min-width: 640px) 150px, 100px"></Image>
+                <Image src={imgPath} alt="person" className="rounded-xl w-36 lg:w-40 min-w-36 lg:min-w-40 h-auto" sizes="(min-width: 1040px) 168px, (min-width: 780px) 100px, (min-width: 640px) 150px, 100px"></Image>
                 <h2 className="font-mont font-bold text-white text-center">{name}</h2>
             </div>
             <div className="px-4 sm:px-5">
