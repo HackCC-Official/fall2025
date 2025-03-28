@@ -1,15 +1,18 @@
 
-import Image from "next/image";
+import Image, { StaticImageData} from "next/image";
+
+import placeholder from '../../../../public/Headshot Placeholder.webp'
+
 interface props {
     indvidualName1?: string;
     indvidualRole1?: string;
-    indviduaImageVaraible1?: string;
+    indviduaImageVaraible1?: StaticImageData;
     indvidualName2?: string;
     indvidualRole2?: string;
-    indviduaImageVaraible2?: string;
+    indviduaImageVaraible2?: StaticImageData;
 
 }
-export default function Slide({indvidualName1, indvidualRole1, indviduaImageVaraible1='/Headshot Placeholder.webp', indvidualName2, indvidualRole2, indviduaImageVaraible2='/Headshot Placeholder.webp'}:props) {
+export default function Slide({indvidualName1, indvidualRole1, indviduaImageVaraible1=placeholder, indvidualName2, indvidualRole2, indviduaImageVaraible2=placeholder}:props) {
     
     return (
         <div className="w-56 h-auto">
