@@ -47,7 +47,7 @@ export default function Slider () {
             <div className='relative bg-bgpurple w-screen h-auto overflow-x-clip text-center'>
                 <Title text="2025 Organizers"></Title>
                 <div className='relative mx-auto max-w-[1350px] h-auto'>
-                <Image src={CatFace} className='-top-28 lg:-top-40 -right-20 absolute w-[230px] lg:w-[300px] min-w-[230px] h-auto animate-swaying ease-linear' alt="cloud"></Image>
+                <Image src={CatFace} sizes="(min-width: 1040px) 300px, 230px" className='-top-28 lg:-top-40 -right-20 absolute w-[230px] lg:w-[300px] min-w-[230px] h-auto animate-swaying ease-linear' alt="cloud"></Image>
                 <div className='relative mx-auto pb-10 max-w-[1350px] embla'>
                     <div className="max-w-[1350px] embla__viewport" ref={emblaRef} >
                         <div className="w-[100%] max-w-[1350px] embla__container">
