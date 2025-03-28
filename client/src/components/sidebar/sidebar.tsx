@@ -22,7 +22,7 @@ import {
 import { LogoIcon } from "../logo-icon";
 import { NavUser } from "./nav-user";
 import { getBrowserClient } from "@/features/auth/lib/supabase-client";
-import defaultPic from '../../../public/default.jpg'
+import defaultPic from '../../../public/default.webp'
 import { useEffect, useState } from "react";
 import { User } from "@supabase/supabase-js";
 import { useRouter } from "next/router";
