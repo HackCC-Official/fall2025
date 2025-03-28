@@ -1,13 +1,12 @@
 'use client'
 import Image, { StaticImageData } from "next/image"
-import placeholder from "../../../../public/Headshot Placeholder.webp"
 
 interface props {
     path?: string;
     name?: string;
     role?: string;
 }
-export default function Card({name="first last", role="role/team", path=placeholder}:props) {
+export default function Card({name="first last", role="role/team", path='/Headshot Placeholder.webp'}:props) {
     return (
         <div className="z-50 flex flex-col justify-center items-center bg-white hover:shadow-2xl mx-auto my-10 lg:my-7 rounded-xl w-56 lg:w-60 h-[280px] lg:h-[300px]">
             <Image 
