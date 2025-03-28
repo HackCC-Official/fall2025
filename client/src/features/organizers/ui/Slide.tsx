@@ -4,10 +4,10 @@ import Card from "./Card"
 interface props {
     indvidualName1?: string;
     indvidualRole1?: string;
-    indviduaImageVaraible1?: StaticImageData;
+    indviduaImageVaraible1?: string;
     indvidualName2?: string;
     indvidualRole2?: string;
-    indviduaImageVaraible2?: StaticImageData;
+    indviduaImageVaraible2?: string;
 
 }
 export default function Slide({indvidualName1, indvidualRole1, indviduaImageVaraible1, indvidualName2, indvidualRole2, indviduaImageVaraible2}:props) {

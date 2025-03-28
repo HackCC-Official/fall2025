@@ -3,7 +3,7 @@ import Image, { StaticImageData } from "next/image"
 import placeholder from "../../../../public/Headshot Placeholder.webp"
 
 interface props {
-    path?: StaticImageData;
+    path?: string;
     name?: string;
     role?: string;
 }
@@ -14,6 +14,8 @@ export default function Card({name="first last", role="role/team", path=placehol
             src={path} 
             className="rounded-xl w-36 lg:w-40 h-auto" 
             alt="organizer"
+            width={144}
+            height={144}
             sizes="(min-width: 1040px) 160px, 144px">
             </Image>
             
