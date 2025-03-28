@@ -316,7 +316,7 @@ export default function ApplyPage() {
                                     <Controller
                                         name={`question_${n.question.id}`}
                                         control={control}
-                                        defaultValue=""
+                                        defaultValue={n.question.type === QuestionType.EMAIL ? user?.email : ''}
                                         rules={formRules}
                                         render={({ field, fieldState: { error } }) => {
                                             switch (n.question.type) {
@@ -445,7 +445,7 @@ export default function ApplyPage() {
                                                 <Controller
                                                     name={`question_${q.id}`}
                                                     control={control}
-                                                    defaultValue=""
+                                                    defaultValue={q.type === QuestionType.EMAIL ? user?.email : ''}
                                                     rules={formRules}
                                                     render={({ field, fieldState: { error } }) => {
                                                         switch (q.type) {
