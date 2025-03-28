@@ -69,7 +69,7 @@ theme: {
 			vibrantyellow: '#FBFA74',
 			activeyellow: '#e3e122',
 			deepsky: '#371EAE',
-			bgpurple: '#9746db',
+			bgpurple: '#a348e2',
 			glass: 'rgba(46, 24, 138, .50)',
 			graytext: '#3C4146',
 			
