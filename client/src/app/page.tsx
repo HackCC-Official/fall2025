@@ -20,7 +20,7 @@ export default function HomePage() {
       {<FrontPage></FrontPage>}
       <About></About>
       <Collage></Collage>
-      {/*<Carousel></Carousel>*/}
+      <Carousel></Carousel>
       <AttendeeContainer/>
       <Slider></Slider>
       <VolunteerJudgeContainer></VolunteerJudgeContainer>

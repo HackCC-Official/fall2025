@@ -35,13 +35,9 @@ theme: {
 				'50%': {transform: 'translateX(12px)'},
 				'100%': {transform: 'translateX(-12px)'},
 			},
-			movingSpritelg:{
+			movingSprite:{
 				'0%': {transform: 'translateX(0px)'},
-				'100%': {transform: 'translateX(-2000px)'},
-			},
-			movingSpritesm:{
-				'0%': {transform: 'translateX(0px)'},
-				'100%': {transform: 'translateX(-1500px)'},
+				'100%': {transform: 'translateX(-100%)'},
 			},
 			marquee:{
 				'0':{transform: 'translateX(0)'},
@@ -52,8 +48,7 @@ theme: {
 			'bobbing': 'bob 8s linear infinite',
 			'swaying': 'sway 8s linear infinite',
 			'inverseswaying': 'inverseSway 8s linear infinite',
-			'moveSpriteSheetlg': 'movingSpritelg steps(5) 1s infinite',
-			'moveSpriteSheetsm': 'movingSpritesm steps(5) 1s infinite',
+			'moveSpriteSheet': 'movingSprite steps(5) 1s infinite',
 			'marqueeEffect': 'marquee linear 15s infinite'
 		},
 		colors: {
