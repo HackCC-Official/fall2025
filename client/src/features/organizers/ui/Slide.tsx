@@ -1,4 +1,3 @@
-import { StaticImageData } from "next/image";
 import Card from "./Card"
 
 interface props {
