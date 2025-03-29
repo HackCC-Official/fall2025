@@ -4,17 +4,12 @@ import { Title } from "@/components/title";
 import Card from "./ui/Card"
 import Plane from "./ui/plane"
 
-import Image from "next/image";
-import CloudGen from "./ui/CloudGen";
-
 export default function carousel() {
     return (
         <div className="bg-gradient-to-b from-bgpurple to-richpurple w-full h-auto overflow-x-clip text-center">
         <Title text="Event Schedule"></Title>
         <div className="md:relative w-full h-auto md:h-[300px] lg:h-[400px]">
-            <div className="invisible md:visible absolute flex w-full h-auto overflow-x-clip">
-                <CloudGen></CloudGen>
-            </div>
+
             
             <div className="-right-[1190px] md:absolute">
                 <div className="flex md:flex-row flex-col items-center gap-[20px] w-full h-auto md:animate-marqueeEffect md:hover:pause" >
