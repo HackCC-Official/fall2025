@@ -4,20 +4,26 @@ import { Title } from "@/components/title";
 import Card from "./ui/Card"
 import Plane from "./ui/plane"
 
+import Image from "next/image";
+import CloudGen from "./ui/CloudGen";
 
 export default function carousel() {
     return (
-        <div className="w-full h-auto text-center">
+        <div className="bg-gradient-to-b from-bgpurple to-richpurple w-full h-auto overflow-x-clip text-center">
         <Title text="Event Schedule"></Title>
-`        <div className="md:relative w-full h-auto md:h-[300px] lg:h-[400px] overflow-hidden">
+        <div className="md:relative w-full h-auto md:h-[300px] lg:h-[400px]">
+            <div className="invisible md:visible absolute flex w-full h-auto overflow-x-clip">
+                <CloudGen></CloudGen>
+            </div>
+            
             <div className="-right-[1190px] md:absolute">
-                <div className="flex md:flex-row flex-col items-center gap-[20px] w-full h-auto md:animate-marqueeEffect md:hover:pause">
+                <div className="flex md:flex-row flex-col items-center gap-[20px] w-full h-auto md:animate-marqueeEffect md:hover:pause" >
                     <Plane></Plane>
                     <Card day="Day 1" text="Day one of HackCC is an action packed day, kicking off with a welcome keynote and lorem ipsum dolor sit amet, consectetur adipiscing elit."></Card>
                     <Card day="Day 2" text="Day two continues with lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque eu nunc nec mauris accumsan sollicitudin."></Card>           
                 </div>  
             </div>
-        </div>`
+        </div>
         </div>
     )
 }

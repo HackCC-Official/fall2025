@@ -13,7 +13,7 @@ import { Title } from "@/components/title"
 
 export default function VolunteerJudgeContainer() {
     return (
-        <div className="z-10 relative order-none bg-bgpurple -mt-[5px] outline-none w-screen" id="involvedTab">
+        <div className="z-10 relative order-none bg-bgpurple -mt-[5px] outline-none w-screen overflow-x-clip" id="involvedTab" >
             <Image src={PinkClusterL} alt="clouds" className="top-0 left-0 z-30 absolute w-[500px] pointer-events-none" sizes="(min-width: 540px) 500px, calc(90.91vw + 27px)"></Image>
             <Image src={PinkClusterR} alt="clouds" className="top-0 right-0 z-30 absolute w-[1000px] pointer-events-none" sizes="(min-width: 1060px) 1000px, calc(94.59vw + 16px)"></Image>
             <Image src={CloudCluster} alt="clouds" className="-bottom-[150px] z-30 absolute w-[300px] pointer-events-none" sizes="300px"></Image>

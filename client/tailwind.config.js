@@ -43,13 +43,18 @@ theme: {
 				'0':{transform: 'translateX(0)'},
 				'100%':{transform: 'translateX(calc(-100vw - 1200px))'}
 			},
+			cloudMovement:{
+				'0':{transform: 'translateX(0)'},
+				'100%':{transform: 'translateX(100%)'}
+			},
 		},
 		animation: {
 			'bobbing': 'bob 8s linear infinite',
 			'swaying': 'sway 8s linear infinite',
 			'inverseswaying': 'inverseSway 8s linear infinite',
 			'moveSpriteSheet': 'movingSprite steps(5) 1s infinite',
-			'marqueeEffect': 'marquee linear 15s infinite'
+			'marqueeEffect': 'marquee linear 15s infinite',
+			'cloudMovementEffect': 'cloudMovement Linear 5s infinite'
 		},
 		colors: {
 			background: 'hsl(var(--background))',
@@ -66,6 +71,7 @@ theme: {
 			deepsky: '#371EAE',
 			bgpurple: '#a348e2',
 			glass: 'rgba(46, 24, 138, .50)',
+			glass2:'rgba(46, 24, 138, .45)',
 			graytext: '#3C4146',
 			
 			card: {

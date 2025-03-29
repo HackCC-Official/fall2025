@@ -12,7 +12,7 @@ import About from "@/features/about/about";
 import Collage from "@/features/collage/Collage";
 import Slider from "@/features/organizers/Slider";
 import Carousel from "@/features/events/carosoul";
-
+import Faq from "@/features/faq/Faq";
 export default function HomePage() {
   return (
     <div className="flex flex-wrap w-screen h-screen">
@@ -20,6 +20,7 @@ export default function HomePage() {
       {<FrontPage></FrontPage>}
       <About></About>
       <Collage></Collage>
+      <Faq></Faq>
       <Carousel></Carousel>
       <AttendeeContainer/>
       <Slider></Slider>
