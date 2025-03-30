@@ -10,4 +10,6 @@ export interface QuestionResponseDto {
   applicationField?: string;
   group?: string;
   isSingleLabel: boolean;
+  placeholder?: string;
+  name?: string;
 }

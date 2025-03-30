@@ -323,7 +323,7 @@ export default function ApplyPage() {
                                                 case QuestionType.TEXT:
                                                     return (
                                                         <div>
-                                                            <ApplicationInput {...field} placeholder={n.question.prompt} type="text" />
+                                                            <ApplicationInput {...field} placeholder={n.question.placeholder} type="text" />
                                                             {error && <ApplicationError>{error.message}</ApplicationError>}
                                                         </div>
                                                     )
@@ -358,24 +358,24 @@ export default function ApplyPage() {
                                                         </div>
                                                     );
                                                 case QuestionType.SELECT:
-                                                    if (n.question.prompt === 'Your School') {
+                                                    if (n.question.name === 'school') {
                                                         return (
                                                             <div>
                                                                 <ApplicationSelect
                                                                     {...field}
-                                                                    placeholder="School"
+                                                                    placeholder='your school'
                                                                     value={String(field.value)}
                                                                     values={schools.map(s => s.institution)}
                                                                 />
                                                             {error && <ApplicationError>{error.message}</ApplicationError>}
                                                             </div>
                                                         );
-                                                    } else if (n.question.prompt === 'Your Residence') {
+                                                    } else if (n.question.name === 'residence') {
                                                         return (
                                                             <div>
                                                                 <ApplicationSelect
                                                                     {...field}
-                                                                    placeholder="residence"
+                                                                    placeholder="your residence"
                                                                     value={String(field.value)}
                                                                     values={residences.map(r => r.city)}
                                                                 />
@@ -387,12 +387,12 @@ export default function ApplyPage() {
                                                 case QuestionType.EMAIL:
                                                     return (
                                                         <div>
-                                                            <ApplicationInput {...field} placeholder={n.question.prompt} type="email" />
+                                                            <ApplicationInput {...field} placeholder={n.question.placeholder} type="email" />
                                                             {error && <ApplicationError>{error.message}</ApplicationError>}
                                                         </div>
                                                     );
                                                 case QuestionType.MULTIPLE:
-                                                    if (n.question.prompt === 'Gender') {
+                                                    if (n.question.name === 'gender') {
                                                         return (
                                                             <div>
                                                                 <ApplicationMultipleGroup className="mt-4">
@@ -407,7 +407,7 @@ export default function ApplyPage() {
                                                                 {error && <ApplicationError>{error.message}</ApplicationError>}
                                                             </div>
                                                         );
-                                                    } else if (n.question.prompt === 'Graduation Year') {
+                                                    } else if (n.question.name === 'gradYear') {
                                                         return (
                                                             <div>
                                                                 <ApplicationMultipleGroup className="mt-4">
@@ -452,7 +452,7 @@ export default function ApplyPage() {
                                                             case QuestionType.TEXT:
                                                                 return (
                                                                     <div>
-                                                                        <ApplicationInput {...field} placeholder={q.prompt} type="text" />
+                                                                        <ApplicationInput {...field} placeholder={q.placeholder} type="text" />
                                                                         {error && <ApplicationError>{error.message}</ApplicationError>}
                                                                     </div>
                                                                 )
@@ -482,7 +482,7 @@ export default function ApplyPage() {
                                                                     </div>
                                                                 );
                                                             case QuestionType.SELECT:
-                                                                if (q.prompt === 'Your School') {
+                                                                if (q.name === 'school') {
                                                                     return (
                                                                         <div>
                                                                             <ApplicationSelect
@@ -494,7 +494,7 @@ export default function ApplyPage() {
                                                                             {error && <ApplicationError>{error.message}</ApplicationError>}
                                                                         </div>
                                                                     );
-                                                                } else if (q.prompt === 'Your Residence') {
+                                                                } else if (q.name === 'residence') {
                                                                     return (
                                                                         <div>
                                                                             <ApplicationSelect
@@ -512,12 +512,12 @@ export default function ApplyPage() {
                                                             case QuestionType.EMAIL:
                                                                 return (
                                                                     <div>
-                                                                        <ApplicationInput {...field} placeholder={q.prompt} type="email" />
+                                                                        <ApplicationInput {...field} placeholder={q.placeholder} type="email" />
                                                                         {error && <ApplicationError>{error.message}</ApplicationError>}
                                                                     </div>
                                                                 );
                                                             case QuestionType.MULTIPLE:
-                                                                if (q.prompt === 'Gender') {
+                                                                if (q.name === 'gender') {
                                                                     return (
                                                                         <div>
                                                                             <ApplicationMultipleGroup className="mt-4">
@@ -532,7 +532,7 @@ export default function ApplyPage() {
                                                                             {error && <ApplicationError>{error.message}</ApplicationError>}
                                                                         </div>
                                                                     );
-                                                                } else if (q.prompt === 'Graduation Year') {
+                                                                } else if (q.name === 'gradYear') {
                                                                     return (
                                                                         <ApplicationMultipleGroup className="mt-4">
                                                                             {
