@@ -6,7 +6,7 @@ import Plane from "./ui/plane"
 
 export default function carousel() {
     return (
-        <div className="bg-gradient-to-b from-bgpurple to-richpurple w-full h-auto overflow-x-clip text-center">
+        <div className="bg-gradient-to-b from-bgpurple to-richpurple -mt-[2px] w-full h-auto overflow-x-clip text-center">
         <Title text="Event Schedule"></Title>
         <div className="md:relative w-full h-auto md:h-[300px] lg:h-[400px]">
 

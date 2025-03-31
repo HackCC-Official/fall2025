@@ -38,15 +38,15 @@ export default function Slider () {
     const [emblaRef, emblaApi] = useEmblaCarousel({loop:true})
     const scrollPrev = useCallback(() => {
         if (emblaApi) emblaApi.scrollPrev()
-      }, [emblaApi])
+    }, [emblaApi])
     
     const scrollNext = useCallback(() => {
         if (emblaApi) emblaApi.scrollNext()
-      }, [emblaApi])
+    }, [emblaApi])
 
     
     return (
-            <div className='relative bg-bgpurple w-screen h-auto overflow-x-clip text-center'>
+            <div className='relative bg-bgpurple -mt-[2px] w-screen h-auto overflow-x-clip text-center'>
                 <Title text="2025 Organizers"></Title>
                 <div className='relative mx-auto max-w-[1350px] h-auto'>
                 <Image src={CatFace} sizes="(min-width: 1040px) 300px, 230px" className='-top-28 lg:-top-40 -right-20 absolute w-[230px] lg:w-[300px] min-w-[230px] h-auto animate-swaying ease-linear' alt="cloud"></Image>
