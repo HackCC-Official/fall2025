@@ -81,12 +81,13 @@ const ApplicationCalendar = React.forwardRef<HTMLButtonElement, { className?: st
 
     // Sync the date state with the value from {...field}
     React.useEffect(() => {
-      console.log(value)
+      console.log(date, value)
       setDate(value);
     }, [value]);
 
     // Handle date selection
     const handleDateSelect = (selectedDate: Date | undefined) => {
+      console.log(selectedDate)
       setDate(selectedDate);
       if (onChange) {
         onChange(selectedDate);
