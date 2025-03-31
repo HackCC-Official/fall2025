@@ -83,7 +83,7 @@ export default function Card({speaker1,speaker2,speaker3,speaker4,
         )
     } else {
         return (
-            <div className="bg-glass2 backdrop-blur-md p-6 md:p-7 rounded-3xl w-[90%] max-w-[400px] md:max-w-[640px] h-auto md:h-96 overflow-hidden font-mont text-white">
+            <div className="bg-glass2 backdrop-blur-md p-6 md:p-7 rounded-3xl w-[90%] md:w-[40%] md:min-w-[365px] max-w-[400px] md:max-w-[640px] h-auto md:h-[475px] font-mont text-white">
                 <h2 className="mx-auto mb-4 max-w-52 md:max-w-full font-bold text-base sm:text-lg md:text-2xl 2xl:text-3xl md:text-start">{title}</h2>
                 <p className="mb-8 text-xs md:text-base 2xl:text-lg text-start">{subtext}</p>
                 <div className="flex justify-center text-7xl">

@@ -34,7 +34,7 @@ export default function Faq() {
                 <Image sizes="(min-width: 1540px) 350px, (min-width: 780px) 300px, 110px" src={cloud2} alt="cloud" className="-top-32 md:-top-72 2xl:-top-80 -right-10 md:-right-32 absolute w-[110px] md:w-[300px] 2xl:w-[350px] h-auto -scale-x-100 transform"></Image>
 
                 <Image src={texture} className='-top-96 sm:-top-80 left-0 z-0 absolute min-w-[800px] sm:min-w-[1500px] max-w-[800px] sm:max-w-[2000px] h-auto' alt="bg" sizes="(min-width: 640px) 1500px, 800px"></Image>
-                <Image sizes="(min-width: 1540px) 600px, (min-width: 640px) 450px, 300px" src={cloud} alt="cloud" className="right-0 -bottom-8 sm:-bottom-16 2xl:-bottom-24 z-10 absolute w-[300px] sm:w-[450px] 2xl:w-[600px] min-w-[300px] h-auto"></Image>
+                <Image sizes="(min-width: 1540px) 600px, (min-width: 640px) 450px, 300px" src={cloud} alt="cloud" className="right-0 -bottom-8 md:-bottom-16 2xl:-bottom-24 z-10 absolute w-[300px] md:w-[450px] 2xl:w-[600px] min-w-[300px] h-auto"></Image>
                 <div className="w-full h-auto">  
                     <div className="top-1 relative bg-blue-400 mx-auto w-[90%] max-w-[400px] md:max-w-[640px] lg:max-w-[1350px] h-auto">
                         <Image sizes="(min-width: 1040px) 80px, 40px" src={stars} alt="stars" className="top-6 -right-5 lg:-right-10 absolute w-10 lg:w-20 h-auto"></Image>
