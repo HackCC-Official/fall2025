@@ -35,26 +35,26 @@ theme: {
 				'50%': {transform: 'translateX(12px)'},
 				'100%': {transform: 'translateX(-12px)'},
 			},
-			movingSpritelg:{
+			movingSprite:{
 				'0%': {transform: 'translateX(0px)'},
-				'100%': {transform: 'translateX(-2000px)'},
-			},
-			movingSpritesm:{
-				'0%': {transform: 'translateX(0px)'},
-				'100%': {transform: 'translateX(-1500px)'},
+				'100%': {transform: 'translateX(-100%)'},
 			},
 			marquee:{
 				'0':{transform: 'translateX(0)'},
 				'100%':{transform: 'translateX(calc(-100vw - 1200px))'}
+			},
+			cloudMovement:{
+				'0':{transform: 'translateX(0)'},
+				'100%':{transform: 'translateX(100%)'}
 			},
 		},
 		animation: {
 			'bobbing': 'bob 8s linear infinite',
 			'swaying': 'sway 8s linear infinite',
 			'inverseswaying': 'inverseSway 8s linear infinite',
-			'moveSpriteSheetlg': 'movingSpritelg steps(5) 1s infinite',
-			'moveSpriteSheetsm': 'movingSpritesm steps(5) 1s infinite',
-			'marqueeEffect': 'marquee linear 15s infinite'
+			'moveSpriteSheet': 'movingSprite steps(5) 1s infinite',
+			'marqueeEffect': 'marquee linear 15s infinite',
+			'cloudMovementEffect': 'cloudMovement Linear 5s infinite'
 		},
 		colors: {
 			background: 'hsl(var(--background))',
@@ -69,8 +69,9 @@ theme: {
 			vibrantyellow: '#FBFA74',
 			activeyellow: '#e3e122',
 			deepsky: '#371EAE',
-			bgpurple: '#9746db',
+			bgpurple: '#a348e2',
 			glass: 'rgba(46, 24, 138, .50)',
+			glass2:'rgba(46, 24, 138, .45)',
 			graytext: '#3C4146',
 			
 			card: {
