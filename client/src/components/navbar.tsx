@@ -23,9 +23,12 @@ export const Navbar = () => {
                 <a onClick={() => {
                             smoothScroll("aboutTab");
                         }}>About</a>
-                {/* <a onClick={() => {
-                            smoothScroll("venueTab");
-                        }}>Venue</a> */}
+                <a onClick={() => {
+                            smoothScroll("workshopTab");
+                        }}>FAQ</a>
+                <a onClick={() => {
+                            smoothScroll("scheduleTab");
+                        }}>Schedule</a>
                 <a onClick={() => {
                             smoothScroll("involvedTab");
                         }}>Get Involved</a>
@@ -37,11 +40,16 @@ export const Navbar = () => {
                 toggleMenu()
             }}>About</a>
             <div className="bg-activeyellow w-16 h-[1px]"></div>
-            {/* <a onClick={() => {
-                        smoothScroll("venueTab");
+            <a onClick={() => {
+                        smoothScroll("workshopTab");
                         toggleMenu()
-                        }}>Venue</a>
-                        <div className="bg-activeyellow w-16 h-[1px]"></div> */}
+                        }}>FAQ</a>
+            <div className="bg-activeyellow w-16 h-[1px]"></div>
+            <a onClick={() => {
+                        smoothScroll("scheduleTab");
+                        toggleMenu()
+                        }}>Schedule</a>
+            <div className="bg-activeyellow w-16 h-[1px]"></div>
             <a onClick={() => {
                 smoothScroll("involvedTab");
                 toggleMenu()

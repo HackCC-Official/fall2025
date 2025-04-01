@@ -57,21 +57,126 @@ export default function Slider () {
                 <div className='relative mx-auto pb-10 max-w-[1350px] embla'>
                     <div className="max-w-[1350px] embla__viewport" ref={emblaRef} >
                         <div className="w-[100%] max-w-[1350px] embla__container">
-                            <div className="embla__slide"><Slide indvidualName1='Yasir White' indvidualRole1='Lead Organizer' indviduaImageVaraible1={yasir} indvidualName2='Kairi Navratil' indvidualRole2='Operations Lead' indviduaImageVaraible2={kairi}></Slide></div>
-                            <div className="embla__slide"><Slide indvidualName1='Danish Saini' indvidualRole1='Logistics Lead' indviduaImageVaraible1={danish} indvidualName2='Brian Sawaya' indvidualRole2='Logistics' indviduaImageVaraible2={brian}></Slide></div>
-                            <div className="embla__slide"><Slide indvidualName1='Nataly Castillo' indvidualRole1='Logistics' indviduaImageVaraible1={nataly} indvidualName2='Nihal' indvidualRole2='Logistics' indviduaImageVaraible2={nihal}></Slide></div>
-                            <div className="embla__slide"><Slide indvidualName1='Jack Hu' indvidualRole1='Logistics' indviduaImageVaraible1={jack} indvidualName2='Danny Abraham' indvidualRole2='Logistics' indviduaImageVaraible2={danny}></Slide></div>
-                            <div className="embla__slide"><Slide indvidualName1='Peng Tang' indvidualRole1='Logistics' indviduaImageVaraible1={peng} indvidualName2='Tiffany Nguyen' indvidualRole2='Outreach Lead' indviduaImageVaraible2={tiffany}></Slide></div>
+                            <div className="embla__slide"><Slide 
+                            individualName1='Yasir White' 
+                            individualRole1='Lead Organizer' 
+                            individualImageVariable1={yasir} 
+                            individualLink1="https://www.linkedin.com/in/yasir-white" 
+                            individualName2='Kairi Navratil' 
+                            individualRole2='Operations Lead' 
+                            individualImageVariable2={kairi} 
+                            individualLink2="https://www.linkedin.com/in/kairi-navratil/"></Slide></div>
 
-                            <div className="embla__slide"><Slide indvidualName1='Ken Phongpharnich' indvidualRole1='Outreach' indviduaImageVaraible1={ken} indvidualName2='Sonny' indvidualRole2='Outreach' indviduaImageVaraible2={sonny}></Slide></div>
-                            <div className="embla__slide"><Slide indvidualName1='Bhavanbir Dhandi' indvidualRole1='Social Media Lead' indviduaImageVaraible1={bhavanbir} indvidualName2='Aiden Solomon' indvidualRole2='Social Media' indviduaImageVaraible2={aiden}></Slide></div>
-                            <div className="embla__slide"><Slide indvidualName1='Anirudh' indvidualRole1='Social Media' indviduaImageVaraible1={anirudh} indvidualName2='Jennifer' indvidualRole2='Social Media' indviduaImageVaraible2={jennifer}></Slide></div>
+                            <div className="embla__slide"><Slide 
+                            individualName1='Danish Saini' 
+                            individualRole1='Logistics Lead' 
+                            individualImageVariable1={danish} 
+                            individualLink1='https://www.linkedin.com/in/danishsaini/'
+                            individualName2='Brian Sawaya' 
+                            individualRole2='Logistics' 
+                            individualImageVariable2={brian}
+                            individualLink2='https://www.linkedin.com/in/briansawaya/'></Slide></div>
+                            
 
-                            <div className="embla__slide"><Slide indvidualName1='Melody' indvidualRole1='Social Media' indviduaImageVaraible1={melody} indvidualName2='Isabela Arca' indvidualRole2='Social Media' indviduaImageVaraible2={isabela}></Slide></div>
-                            <div className="embla__slide"><Slide indvidualName1='Lexington Carey' indvidualRole1='Website Lead' indviduaImageVaraible1={lexington} indvidualName2='Evan Ly' indvidualRole2='Website' indviduaImageVaraible2={evan}></Slide></div>
+                            <div className="embla__slide"><Slide 
+                            individualName1='Nataly Castillo' 
+                            individualRole1='Logistics' 
+                            individualImageVariable1={nataly} 
+                            individualLink1='https://www.linkedin.com/in/nataly-castillo-14b69a287/'
+                            individualName2='Nihal' 
+                            individualRole2='Logistics' 
+                            individualImageVariable2={nihal}
+                            individualLink2='https://www.linkedin.com/in/nihal-puchakatla-526a79343/'></Slide></div>
 
-                            <div className="embla__slide"><Slide indvidualName1='Christian Figueroa' indvidualRole1='Website' indviduaImageVaraible1={christian} indvidualName2='Gabriel Flores' indvidualRole2='Website' indviduaImageVaraible2={gabriel}></Slide></div>
-                            <div className="embla__slide"><Slide indvidualName1='Remiel Shirazi' indvidualRole1='Website' indviduaImageVaraible1={remiel} indvidualName2='Kiwi' indvidualRole2='Mascot' indviduaImageVaraible2={kiwi}></Slide></div>
+                            <div className="embla__slide"><Slide 
+                            individualName1='Jack Hu' 
+                            individualRole1='Logistics' 
+                            individualImageVariable1={jack} 
+                            individualLink1='https://www.linkedin.com/in/jinze-jack-hu-806227266/'
+                            individualName2='Danny Abraham' 
+                            individualRole2='Logistics' 
+                            individualImageVariable2={danny}
+                            individualLink2='https://www.linkedin.com/in/danny-abraham-64aa65335/'></Slide></div>
+
+                            <div className="embla__slide"><Slide 
+                            individualName1='Peng Tang' 
+                            individualRole1='Logistics' 
+                            individualImageVariable1={peng} 
+                            individualLink1='https://www.linkedin.com/in/pngtng'
+                            individualName2='Tiffany Nguyen' 
+                            individualRole2='Outreach Lead' 
+                            individualImageVariable2={tiffany}
+                            individualLink2='https://www.linkedin.com/in/tiffany-nguyen-3120ba25b/?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=ios_app'></Slide></div>
+
+                            <div className="embla__slide"><Slide 
+                            individualName1='Ken Phongpharnich' 
+                            individualRole1='Outreach' 
+                            individualImageVariable1={ken} 
+                            individualLink1='https://www.linkedin.com/in/chalongraj-phongpharnich/'
+                            individualName2='Sonny' 
+                            individualRole2='Outreach' 
+                            individualImageVariable2={sonny}
+                            individualLink2='https://www.linkedin.com/in/sonny-r-725b38338/'></Slide></div>
+
+                            <div className="embla__slide"><Slide 
+                            individualName1='Bhavanbir Dhandi' 
+                            individualRole1='Social Media Lead' 
+                            individualImageVariable1={bhavanbir} 
+                            individualLink1='https://www.linkedin.com/in/bhavanbir/'
+                            individualName2='Aiden Solomon' 
+                            individualRole2='Social Media' 
+                            individualImageVariable2={aiden}
+                            individualLink2='https://www.linkedin.com/in/aiden-solomon621/'></Slide></div>
+
+                            <div className="embla__slide"><Slide 
+                            individualName1='Anirudh Sunkad' 
+                            individualRole1='Social Media' 
+                            individualImageVariable1={anirudh} 
+                            individualLink1='https://www.linkedin.com/in/a-sunkad/'
+                            individualName2='Jennifer Ho' 
+                            individualRole2='Social Media' 
+                            individualImageVariable2={jennifer}
+                            individualLink2='https://www.linkedin.com/in/jennifer-ho-299b78333/?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=ios_app'></Slide></div>
+
+                            <div className="embla__slide"><Slide 
+                            individualName1='Melody Zhang' 
+                            individualRole1='Social Media' 
+                            individualImageVariable1={melody} 
+                            individualLink1='https://www.linkedin.com/in/yirong-zhang-92b450343/?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=ios_app'
+                            individualName2='Isabela Arca' 
+                            individualRole2='Social Media' 
+                            individualImageVariable2={isabela}
+                            individualLink2='https://www.linkedin.com/in/isabela-arca-030000353/?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=ios_app'></Slide></div>
+
+                            <div className="embla__slide"><Slide 
+                            individualName1='Lexington Carey' 
+                            individualRole1='Website Lead' 
+                            individualImageVariable1={lexington} 
+                            individualLink1='https://www.linkedin.com/in/lexington-carey/'
+                            individualName2='Evan Ly' 
+                            individualRole2='Website' 
+                            individualImageVariable2={evan}
+                            individualLink2='https://www.linkedin.com/in/chheang/'></Slide></div>
+
+                            <div className="embla__slide"><Slide 
+                            individualName1='Christian Figueroa' 
+                            individualRole1='Website' 
+                            individualImageVariable1={christian} 
+                            individualLink1='https://www.linkedin.com/in/hikurage/'
+                            individualName2='Gabriel Flores' 
+                            individualRole2='Website' 
+                            individualImageVariable2={gabriel}
+                            individualLink2='https://www.linkedin.com/in/gabriel-flores-10bb45331/'></Slide></div>
+
+                            <div className="embla__slide"><Slide 
+                            individualName1='Remiel Shirazi' 
+                            individualRole1='Website' 
+                            individualImageVariable1={remiel} 
+                            individualLink1='https://www.linkedin.com/in/remielshirazi '
+                            individualName2='Kiwi' 
+                            individualRole2='Mascot' 
+                            individualImageVariable2={kiwi}
+                            individualLink2='https://www.instagram.com/realhackcc/'></Slide></div>
                         </div>
                     </div>
                     <div className='flex justify-around items-center mx-auto mt-1 lg:mt-8 w-48 h-20'>

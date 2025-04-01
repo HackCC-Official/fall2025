@@ -16,7 +16,7 @@ export default function AttendeeCard({imgPath, text, name}:Props) {
             </div>
             <div className="px-4 sm:px-5">
                 <Image src={quote} alt="quote" className="w-[50px] h-auto" sizes="50px"></Image>
-                <p className="mt-3 font-mont text-white text-base sm:text-lg md:text-2xl 2xl:text-3xl break-normal">{text}</p>               
+                <p className="mt-3 font-mont text-white text-xs md:text-base 2xl:text-lg break-normal">{text}</p>               
             </div>
         </div>
     )
