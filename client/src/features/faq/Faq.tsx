@@ -39,7 +39,7 @@ export default function Faq() {
                     <div className="top-1 relative bg-blue-400 mx-auto w-[90%] max-w-[400px] md:max-w-[640px] lg:max-w-[1350px] h-auto">
                         <Image sizes="(min-width: 1040px) 80px, 40px" src={stars} alt="stars" className="top-6 -right-5 lg:-right-10 absolute w-10 lg:w-20 h-auto"></Image>
                     </div>
-                    <Title text="Educational Workshops"></Title>
+                    <Title text="FAQ"></Title>
                     <div className="flex md:flex-row flex-col md:flex-wrap md:justify-center items-center gap-5 md:gap-8 mx-auto my-6 w-full max-w-[1350px] h-auto">
                         <Card hasSpeaker={false} title="When can I apply?" subtext={text1} iconDef={faFile}></Card>
                         <Card hasSpeaker={false} title="What is a hackathon?" subtext={text2} iconDef={faLaptopCode}></Card>
