@@ -34,6 +34,7 @@ import evan from "../../../public/evan.webp"
 import christian from "../../../public/chris.webp"
 import gabriel from "../../../public/gabriel.webp"
 import remiel from "../../../public/remiel.webp"
+import dichill from "../../../public/dichill.webp"
 import kiwi from "../../../public/kiwi.webp"
 
 
@@ -173,10 +174,10 @@ export default function Slider () {
                             individualRole1='Website' 
                             individualImageVariable1={remiel} 
                             individualLink1='https://www.linkedin.com/in/remielshirazi '
-                            individualName2='Kiwi' 
-                            individualRole2='Mascot' 
-                            individualImageVariable2={kiwi}
-                            individualLink2='https://www.instagram.com/realhackcc/'></Slide></div>
+                            individualName2='Dichill Tomarong' 
+                            individualRole2='Website' 
+                            individualImageVariable2={dichill}
+                            individualLink2='https://www.linkedin.com/in/dichill/'></Slide></div>
                         </div>
                     </div>
                     <div className='flex justify-around items-center mx-auto mt-1 lg:mt-8 w-48 h-20'>
@@ -196,3 +197,8 @@ export default function Slider () {
     
     )
 }
+
+// individualName2='Kiwi' 
+// individualRole2='Mascot' 
+// individualImageVariable2={kiwi}
+// individualLink2='https://www.instagram.com/realhackcc/'
