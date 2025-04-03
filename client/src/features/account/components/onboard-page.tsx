@@ -111,53 +111,53 @@ export function OnboardPageContent() {
         <div className="z-10 mt-4 mb-8 font-bagel text-white text-3xl md:text-4xl text-center">
           <h1>Onboard</h1>
         </div>
-          <DarkCard>
-              {error && (
-                  <div className="flex items-center gap-2 bg-red-50 mb-4 p-3 border border-red-200 rounded-md text-red-600 text-sm">
-                      <AlertCircle className="w-4 h-4" />
-                      <span>{error}</span>
-                  </div>
-              )}
-                  {isClient ? (
-                      <form className="space-y-4">
-                          <div className="space-y-2">
-                            <AuthInput
-                              id="password"
+        <DarkCard>
+            {error && (
+                <div className="flex items-center gap-2 bg-red-50 mb-4 p-3 border border-red-200 rounded-md text-red-600 text-sm">
+                    <AlertCircle className="w-4 h-4" />
+                    <span>{error}</span>
+                </div>
+            )}
+                {isClient ? (
+                    <form className="space-y-4">
+                        <div className="space-y-2">
+                          <AuthInput
+                            id="password"
+                            type="password"
+                            placeholder="Password"
+                            value={password}
+                            onChange={(e) =>
+                                setPassword(e.target.value)
+                            }
+                            required
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          <AuthInput
+                              id="confirmpassword"
                               type="password"
-                              placeholder="Password"
-                              value={password}
+                              placeholder="Confirmed Password"
+                              value={confirmPassword}
                               onChange={(e) =>
-                                  setPassword(e.target.value)
+                                  setConfirmPassword(e.target.value)
                               }
                               required
-                            />
-                          </div>
-
-                          <div className="space-y-2">
-                            <AuthInput
-                                id="confirmpassword"
-                                type="password"
-                                placeholder="Confirmed Password"
-                                value={confirmPassword}
-                                onChange={(e) =>
-                                    setConfirmPassword(e.target.value)
-                                }
-                                required
-                            />
-                          </div>
-
-                          <AuthButton
-                              type='submit'
-                              onClick={handleSubmit}
-                              text="Set Password"
-                              loadingText="Onboarding..."
-                              isLoading={isLoading}
                           />
-                      </form>
-                  ) : (
-                      <AuthCardSkeletonDefault />
-                  )}
-          </DarkCard>
+                        </div>
+
+                        <AuthButton
+                            type='submit'
+                            onClick={handleSubmit}
+                            text="Set Password"
+                            loadingText="Onboarding..."
+                            isLoading={isLoading}
+                        />
+                    </form>
+                ) : (
+                    <AuthCardSkeletonDefault />
+                )}
+        </DarkCard>
       </div>
     </div>
   );  
