@@ -5,9 +5,31 @@ import { ApplicationStatus } from "@/features/application/types/status.enum";
 import { FolderCheck, FolderSearch, FolderX } from "lucide-react";
 import { useState } from "react";
 import { ApplicationItem, ApplicationList } from "@/features/application/components/application-list";
+import { useQuery } from "@tanstack/react-query";
+import { getApplications } from "@/features/application/api/application";
+import { Skeleton } from "@/components/ui/skeleton";
+
+function ApplicationListSkeleton() {
+  return (
+    <>
+      <Skeleton className="w-full h-16" />
+      <Skeleton className="w-full h-16" />
+      <Skeleton className="w-full h-16" />
+      <Skeleton className="w-full h-16" />
+      <Skeleton className="w-full h-16" />
+      <Skeleton className="w-full h-16" />
+      <Skeleton className="w-full h-16" />
+    </>
+  )
+}
 
 export default function ApplicationPage() {
   const [status, setStatus] = useState(ApplicationStatus.SUBMITTED)
+  const { isLoading, data } = useQuery({
+    queryKey: ['applications', status],
+    queryFn: () => getApplications({ status })
+  })
+
   return (
     <div className="flex flex-col h-full">
       <PanelHeader>Applications</PanelHeader>
@@ -19,13 +41,15 @@ export default function ApplicationPage() {
         </TabsList> 
       </Tabs>
       <ApplicationList className="flex-grow mt-4">
-        <ApplicationItem />
-        <ApplicationItem />
-        <ApplicationItem />
-        <ApplicationItem />
-        <ApplicationItem />
-        <ApplicationItem />
-        <ApplicationItem />
+        {
+          isLoading
+          ?
+          <ApplicationListSkeleton />
+          :
+          data && data.map(a => (
+            <ApplicationItem key={a.id} application={a} />
+          ))
+        }
       </ApplicationList>
     </div>
   ) 
