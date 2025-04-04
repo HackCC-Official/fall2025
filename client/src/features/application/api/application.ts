@@ -1,5 +1,5 @@
 import { applyClient } from "@/api/apply-client";
-import { ApplicationRequestDTO } from "../types/application";
+import { ApplicationRequestDTO, ApplicationResponseDTO } from "../types/application";
 import { ApplicationStatus } from "../types/status.enum";
 
 export interface Document {
@@ -46,4 +46,14 @@ export async function getApplicationByUserId(userId: string) : Promise<{ status:
         url: "applications/user/" + userId,
       })
     ).data;
+}
+
+export async function getApplications({ status } : { status: ApplicationStatus}) : Promise<ApplicationResponseDTO[]> {
+  return (
+    await applyClient.request({
+      method: "GET",
+      url: "applications",
+      params: { status }
+    })
+  ).data
 }
