@@ -3,6 +3,8 @@ import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 import { CircleUser } from "lucide-react";
 import { ContactBadge, EmailBadge, SchoolBadge } from "./application-status";
+import { ApplicationResponseDTO } from "../types/application";
+import { useRouter } from "next/router";
 
 interface ApplicationListProps {
   children: React.ReactNode;
@@ -24,23 +26,24 @@ export function ApplicationList({ children, className } : ApplicationListProps) 
   )
 }
 
-export function ApplicationItem() {
+export function ApplicationItem({ application } : { application: ApplicationResponseDTO }) {
+  const router = useRouter()
   return (
-    <Card className="group hover:bg-lightpurple transition-all cursor-pointer">
+    <Card onClick={() => router.push('/panel/application/' + application.id)} className="group hover:bg-lightpurple transition-all cursor-pointer">
       <CardHeader className="flex flex-row items-center gap-4 p-4">
         <CardTitle className="flex items-center gap-4 font-semibold group-hover:text-white text-xl">
           <div className="flex bg-purple-50 p-2 border border-lightpurple rounded-md text-lightpurple">
             <CircleUser />
           </div>
           <div>
-            Evan (Eang Cheang) Ly
+            {application.firstName} { application.lastName}
           </div>
         </CardTitle>
         <Separator className="h-8" orientation="vertical" />
         <CardDescription className="space-x-2">
-          <EmailBadge>eangchheangly@gmail.com</EmailBadge>
-          <ContactBadge>+855 069 980 981</ContactBadge>
-          <SchoolBadge>Santa Monica College</SchoolBadge>
+          <EmailBadge>{application.email}</EmailBadge>
+          <ContactBadge>{application.phoneNumber}</ContactBadge>
+          <SchoolBadge>{application.school}</SchoolBadge>
         </CardDescription>
       </CardHeader>
     </Card>

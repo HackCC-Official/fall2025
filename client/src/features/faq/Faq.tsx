@@ -26,7 +26,7 @@ const text4 = "Attending HackCC is an incredible opportunity, and the best part 
 
 export default function Faq() {
     return (
-        <div className="bg-hoverpurple pt-20 md:pt-40 w-full h-auto overflow-x-clip text-center"> 
+        <div id="workshopTab" className="bg-hoverpurple pt-20 md:pt-40 w-full h-auto overflow-x-clip text-center"> 
             <div className="relative bg-gradient-to-b from-hoverpurple to-bgpurple pb-20 w-full h-auto">
                 <Image sizes="(min-width: 1540px) 600px, (min-width: 780px) 450px, 300px"  src={indvidualCloud1} alt="cloud" className="-top-32 md:-top-48 2xl:-top-60 -left-40 absolute w-[300px] md:w-[450px] 2xl:w-[600px] h-auto"></Image>
                 <Image sizes="(min-width: 1540px) 400px, (min-width: 780px) 300px, 200px" src={indvidualCloud2} alt="cloud" className="-top-24 md:-top-36 2xl:-top-44 -left-36 md:-left-28 absolute w-[200px] md:w-[300px] 2xl:w-[400px] h-auto"></Image>

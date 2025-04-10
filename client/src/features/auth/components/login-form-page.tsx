@@ -32,30 +32,27 @@ export function LoginFormPage() {
         setError("");
         setIsLoading(true);
 
-        try {
-            const { data, error: authError } = await signInWithEmailAndPassword(
-                { email, password }
-            );
+        const { error: authError } = await signInWithEmailAndPassword(
+            { email, password }
+        );
 
-            if (authError) {
-                setError(
-                    authError.message ||
-                        "Failed to login. Please check your credentials."
-                );
-                console.error("Error logging in:", authError);
-            } else {
-                console.log("Logged in successfully:", data);
-                if (searchParams?.get('redirect')) {
-
-                }
-                router.push((searchParams && searchParams?.get('redirect')) ? (searchParams.get('redirect') || '') : '/');
+        if (authError) {
+            // Handle specific auth errors you expect
+            let message = "Invalid email or password";
+            
+            if (authError.message.includes("Email not confirmed")) {
+                message = "Please verify your email first";
             }
-        } catch (err) {
-            setError("An unexpected error occurred. Please try again.");
-            console.error("Login error:", err);
-        } finally {
-            setIsLoading(false);
+            // Add more specific error cases as needed
+            
+            setError(message);
+            return;
         }
+
+        // Success case
+        router.push(searchParams?.get('redirect') || '/');
+
+        setIsLoading(false);
     };
 
     return (
