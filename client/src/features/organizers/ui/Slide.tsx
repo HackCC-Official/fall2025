@@ -42,7 +42,7 @@ export default function Slide({individualName1, individualRole1, individualImage
                     height={144}
                     sizes="(min-width: 1040px) 160px, 144px">
                     </Image>
-                    <a target="_blank" href={individualLink2}><h2 className="mt-4 w-full font-mont font-black hover:text-royalpurple text-lg text-center truncate">{individualName2}</h2></a>
+                    <h2 className="mt-4 w-full font-mont font-black hover:text-royalpurple text-lg text-center truncate">{individualName2}</h2>
                     <h3 onMouseEnter={() => setRole2(individualName2 == "Evan Ly" ? "Backend Specialist" : individualRole2) } onMouseLeave={() => setRole2(individualName2 == "Evan Ly" ? "Website" : individualRole2) } className="pt-1 font-mont text-grey text-base">{role2}</h3>
                 </div>
             </a>
