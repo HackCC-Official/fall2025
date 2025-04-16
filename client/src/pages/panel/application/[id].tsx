@@ -5,6 +5,18 @@ import { useRouter } from "next/router"
 import { getApplicationById } from "@/features/application/api/application"
 
 export default function ApplicationDetailPage() {
+  if (typeof Promise.withResolvers === 'undefined') {
+    if (window)
+        // @ts-expect-error This does not exist outside of polyfill which this is doing
+        window.Promise.withResolvers = function () {
+            let resolve, reject;
+            const promise = new Promise((res, rej) => {
+                resolve = res;
+                reject = rej;
+            });
+            return { promise, resolve, reject };
+        };
+  }
   const router = useRouter()
   const { isLoading, data } = useQuery({
     queryKey: ['application',router.query.id],

@@ -5,11 +5,10 @@ import { CircleUser } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { EmailBadge, ContactBadge, SchoolBadge } from "./application-status";
 import { Separator } from "@/components/ui/separator";
-import { pdfjs } from 'react-pdf'
+import { Document, Page, pdfjs } from 'react-pdf'
 import { useMemo, useState } from "react";
 
-pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
-
+pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/legacy/build/pdf.worker.min.mjs`;
 
 import 'react-pdf/dist/Page/AnnotationLayer.css';
 import 'react-pdf/dist/Page/TextLayer.css';
@@ -18,7 +17,6 @@ import { SubmissionRequestDTO } from "@/features/submission/types/submission-req
 import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getSubmissionById } from "@/features/submission/api/submission";
-import dynamic from "next/dynamic";
 
 export function ApplicationHeader({ application } : { application: ApplicationResponseDTO }) {
   return (
@@ -75,16 +73,6 @@ export function ApplicationResponse({ response } : { response: SubmissionRequest
     </Card>
   )
 }
-
-// Dynamically import react-pdf with no SSR
-const Document = dynamic(
-  () => import('react-pdf').then((mod) => mod.Document),
-  { ssr: false }
-);
-const Page = dynamic(
-  () => import('react-pdf').then((mod) => mod.Page),
-  { ssr: false }
-);
 
 export function ApplicationFile({ prompt, url }: { prompt: string, url: string }) {
   const [numPages, setNumPages] = useState(0);
