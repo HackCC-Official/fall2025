@@ -35,7 +35,7 @@ export default function ApplicationDetailPage() {
         <h2 className="mt-8 font-semibold text-xl">Submissions</h2>
         <div className="space-y-4 my-4">
           {
-            data.submissions.map(s => 
+            data.submissions.sort((a, b) => a.questionId - b.questionId).map(s => 
               <ApplicationResponse key={s.questionId} response={s} />
             )
           }
