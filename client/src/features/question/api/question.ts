@@ -7,3 +7,10 @@ export async function getQuestions(): Promise<QuestionResponseDto[]> {
     url: 'questions'
   })).data
 }
+
+export async function getQuestionById(id: number): Promise<QuestionResponseDto> {
+  return (await applyClient.request({
+    method: 'GET',
+    url: 'questions/' + id
+  })).data
+}
