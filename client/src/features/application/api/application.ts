@@ -48,6 +48,16 @@ export async function getApplicationByUserId(userId: string) : Promise<{ status:
     ).data;
 }
 
+export async function getApplicationById(id: string) : Promise<ApplicationResponseDTO> {
+  // Make the POST request with formData
+  return (
+    await applyClient.request({
+      method: "GET",
+      url: "applications/" + id,
+    })
+  ).data;
+}
+
 export async function getApplications({ status } : { status: ApplicationStatus}) : Promise<ApplicationResponseDTO[]> {
   return (
     await applyClient.request({

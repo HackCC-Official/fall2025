@@ -22,5 +22,7 @@ export interface ApplicationResponseDTO {
   email: string;
   phoneNumber: string;
   school: string;
+  transcriptUrl: string;
+  resumeUrl: string;
   submissions: SubmissionRequestDTO[];
 }

@@ -12,6 +12,9 @@ type AppPropsWithLayout = AppProps & {
     Component: NextPageWithLayout;
 };
 
+import { polyfillPromiseWithResolvers } from "@/utils/polyfillResolvers";
+polyfillPromiseWithResolvers();
+
 const queryClient = new QueryClient();
 
 export default function MyApp({ Component, pageProps }: AppPropsWithLayout) {
