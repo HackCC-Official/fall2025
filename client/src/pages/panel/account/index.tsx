@@ -17,7 +17,7 @@ export default function AccountPage() {
     queryFn: () => getAccounts()
   })
   return (
-    <div className="py-10">
+    <div>
       <h1 className="font-bold text-3xl">Account</h1>
       <div className="flex space-x-4 my-4">
         <Sheet open={open} onOpenChange={setOpen}>
