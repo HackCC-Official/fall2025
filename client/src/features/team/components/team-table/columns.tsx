@@ -1,13 +1,13 @@
 import { ColumnDef } from "@tanstack/react-table";
 import { ResponseTeamDTO } from "../../type/team";
-import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
+import { AccountBadge } from "../account-badge";
 
 export const columns: ColumnDef<ResponseTeamDTO>[] = [
   {
     accessorKey: 'name',
     header: 'Team\'s Name',
-    cell: ({ row }) => <div className="font-medium">{row.original.name}</div>
+    cell: ({ row }) => <div className="font-semibold">{row.original.name}</div>
   },
   {
     accessorKey: 'accounts',
@@ -16,9 +16,7 @@ export const columns: ColumnDef<ResponseTeamDTO>[] = [
     <div className="flex flex-wrap gap-2">
       {
         row.original.accounts.map(a => (
-          <Badge key={a.id}>
-            {a.firstName} {a.lastName}
-          </Badge>
+          <AccountBadge account={a} key={a.id} />
         ))
       }
     </div>
@@ -26,6 +24,6 @@ export const columns: ColumnDef<ResponseTeamDTO>[] = [
     {
       accessorKey: 'createdAt',
       header: 'Created At',
-      cell: ({ row }) => format(row.original.createdAt || '', 'MMM, do yyyy hh:mm aaaa')
+      cell: ({ row }) => format(row.original.createdAt || '', 'MMM, do yyyy')
     },
 ]

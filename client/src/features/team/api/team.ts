@@ -5,7 +5,7 @@ export async function getTeams() : Promise<ResponseTeamDTO[]> {
   return (await accountClient.request({
     method: 'GET',
     url: 'teams'
-  }))
+  })).data
 }
 
 export async function createTeam(teamDTO: RequestTeamDTO) : Promise<ResponseTeamDTO> {
