@@ -1,7 +1,7 @@
 import { accountClient } from "@/api/account-client";
 import { RequestTeamDTO, ResponseTeamDTO } from "../type/team";
 
-export async function getTeams() : Promise<ResponseTeamDTO> {
+export async function getTeams() : Promise<ResponseTeamDTO[]> {
   return (await accountClient.request({
     method: 'GET',
     url: 'teams'
