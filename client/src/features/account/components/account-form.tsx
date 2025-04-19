@@ -18,7 +18,7 @@ const formSchema = z.object({
   roles: z.array(z.nativeEnum(AccountRoles))
 })
 
-export function CreateAccountForm({ setOpen } : { setOpen: (o: boolean) => void }) {
+export function AccountForm({ setOpen } : { setOpen: (o: boolean) => void }) {
   const queryClient = useQueryClient()
   const accountMutation = useMutation({
     mutationFn: (accountDTO: AccountDTO) => createAccountWithInviteLink({ accountDTO }),
@@ -140,7 +140,7 @@ export function CreateAccountForm({ setOpen } : { setOpen: (o: boolean) => void 
           render={({field}) => (
             <FormItem>
             <FormLabel>Roles</FormLabel>
-              <MultiSelect 
+              <MultiSelect
                 variant='secondary'
                 options={roleOptions}
                 onValueChange={field.onChange}
