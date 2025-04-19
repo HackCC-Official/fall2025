@@ -8,6 +8,13 @@ export async function getTeams() : Promise<ResponseTeamDTO[]> {
   })).data
 }
 
+export async function getTeamById(teamId: string) : Promise<ResponseTeamDTO> {
+  return (await accountClient.request({
+    method: 'GET',
+    url: 'teams/' + teamId
+  })).data
+}
+
 export async function createTeam(teamDTO: RequestTeamDTO) : Promise<ResponseTeamDTO> {
   return (await accountClient.request({
     method: 'POST',
@@ -17,9 +24,17 @@ export async function createTeam(teamDTO: RequestTeamDTO) : Promise<ResponseTeam
 }
 
 export async function updateTeam(teamId: string, teamDTO: RequestTeamDTO) : Promise<ResponseTeamDTO> {
+  console.log('HEY')
   return (await accountClient.request({
     method: 'PUT',
     url: 'teams/' + teamId,
     data: teamDTO
+  }))
+}
+
+export async function deleteTeam(teamId: string) {
+  return (await accountClient.request({
+    method: 'DELETE',
+    url: 'teams/' + teamId,
   }))
 }

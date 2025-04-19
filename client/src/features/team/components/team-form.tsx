@@ -5,11 +5,11 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { Input } from "@/components/ui/input"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { Button } from "@/components/ui/button"
-import { useState } from "react"
+import { Dispatch, SetStateAction, useEffect, useState } from "react"
 import { useDebounce } from "@uidotdev/usehooks"
 import { getAccounts } from "@/features/account/api/account"
 import { RequestTeamDTO } from "../type/team"
-import { createTeam } from "../api/team"
+import { createTeam, getTeamById, updateTeam } from "../api/team"
 import MultipleSelector from '@/components/ui/multiple-selector'
 import { getFormattedAccount } from "./account-badge"
 
@@ -24,7 +24,11 @@ const formSchema = z.object({
   ).min(1, { message: 'Team must at least have one member in it'})
 })
 
-export function TeamForm({ teamId, setOpen } : { teamId?: string, setOpen: (o: boolean) => void }) {
+export function TeamForm({ teamId, setTeamId, setOpen } : { 
+  teamId?: string, 
+  setTeamId: Dispatch<SetStateAction<string>>, 
+  setOpen: (o: boolean) => void 
+}) {
   const [q, setQ] = useState('');
   const debouncedQ = useDebounce(q, 200);
   const queryClient = useQueryClient()
@@ -35,12 +39,22 @@ export function TeamForm({ teamId, setOpen } : { teamId?: string, setOpen: (o: b
     queryFn: () => getAccounts(debouncedQ),
   })
 
+  const teamQuery = useQuery({
+    queryKey: ['team', teamId],
+    queryFn: () => teamId ? getTeamById(teamId) : undefined,
+    enabled: !!teamId
+  })
+
   const teamMutation = useMutation({
-    mutationFn: (requestTeamDTO: RequestTeamDTO) => createTeam(requestTeamDTO),
+    mutationFn: (requestTeamDTO: RequestTeamDTO) => teamId ? updateTeam(teamId, requestTeamDTO) : createTeam(requestTeamDTO),
     onSettled: () => {
       queryClient.invalidateQueries({
         queryKey: ['teams']
       })
+      if (teamId) {
+        setTeamId('');
+      }
+      setOpen(false)
     }
   })
 
@@ -53,6 +67,16 @@ export function TeamForm({ teamId, setOpen } : { teamId?: string, setOpen: (o: b
     }
   })
 
+  useEffect(() => {
+    if (teamId && teamQuery.data) {
+      const team = teamQuery.data;
+      form.reset({
+        id: '',
+        name: team.name,
+        accounts: team.accounts.map(a => ({ label: getFormattedAccount(a), value: a.id }))
+      });
+    }
+  }, [form, teamId, teamQuery.data])
 
   // 2. Define a submit handler.
   function onSubmit(values: z.infer<typeof formSchema>) {
@@ -60,7 +84,6 @@ export function TeamForm({ teamId, setOpen } : { teamId?: string, setOpen: (o: b
       name: values.name,
       account_ids: values.accounts.map(a => a.value)
     })
-    setOpen(false)
   }
 
   return (
