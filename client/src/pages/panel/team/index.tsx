@@ -38,8 +38,6 @@ export default function TeamPage() {
     deleteTeamMutation.mutate(value.id)
   }
 
-  console.log(open)
-
   return (
     <div>
       <h1 className="font-bold text-3xl">Account</h1>

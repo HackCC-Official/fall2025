@@ -67,3 +67,21 @@ export async function getApplications({ status } : { status: ApplicationStatus})
     })
   ).data
 }
+
+export async function acceptApplication(applicationId: string) : Promise<ApplicationResponseDTO> {
+  return (
+    await applyClient.request({
+      method: "PUT",
+      url: "applications/" + applicationId + '/accept',
+    })
+  ).data
+}
+
+export async function denyApplication(applicationId: string) : Promise<ApplicationResponseDTO> {
+  return (
+    await applyClient.request({
+      method: "PUT",
+      url: "applications/" + applicationId + '/deny',
+    })
+  ).data
+}

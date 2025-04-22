@@ -1,8 +1,11 @@
-import { useQuery } from "@tanstack/react-query"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import PanelLayout from "../layout"
 import { ApplicationFile, ApplicationHeader, ApplicationResponse } from "@/features/application/components/application-detail"
 import { useRouter } from "next/router"
-import { getApplicationById } from "@/features/application/api/application"
+import { acceptApplication, denyApplication, getApplicationById } from "@/features/application/api/application"
+import { Button } from "@/components/ui/button"
+import { cn } from "@/lib/utils"
+import { ApplicationStatus } from "@/features/application/types/status.enum"
 
 export default function ApplicationDetailPage() {
   if (typeof Promise.withResolvers === 'undefined') {
@@ -18,11 +21,29 @@ export default function ApplicationDetailPage() {
         };
   }
   const router = useRouter()
+
+  const queryClient = useQueryClient()
+
   const { isLoading, data } = useQuery({
     queryKey: ['application',router.query.id],
     queryFn: () => getApplicationById(String(router.query.id)),
     enabled: !!router.query.id
   })
+
+  const acceptMutation = useMutation({
+    mutationFn: (applicationId: string) => acceptApplication(applicationId),
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['application',router.query.id] })
+    }
+  })
+
+  const denyMutation = useMutation({
+    mutationFn: (applicationId: string) => denyApplication(applicationId),
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['application',router.query.id] })
+    }
+  })
+  
   return (
     <>
       {
@@ -41,6 +62,23 @@ export default function ApplicationDetailPage() {
           }
           <ApplicationFile prompt="Transcript" url={data.transcriptUrl} />
           <ApplicationFile prompt="Resume" url={data.resumeUrl} />
+          <div className={cn([
+            "hidden justify-end gap-4",
+            data.status === ApplicationStatus.SUBMITTED && 'flex'
+          ])}>
+            <Button 
+              onClick={() => acceptMutation.mutate(String(router.query.id))} 
+              className="bg-green-500 hover:bg-emerald-600"
+            >
+                Accept
+            </Button>
+            <Button 
+              onClick={() => denyMutation.mutate(String(router.query.id))} 
+              className="bg-red-500 hover:bg-red-600"
+            >
+              Deny
+            </Button>
+          </div>
         </div>
       </>
       }

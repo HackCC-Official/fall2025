@@ -17,6 +17,7 @@ import { SubmissionRequestDTO } from "@/features/submission/types/submission-req
 import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getSubmissionById } from "@/features/submission/api/submission";
+import { ApplicationStatus } from "../types/status.enum";
 
 export function ApplicationHeader({ application } : { application: ApplicationResponseDTO }) {
   return (
@@ -28,7 +29,7 @@ export function ApplicationHeader({ application } : { application: ApplicationRe
           </div>
           <div className="ml-4 text-2xl">{application.firstName + ' ' + application.lastName}</div>
           <Separator className="mx-4 h-6" orientation="vertical"/>
-          <Badge>{application.status}</Badge>
+          <ApplicationStatusBadge status={application.status} />
         </CardTitle>
       </CardHeader>
       <CardContent className="space-x-2">
@@ -38,6 +39,20 @@ export function ApplicationHeader({ application } : { application: ApplicationRe
       </CardContent>
     </Card>
   )
+}
+
+export function ApplicationStatusBadge({ status } : { status: ApplicationStatus }) {
+  if (status === ApplicationStatus.SUBMITTED) {
+    return (
+      <Badge>{status}</Badge>
+    )
+  } else if (status === ApplicationStatus.DENIED) {
+    return (
+      <Badge className="bg-red-500 hover:bg-red-600">{status}</Badge>
+    )
+  }
+
+  return <Badge className="bg-emerald-500 hover:bg-emerald-600">{status}</Badge>
 }
 
 export function ApplicationResponseSkeleton() {
