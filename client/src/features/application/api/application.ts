@@ -1,5 +1,5 @@
 import { applyClient } from "@/api/apply-client";
-import { ApplicationRequestDTO, ApplicationResponseDTO } from "../types/application";
+import { ApplicationRequestDTO, ApplicationResponseDTO, ApplicationStatistics } from "../types/application";
 import { ApplicationStatus } from "../types/status.enum";
 
 export interface Document {
@@ -64,6 +64,16 @@ export async function getApplications({ status } : { status: ApplicationStatus})
       method: "GET",
       url: "applications",
       params: { status }
+    })
+  ).data
+}
+
+
+export async function getApplicationsStats() : Promise<ApplicationStatistics> {
+  return (
+    await applyClient.request({
+      method: "GET",
+      url: "applications/stats",
     })
   ).data
 }

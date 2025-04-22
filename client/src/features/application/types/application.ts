@@ -26,3 +26,9 @@ export interface ApplicationResponseDTO {
   resumeUrl: string;
   submissions: SubmissionRequestDTO[];
 }
+
+export interface ApplicationStatistics {
+  submitted: number;
+  accepted: number;
+  denied: number;
+}
