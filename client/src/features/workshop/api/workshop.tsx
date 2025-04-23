@@ -39,3 +39,12 @@ export async function updateWorkshop(workshopId: string, workshopDTO: WorkshopRe
     })
   ).data
 }
+
+export async function deleteWorkshop(workshopId: string) : Promise<WorkshopRequestDTO> {
+  return (
+    await qrClient.request({
+      method: "DELETE",
+      url: "workshops/" + workshopId,
+    })
+  ).data
+}

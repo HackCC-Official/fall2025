@@ -8,6 +8,7 @@ export interface WorkshopRequestDTO {
 }
 
 export interface WorkshopResponseDTO {
+  id: string;
   name: string;
   description: string;
   location: string;
