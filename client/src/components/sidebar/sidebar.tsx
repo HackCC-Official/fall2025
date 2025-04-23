@@ -19,6 +19,7 @@ import {
     LucideIcon,
     Users,
     Network,
+    Theater,
 } from "lucide-react";
 import { LogoIcon } from "../logo-icon";
 import { NavUser } from "./nav-user";
@@ -71,6 +72,11 @@ const items: MenuItem[] = [
         title: "Team",
         url: "/panel/team",
         icon: Network,
+    },
+    {
+        title: "Workshop",
+        url: "/panel/workshop",
+        icon: Theater,
     },
 ];
 

@@ -7,17 +7,17 @@ import { AccountActions } from "../account-actions";
 
 export const columns: ColumnDef<AccountDTO>[] = [
   {
+    accessorKey: 'email',
+    header: 'Email',
+    cell: ({ row }) => <Badge variant='outline' className="">{row.original.email}</Badge>
+  },
+  {
     accessorKey: 'firstName',
     header: 'First Name'
   },
   {
     accessorKey: 'lastName',
     header: 'Last Name'
-  },
-  {
-    accessorKey: 'email',
-    header: 'Email',
-    cell: ({ row }) => <Badge variant='outline' className="">{row.original.email}</Badge>
   },
   {
     accessorKey: 'roles',
