@@ -1,7 +1,7 @@
 import { ColumnDef } from "@tanstack/react-table";
 import { ResponseTeamDTO } from "../../type/team";
 import { format } from "date-fns";
-import { AccountBadge } from "../account-badge";
+import { AccountBadge } from "../../../account/components/account-badge";
 
 export const columns: ColumnDef<ResponseTeamDTO>[] = [
   {

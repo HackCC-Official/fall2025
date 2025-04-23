@@ -11,7 +11,7 @@ import { getAccounts } from "@/features/account/api/account"
 import { RequestTeamDTO } from "../type/team"
 import { createTeam, getTeamById, updateTeam } from "../api/team"
 import MultipleSelector from '@/components/ui/multiple-selector'
-import { getFormattedAccount } from "./account-badge"
+import { getFormattedAccount } from "../../account/components/account-badge"
 
 const formSchema = z.object({
   id: z.string(),
