@@ -8,25 +8,27 @@ import { Button } from "@/components/ui/button"
 import { Dispatch, SetStateAction, useEffect, useState } from "react"
 import { useDebounce } from "@uidotdev/usehooks"
 import { getAccounts } from "@/features/account/api/account"
-import { RequestTeamDTO } from "../type/team"
-import { createTeam, getTeamById, updateTeam } from "../api/team"
 import MultipleSelector from '@/components/ui/multiple-selector'
 import { getFormattedAccount } from "../../account/components/account-badge"
+import { createWorkshop, getWorkshopById, updateWorkshop } from "../api/workshop"
+import { WorkshopRequestDTO } from "../types/workshop"
 
 const formSchema = z.object({
   id: z.string(),
-  name: z.string().min(2, { message: 'Team name must be at least 2 characters long'}),
-  accounts: z.array(
+  name: z.string().min(2, { message: 'Workshop name must be at least 2 characters long'}),
+  description: z.string(),
+  location: z.string().min(1, { message: 'Workshop location is required'}),
+  organizers: z.array(
     z.object({
     label: z.string(),
     value: z.string()
     })
-  ).min(1, { message: 'Team must at least have one member in it'})
+  ).min(1, { message: 'Team must at least have one member in it'}),
 })
 
-export function TeamForm({ teamId, setTeamId, setOpen } : { 
-  teamId?: string, 
-  setTeamId: Dispatch<SetStateAction<string>>, 
+export function WorkshopForm({ workshopId, setWorkshopId, setOpen } : { 
+  workshopId?: string, 
+  setWorkshopId: Dispatch<SetStateAction<string>>, 
   setOpen: (o: boolean) => void 
 }) {
   const [q, setQ] = useState('');
@@ -39,20 +41,24 @@ export function TeamForm({ teamId, setTeamId, setOpen } : {
     queryFn: () => getAccounts(debouncedQ),
   })
 
-  const teamQuery = useQuery({
-    queryKey: ['team', teamId],
-    queryFn: () => teamId ? getTeamById(teamId) : undefined,
-    enabled: !!teamId
+  const workshopQuery = useQuery({
+    queryKey: ['workshop', workshopId],
+    queryFn: () => workshopId ? getWorkshopById(workshopId) : undefined,
+    enabled: !!workshopId
   })
 
   const teamMutation = useMutation({
-    mutationFn: (requestTeamDTO: RequestTeamDTO) => teamId ? updateTeam(teamId, requestTeamDTO) : createTeam(requestTeamDTO),
+    mutationFn: (requestWorkshopDTO: WorkshopRequestDTO) => 
+      workshopId ? 
+      updateWorkshop(workshopId, requestWorkshopDTO) 
+      : 
+      createWorkshop(requestWorkshopDTO),
     onSettled: () => {
       queryClient.invalidateQueries({
-        queryKey: ['teams']
+        queryKey: ['workshops']
       })
-      if (teamId) {
-        setTeamId('');
+      if (workshopId) {
+        setWorkshopId('');
       }
       setOpen(false)
     }
@@ -63,26 +69,31 @@ export function TeamForm({ teamId, setTeamId, setOpen } : {
     defaultValues: {
       id: '',
       name: '',
-      accounts: []
+      location: '',
+      organizers: []
     }
   })
 
   useEffect(() => {
-    if (teamId && teamQuery.data) {
-      const team = teamQuery.data;
+    if (workshopId && workshopQuery.data) {
+      const workshop = workshopQuery.data;
       form.reset({
         id: '',
-        name: team.name,
-        accounts: team.accounts.map(a => ({ label: getFormattedAccount(a), value: a.id }))
+        name: workshop.name,
+        description: workshop.description,
+        location: workshop.location,
+        organizers: workshop.organizers.map(a => ({ label: getFormattedAccount(a), value: a.id }))
       });
     }
-  }, [form, teamId, teamQuery.data])
+  }, [form, workshopQuery.data, workshopId])
 
   // 2. Define a submit handler.
   function onSubmit(values: z.infer<typeof formSchema>) {
     teamMutation.mutate({
       name: values.name,
-      account_ids: values.accounts.map(a => a.value)
+      description: values.description,
+      location: values.location,
+      organizers: values.organizers.map(a => a.value)
     })
   }
 
@@ -90,9 +101,9 @@ export function TeamForm({ teamId, setTeamId, setOpen } : {
     <Form {...form} >
       <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4'>
         <div>
-          <h3 className="font-semibold">Team Information</h3>
+          <h3 className="font-semibold">Workshop Information</h3>
           <p className="text-muted-foreground text-xs">
-            {"Fill in all fields for the team information."}
+            {"Fill in all fields for the workshop information."}
           </p>
         </div>
         <FormField
@@ -105,7 +116,7 @@ export function TeamForm({ teamId, setTeamId, setOpen } : {
                 <Input placeholder="Carl" {...field} />
               </FormControl>
               <FormDescription>
-                Team&apos;s name
+                Workshop&apos;s name
               </FormDescription>
               <FormMessage />
             </FormItem>
@@ -113,7 +124,39 @@ export function TeamForm({ teamId, setTeamId, setOpen } : {
         />
         <FormField
           control={form.control}
-          name='accounts'
+          name="description"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Description</FormLabel>
+              <FormControl>
+                <Input placeholder="Carl loves our backend system" {...field} />
+              </FormControl>
+              <FormDescription>
+                Workshop&apos;s description
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="location"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Location</FormLabel>
+              <FormControl>
+                <Input placeholder="Drescher Hall, DSCH 205" {...field} />
+              </FormControl>
+              <FormDescription>
+                Workshop&apos;s location
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name='organizers'
           render={({field}) => (
             <FormItem>
             <FormLabel>Members</FormLabel>
@@ -137,7 +180,7 @@ export function TeamForm({ teamId, setTeamId, setOpen } : {
                 }
               />
             <FormDescription>
-              The user roles
+              The workshop organizers
             </FormDescription>
             <FormMessage />
             </FormItem>
@@ -145,11 +188,11 @@ export function TeamForm({ teamId, setTeamId, setOpen } : {
         />
         <Button type="submit">
           {
-            teamId
+            workshopId
             ?
-            'Update Team'
+            'Update Workshop'
             :
-            'Create Team'
+            'Create Workshop'
           }
         </Button>
       </form>
