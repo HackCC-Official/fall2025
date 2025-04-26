@@ -40,7 +40,7 @@ export default function TeamPage() {
 
   return (
     <div>
-      <h1 className="font-bold text-3xl">Account</h1>
+      <h1 className="font-bold text-3xl">Team</h1>
       <div className="flex space-x-4 my-4">
         <Sheet open={open} onOpenChange={setOpen} modal={false}>
           <SheetTrigger asChild>
