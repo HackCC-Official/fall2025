@@ -47,7 +47,7 @@ export default function RegisterPage() {
         setIsLoading(true);
 
         try {
-            const { data } = await accountMutation.mutateAsync({
+            const data = await accountMutation.mutateAsync({
                 email, password,
                 id: '',
                 firstName: "",
