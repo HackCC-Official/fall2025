@@ -1,4 +1,4 @@
-import { AttendanceSearch } from "@/features/attendance/components/attendance-search"
+import { InputSearch } from "@/components/input-search"
 import PanelLayout from "../layout"
 import { EventSelect } from "@/features/attendance/components/event-select"
 import { AttendanceTab } from "@/features/attendance/components/attendance-tab"
@@ -44,16 +44,18 @@ export default function AttendancePage() {
   }, [eventQuery, event])
 
   const queriedData = attendanceQuery.data?.filter(d => 
-    d.account.email.includes(q) || 
-    d.account.firstName.includes(q) || 
-    d.account.lastName.includes(q)
+    d.account.email.includes(q) 
+    || 
+    (d.account.firstName ? d.account.firstName.includes(q) : false)
+    || 
+    (d.account.lastName ? d.account.lastName.includes(q) : false)
   );
 
   return (
     <div>
-      <PanelHeader>Events</PanelHeader>
+      <PanelHeader>Attendance</PanelHeader>
       <div className="flex justify-between items-center mt-8">
-        <AttendanceSearch q={q} setQ={debouncedSetQ} />
+        <InputSearch q={q} setQ={debouncedSetQ} placeholder="Search attendances..." />
         <EventSelect events={eventQuery.data || []} value={event} onClick={setEvent} />
       </div>
       <AttendanceTab data={queriedData || []} isLoading={attendanceQuery.isLoading} className="mt-4" setStatus={setStatus} />
