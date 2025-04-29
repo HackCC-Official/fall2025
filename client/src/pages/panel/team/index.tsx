@@ -26,6 +26,13 @@ export default function TeamPage() {
       queryClient.invalidateQueries({ queryKey: ['teams'] })
     }
   })
+
+  function onCreate() {
+    setTeamId('')
+    setTimeout(() => {
+      setOpen(true);
+    }, 0);
+  }
   
   function onEdit(value: ResponseTeamDTO) {
     setTeamId(value.id);
@@ -44,7 +51,7 @@ export default function TeamPage() {
       <div className="flex space-x-4 my-4">
         <Sheet open={open} onOpenChange={setOpen} modal={false}>
           <SheetTrigger asChild>
-            <Button>
+            <Button onClick={onCreate}>
               <Plus />
               Create Team
             </Button>

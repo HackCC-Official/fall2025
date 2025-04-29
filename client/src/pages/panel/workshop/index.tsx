@@ -26,6 +26,13 @@ export default function WorkshopPage() {
       queryClient.invalidateQueries({ queryKey: ['workshops'] })
     }
   })
+
+  function onCreate() {
+    setWorkshopId('');
+    setTimeout(() => {
+      setOpen(true);
+    }, 0);
+  }
   
   function onEdit(value: WorkshopResponseDTO) {
     setWorkshopId(value.id);
@@ -44,7 +51,7 @@ export default function WorkshopPage() {
       <div className="flex space-x-4 my-4">
         <Sheet open={open} onOpenChange={setOpen} modal={false}>
           <SheetTrigger asChild>
-            <Button>
+            <Button onClick={onCreate}>
               <Plus />
               Create Workshop
             </Button>

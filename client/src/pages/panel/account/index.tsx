@@ -25,6 +25,13 @@ export default function AccountPage() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['accounts'] })
   });
 
+  function onCreate() {
+    setAccountId('')
+    setTimeout(() => {
+      setOpen(true);
+    }, 0);
+  }
+
   function onEdit(value: AccountDTO) {
     setAccountId(value.id);
     setTimeout(() => {
@@ -41,7 +48,7 @@ export default function AccountPage() {
       <div className="flex space-x-4 my-4">
         <Sheet open={open} onOpenChange={setOpen}>
           <SheetTrigger asChild>
-            <Button>
+            <Button onClick={onCreate}>
               <Plus />
               Create User
             </Button>
