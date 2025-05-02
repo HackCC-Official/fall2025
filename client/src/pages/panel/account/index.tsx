@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button"
 import PanelLayout from "../layout"
-import { Plus } from "lucide-react"
-import { DataTable } from "@/components/data-table";
+import { Edit, Plus, Trash } from "lucide-react"
+import { ContextOption, DataTable } from "@/components/data-table";
 import { columns } from "@/features/account/components/account-table/columns";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { deleteAccount, getAccounts } from "@/features/account/api/account";
@@ -42,6 +42,21 @@ export default function AccountPage() {
   function onDelete(value: AccountDTO) {
     deleteAccountMutation.mutate(value.id)
   }
+
+  const accountContextOptions: ContextOption<AccountDTO>[] = [
+    {
+      label: 'Edit account',
+      icon: Edit,
+      onClick: onEdit
+    },
+    {
+      label: 'Delete accountp',
+      icon: Trash,
+      onClick: onDelete
+    }
+  ]
+  
+
   return (
     <div>
       <h1 className="font-bold text-3xl">Account</h1>
@@ -69,9 +84,7 @@ export default function AccountPage() {
         isLoading={isLoading} 
         data={data || []} 
         columns={columns} 
-        onEdit={onEdit}
-        onDelete={onDelete}
-        enableRightClick 
+        contextOptions={accountContextOptions}
       />
     </div>
   )

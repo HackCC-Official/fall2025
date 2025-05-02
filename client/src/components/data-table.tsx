@@ -25,27 +25,29 @@ import {
 import { useMemo } from "react"
 import { Skeleton } from "./ui/skeleton"
 import { Button } from "./ui/button"
-import { Edit, Trash2 } from "lucide-react"
+import { LucideIcon } from "lucide-react"
  
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
 }
 
+export interface ContextOption<TValue> {
+  label: string;
+  icon: LucideIcon;
+  onClick: (value: TValue) => void;
+}
+
 interface CustomDataTableProps<TData, TValue> extends DataTableProps<TData, TValue> {
   isLoading?: boolean;
-  enableRightClick?: boolean;
-  onEdit?: (value: TValue) => void;
-  onDelete?: (value: TValue) => void;
+  contextOptions?: ContextOption<TValue>[];
 }
  
 export function DataTable<TData, TValue>({
   columns,
   data,
   isLoading,
-  onEdit,
-  onDelete,
-  enableRightClick = false
+  contextOptions,
 }: CustomDataTableProps<TData, TValue>) {
   const tableData = useMemo(
     () => (isLoading ? Array(10).fill({}) : data),
@@ -95,7 +97,7 @@ export function DataTable<TData, TValue>({
           <TableBody>
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
-                enableRightClick && onEdit && onDelete && !isLoading
+                contextOptions && !isLoading
                 ?
                   <ContextMenu key={row.id} >
                     <ContextMenuTrigger asChild>
@@ -110,8 +112,19 @@ export function DataTable<TData, TValue>({
                       </TableRow>
                     </ContextMenuTrigger>
                     <ContextMenuContent>
-                      <ContextMenuItem onClick={() => onEdit(row.original as TValue)}><Edit className="mr-2 w-4 h-4" /> Edit</ContextMenuItem>
-                      <ContextMenuItem onClick={() => onDelete(row.original as TValue)}><Trash2 className="mr-2 w-4 h-4" /> Delete</ContextMenuItem>
+                      {/* <ContextMenuItem onClick={() => onEdit(row.original as TValue)}><Edit className="mr-2 w-4 h-4" /> Edit</ContextMenuItem>
+                      <ContextMenuItem onClick={() => onDelete(row.original as TValue)}><Trash2 className="mr-2 w-4 h-4" /> Delete</ContextMenuItem> */}
+                      {
+                        contextOptions.map(c => (
+                          <ContextMenuItem
+                            className="min-w-[200px] cursor-pointer"
+                            key={c.label}
+                            onClick={() => c.onClick(row.original as TValue)}
+                          >
+                            <c.icon className="mr-2 w-4 h-4" /> {c.label}
+                          </ContextMenuItem>
+                        ))
+                      }
                     </ContextMenuContent>
                   </ContextMenu>
                 :

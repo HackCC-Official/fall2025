@@ -1,10 +1,10 @@
-import { DataTable } from "@/components/data-table";
+import { ContextOption, DataTable } from "@/components/data-table";
 import { deleteTeam, getTeams } from "@/features/team/api/team";
 import { columns } from "@/features/team/components/team-table/columns";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import PanelLayout from "../layout";
 import { Sheet, SheetTrigger, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
-import { Plus } from "lucide-react";
+import { Edit, Plus, Trash } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { Separator } from "@/components/ui/separator";
@@ -45,6 +45,20 @@ export default function TeamPage() {
     deleteTeamMutation.mutate(value.id)
   }
 
+  const teamContextOptions: ContextOption<ResponseTeamDTO>[] = [
+    {
+      label: 'Edit team',
+      icon: Edit,
+      onClick: onEdit
+    },
+    {
+      label: 'Delete team',
+      icon: Trash,
+      onClick: onDelete
+    }
+  ]
+  
+
   return (
     <div>
       <h1 className="font-bold text-3xl">Team</h1>
@@ -72,9 +86,7 @@ export default function TeamPage() {
         isLoading={isLoading} 
         data={data || []} 
         columns={columns} 
-        onEdit={onEdit}
-        onDelete={onDelete}
-        enableRightClick 
+        contextOptions={teamContextOptions}
       />
     </div>
   )

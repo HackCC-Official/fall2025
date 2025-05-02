@@ -2,9 +2,9 @@ import { SheetTrigger, SheetContent, SheetHeader, SheetTitle, SheetDescription, 
 import PanelLayout from "../layout"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
-import { Plus } from "lucide-react"
+import { Edit, Plus, Trash } from "lucide-react"
 import { Separator } from "@/components/ui/separator"
-import { DataTable } from "@/components/data-table"
+import { ContextOption, DataTable } from "@/components/data-table"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { deleteWorkshop, getWorkshops } from "@/features/workshop/api/workshop"
 import { columns } from "@/features/workshop/components/workshop-table/columns"
@@ -41,6 +41,20 @@ export default function WorkshopPage() {
     }, 0);
   }
 
+  const workshopContextOptions: ContextOption<WorkshopResponseDTO>[] = [
+    {
+      label: 'Edit workshop',
+      icon: Edit,
+      onClick: onEdit
+    },
+    {
+      label: 'Delete workshop',
+      icon: Trash,
+      onClick: onDelete
+    }
+  ]
+  
+
   function onDelete(value: WorkshopResponseDTO) {
     deleteWorkshopMutation.mutate(value.id)
   }
@@ -76,9 +90,7 @@ export default function WorkshopPage() {
         columns={columns} 
         data={data || []}   
         isLoading={isLoading}
-        onEdit={onEdit}
-        onDelete={onDelete}
-        enableRightClick 
+        contextOptions={workshopContextOptions} 
       />
     </div>
   )
