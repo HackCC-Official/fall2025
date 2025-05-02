@@ -95,7 +95,7 @@ export function DataTable<TData, TValue>({
           <TableBody>
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
-                enableRightClick && onEdit && onDelete
+                enableRightClick && onEdit && onDelete && !isLoading
                 ?
                   <ContextMenu key={row.id} >
                     <ContextMenuTrigger asChild>
