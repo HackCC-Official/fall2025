@@ -4,7 +4,6 @@ import { ColumnDef } from "@tanstack/react-table"
 import { EventDTO } from "../../types/event-dto"
 import { format } from "date-fns";
 import { ActiveBadge, InactiveBadge } from "@/components/status-badge";
-import { EventActions } from "../event-actions";
 
 export const columns: ColumnDef<EventDTO>[] = [
   {
@@ -78,11 +77,5 @@ export const columns: ColumnDef<EventDTO>[] = [
       <ActiveBadge />
       :
       <InactiveBadge />
-  },
-  {
-    id: 'actions',
-    header: 'Actions',
-    cell: ({ row }) =>
-      <EventActions event={row.original} />
   },
 ]

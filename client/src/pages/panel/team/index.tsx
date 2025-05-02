@@ -57,7 +57,8 @@ export default function TeamPage() {
       onClick: onDelete
     }
   ]
-  
+
+  const createOrUpdate = teamId ? 'Update' : 'Create';
 
   return (
     <div>
@@ -72,9 +73,9 @@ export default function TeamPage() {
           </SheetTrigger>
           <SheetContent className="sm:max-w-[500px]">
               <SheetHeader>
-                <SheetTitle>Create Team</SheetTitle>
+                <SheetTitle>{createOrUpdate} Team</SheetTitle>
                 <SheetDescription>
-                  Create a team for the hackathon
+                  {createOrUpdate} a team for the hackathon
                 </SheetDescription>
               </SheetHeader>
               <Separator className="my-4" />
