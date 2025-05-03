@@ -180,7 +180,7 @@ export default function Slider () {
                             individualLink2='https://www.linkedin.com/in/dichill/'></Slide></div>
                         </div>
                     </div>
-                    <div className='flex justify-around items-center mx-auto lg:mt-8 w-48 h-10 lg:h-15'>
+                    <div className='flex justify-around items-center mx-auto mt-4 lg:mt-8 w-48 h-auto lg:h-15'>
                         <button className="flex justify-center items-center bg-hoverpurple active:bg-black active:shadow-lg rounded-[100%] w-[50px] lg:w-[60px] h-[50px] lg:h-[60px] transition-all active:translate-y-1 duration-150" onClick={scrollPrev}>
                             <Image className="w-6 lg:w-9 h-auto" src={left} alt="left-button"></Image>
                         </button>

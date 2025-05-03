@@ -19,10 +19,10 @@ export default function Slide({individualName1, individualRole1, individualImage
     return (
         <div className="w-56 h-auto">
             <a target="_blank" href={individualLink1} className="cursor-pointer">
-                <div className="z-50 flex flex-col justify-center items-center bg-white hover:shadow-2xl mx-auto my-10 lg:my-7 rounded-xl w-52 lg:w-60 h-[260px] lg:h-[300px]">
+                <div className="z-50 flex flex-col justify-center items-center bg-white hover:shadow-2xl mx-auto lg:my-7 mt-4 rounded-xl w-[200px] lg:w-60 h-[240px] lg:h-[300px]">
                     <Image
                     src={individualImageVariable1} 
-                    className="rounded-xl w-[135px] lg:w-40 h-auto" 
+                    className="rounded-xl w-[120px] lg:w-40 h-auto" 
                     alt="organizer"
                     width={144}
                     height={144}
@@ -33,10 +33,10 @@ export default function Slide({individualName1, individualRole1, individualImage
                 </div>
             </a>
             <a target="_blank" href={individualLink2} className="cursor-pointer">
-                <div className="z-50 flex flex-col justify-center items-center bg-white hover:shadow-2xl mx-auto my-10 lg:my-7 rounded-xl w-52 lg:w-60 h-[260px] lg:h-[300px]">
+                <div className="z-50 flex flex-col justify-center items-center bg-white hover:shadow-2xl mx-auto lg:my-7 mt-4 rounded-xl w-[200px] lg:w-60 h-[240px] lg:h-[300px]">
                     <Image
                     src={individualImageVariable2} 
-                    className="rounded-xl w-[135px] lg:w-40 h-auto" 
+                    className="rounded-xl w-[120px] lg:w-40 h-auto" 
                     alt="organizer"
                     width={144}
                     height={144}
