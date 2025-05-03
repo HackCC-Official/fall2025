@@ -3,9 +3,13 @@ import { AccountDTO } from "../../types/account-dto";
 import { RolesBadge } from "../roles-badge";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
-import { AccountActions } from "../account-actions";
 
 export const columns: ColumnDef<AccountDTO>[] = [
+  {
+    accessorKey: 'email',
+    header: 'Email',
+    cell: ({ row }) => <Badge variant='outline' className="">{row.original.email}</Badge>
+  },
   {
     accessorKey: 'firstName',
     header: 'First Name'
@@ -13,11 +17,6 @@ export const columns: ColumnDef<AccountDTO>[] = [
   {
     accessorKey: 'lastName',
     header: 'Last Name'
-  },
-  {
-    accessorKey: 'email',
-    header: 'Email',
-    cell: ({ row }) => <Badge variant='outline' className="">{row.original.email}</Badge>
   },
   {
     accessorKey: 'roles',
@@ -29,18 +28,4 @@ export const columns: ColumnDef<AccountDTO>[] = [
     header: 'Created At',
     cell: ({ row }) => format(row.original.createdAt || '', 'MMM, do yyyy hh:mm aaaa')
   },
-  {
-    id: 'actions',
-    header: 'Actions',
-    cell: ({ row }) => {
-      return (
-        <div className="flex justify-center w-full">
-          <AccountActions
-            id={row.original.id}
-            email={row.original.email}
-          />
-        </div>
-      );
-    }
-  }
 ]

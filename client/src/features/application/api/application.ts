@@ -1,5 +1,5 @@
 import { applyClient } from "@/api/apply-client";
-import { ApplicationRequestDTO, ApplicationResponseDTO } from "../types/application";
+import { ApplicationRequestDTO, ApplicationResponseDTO, ApplicationStatistics } from "../types/application";
 import { ApplicationStatus } from "../types/status.enum";
 
 export interface Document {
@@ -48,12 +48,50 @@ export async function getApplicationByUserId(userId: string) : Promise<{ status:
     ).data;
 }
 
+export async function getApplicationById(id: string) : Promise<ApplicationResponseDTO> {
+  // Make the POST request with formData
+  return (
+    await applyClient.request({
+      method: "GET",
+      url: "applications/" + id,
+    })
+  ).data;
+}
+
 export async function getApplications({ status } : { status: ApplicationStatus}) : Promise<ApplicationResponseDTO[]> {
   return (
     await applyClient.request({
       method: "GET",
       url: "applications",
       params: { status }
+    })
+  ).data
+}
+
+
+export async function getApplicationsStats() : Promise<ApplicationStatistics> {
+  return (
+    await applyClient.request({
+      method: "GET",
+      url: "applications/stats",
+    })
+  ).data
+}
+
+export async function acceptApplication(applicationId: string) : Promise<ApplicationResponseDTO> {
+  return (
+    await applyClient.request({
+      method: "PUT",
+      url: "applications/" + applicationId + '/accept',
+    })
+  ).data
+}
+
+export async function denyApplication(applicationId: string) : Promise<ApplicationResponseDTO> {
+  return (
+    await applyClient.request({
+      method: "PUT",
+      url: "applications/" + applicationId + '/deny',
     })
   ).data
 }

@@ -6,8 +6,9 @@ import { FolderCheck, FolderSearch, FolderX } from "lucide-react";
 import { useState } from "react";
 import { ApplicationItem, ApplicationList } from "@/features/application/components/application-list";
 import { useQuery } from "@tanstack/react-query";
-import { getApplications } from "@/features/application/api/application";
+import { getApplications, getApplicationsStats } from "@/features/application/api/application";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Badge } from "@/components/ui/badge";
 
 function ApplicationListSkeleton() {
   return (
@@ -30,9 +31,33 @@ export default function ApplicationPage() {
     queryFn: () => getApplications({ status })
   })
 
+  const statQuery = useQuery({
+    queryKey: ['applications-stats'],
+    queryFn: () => getApplicationsStats()
+  })
+
   return (
     <div className="flex flex-col h-full">
-      <PanelHeader>Applications</PanelHeader>
+      <PanelHeader className="flex items-center">
+        Applications
+        {
+          statQuery.data &&
+          <div className="inline-flex items-center gap-2 ml-4">
+            <Badge>
+              Submitted
+              <span className="ml-2 font-light">{statQuery.data.submitted}</span>
+            </Badge>
+            <Badge className="bg-emerald-500 hover:bg-emerald-600">
+              Accepted 
+              <span className="ml-2 font-light">{statQuery.data.accepted}</span>
+            </Badge>
+            <Badge className="bg-red-500 hover:bg-red-600">
+              Denied 
+              <span className="ml-2 font-light">{statQuery.data.denied}</span>
+            </Badge>
+          </div>
+        }
+      </PanelHeader>
       <Tabs className="mt-4" onValueChange={(s) => setStatus(s as ApplicationStatus)} value={status}>
         <TabsList className="w-full">
           <TabsTrigger className="flex items-center gap-2 w-full" value={ApplicationStatus.SUBMITTED}><FolderSearch size={16} /> Submitted</TabsTrigger>

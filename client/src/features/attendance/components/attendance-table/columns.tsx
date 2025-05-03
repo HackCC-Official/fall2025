@@ -2,7 +2,6 @@ import { ColumnDef } from "@tanstack/react-table";
 import { AttendanceDTO } from "../../types/attendance-dto";
 import { AttendanceBadge } from "../attendance-badge";
 import { format } from "date-fns";
-import { AttendanceActions } from "../attendance-action";
 
 export const columns: ColumnDef<AttendanceDTO>[] = [
   {
@@ -28,8 +27,4 @@ export const columns: ColumnDef<AttendanceDTO>[] = [
     header: 'Checked In',
     cell: ({row}) => row.original.checkedInAt ? format(row.original.checkedInAt, 'MMM, do yyyy hh:mm aaaa') : 'N/A'
   },
-  {
-    header: 'Actions',
-    cell: ({row}) => <AttendanceActions account_id={row.original.account.id} event_id={row.original.event_id} />
-  }
 ]

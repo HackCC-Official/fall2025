@@ -6,9 +6,10 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { Input } from "@/components/ui/input"
 import { MultiSelect } from "@/components/ui/multi-select"
 import { Gavel, Shield, User, Wrench } from "lucide-react"
-import { useMutation, useQueryClient } from "@tanstack/react-query"
-import { createAccountWithInviteLink } from "../api/account"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { createAccountWithInviteLink, getAccountById, updateAccount } from "../api/account"
 import { Button } from "@/components/ui/button"
+import { useEffect } from "react"
 
 const formSchema = z.object({
   id: z.string(),
@@ -18,15 +19,22 @@ const formSchema = z.object({
   roles: z.array(z.nativeEnum(AccountRoles))
 })
 
-export function CreateAccountForm({ setOpen } : { setOpen: (o: boolean) => void }) {
+export function AccountForm({ accountId, setOpen } : { accountId?: string, setOpen: (o: boolean) => void }) {
   const queryClient = useQueryClient()
   const accountMutation = useMutation({
-    mutationFn: (accountDTO: AccountDTO) => createAccountWithInviteLink({ accountDTO }),
+    mutationFn: (accountDTO: AccountDTO) => 
+      accountId ?  updateAccount({ accountId, accountDTO }) : createAccountWithInviteLink({ accountDTO }),
     onSettled: () => {
       queryClient.invalidateQueries({
         queryKey: ['accounts']
       })
     }
+  })
+
+  const accountQuery = useQuery({
+    queryKey: ['account', accountId],
+    queryFn: () => accountId ? getAccountById(accountId) : undefined,
+    enabled: !!accountId
   })
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -39,6 +47,20 @@ export function CreateAccountForm({ setOpen } : { setOpen: (o: boolean) => void 
       roles: [AccountRoles.USER]
     }
   })
+
+  useEffect(() => {
+    if (accountId && accountQuery.data) {
+      const account = accountQuery.data;
+      console.log(account)
+      form.reset({
+        id: '',
+        email: account.email,
+        firstName: account.firstName,
+        lastName: account.lastName,
+        roles: account.roles
+      });
+    }
+  }, [accountId, accountQuery.data, form])
 
   const roleOptions = [
     {
@@ -68,6 +90,8 @@ export function CreateAccountForm({ setOpen } : { setOpen: (o: boolean) => void 
     accountMutation.mutate(values)
     setOpen(false)
   }
+
+  console.log(form.getValues())
 
   return (
     <Form {...form} >
@@ -140,10 +164,11 @@ export function CreateAccountForm({ setOpen } : { setOpen: (o: boolean) => void 
           render={({field}) => (
             <FormItem>
             <FormLabel>Roles</FormLabel>
-              <MultiSelect 
+              <MultiSelect
                 variant='secondary'
                 options={roleOptions}
                 onValueChange={field.onChange}
+                defaultValue={field.value}
                 value={field.value}
                 placeholder="Select roles"
                 animation={2}
@@ -156,7 +181,15 @@ export function CreateAccountForm({ setOpen } : { setOpen: (o: boolean) => void 
             </FormItem>
           )}
         />
-        <Button type="submit">Create Account</Button>
+        <Button type="submit">
+          {
+            accountId
+            ?
+            'Update Team'
+            :
+            'Create Team'
+          }
+        </Button>
       </form>
     </Form>
   )

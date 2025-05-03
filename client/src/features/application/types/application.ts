@@ -22,5 +22,13 @@ export interface ApplicationResponseDTO {
   email: string;
   phoneNumber: string;
   school: string;
+  transcriptUrl: string;
+  resumeUrl: string;
   submissions: SubmissionRequestDTO[];
+}
+
+export interface ApplicationStatistics {
+  submitted: number;
+  accepted: number;
+  denied: number;
 }

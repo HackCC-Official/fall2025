@@ -35,6 +35,7 @@ import christian from "../../../public/chris.webp"
 import gabriel from "../../../public/gabriel.webp"
 import remiel from "../../../public/remiel.webp"
 import dichill from "../../../public/dichill.webp"
+import devi from "../../../public/devi.webp"
 import kiwi from "../../../public/kiwi.webp"
 
 
@@ -113,11 +114,21 @@ export default function Slider () {
                             individualName1='Ken Phongpharnich' 
                             individualRole1='Outreach' 
                             individualImageVariable1={ken} 
-                            individualLink1='https://www.linkedin.com/in/chalongraj-phongpharnich/'
+                            individualLink1='https://www.linkedin.com/in/ken-phongpharnich/'
                             individualName2='Sonny' 
                             individualRole2='Outreach' 
                             individualImageVariable2={sonny}
                             individualLink2='https://www.linkedin.com/in/sonny-r-725b38338/'></Slide></div>
+
+                            <div className="embla__slide"><Slide 
+                            individualName1='Devi Amarsaikhan' 
+                            individualRole1='Outreach' 
+                            individualImageVariable1={devi} 
+                            individualLink1='https://www.linkedin.com/in/devi-amarsaikhan/'
+                            individualName2='Kiwi' 
+                            individualRole2='Mascot' 
+                            individualImageVariable2={kiwi}
+                            individualLink2='https://www.instagram.com/realhackcc/'></Slide></div>
 
                             <div className="embla__slide"><Slide 
                             individualName1='Bhavanbir Dhandi' 
@@ -178,6 +189,7 @@ export default function Slider () {
                             individualRole2='Website' 
                             individualImageVariable2={dichill}
                             individualLink2='https://www.linkedin.com/in/dichill/'></Slide></div>
+                            
                         </div>
                     </div>
                     <div className='flex justify-around items-center mx-auto mt-4 lg:mt-8 w-48 h-auto lg:h-15'>

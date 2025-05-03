@@ -18,6 +18,9 @@ import {
     QrCode,
     LucideIcon,
     Users,
+    Network,
+    Theater,
+    Ham,
 } from "lucide-react";
 import { LogoIcon } from "../logo-icon";
 import { NavUser } from "./nav-user";
@@ -65,6 +68,21 @@ const items: MenuItem[] = [
         title: "Account",
         url: "/panel/account",
         icon: Users,
+    },
+    {
+        title: "Meal",
+        url: "/panel/meal",
+        icon: Ham,
+    },
+    {
+        title: "Team",
+        url: "/panel/team",
+        icon: Network,
+    },
+    {
+        title: "Workshop",
+        url: "/panel/workshop",
+        icon: Theater,
     },
 ];
 
