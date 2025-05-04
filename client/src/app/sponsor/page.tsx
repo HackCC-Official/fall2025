@@ -50,15 +50,15 @@ export default function SponsorPage() {
     function onSubmit(values: z.infer<typeof formSchema>) {
         console.log(values)
     }
-    const text ="text goes here"
+    const text ="HackCC wouldn’t be possible without the support of our incredible sponsors. As the first hackathon created by and for California Community College students, we’re dedicated to fostering innovation, accessibility, and career opportunities for aspiring developers. With your support, we can empower the next generation of tech talent and scale innovation like never before!"
 
 
     return(
-        <main className="bg-white">
-            <div className="flex flex-wrap w-screen h-screen">
+        <main className="bg-white overflow-hidden">
+            <div className="flex flex-wrap bg-white w-screen h-auto">
                 <Nav></Nav>
-                <div className="flex flex-wrap md:flex-nowrap md:gap-x-10 mx-auto mt-40 w-[90%] lg:w-[80%] min-w-[200px] max-w-[1600px] h-auto">
-                    <div className="font-mont text-black md:basis-1/2">
+                <div className="flex flex-wrap md:flex-nowrap md:gap-x-10 mx-auto mt-24 md:mt-40 w-[90%] lg:w-[80%] min-w-[200px] max-w-[1600px] h-auto">
+                    <div className="h-auto font-mont text-black md:basis-1/2">
                         <h1 className="mb-4 font-bagel text-hoverpurple text-2xl sm:text-3xl md:text-4xl 2xl:text-6xl">Sponsor Us</h1>
                         <h2 className="text-hoverpurple text-base sm:text-lg md:text-2xl 2xl:text-3xl">Hey there!</h2>
                         <p className="my-2 text-xs md:text-base 2xl:text-lg">{text}</p>
@@ -70,17 +70,17 @@ export default function SponsorPage() {
                         </ul>
                         <p className="mt-6 font-black text-xs md:text-base 2xl:text-lg">Interested in sponsoring? Fill out this contact form, and our team will be in touch with more details!</p>
                     </div>
-                    <div className="flex justify-center bg-gray-300 rounded-xl w-full h-auto md:basis-1/2">
+                    <div className="flex justify-center md:bg-gray-300 mt-6 md:mt-0 rounded-xl w-full h-auto md:basis-1/2">
                         <Form {...form}>
-                            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+                            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 md:px-12 py-10 w-full h-auto">
                                 <FormField
                                 control={form.control}
                                 name="fname"
                                 render={({ field }) => (
                                     <FormItem>
-                                    <FormLabel>Full Name</FormLabel>
+                                    <FormLabel className="text-base">Full Name</FormLabel>
                                     <FormControl>
-                                        <Input placeholder="" {...field} />
+                                        <Input placeholder="" {...field} className="bg-white border-2 border-gray-400 h-12"/>
                                     </FormControl>
                                     <FormMessage />
                                     </FormItem>
@@ -91,9 +91,9 @@ export default function SponsorPage() {
                                 name="company"
                                 render={({ field }) => (
                                     <FormItem>
-                                    <FormLabel>Company</FormLabel>
+                                    <FormLabel className="text-base">Company</FormLabel>
                                     <FormControl>
-                                        <Input placeholder="" {...field} />
+                                        <Input placeholder="" {...field} className="bg-white border-2 border-gray-400 h-12"/>
                                     </FormControl>
                                     <FormMessage />
                                     </FormItem>
@@ -104,9 +104,9 @@ export default function SponsorPage() {
                                 name="email"
                                 render={({ field }) => (
                                     <FormItem>
-                                    <FormLabel>Email</FormLabel>
+                                    <FormLabel className="text-base">Email</FormLabel>
                                     <FormControl>
-                                        <Input placeholder="" {...field} />
+                                        <Input placeholder="" {...field} className="bg-white border-2 border-gray-400 h-12"/>
                                     </FormControl>
                                     <FormMessage />
                                     </FormItem>
@@ -117,21 +117,21 @@ export default function SponsorPage() {
                                 name="inquiry"
                                 render={({ field }) => (
                                     <FormItem>
-                                    <FormLabel>Inquiry</FormLabel>
+                                    <FormLabel className="text-base">Inquiry</FormLabel>
                                     <FormControl>
-                                        <Textarea placeholder="Type your message here." {...field}/>
+                                        <Textarea {...field} className="bg-white border-2 border-gray-400 w-full h-48"/>
                                     </FormControl>
                                     <FormMessage />
                                     </FormItem>
                                 )}
                                 />                                
-                                <Button type="submit">Submit</Button>
+                                <Button type="submit" className="bg-hoverpurple px-9 py-5 rounded-3xl font-bold text-white tracking-widest">Submit</Button>
                             </form>
                         </Form>
                     </div>
                 </div>
             </div>
-            <footer className="w-full h-40"></footer>
+            <footer className="bg-white w-full h-40"></footer>
         </main>
     )
 }
