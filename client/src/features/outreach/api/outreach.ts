@@ -11,6 +11,10 @@ import {
     InterestedUserDto,
 } from "../types/interested-users.dto";
 import { OutreachTeamDto } from "../types/outreach-team";
+import {
+    SponsorInquiryDto,
+    SponsorInquiryResponseDto,
+} from "../types/sponsor.dto";
 
 interface OutreachTeamApiResponse {
     data: {
@@ -403,4 +407,16 @@ export async function getOutreachTeamMemberByEmail(
             url: `outreach-team/email/${email}`,
         })
     ).data;
+}
+
+export async function submitSponsorInquiry(
+    inquiryData: SponsorInquiryDto
+): Promise<SponsorInquiryResponseDto> {
+    const response = await outreachClient.request({
+        method: "POST",
+        url: "/sponsors/inquiry",
+        data: inquiryData,
+    });
+
+    return response.data;
 }
