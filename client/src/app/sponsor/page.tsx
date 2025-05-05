@@ -1,6 +1,6 @@
 'use client'
 
-import Nav  from "../../components/sponser/nav"
+import Nav  from "../../components/sponsor/nav"
 
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -55,14 +55,14 @@ export default function SponsorPage() {
 
     return(
         <main className="bg-white overflow-hidden">
-            <div className="flex flex-wrap bg-white w-screen h-auto">
+            <div className="flex flex-wrap bg-white w-screen h-screen">
                 <Nav></Nav>
-                <div className="flex flex-wrap md:flex-nowrap md:gap-x-10 mx-auto mt-24 md:mt-40 w-[90%] lg:w-[80%] min-w-[200px] max-w-[1600px] h-auto">
+                <div className="flex flex-wrap md:flex-nowrap md:gap-x-10 mx-auto mt-24 md:mt-40 w-[90%] lg:w-[80%] min-w-[200px] max-w-[1600px] h-min">
                     <div className="h-auto font-mont text-black md:basis-1/2">
-                        <h1 className="mb-4 font-bagel text-hoverpurple text-2xl sm:text-3xl md:text-4xl 2xl:text-6xl">Sponsor Us</h1>
-                        <h2 className="text-hoverpurple text-base sm:text-lg md:text-2xl 2xl:text-3xl">Hey there!</h2>
+                        <h1 className="mb-6 font-bagel text-hoverpurple text-2xl sm:text-3xl md:text-4xl 2xl:text-6xl">Sponsor Us</h1>
+                        <h2 className="mt-6 text-hoverpurple text-base sm:text-lg md:text-2xl 2xl:text-3xl">Hey there!</h2>
                         <p className="my-2 text-xs md:text-base 2xl:text-lg">{text}</p>
-                        <h1 className="text-hoverpurple text-base sm:text-lg md:text-2xl 2xl:text-3xl">As a sponsor, you'll be able to:</h1>
+                        <h1 className="mt-6 text-hoverpurple text-base sm:text-lg md:text-2xl 2xl:text-3xl">As a sponsor, you'll be able to:</h1>
                         <ul className="my-2 pl-6 text-xs md:text-base 2xl:text-lg list-disc">
                             <li>Support ambitious students from underserved backgrounds with career-defining opportunities</li>
                             <li>Introduce your product, platform, or API to a diverse group of student developers</li>
@@ -131,7 +131,6 @@ export default function SponsorPage() {
                     </div>
                 </div>
             </div>
-            <footer className="bg-white w-full h-40"></footer>
         </main>
     )
 }
