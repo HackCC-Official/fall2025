@@ -28,7 +28,7 @@ export default function MealPage() {
         queryFn: () => getAccountsByEventAndMealType({
             event_id: event?.id || '',
             mealType: mealType
-          }),
+        }),
         enabled: !!(event?.id && mealType)
       },
     ]
@@ -44,13 +44,14 @@ export default function MealPage() {
     }
   }, [eventQuery, event])
 
-  const queriedData = mealAccountQuery.data?.filter(d => 
+
+  const queriedData = mealAccountQuery.data ? mealAccountQuery.data?.filter(d => 
     d.account.email.includes(q) 
     || 
     (d.account.firstName ? d.account.firstName.includes(q) : false)
     || 
     (d.account.lastName ? d.account.lastName.includes(q) : false)
-  );
+  ) : [];
 
   return (
     <div>
