@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button"
 import PanelLayout from "../layout"
-import { Edit, Plus, Trash } from "lucide-react"
+import { Edit, Mail, Plus, Trash } from "lucide-react"
 import { ContextOption, DataTable } from "@/components/data-table";
 import { columns } from "@/features/account/components/account-table/columns";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -10,6 +10,8 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTr
 import { Separator } from "@/components/ui/separator";
 import { useState } from "react";
 import { AccountDTO } from "@/features/account/types/account-dto";
+import { getBrowserClient } from "@/features/auth/lib/supabase-client";
+import { toast } from "sonner";
 
 export default function AccountPage() {
   const [accountId, setAccountId] = useState<string>('');
@@ -32,6 +34,20 @@ export default function AccountPage() {
     }, 0);
   }
 
+  async function sendInvite(value: AccountDTO) {
+  const supabase = getBrowserClient()
+  const { error } = await supabase.auth.signInWithOtp({
+    email: value.email,
+    options: {
+      emailRedirectTo: process.env.NEXT_PUBLIC_MAGIC_LINK
+    }
+  })
+
+  if (error) {
+    toast(error.message)
+  }
+}
+
   function onEdit(value: AccountDTO) {
     setAccountId(value.id);
     setTimeout(() => {
@@ -48,6 +64,11 @@ export default function AccountPage() {
       label: 'Edit account',
       icon: Edit,
       onClick: onEdit
+    },
+    {
+      label: 'Send Magic Link',
+      icon: Mail,
+      onClick: sendInvite
     },
     {
       label: 'Delete accountp',

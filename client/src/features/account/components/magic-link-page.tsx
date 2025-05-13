@@ -1,7 +1,6 @@
 import { getBrowserClient } from "@/features/auth/lib/supabase-client";
 import { Homebg } from "@/features/home-page/components/homebg";
-import { useSearchParams } from "next/navigation";
-import { useRouter } from "next/router";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect } from "react";
 
 export function MagicLinkPageContent() {
