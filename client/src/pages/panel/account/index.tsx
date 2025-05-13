@@ -40,7 +40,8 @@ export default function AccountPage() {
     const { error } = await supabase.auth.signInWithOtp({
       email: value.email,
       options: {
-        emailRedirectTo: `${process.env.NEXT_PUBLIC_MAGIC_LINK}?email=${encodeURIComponent(value.email)}&token={{ .Token }}`
+        emailRedirectTo: `${process.env.NEXT_PUBLIC_MAGIC_LINK}?email=${encodeURIComponent(value.email)}`,
+        shouldCreateUser: false
       }
     })
 
