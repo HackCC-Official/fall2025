@@ -35,18 +35,19 @@ export default function AccountPage() {
   }
 
   async function sendInvite(value: AccountDTO) {
-  const supabase = getBrowserClient()
-  const { error } = await supabase.auth.signInWithOtp({
-    email: value.email,
-    options: {
-      emailRedirectTo: process.env.NEXT_PUBLIC_MAGIC_LINK
-    }
-  })
+    const supabase = getBrowserClient()
+    console.log(process.env.NEXT_PUBLIC_MAGIC_LINK)
+    const { error } = await supabase.auth.signInWithOtp({
+      email: value.email,
+      options: {
+        emailRedirectTo: `${process.env.NEXT_PUBLIC_MAGIC_LINK}?email=${encodeURIComponent(value.email)}&token={{ .Token }}`
+      }
+    })
 
-  if (error) {
-    toast(error.message)
+    if (error) {
+      toast(error.message)
+    }
   }
-}
 
   function onEdit(value: AccountDTO) {
     setAccountId(value.id);

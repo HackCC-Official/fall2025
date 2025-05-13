@@ -19,7 +19,7 @@ export function AccountActions({ id, email }: AccountActionsProps) {
     const { error } = await supabase.auth.signInWithOtp({
       email: email,
       options: {
-        emailRedirectTo: process.env.NEXT_PUBLIC_MAGIC_LINK
+        emailRedirectTo: `${process.env.NEXT_PUBLIC_MAGIC_LINK}?email=${encodeURIComponent(email)}`
       }
     })
 
