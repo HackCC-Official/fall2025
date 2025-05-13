@@ -37,7 +37,7 @@ export default function PanelLayout({
             if (!session) {
                 router.push('/register');
             } else if (!accountData.roles.find(r => [AccountRoles.ADMIN, AccountRoles.ORGANIZER].includes(r))) {
-                router.push('/login')
+                router.push('/')
             } else {
                 setAuthChecked(true);
             }
