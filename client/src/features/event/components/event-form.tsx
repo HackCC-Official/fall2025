@@ -72,6 +72,7 @@ export function EventForm({ eventId, setEventId, setOpen } : EventFormProps) {
   
 
   useEffect(() => {
+    console.log(form.getValues('date'))
     if (eventId && eventQuery.data) {
       const eventDTO = eventQuery.data
       // date objects are already in UTC

@@ -185,9 +185,9 @@ export function AccountForm({ accountId, setOpen } : { accountId?: string, setOp
           {
             accountId
             ?
-            'Update Team'
+            'Update Account'
             :
-            'Create Team'
+            'Create Account'
           }
         </Button>
       </form>
