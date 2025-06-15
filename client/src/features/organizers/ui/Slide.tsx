@@ -18,30 +18,34 @@ export default function Slide({individualName1, individualRole1, individualImage
 
     return (
         <div className="w-56 h-auto">
-            <div className="z-50 flex flex-col justify-center items-center bg-white hover:shadow-2xl mx-auto my-10 lg:my-7 rounded-xl w-52 lg:w-60 h-[260px] lg:h-[300px]">
-                <Image
-                src={individualImageVariable1} 
-                className="rounded-xl w-[135px] lg:w-40 h-auto" 
-                alt="organizer"
-                width={144}
-                height={144}
-                sizes="(min-width: 1040px) 160px, 144px">
-                </Image>
-                <a target="_blank" href={individualLink1}><h2 className="mt-4 w-full font-mont font-black hover:text-royalpurple text-lg text-center truncate cursor-pointer">{individualName1}</h2></a>
-                <h3 className="pt-1 font-mont text-grey text-base">{individualRole1}</h3>
-            </div>
-            <div className="z-50 flex flex-col justify-center items-center bg-white hover:shadow-2xl mx-auto my-10 lg:my-7 rounded-xl w-52 lg:w-60 h-[260px] lg:h-[300px]">
-                <Image
-                src={individualImageVariable2} 
-                className="rounded-xl w-[135px] lg:w-40 h-auto" 
-                alt="organizer"
-                width={144}
-                height={144}
-                sizes="(min-width: 1040px) 160px, 144px">
-                </Image>
-                <a target="_blank" href={individualLink2}><h2 className="mt-4 w-full font-mont font-black hover:text-royalpurple text-lg text-center truncate cursor-pointer">{individualName2}</h2></a>
-                <h3 onMouseEnter={() => setRole2(individualName2 == "Evan Ly" ? "Backend Specialist" : individualRole2) } onMouseLeave={() => setRole2(individualName2 == "Evan Ly" ? "Website" : individualRole2) } className="pt-1 font-mont text-grey text-base">{role2}</h3>
-            </div>
+            <a target="_blank" href={individualLink1} className="cursor-pointer">
+                <div className="z-50 flex flex-col justify-center items-center bg-white hover:shadow-2xl mx-auto lg:my-7 mt-4 rounded-xl w-[200px] lg:w-60 h-[240px] lg:h-[300px]">
+                    <Image
+                    src={individualImageVariable1} 
+                    className="rounded-xl w-[120px] lg:w-40 h-auto" 
+                    alt="organizer"
+                    width={144}
+                    height={144}
+                    sizes="(min-width: 1040px) 160px, 144px">
+                    </Image>
+                    <h2 className="mt-4 w-full font-mont font-black hover:text-royalpurple text-lg text-center truncate">{individualName1}</h2>
+                    <h3 className="pt-1 font-mont text-grey text-base">{individualRole1}</h3>
+                </div>
+            </a>
+            <a target="_blank" href={individualLink2} className="cursor-pointer">
+                <div className="z-50 flex flex-col justify-center items-center bg-white hover:shadow-2xl mx-auto lg:my-7 mt-4 rounded-xl w-[200px] lg:w-60 h-[240px] lg:h-[300px]">
+                    <Image
+                    src={individualImageVariable2} 
+                    className="rounded-xl w-[120px] lg:w-40 h-auto" 
+                    alt="organizer"
+                    width={144}
+                    height={144}
+                    sizes="(min-width: 1040px) 160px, 144px">
+                    </Image>
+                    <h2 className="mt-4 w-full font-mont font-black hover:text-royalpurple text-lg text-center truncate">{individualName2}</h2>
+                    <h3 onMouseEnter={() => setRole2(individualName2 == "Evan Ly" ? "Backend Specialist" : individualRole2) } onMouseLeave={() => setRole2(individualName2 == "Evan Ly" ? "Website" : individualRole2) } className="pt-1 font-mont text-grey text-base">{role2}</h3>
+                </div>
+            </a>
         </div>
     )
 }

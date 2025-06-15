@@ -165,27 +165,27 @@ export const Interest = () => {
 
     // Loading spinner animation
     const LoadingSpinner = () => (
-        <div className="animate-fadeIn flex flex-col items-center py-6 relative">
-            <div className="animate-spin text-hoverpurple text-4xl mb-4 relative">
+        <div className="relative flex flex-col items-center py-6 animate-fadeIn">
+            <div className="relative mb-4 text-hoverpurple text-4xl animate-spin">
                 <FiLoader />
-                <div className="absolute inset-0 rounded-full animate-ping bg-hoverpurple opacity-20"></div>
+                <div className="absolute inset-0 bg-hoverpurple opacity-20 rounded-full animate-ping"></div>
             </div>
-            <p className="text-white font-medium">Processing your request...</p>
-            <p className="text-white/80 text-sm mt-1">
+            <p className="font-medium text-white">Processing your request...</p>
+            <p className="mt-1 text-white/80 text-sm">
                 This will just take a moment
             </p>
 
             <div className="flex justify-center space-x-1 mt-4">
                 <div
-                    className="w-2 h-2 bg-white/80 rounded-full animate-bounce"
+                    className="bg-white/80 rounded-full w-2 h-2 animate-bounce"
                     style={{ animationDelay: "0ms" }}
                 ></div>
                 <div
-                    className="w-2 h-2 bg-white/80 rounded-full animate-bounce"
+                    className="bg-white/80 rounded-full w-2 h-2 animate-bounce"
                     style={{ animationDelay: "150ms" }}
                 ></div>
                 <div
-                    className="w-2 h-2 bg-white/80 rounded-full animate-bounce"
+                    className="bg-white/80 rounded-full w-2 h-2 animate-bounce"
                     style={{ animationDelay: "300ms" }}
                 ></div>
             </div>
@@ -197,14 +197,14 @@ export const Interest = () => {
         const [buttonHovered, setButtonHovered] = useState(false);
 
         return (
-            <div className="animate-fadeIn flex flex-col items-center py-4 relative">
-                <div className="text-yellow-400 text-4xl mb-3 animate-pulse">
+            <div className="relative flex flex-col items-center py-4 animate-fadeIn">
+                <div className="mb-3 text-yellow-400 text-4xl animate-pulse">
                     <FiInfo />
                 </div>
-                <p className="text-white font-medium">
+                <p className="font-medium text-white">
                     This email is already registered!
                 </p>
-                <p className="text-white/80 text-sm mt-1 mb-4">
+                <p className="mt-1 mb-4 text-white/80 text-sm">
                     You&apos;ll receive updates about the event at {email}
                 </p>
 
@@ -233,7 +233,7 @@ export const Interest = () => {
     return (
         <div
             ref={containerRef}
-            className="2xl:w-[550px] md:w-[450px] sm:w-[400px] w-[300px] font-mont bg-black bg-opacity-20 backdrop-blur-sm px-7 py-8 rounded-3xl relative 2xl:text-lg md:text-md text-sm flex flex-col text-center z-10 shadow-lg border border-white/10 transition-all duration-300"
+            className="z-10 relative flex flex-col bg-black bg-opacity-20 shadow-lg backdrop-blur-sm px-7 py-8 border border-white/10 rounded-3xl w-[300px] sm:w-[400px] md:w-[450px] 2xl:w-[550px] font-mont md:text-md text-sm 2xl:text-lg text-center transition-all duration-300"
             style={{
                 ...tiltStyle,
                 boxShadow: isHovering
@@ -253,19 +253,19 @@ export const Interest = () => {
             {isDuplicate && !isSubmitting && <DuplicateEmail />}
 
             {!isSubmitting && !success && !isDuplicate && (
-                <div className="animate-fadeIn relative">
-                    <p className="font-semibold text-white/90 mb-3">
+                <div className="relative animate-fadeIn">
+                    <p className="mb-3 font-semibold text-white/90">
                         Sign up to receive updates{" "}
                         <br className="sm:hidden inline" /> about the event
                     </p>
-                    <div className="flex sm:flex-row flex-col items-center pt-3 md:pt-4 relative">
-                        <div className="sm:w-2/3 w-full relative group">
-                            <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-navyblue">
+                    <div className="relative flex sm:flex-row flex-col items-center pt-3 md:pt-4">
+                        <div className="group relative w-full sm:w-2/3">
+                            <div className="top-1/2 left-3 absolute text-navyblue -translate-y-1/2 transform">
                                 <FiMail />
                             </div>
                             <input
                                 name="email"
-                                className="w-full bg-white/90 sm:mb-0 mb-3 px-10 py-3 rounded-lg text-black placeholder-gray-500 outline-none focus:ring-2 focus:ring-hoverpurple transition-all duration-300 shadow-sm"
+                                className="bg-white/90 shadow-sm mb-3 sm:mb-0 px-10 py-3 rounded-lg outline-none focus:ring-2 focus:ring-hoverpurple w-full text-black transition-all duration-300 placeholder-gray-500"
                                 type="email"
                                 placeholder="Enter your email"
                                 value={email}
@@ -273,7 +273,7 @@ export const Interest = () => {
                                 onKeyPress={handleKeyPress}
                             />
                         </div>
-                        <div className="sm:w-1/3 w-full sm:ml-3 md:ml-4">
+                        <div className="sm:ml-3 md:ml-4 w-full sm:w-1/3">
                             <button
                                 type="button"
                                 className={`w-full text-nowrap text-center py-3 px-4 rounded-lg flex items-center justify-center font-medium transition-all duration-300 ${
@@ -299,14 +299,14 @@ export const Interest = () => {
                 </div>
             )}
             {!isSubmitting && success && !isDuplicate && (
-                <div className="animate-fadeIn flex flex-col items-center py-4 relative">
-                    <div className="text-green-400 text-4xl mb-3">
+                <div className="relative flex flex-col items-center py-4 animate-fadeIn">
+                    <div className="mb-3 text-green-400 text-4xl">
                         <FiCheckCircle />
                     </div>
-                    <p className="text-white font-medium">
+                    <p className="font-medium text-white">
                         Thank you for your interest!
                     </p>
-                    <p className="text-white/80 text-sm mt-1">
+                    <p className="mt-1 text-white/80 text-sm">
                         You&apos;ll receive updates about our event
                     </p>
                 </div>
@@ -316,8 +316,8 @@ export const Interest = () => {
                     className={`mt-4 flex flex-col md:text-md text-sm lg:text-base text-center relative ${status.includes("Error") ? "text-red-300" : "text-white/80"}`}
                 >
                     {status.includes("Error") ? (
-                        <div className="flex items-center justify-center">
-                            <span className="text-red-300 mr-2">
+                        <div className="flex justify-center items-center">
+                            <span className="mr-2 text-red-300">
                                 <FiAlertCircle />
                             </span>
                             <p>{status}</p>

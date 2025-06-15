@@ -14,16 +14,16 @@ import Faq from "@/features/faq/Faq";
 export default function HomePage() {
   return (
     <div className="flex flex-wrap w-screen h-screen">
-      <Navbar></Navbar>
+      {/* <Navbar></Navbar> */}
       {<FrontPage></FrontPage>}
-      <About></About>
+      {/* <About></About>
       <Collage></Collage>
       <Faq></Faq>
       <Carousel></Carousel>
       <AttendeeContainer/>
       <Slider></Slider>
       <VolunteerJudgeContainer></VolunteerJudgeContainer>
-      <Footer></Footer>
+      <Footer></Footer> */}
 
     </div>
   )

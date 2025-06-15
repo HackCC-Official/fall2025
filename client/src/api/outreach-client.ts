@@ -8,7 +8,8 @@ if (!process.env.NEXT_PUBLIC_OUTREACH_SERVICE_URL) {
 }
 
 export const outreachClient = axios.create({
-    baseURL: "/outreach-service",
+    baseURL:
+        process.env.NEXT_PUBLIC_OUTREACH_SERVICE_URL,
     headers: {
         "Content-Type": "application/json",
     },
