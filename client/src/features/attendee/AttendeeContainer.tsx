@@ -11,6 +11,7 @@ import ethan from "../../../public/Ethan.webp"
 
 export default function AttendeeContainer() {
     return(
+        
         //md:tablet breakpoint
         //lg:desktop/laptop breakpoint
         //initally scaled for mobile->tablet->desktop/laptop
