@@ -20,7 +20,7 @@ const ApplicationInput = React.forwardRef<HTMLInputElement, ApplicationInputProp
         value={sanitizedValue}
         type={type}
         className={cn(
-          "p-4 md:p-6 text-xs md:text-base rounded-2xl placeholder:text-[#696E75] font-semibold w-full text-black bg-[#F9F9FB]",
+          "bg-[#F9F9FB] p-4 md:p-6 rounded-2xl w-full font-semibold text-black placeholder:text-[#696E75] text-xs md:text-base",
           className
         )}
         ref={ref}
@@ -56,7 +56,7 @@ const ApplicationTextarea = React.forwardRef<HTMLTextAreaElement, ApplicationTex
           value={sanitizedValue}
           rows={8}
           className={cn(
-            "p-2 md:p-6 rounded-2xl placeholder:text-[#696E75] font-semibold w-full text-black bg-[#F9F9FB] border-0 focus:ring-1",
+            "bg-[#F9F9FB] p-2 md:p-6 border-0 rounded-2xl focus:ring-1 w-full font-semibold text-black placeholder:text-[#696E75]",
             className
           )}
           ref={ref}
@@ -99,7 +99,7 @@ const ApplicationCalendar = React.forwardRef<HTMLButtonElement, { className?: st
         <PopoverTrigger asChild>
           <Button
             className={cn(
-              "px-6 py-6 h-auto shadow-none hover:bg-[#F9F9FB] rounded-2xl placeholder:text-[#696E75] font-semibold w-full text-black bg-[#F9F9FB]",
+              "bg-[#F9F9FB] hover:bg-[#F9F9FB] shadow-none px-6 py-6 rounded-2xl w-full h-auto font-semibold text-black placeholder:text-[#696E75]",
               !date && "text-muted-foreground",
               className
             )}
@@ -132,3 +132,20 @@ const ApplicationCalendar = React.forwardRef<HTMLButtonElement, { className?: st
 ApplicationCalendar.displayName = "Calendar";
 
 export { ApplicationCalendar }
+
+export function ApplicationError({ children } :  { children: React.ReactNode }) {
+  return (
+    <p className="mt-4 font-semibold text-red-500 text-sm">{children}</p>
+  )
+}
+
+import { Label } from "@/components/ui/label";
+
+export function ApplicationLabel({ className, children } : { className?: string, children: React.ReactNode }) {
+  return (
+    <Label className={cn([
+      'text-xl md:text-[25px] font-bagel',
+      className,
+    ])}>{children}</Label>
+  )
+}

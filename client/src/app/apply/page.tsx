@@ -6,14 +6,8 @@ import { useForm, Controller } from "react-hook-form";
 import { getBrowserClient } from "@/features/auth/lib/supabase-client";
 import { Logo } from "@/components/logo";
 import { SkyFixed } from "@/components/sky";
-import { FileUploader } from "@/components/ui/file-uploader";
-import { ApplicationInput, ApplicationCalendar, ApplicationTextarea } from "@/features/application/components/application-input";
-import { ApplicationLabel } from "@/features/application/components/application-label";
-import { ApplicationMultipleGroup, ApplicationMultipleItem } from "@/features/application/components/application-multiple";
-import { ApplicationSelect } from "@/features/application/components/application-select";
+import { ApplicationLabel } from "@/features/application/components/application-input";
 import { FormCard } from "@/features/application/components/form-card";
-import schools from '@/features/application/data/schools.json';
-import residences from '@/features/application/data/residences.json';
 import { useMutation, useQueries, useQueryClient } from "@tanstack/react-query";
 import { getQuestions } from "@/features/question/api/question";
 import { QuestionResponseDto } from "@/features/question/types/question-response.dto";
@@ -25,28 +19,10 @@ import { ApplicationStatus } from "@/features/application/types/status.enum";
 import { createApplication, Document, getApplicationByUserId } from "@/features/application/api/application";
 import { User } from "@supabase/supabase-js";
 import { DarkCard } from "@/components/dark-card";
-import { ApplicationError } from "@/features/application/components/application-error";
 import { debounce } from "lodash";
 import { Spinner } from "@/components/ui/spinner";
 import { BackButton } from "@/features/application/components/back-btn";
-
-interface QuestionGroupNode {
-    type: 'GROUP';
-    questions: QuestionResponseDto[];
-    isSingleLabel: boolean;
-    label: string;
-}
-
-interface QuestionNode {
-    type: 'NODE';
-    question: QuestionResponseDto;
-}
-
-type QuestionNodes = QuestionNode | QuestionGroupNode;
-
-interface FormValues {
-    [key: string]: string | number | File | null; // Dynamic form values
-}
+import { FormValues, Question, QuestionGroupNode, QuestionNodes } from "@/features/application/components/question-node";
 
 export default function ApplyPage() {
     const maxWordLength = 150;
@@ -313,121 +289,11 @@ export default function ApplyPage() {
                             <div key={n.question.id}>
                                 <ApplicationLabel>{n.question.prompt}</ApplicationLabel>
                                 <div className="mt-4">
-                                    <Controller
-                                        name={`question_${n.question.id}`}
+                                    <Question
+                                        question={n.question}
                                         control={control}
                                         defaultValue={n.question.type === QuestionType.EMAIL ? user?.email : ''}
                                         rules={formRules}
-                                        render={({ field, fieldState: { error } }) => {
-                                            switch (n.question.type) {
-                                                case QuestionType.TEXT:
-                                                    return (
-                                                        <div>
-                                                            <ApplicationInput {...field} placeholder={n.question.placeholder} type="text" />
-                                                            {error && <ApplicationError>{error.message}</ApplicationError>}
-                                                        </div>
-                                                    )
-                                                case QuestionType.TEXTAREA:
-                                                    return (
-                                                        <div>
-                                                            <ApplicationTextarea
-                                                                maxWord={maxWordLength}
-                                                                {...field}
-                                                            />
-                                                            {error && <ApplicationError>{error.message}</ApplicationError>}
-                                                        </div>
-                                                    )
-                                                case QuestionType.DATE:
-                                                    return (
-                                                        <div>
-                                                            <ApplicationCalendar {...field} value={field.value as unknown as Date} />
-                                                            {error && <ApplicationError>{error.message}</ApplicationError>}
-                                                        </div>
-                                                    )
-                                                case QuestionType.FILE:
-                                                    return (
-                                                        <div>
-                                                            <FileUploader
-                                                                {...field}
-                                                                value={field.value as unknown as File[]} // Cast field.value to File[]
-                                                                onValueChange={field.onChange} // Pass field.onChange directly
-                                                                maxFileCount={1} // Allow only 1 file (or adjust as needed)
-                                                                maxSize={1000000 * 25}
-                                                            />
-                                                            {error && <ApplicationError>{error.message}</ApplicationError>}
-                                                        </div>
-                                                    );
-                                                case QuestionType.SELECT:
-                                                    if (n.question.name === 'school') {
-                                                        return (
-                                                            <div>
-                                                                <ApplicationSelect
-                                                                    {...field}
-                                                                    placeholder='your school'
-                                                                    value={String(field.value)}
-                                                                    values={schools.map(s => s.institution)}
-                                                                />
-                                                            {error && <ApplicationError>{error.message}</ApplicationError>}
-                                                            </div>
-                                                        );
-                                                    } else if (n.question.name === 'residence') {
-                                                        return (
-                                                            <div>
-                                                                <ApplicationSelect
-                                                                    {...field}
-                                                                    placeholder="your residence"
-                                                                    value={String(field.value)}
-                                                                    values={residences.map(r => r.city)}
-                                                                />
-                                                            {error && <ApplicationError>{error.message}</ApplicationError>}
-                                                            </div>
-                                                        );
-                                                    }
-                                                    return <div>Unsupported question type</div>;
-                                                case QuestionType.EMAIL:
-                                                    return (
-                                                        <div>
-                                                            <ApplicationInput {...field} placeholder={n.question.placeholder} type="email" />
-                                                            {error && <ApplicationError>{error.message}</ApplicationError>}
-                                                        </div>
-                                                    );
-                                                case QuestionType.MULTIPLE:
-                                                    if (n.question.name === 'gender') {
-                                                        return (
-                                                            <div>
-                                                                <ApplicationMultipleGroup className="mt-4">
-                                                                    {
-                                                                        n.question.possibleAnswers
-                                                                        &&
-                                                                        n.question.possibleAnswers.map((p, i) => (
-                                                                            <ApplicationMultipleItem key={'gender_' + i} id={'gender_' + i} {...field} value={p} />
-                                                                        ))
-                                                                    }
-                                                                </ApplicationMultipleGroup>
-                                                                {error && <ApplicationError>{error.message}</ApplicationError>}
-                                                            </div>
-                                                        );
-                                                    } else if (n.question.name === 'gradYear') {
-                                                        return (
-                                                            <div>
-                                                                <ApplicationMultipleGroup className="mt-4">
-                                                                    {
-                                                                        n.question.possibleAnswers
-                                                                        &&
-                                                                        n.question.possibleAnswers.map((p, i) => (
-                                                                            <ApplicationMultipleItem key={'grad_year_' + i} id={'grad_year_' + i} {...field} value={p} />
-                                                                        ))
-                                                                    }
-                                                                </ApplicationMultipleGroup>
-                                                                {error && <ApplicationError>{error.message}</ApplicationError>}
-                                                            </div>
-                                                        );
-                                                    }
-                                                    return <div>Unsupported question type</div>;
-                                                default:
-                                                    return <div>Unsupported question type</div>;
-                                            }
-                                        }}
                                     />
                                 </div>
                             </div>
@@ -442,115 +308,11 @@ export default function ApplyPage() {
                                         <div className="w-full" key={q.id}>
                                             {n.isSingleLabel && <ApplicationLabel>{q.prompt}</ApplicationLabel>}
                                             <div className={n.isSingleLabel ? 'mt-4' : ''}>
-                                                <Controller
-                                                    name={`question_${q.id}`}
+                                                <Question
+                                                    question={q}
                                                     control={control}
                                                     defaultValue={q.type === QuestionType.EMAIL ? user?.email : ''}
                                                     rules={formRules}
-                                                    render={({ field, fieldState: { error } }) => {
-                                                        switch (q.type) {
-                                                            case QuestionType.TEXT:
-                                                                return (
-                                                                    <div>
-                                                                        <ApplicationInput {...field} placeholder={q.placeholder} type="text" />
-                                                                        {error && <ApplicationError>{error.message}</ApplicationError>}
-                                                                    </div>
-                                                                )
-                                                            case QuestionType.TEXTAREA:
-                                                                return (
-                                                                    <div>
-                                                                        <ApplicationTextarea
-                                                                            maxWord={maxWordLength}
-                                                                            {...field} 
-                                                                        />
-                                                                        {error && <ApplicationError>{error.message}</ApplicationError>}
-                                                                    </div>
-                                                                )
-                                                            case QuestionType.DATE:
-                                                                return <ApplicationCalendar {...field} value={field.value as unknown as Date} />;
-                                                            case QuestionType.FILE:
-                                                                return (
-                                                                    <div>
-                                                                        <FileUploader
-                                                                            {...field}
-                                                                            value={field.value as unknown as File[]} // Cast field.value to File[]
-                                                                            onValueChange={field.onChange} // Pass field.onChange directly
-                                                                            maxFileCount={1} // Allow only 1 file (or adjust as needed)
-                                                                            maxSize={1000000 * 25}
-                                                                        />
-                                                                        {error && <ApplicationError>{error.message}</ApplicationError>}
-                                                                    </div>
-                                                                );
-                                                            case QuestionType.SELECT:
-                                                                if (q.name === 'school') {
-                                                                    return (
-                                                                        <div>
-                                                                            <ApplicationSelect
-                                                                                {...field}
-                                                                                placeholder="School"
-                                                                                value={String(field.value)}
-                                                                                values={schools.map(s => s.institution)}
-                                                                            />
-                                                                            {error && <ApplicationError>{error.message}</ApplicationError>}
-                                                                        </div>
-                                                                    );
-                                                                } else if (q.name === 'residence') {
-                                                                    return (
-                                                                        <div>
-                                                                            <ApplicationSelect
-                                                                                {...field}
-                                                                                placeholder="residence"
-                                                                                value={String(field.value)}
-                                                                                values={residences.map(r => r.city)}
-                                                                            />
-                                                                            {error && <ApplicationError>{error.message}</ApplicationError>}
-                                                                        </div>
-
-                                                                    );
-                                                                }
-                                                                return <div>Unsupported question type</div>;
-                                                            case QuestionType.EMAIL:
-                                                                return (
-                                                                    <div>
-                                                                        <ApplicationInput {...field} placeholder={q.placeholder} type="email" />
-                                                                        {error && <ApplicationError>{error.message}</ApplicationError>}
-                                                                    </div>
-                                                                );
-                                                            case QuestionType.MULTIPLE:
-                                                                if (q.name === 'gender') {
-                                                                    return (
-                                                                        <div>
-                                                                            <ApplicationMultipleGroup className="mt-4">
-                                                                                {
-                                                                                    q.possibleAnswers
-                                                                                    &&
-                                                                                    q.possibleAnswers.map((p, i) => (
-                                                                                        <ApplicationMultipleItem key={'gender_' + i} id={'gender_' + i} {...field} value={p} />
-                                                                                    ))
-                                                                                }
-                                                                            </ApplicationMultipleGroup>
-                                                                            {error && <ApplicationError>{error.message}</ApplicationError>}
-                                                                        </div>
-                                                                    );
-                                                                } else if (q.name === 'gradYear') {
-                                                                    return (
-                                                                        <ApplicationMultipleGroup className="mt-4">
-                                                                            {
-                                                                                q.possibleAnswers
-                                                                                &&
-                                                                                q.possibleAnswers.map((p, i) => (
-                                                                                    <ApplicationMultipleItem key={'grad_year_' + i} id={'grad_year_' + i} {...field} value={p} />
-                                                                                ))
-                                                                            }
-                                                                            {error && <ApplicationError>{error.message}</ApplicationError>}
-                                                                        </ApplicationMultipleGroup>
-                                                                    );
-                                                                }
-                                                                return <div>Unsupported question type</div>;
-                                                            default:
-                                                                return <div>Unsupported question type</div>;
-                                                        }
-                                                    }}
                                                 />
                                             </div>
                                         </div>
