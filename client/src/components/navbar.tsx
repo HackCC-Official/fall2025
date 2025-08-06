@@ -63,9 +63,7 @@ export const Navbar = () => {
             <ApplyButton text="Apply" size="sm" directory="/apply"></ApplyButton>
             </div>
             <h1 className={`${isMenuOpen? 'text-black' : 'text-white'} fixed z-50 top-4 right-4 text-3xl sm:hidden flex`} onClick={() => {toggleMenu()}}>{isMenuOpen ? 'X' : '☰'}</h1>
-            <div className="fixed w-full h-full">
-                <a className='bottom-4 left-4 absolute !fill-white w-12 h-12 !text-white' target='_blank' href="https://discord.gg/yRShGV7Py4"><FontAwesomeIcon className="w-full h-full text-white" icon={faDiscord} /></a>
-            </div>
+            <a className='bottom-4 left-4 z-[100] fixed !fill-white w-12 h-12 !text-white' target='_blank' href="https://discord.gg/yRShGV7Py4"><FontAwesomeIcon className="w-full h-full text-white" icon={faDiscord} /></a>
         </div>
     )
 }

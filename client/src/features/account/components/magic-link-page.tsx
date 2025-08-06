@@ -9,13 +9,14 @@ export function MagicLinkPageContent() {
 
   useEffect(() => {
     // Extract the magic link code from the URL query parameters
-    const code = searchParams ? searchParams.get('code') : null;
-    if (!code) return;
+    const token = searchParams ? searchParams.get('token') : null;
+    const email = searchParams ? searchParams.get('email') : null;
+    if (!token || !email) return;
 
-    handleMagicLink(code);
+    handleMagicLink(token, email);
   }, [searchParams]);
 
-  const handleMagicLink = async (code: string) => {
+  const handleMagicLink = async (token: string, email: string) => {
     const supabase = getBrowserClient();
 
     // Verify the magic link code
@@ -23,8 +24,9 @@ export function MagicLinkPageContent() {
       data: { session },
       error,
     } = await supabase.auth.verifyOtp({
+      email,
       type: 'email',
-      token_hash: code
+      token
     });
 
     if (error) {
