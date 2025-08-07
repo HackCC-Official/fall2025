@@ -4,13 +4,13 @@ import { QuestionResponseDto } from "@/features/question/types/question-response
 export async function getQuestions(): Promise<QuestionResponseDto[]> {
   return (await applyClient.request({
     method: 'GET',
-    url: 'questions'
+    url: 'questions/hackathon'
   })).data
 }
 
 export async function getQuestionById(id: number): Promise<QuestionResponseDto> {
   return (await applyClient.request({
     method: 'GET',
-    url: 'questions/' + id
+    url: 'questions' + id
   })).data
 }

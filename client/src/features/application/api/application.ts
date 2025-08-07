@@ -7,7 +7,7 @@ export interface Document {
   transcript: File | undefined;
 }
 
-export async function createApplication(applicationDTO: ApplicationRequestDTO, document: Document): Promise<ApplicationRequestDTO> {
+export async function createHackathonApplication(applicationDTO: ApplicationRequestDTO, document: Document): Promise<ApplicationRequestDTO> {
   // Create a new FormData object
   const formData = new FormData();
 
@@ -29,7 +29,7 @@ export async function createApplication(applicationDTO: ApplicationRequestDTO, d
   return (
     await applyClient.request({
       method: "POST",
-      url: "applications",
+      url: "applications/hackathon",
       data: formData,
       headers: {
         "Content-Type": "multipart/form-data", // Set the content type for file uploads
@@ -38,12 +38,12 @@ export async function createApplication(applicationDTO: ApplicationRequestDTO, d
   ).data;
 }
 
-export async function getApplicationByUserId(userId: string) : Promise<{ status: ApplicationStatus }> {
+export async function getHackathonApplicationByUserId(userId: string) : Promise<{ status: ApplicationStatus }> {
     // Make the POST request with formData
     return (
       await applyClient.request({
         method: "GET",
-        url: "applications/user/" + userId,
+        url: "applications/hackathon/user/" + userId,
       })
     ).data;
 }
@@ -62,7 +62,7 @@ export async function getApplications({ status } : { status: ApplicationStatus})
   return (
     await applyClient.request({
       method: "GET",
-      url: "applications",
+      url: "applications/hackathon",
       params: { status }
     })
   ).data

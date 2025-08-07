@@ -16,7 +16,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { ApplicationRequestDTO } from "@/features/application/types/application";
 import { ApplicationStatus } from "@/features/application/types/status.enum";
-import { createApplication, Document, getApplicationByUserId } from "@/features/application/api/application";
+import {  createHackathonApplication, Document, getHackathonApplicationByUserId, } from "@/features/application/api/application";
 import { User } from "@supabase/supabase-js";
 import { DarkCard } from "@/components/dark-card";
 import { debounce } from "lodash";
@@ -80,11 +80,11 @@ export default function ApplyPage() {
         queries: [
             {
                 queryKey: ['application-user', user ? user.id : ''],
-                queryFn: () => getApplicationByUserId(user ? user.id : ''),
+                queryFn: () => getHackathonApplicationByUserId(user ? user.id : ''),
                 enabled: () => !!(user && user.id)
             },
             {
-                queryKey: ['questions'],
+                queryKey: ['hackathon-questions'],
                 queryFn: () => getQuestions()
             }
         ]
@@ -102,7 +102,7 @@ export default function ApplyPage() {
                 document: Document 
             }
             ) => 
-                createApplication(applicationDTO, document)
+                createHackathonApplication(applicationDTO, document)
         ,
         onSettled: () => {
             queryClient.invalidateQueries({ queryKey: ['application-user', user ? user.id : ''] })
