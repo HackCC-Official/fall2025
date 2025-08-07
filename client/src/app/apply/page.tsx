@@ -1,9 +1,6 @@
  
 "use client";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import { useForm, Controller } from "react-hook-form";
-import { getBrowserClient } from "@/features/auth/lib/supabase-client";
+import { useForm } from "react-hook-form";
 import { Logo } from "@/components/logo";
 import { SkyFixed } from "@/components/sky";
 import { ApplicationLabel } from "@/features/application/components/application-input";
@@ -16,7 +13,6 @@ import { Button } from "@/components/ui/button";
 import { ApplicationRequestDTO } from "@/features/application/types/application";
 import { ApplicationStatus } from "@/features/application/types/status.enum";
 import { Document } from "@/features/application/api/application";
-import { User } from "@supabase/supabase-js";
 import { DarkCard } from "@/components/dark-card";
 import { debounce } from "lodash";
 import { Spinner } from "@/components/ui/spinner";
@@ -25,6 +21,7 @@ import { FormValues, Question, QuestionGroupNode, QuestionNodes } from "@/featur
 import { getHackathonQuestions } from "@/features/question/api/hackathon-question";;
 import { getHackathonApplicationByUserId, createHackathonApplication } from "@/features/application/api/hackathon-application";
 import { FrontPageSecondaryLayout } from "@/layouts/front-page-layout";
+import { useAuthentication } from "@/features/auth/hooks/use-authentication";
 
 export default function ApplyPage() {
     const maxWordLength = 150;
@@ -73,10 +70,7 @@ export default function ApplyPage() {
     }
 
     const queryClient = useQueryClient();
-    const [user, setUser] = useState<User | null>(null);
-    const supabase = getBrowserClient()
-    const router = useRouter();
-    const [authCheck, setAuthChecked] = useState(false);
+    const { user, authCheck } = useAuthentication();
 
     const [applicationQuery, questionQuery] = useQueries({
         queries: [
@@ -115,21 +109,6 @@ export default function ApplyPage() {
         mode: 'onChange', // This enables validation on change
         reValidateMode: 'onChange', // This ensures re-validation happens on change
     });
-
-    useEffect(() => {
-        const checkAuth = async () => {
-            const { data: { session } } = await supabase.auth.getSession();
-
-            if (!session) {
-                router.push('/register');
-            } else {
-                setAuthChecked(true);
-                setUser(session.user)
-            }
-        };
-
-        checkAuth();
-    }, [router, supabase.auth]);
 
     if (!authCheck || applicationQuery.isLoading || questionQuery.isLoading) {
         return (
