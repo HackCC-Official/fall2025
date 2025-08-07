@@ -6,9 +6,10 @@ import { FolderCheck, FolderSearch, FolderX } from "lucide-react";
 import { useState } from "react";
 import { ApplicationItem, ApplicationList } from "@/features/application/components/application-list";
 import { useQuery } from "@tanstack/react-query";
-import { getApplications, getApplicationsStats } from "@/features/application/api/application";
+import { getApplicationsStats } from "@/features/application/api/application";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
+import { getHackathonApplications } from "@/features/application/api/hackathon-application";
 
 function ApplicationListSkeleton() {
   return (
@@ -27,8 +28,8 @@ function ApplicationListSkeleton() {
 export default function ApplicationPage() {
   const [status, setStatus] = useState(ApplicationStatus.SUBMITTED)
   const { isLoading, data } = useQuery({
-    queryKey: ['applications', status],
-    queryFn: () => getApplications({ status })
+    queryKey: ['hackathon-applications', status],
+    queryFn: () => getHackathonApplications({ status })
   })
 
   const statQuery = useQuery({

@@ -9,7 +9,6 @@ import { SkyFixed } from "@/components/sky";
 import { ApplicationLabel } from "@/features/application/components/application-input";
 import { FormCard } from "@/features/application/components/form-card";
 import { useMutation, useQueries, useQueryClient } from "@tanstack/react-query";
-import { getQuestions } from "@/features/question/api/question";
 import { QuestionResponseDto } from "@/features/question/types/question-response.dto";
 import { QuestionType } from "@/features/question/types/question-type.enum";
 import { cn } from "@/lib/utils";
@@ -23,6 +22,7 @@ import { debounce } from "lodash";
 import { Spinner } from "@/components/ui/spinner";
 import { BackButton } from "@/features/application/components/back-btn";
 import { FormValues, Question, QuestionGroupNode, QuestionNodes } from "@/features/application/components/question-node";
+import { getHackathonQuestions } from "@/features/question/api/hackathon-question";
 
 export default function ApplyPage() {
     const maxWordLength = 150;
@@ -79,13 +79,13 @@ export default function ApplyPage() {
     const [applicationQuery, questionQuery] = useQueries({
         queries: [
             {
-                queryKey: ['application-user', user ? user.id : ''],
+                queryKey: ['hackathon-application-user', user ? user.id : ''],
                 queryFn: () => getHackathonApplicationByUserId(user ? user.id : ''),
                 enabled: () => !!(user && user.id)
             },
             {
                 queryKey: ['hackathon-questions'],
-                queryFn: () => getQuestions()
+                queryFn: () => getHackathonQuestions()
             }
         ]
     })
