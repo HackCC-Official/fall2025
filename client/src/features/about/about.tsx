@@ -8,8 +8,8 @@ import cloudR from "../../../public/Pink Cloud Cluster 4.webp"
 import texture from "../../../public/About Texture.webp"
 export default function About () {
     return (
-        <div className='-z-20 relative bg-gradient-to-b from-bgpurple to-richpurple -mt-[5px] w-full h-auto overflow-x-clip' id='aboutTab'>
-            <Image src={texture} className='-top-20 sm:-top-80 left-0 z-0 absolute min-w-[800px] sm:min-w-[1500px] max-w-[800px] sm:max-w-[2000px] h-auto' alt="bg" sizes="(min-width: 640px) 1500px, 800px"></Image>
+        <div className='-z-20 relative bg-gradient-to-b from-bgpurple to-richpurple w-full h-auto overflow-x-clip' id='aboutTab'>
+            <Image src={texture} className='-top-20 sm:-top-80 left-0 z-0 absolute min-w-[800px] sm:min-w-[1500px] max-w-[800px] sm:max-w-[2000px] h-auto object-cover' alt="bg" sizes="(min-width: 640px) 1500px, 800px"></Image>
             <Image src={cloudL} className='top-16 sm:top-0 md:-top-16 -left-5 absolute w-[90px] sm:w-48 md:w-72 2xl:w-96 h-auto animate-swaying ease-linear' alt="cloud" sizes="(min-width: 1540px) 384px, (min-width: 780px) 288px, (min-width: 640px) 192px, 90px"></Image>
             <Image src={cloudR} className='top-20 sm:top-10 md:top-2 -right-5 absolute w-28 sm:w-72 md:w-96 2xl:w-96 h-auto animate-swaying ease-linear' alt='cloud' sizes="(min-width: 780px) 384px, (min-width: 640px) 288px, 112px"></Image>
             <div className='flex flex-col justify-center items-center mx-auto py-20 w-[1000px] max-w-[90%] text-white align-center' >

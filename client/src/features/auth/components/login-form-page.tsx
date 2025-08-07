@@ -11,6 +11,7 @@ import { AuthCardSkeletonDefault } from "./auth-card-skeleton";
 import { AuthInput } from "./auth-input";
 import Image from "next/image";
 import HotAirBalloon from "../../../../public/Hot Air Balloon.webp";
+import { FrontPagePrimaryLayout } from "@/layouts/front-page-layout";
 
 
 export function LoginFormPage() {
@@ -56,8 +57,7 @@ export function LoginFormPage() {
     };
 
     return (
-        <div className="relative w-screen h-screen overflow-hidden">
-            <Homebg></Homebg>
+        <FrontPagePrimaryLayout>
             <div className="flex justify-center items-center p-4 min-h-screen">
                 <div className="flex flex-col justify-center items-center w-full max-w-md">
                     <div className="flex flex-col justify-center items-center mx-auto">
@@ -139,6 +139,6 @@ export function LoginFormPage() {
                     </DarkCard>
                 </div>
             </div>
-        </div>
+        </FrontPagePrimaryLayout>
     );
 }

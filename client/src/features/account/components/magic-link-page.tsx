@@ -1,5 +1,6 @@
 import { getBrowserClient } from "@/features/auth/lib/supabase-client";
 import { Homebg } from "@/features/home-page/components/homebg";
+import { FrontPagePrimaryLayout } from "@/layouts/front-page-layout";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect } from "react";
 
@@ -41,8 +42,6 @@ export function MagicLinkPageContent() {
   };
 
   return (
-    <div className="relative w-screen h-screen overflow-hidden">
-      <Homebg />
-    </div>
+    <FrontPagePrimaryLayout />
   );
 }

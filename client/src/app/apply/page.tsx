@@ -15,14 +15,16 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { ApplicationRequestDTO } from "@/features/application/types/application";
 import { ApplicationStatus } from "@/features/application/types/status.enum";
-import {  createHackathonApplication, Document, getHackathonApplicationByUserId, } from "@/features/application/api/application";
+import { Document } from "@/features/application/api/application";
 import { User } from "@supabase/supabase-js";
 import { DarkCard } from "@/components/dark-card";
 import { debounce } from "lodash";
 import { Spinner } from "@/components/ui/spinner";
 import { BackButton } from "@/features/application/components/back-btn";
 import { FormValues, Question, QuestionGroupNode, QuestionNodes } from "@/features/application/components/question-node";
-import { getHackathonQuestions } from "@/features/question/api/hackathon-question";
+import { getHackathonQuestions } from "@/features/question/api/hackathon-question";;
+import { getHackathonApplicationByUserId, createHackathonApplication } from "@/features/application/api/hackathon-application";
+import { FrontPageSecondaryLayout } from "@/layouts/front-page-layout";
 
 export default function ApplyPage() {
     const maxWordLength = 150;
@@ -131,16 +133,13 @@ export default function ApplyPage() {
 
     if (!authCheck || applicationQuery.isLoading || questionQuery.isLoading) {
         return (
-            <div className="relative w-screen h-screen overflow-x-hidden">
-                <SkyFixed />
-            </div>
+            <FrontPageSecondaryLayout />
         );
     }
 
     if (applicationQuery && applicationQuery.data && applicationQuery.data.status === ApplicationStatus.SUBMITTED) {
         return (
-            <div className="relative w-screen h-screen overflow-x-hidden">
-                <SkyFixed />
+            <FrontPageSecondaryLayout>
                 <div className="flex flex-col justify-center items-center mx-auto mt-24 md:mt-16 2xl:mt-20 xl:mt-16 text-white">
                     <div className="relative flex">
                         <Logo />
@@ -158,7 +157,7 @@ export default function ApplyPage() {
                         </div>
                     </DarkCard>
                 </div>
-            </div>
+            </FrontPageSecondaryLayout>
         )
     }
 
@@ -256,8 +255,7 @@ export default function ApplyPage() {
     const debouncedLargerThanMaxWordLength = debounce((value: string) => largerThanMaxWordLength(value), 500)
 
     return (
-        <div className="relative w-screen h-screen overflow-x-hidden">
-            <SkyFixed />
+        <FrontPageSecondaryLayout>
             {
                 applicationMutation.status === 'pending' &&
                 <div className="z-40 fixed inset-0 place-content-center grid bg-gray-400/60 h-screen">
@@ -331,6 +329,6 @@ export default function ApplyPage() {
                     Not ready? Go back home
                 </BackButton>
             </FormCard>
-        </div>
+        </FrontPageSecondaryLayout>
     );
 }

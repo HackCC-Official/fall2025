@@ -13,6 +13,7 @@ import { Logo } from "@/components/logo";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { AccountDTO, AccountRoles } from "@/features/account/types/account-dto";
 import { createAccount } from "@/features/account/api/account";
+import { FrontPagePrimaryLayout } from "@/layouts/front-page-layout";
 
 export default function RegisterPage() {
     const queryClient = useQueryClient()
@@ -66,8 +67,7 @@ export default function RegisterPage() {
     };
 
     return (
-        <div className="relative w-screen h-screen overflow-hidden">
-            <Homebg></Homebg>
+        <FrontPagePrimaryLayout>
                 <div className="flex justify-center items-center p-4 min-h-screen">
                     <div className="flex flex-col justify-center items-center w-full max-w-md">
                         <div className="flex flex-col justify-center items-center mx-auto">
@@ -168,7 +168,7 @@ export default function RegisterPage() {
                         </DarkCard>
                     </div>
                 </div>
-        </div>
+        </FrontPagePrimaryLayout>
     );
 }
 

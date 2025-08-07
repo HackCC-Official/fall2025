@@ -3,11 +3,11 @@ import Logo from "../../../public/Logo.webp"
 import HotAirBalloon from "../../../public/Hot Air Balloon.webp"
 import { Homebg } from "./components/homebg";
 import { ApplyButton } from "@/components/applybutton";
+import { FrontPagePrimaryLayout } from "@/layouts/front-page-layout";
 
-export default function home() {
+export default function Home() {
     return(
-        <div className="relative flex bg-bgpurple w-screen h-screen overflow-x-clip text-white">
-            <Homebg></Homebg>
+        <FrontPagePrimaryLayout className="flex bg-bgpurple overflow-x-clip text-white">
             <div className="flex flex-col justify-center items-center mx-auto">
                 <div className="relative flex">
                     <Image className="z-10 ml-[5%] w-auto h-40 sm:h-48 md:h-48 lg:h-48 2xl:h-56" src={Logo} alt="HackCC Logo " priority sizes="(min-width: 1540px) 290px, (min-width: 640px) 249px, 207px"></Image>
@@ -18,7 +18,7 @@ export default function home() {
                 </div>
                 <ApplyButton text="Apply to Attend" size="xl" directory="/apply"></ApplyButton>
             </div>
-        </div>
+        </FrontPagePrimaryLayout>
     )
 }
 
