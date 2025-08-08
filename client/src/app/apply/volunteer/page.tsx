@@ -84,7 +84,7 @@ export default function VolunteerApplicationPage() {
             </div>
             <FormCard className="relative p-4 md:p-16 font-mont">
                 <BackButton className="top-[-3rem] left-[1rem] absolute">
-                    Not ready? Go back home
+                    Go back home
                 </BackButton>
                 <h1 className="font-bagel md:text-[2rem] text-xl text-center">Thank you for Applying!</h1>
                 <p className="mt-2 md:mt-4 px-4 md:px-20 font-semibold text-muted-foreground text-xs md:text-sm text-center">
