@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import Image from "next/image";
 import { AlertCircle } from "lucide-react";
 import HotAirBalloon from "../../../public/Hot Air Balloon.webp";
@@ -16,6 +17,7 @@ import { createAccount } from "@/features/account/api/account";
 import { FrontPagePrimaryLayout } from "@/layouts/front-page-layout";
 
 export default function RegisterPage() {
+    const searchParams = useSearchParams();
     const queryClient = useQueryClient()
     const accountMutation = useMutation({
         mutationFn: (accountDTO: AccountDTO) => createAccount({ accountDTO }),
@@ -25,6 +27,7 @@ export default function RegisterPage() {
             })
             }
         })
+    
     const [registerDone, setRegisterDone] = useState(false)
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
@@ -48,12 +51,17 @@ export default function RegisterPage() {
         setIsLoading(true);
 
         try {
+            // Get the redirect_to query parameter
+            const redirectTo = searchParams?.get('redirect_to') || '';
+
             const data = await accountMutation.mutateAsync({
-                email, password,
+                email, 
+                password,
                 id: '',
                 firstName: "",
                 lastName: "",
-                roles: [AccountRoles.USER]
+                roles: [AccountRoles.USER],
+                redirectTo: redirectTo // Use the captured redirect_to parameter
             });
 
             console.log("Registered in successfully:", data);
