@@ -68,7 +68,6 @@ export function ApplicationResponseSkeleton() {
 }
 
 export function ApplicationResponse({ response } : { response: SubmissionRequestDTO }) {
-  console.log(response)
   const { isLoading, data } = useQuery({
     queryKey: ['question', response.id],
     queryFn: () => getSubmissionById(String(response.id))
@@ -115,7 +114,7 @@ export function ApplicationFile({ prompt, url }: { prompt: string, url: string }
       </CardHeader>
       <CardContent>
         <Document 
-          key={'/evan-resume-4.pdf'}
+          key={'resume'}
           file={{ url }}
           onLoadSuccess={onLoadSuccess}
           options={options}

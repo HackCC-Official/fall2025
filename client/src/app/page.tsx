@@ -11,18 +11,20 @@ import Collage from "@/features/collage/Collage";
 import Slider from "@/features/organizers/Slider";
 import Carousel from "@/features/events/carosoul";
 import Faq from "@/features/faq/Faq";
+
+// TODO-IF-ACTION: Rearrange VolunterJudgeContainer to above Footer
 export default function HomePage() {
   return (
     <div className="flex flex-wrap w-screen h-screen">
       <Navbar></Navbar>
       <Home></Home>
+      <VolunteerJudgeContainer></VolunteerJudgeContainer>
       <About></About>
       <Collage></Collage>
       <Faq></Faq>
       <Carousel></Carousel>
       <AttendeeContainer/>
       <Slider></Slider>
-      <VolunteerJudgeContainer></VolunteerJudgeContainer>
       <Footer></Footer>
     </div>
   )

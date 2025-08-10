@@ -43,6 +43,8 @@ export default function ApplicationDetailPage() {
       queryClient.invalidateQueries({ queryKey: ['application',router.query.id] })
     }
   })
+
+  console.log(data)
   
   return (
     <>

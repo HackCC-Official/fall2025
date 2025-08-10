@@ -89,7 +89,8 @@ export default function OrganizerApplicationPage() {
                 <h1 className="font-bagel md:text-[2rem] text-xl text-center">Thank you for Applying!</h1>
                 <p className="mt-2 md:mt-4 px-4 md:px-20 font-semibold text-muted-foreground text-xs md:text-sm text-center">
                     Help bring the hackathon to life! Organizers are responsible for planning and executing the event.
-                    Tell us a bit about yourself and what you’d like to contribute to the team. Our team will collect applications from from Mmm dd - Mmm dd, 2025.
+                    Tell us a bit about yourself and what you’d like to contribute to the team. Our team will collect applications
+                     from August 10th - October 10th, 2025.
                 </p>
                 <p className="mt-4 text-xs md:text-sm text-center italic">
                     All Fields Required
