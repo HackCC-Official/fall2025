@@ -175,26 +175,12 @@ export function Question({ question, defaultValue, control, rules } : QuestionPr
                       <EmailQuestion question={question} field={field} fieldState={fieldState} />
                   );
               case QuestionType.MULTIPLE:
-                  if (question.name === 'gender') {
-                      return (
-                          <MultipleQuestion
-                              keyPrefix='gender_'
+                    return <MultipleQuestion
+                              keyPrefix={question.name || ''}
                               question={question} 
                               field={field} 
                               fieldState={fieldState}
                           />
-                      );
-                  } else if (question.name === 'gradYear') {
-                      return (
-                          <MultipleQuestion
-                              keyPrefix='grad_year_'
-                              question={question} 
-                              field={field} 
-                              fieldState={fieldState}
-                          />
-                      )
-                  }
-                  return <div>Unsupported question type</div>;
               default:
                   return <div>Unsupported question type</div>;
           }

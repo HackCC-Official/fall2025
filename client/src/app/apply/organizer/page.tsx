@@ -14,8 +14,6 @@ import { Question } from "@/features/application/components/question-node";
 import { FrontPageSecondaryLayout } from "@/layouts/front-page-layout";
 import { useAuthentication } from "@/features/auth/hooks/use-authentication";
 import { useApplication } from "@/features/application/hook/use-application";
-import { createVolunteerApplication, getVolunteerApplicationByUserId } from "@/features/application/api/volunteer-application";
-import { getVolunteerQuestions } from "@/features/question/api/volunteer-question";
 import { createOrganizerApplication, getOrganizerApplicationByUserId } from "@/features/application/api/organizer-application";
 import { getOrganizerQuestions } from "@/features/question/api/organizer-question";
 
