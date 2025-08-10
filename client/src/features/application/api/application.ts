@@ -16,16 +16,6 @@ export async function getApplicationById(id: string) : Promise<ApplicationRespon
   ).data;
 }
 
-
-export async function getApplicationsStats() : Promise<ApplicationStatistics> {
-  return (
-    await applyClient.request({
-      method: "GET",
-      url: "applications/stats",
-    })
-  ).data
-}
-
 export async function acceptApplication(applicationId: string) : Promise<ApplicationResponseDTO> {
   return (
     await applyClient.request({

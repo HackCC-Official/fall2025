@@ -1,13 +1,23 @@
 import { applyClient } from "@/api/apply-client";
-import { ApplicationResponseDTO, ApplicationRequestDTO } from "../types/application";
+import { ApplicationResponseDTO, ApplicationRequestDTO, ApplicationStatistics } from "../types/application";
 import { ApplicationStatus } from "../types/status.enum";
 import { Document } from "./application";
+
+export async function getJudgeApplicationsStats() : Promise<ApplicationStatistics> {
+  return (
+    await applyClient.request({
+      method: "GET",
+      url: "applications/judge/stats",
+    })
+  ).data
+}
+
 
 export async function getJudgeApplications({ status } : { status: ApplicationStatus}) : Promise<ApplicationResponseDTO[]> {
   return (
     await applyClient.request({
       method: "GET",
-      url: "applications/judge",
+      url: "applications/judge/list",
       params: { status }
     })
   ).data
