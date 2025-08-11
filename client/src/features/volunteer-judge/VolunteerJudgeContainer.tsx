@@ -31,7 +31,7 @@ export default function VolunteerJudgeContainer() {
                         <Image src={BalloonCat} alt="ballon cat" className="mb-5 w-[75px] lg:w-[100px] h-auto pointer-events-none" sizes="(min-width: 1040px) 100px, 75px"></Image>
                         <h2 className={`font-bagel text-base sm:text-lg md:text-2xl 2xl:text-3xl text-white`}>Organizer</h2>
                         <h3 className={`font-mont text-sm sm:text-xs lg:text-sm 2xl:text-lg text-white h-[40px] max-w-[350px] mx-3`}>Want to get involved in putting the event together?</h3>
-                        <ApplyButton bypassDisable={true} text="Apply to organizer" size="md" to={'/apply/organizer'}></ApplyButton>
+                        <ApplyButton bypassDisable={true} text="Apply to organize" size="md" to={'/apply/organizer'}></ApplyButton>
                     </div>
                     <div className="relative flex flex-col justify-center items-center bg-glass backdrop-blur-md mx-auto my-auto mb-5 md:mb-0 px-5 rounded-3xl w-[90%] md:w-1/2 h-[350px] lg:h-[350px] text-center">
                         <Image src={PinkPawL} alt="paw" className="mb-5 w-[75px] lg:w-[100px] h-auto pointer-events-none" sizes="(min-width: 1040px) 100px, 75px"></Image>

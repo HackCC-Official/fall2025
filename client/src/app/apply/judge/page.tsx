@@ -141,7 +141,7 @@ export default function JudgeApplicationPage() {
                     </div>
                 </form>
                 <BackButton className="bottom-[-3rem] left-[1rem] absolute">
-                    Not ready? Go back home
+                    Go back home
                 </BackButton>
             </FormCard>
         </FrontPageSecondaryLayout>
