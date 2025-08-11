@@ -47,6 +47,32 @@ server {
     client_max_body_size 20M;
   }
 
+  location /apply-service/docs {
+    proxy_pass http://apply-service:3000/apply-service/docs;
+    proxy_set_header Host $host;  # Ensure proper forwarding
+    client_max_body_size 20M;
+  }
+
+  location /apply-service/ {
+    resolver 127.0.0.11 valid=30s;
+    proxy_pass http://apply-service:3000/apply-service/;
+    proxy_set_header Host $host;  # Ensures that the full URL is forwarded
+    client_max_body_size 20M;
+  }
+
+  location /qr-service/docs {
+    proxy_pass http://qr-service:3000/qr-service/docs;
+    proxy_set_header Host $host;  # Ensure proper forwarding
+    client_max_body_size 20M;
+  }
+
+  location /qr-service/ {
+    resolver 127.0.0.11 valid=30s;
+    proxy_pass http://qr-service:3000/qr-service/;
+    proxy_set_header Host $host;  # Ensures that the full URL is forwarded
+    client_max_body_size 20M;
+  }
+
   location /outreach-service/docs {
     proxy_pass http://outreach-service:3000/outreach-service/docs;
     proxy_set_header Host $host;  # Ensure proper forwarding
