@@ -4,7 +4,9 @@ import { Suspense } from "react";
 export default function ConfirmPage() {
   return (
     <Suspense>
-      <ConfirmContent />
+        <div className="overflow-y-hidden"> 
+          <ConfirmContent />
+        </div>
     </Suspense>
   )
 }

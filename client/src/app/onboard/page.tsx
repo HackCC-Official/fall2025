@@ -4,7 +4,9 @@ import { Suspense } from "react";
 export default function OnboardPage() {
   return (
     <Suspense>
-      <OnboardPageContent />
+      <div className="overflow-y-hidden">
+        <OnboardPageContent />
+      </div>
     </Suspense>
   )
 }

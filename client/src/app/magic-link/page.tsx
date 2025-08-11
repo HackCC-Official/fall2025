@@ -7,7 +7,9 @@ import { MagicLinkPageContent } from '@/features/account/components/magic-link-p
 export default function MagicLinkPage() {
   return (
     <Suspense>
-      <MagicLinkPageContent />
+      <div className="overflow-y-hidden">
+        <MagicLinkPageContent />
+      </div>
     </Suspense>
   )
 }

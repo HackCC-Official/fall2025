@@ -41,7 +41,7 @@ export default function VolunteerJudgeContainer() {
                     </div>
                     <div className="relative flex flex-col justify-center items-center bg-glass backdrop-blur-md mx-auto my-auto px-5 rounded-3xl w-[90%] md:w-1/2 h-[350px] lg:h-[350px] text-center">
                         <Image src={PinkPawR} alt="paw" className="mb-5 w-[125px] lg:w-[150px] h-auto pointer-events-none" sizes="(min-width: 1040px) 150px, 125px"></Image>
-                        <h2 className={`font-bagel text-base sm:text-lg md:text-2xl 2xl:text-3xl text-white`}>Become a Judge</h2>
+                        <h2 className={`font-bagel text-base sm:text-lg md:text-2xl 2xl:text-3xl text-white`}>Judge</h2>
                         <h3 className={`font-mont text-sm sm:text-xs lg:text-sm 2xl:text-lg text-white max-w-[350px] mx-3`}>Want to help determine the top projects from the event?</h3>
                         <ApplyButton bypassDisable={true} text="Apply to judge" size="md" to={'/apply/judge'}></ApplyButton>
                     </div> 

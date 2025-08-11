@@ -6,7 +6,9 @@ import { Suspense } from "react";
 export default function RegisterPage() {
     return (
         <Suspense>
-            <RegisterFormPage />
+            <div className="overflow-y-hidden">
+                <RegisterFormPage />
+            </div>
         </Suspense>
     )
 }

@@ -6,7 +6,9 @@ import { Suspense } from "react";
 export default function LoginPage() {
     return (
         <Suspense>
-            <LoginFormPage />
+            <div className="overflow-y-hidden"> 
+                <LoginFormPage />
+            </div>
         </Suspense>
     )
 }
