@@ -2,7 +2,7 @@ import { FileUploader } from "@/components/ui/file-uploader";
 import { QuestionResponseDto } from "@/features/question/types/question-response.dto";
 import { Control, Controller, ControllerFieldState, ControllerRenderProps, RegisterOptions } from "react-hook-form";
 import { ApplicationInput, ApplicationError, ApplicationTextarea, ApplicationCalendar } from "./application-input";
-import { ApplicationMultipleGroup, ApplicationMultipleItem } from "./application-multiple";
+import { ApplicationRadioGroup, ApplicationRadioItem } from "./application-radio";
 import { ApplicationSelect } from "./application-select";
 import { QuestionType } from "@/features/question/types/question-type.enum";
 
@@ -103,30 +103,84 @@ export function EmailQuestion({ question, field, fieldState: { error } } : Quest
   )
 }
 
-interface MultipleQuestionProps extends QuestionNodeComponentProps {
+interface RadioQuestionProps extends QuestionNodeComponentProps {
   keyPrefix: string;
 }
 
-export function MultipleQuestion({ keyPrefix, question, field, fieldState: { error } } : MultipleQuestionProps) {
+export function RadioQuestion({ keyPrefix, question, field, fieldState: { error } } : RadioQuestionProps) {
   return (
       <div>
-          <ApplicationMultipleGroup className="mt-4">
+          <ApplicationRadioGroup className="mt-4">
               {
                   question.possibleAnswers ?
                   question.possibleAnswers.map((p, i) => (
-                      <ApplicationMultipleItem key={keyPrefix + String(i)} id={keyPrefix + String(i)} {...field} value={p} />
+                      <ApplicationRadioItem key={keyPrefix + String(i)} id={keyPrefix + String(i)} {...field} value={p} />
                   ))
                   :
                   []
               }
-          </ApplicationMultipleGroup>
+          </ApplicationRadioGroup>
           {error && <ApplicationError>{error.message}</ApplicationError>}
       </div>
   )
 }
 
+interface MultipleQuestionProps extends QuestionNodeComponentProps {
+  keyPrefix: string;
+}
+
+export function MulitpleQuestion({ keyPrefix, question, field, fieldState: { error }} : MultipleQuestionProps) {
+  // Helper function to safely split the comma-separated string
+  const getCurrentValues = (value: string): string[] => {
+    if (!value || value.trim() === '') return [];
+    return value.split(',').filter(v => v.trim() !== '');
+  };
+  
+  const handleCheckboxChange = (value: string, checked: boolean) => {
+    const currentValues = getCurrentValues(field.value as string);
+    let newValues: string[];
+    
+    if (checked) {
+      // Add to array if checked and not already present
+      newValues = currentValues.includes(value) 
+        ? currentValues 
+        : [...currentValues, value];
+    } else {
+      // Remove from array if unchecked
+      newValues = currentValues.filter(v => v !== value);
+    }
+    
+    // Join and update field value
+    field.onChange(newValues.join(','));
+  };
+
+  return (
+    <div>
+      <ApplicationMultiple className="mt-4">
+        {
+          question.possibleAnswers ?
+          question.possibleAnswers.map((p, i ) => (
+            <ApplicationCheckboxItem 
+              id={keyPrefix + String(i)} 
+              key={i} 
+              value={p}
+              defaultChecked={getCurrentValues(field.value as string).includes(p)}
+              onChange={handleCheckboxChange}
+            />
+          ))
+          :
+          []
+        }
+      </ApplicationMultiple>
+      {error && <div className="mt-2 text-red-500 text-sm">{error.message}</div>}
+    </div>
+  )
+}
+
+
 import schools from '@/features/application/data/schools.json';
 import residences from '@/features/application/data/residences.json';
+import { ApplicationCheckboxItem, ApplicationMultiple } from "./application-multiple";
 
 export interface QuestionProps {
   question: QuestionResponseDto, 
@@ -174,12 +228,19 @@ export function Question({ question, defaultValue, control, rules } : QuestionPr
                   return (
                       <EmailQuestion question={question} field={field} fieldState={fieldState} />
                   );
-              case QuestionType.MULTIPLE:
-                    return <MultipleQuestion
+              case QuestionType.RADIO:
+                    return <RadioQuestion
                               keyPrefix={question.name || ''}
                               question={question} 
                               field={field} 
                               fieldState={fieldState}
+                            />
+              case QuestionType.MULTIPLE:
+                  return <MulitpleQuestion 
+                            keyPrefix={question.name || ''}
+                            question={question} 
+                            field={field} 
+                            fieldState={fieldState}
                           />
               default:
                   return <div>Unsupported question type</div>;

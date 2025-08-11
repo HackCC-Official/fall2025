@@ -1,41 +1,45 @@
 import { Label } from "@/components/ui/label";
-import { RadioGroup } from "@/components/ui/radio-group";
-import { RadioGroupItem } from "@/components/ui/radio-group";
+import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
 
-export function ApplicationMultipleGroup({ className, defaultValue, children } : { className?: string, defaultValue?: string, children: React.ReactNode }) {
+export function ApplicationMultiple({ className, defaultValues, children } : { 
+  className?: string, 
+  defaultValues?: string[], 
+  children: React.ReactNode 
+}) {
   return (
-    <RadioGroup className={cn([
+    <div className={cn([
       "space-y-4",
       className
-    ])} defaultValue={defaultValue}>
+    ])}>
       {children}
-    </RadioGroup>
+    </div>
   )
 }
 
-interface ApplicationMultipleItemProps {
-  value?: string | number | File | null | readonly string[]; // Add support for readonly string[]
+interface ApplicationCheckboxItemProps {
+  value?: string;
   id: string;
-  onChange?: (value: string) => void; // Add onChange prop
+  onChange?: (value: string, checked: boolean) => void;
+  defaultChecked?: boolean;
 }
 
-export function ApplicationMultipleItem({ value, id, onChange }: ApplicationMultipleItemProps) {
+export function ApplicationCheckboxItem({ value, id, onChange, defaultChecked }: ApplicationCheckboxItemProps) {
   const sanitizedValue = String(value);
-
-  const handleChange = () => {
+  
+  const handleChange = (checked: boolean) => {
     if (onChange) {
-      onChange(sanitizedValue); // Trigger onChange with the sanitized value
+      onChange(sanitizedValue, checked);
     }
   };
-
+  
   return (
     <div className="flex items-center space-x-4 font-mont">
-      <RadioGroupItem
-        className="accent-royalpurple"
-        value={sanitizedValue}
+      <Checkbox
+        className="disabled:opacity-50 shadow-none border border-[#E5E8EC] focus:outline-none focus-visible:ring-1 focus-visible:ring-ring w-4 md:w-6 h-5 md:h-6 aspect-square text-primary accent-royalpurple disabled:cursor-not-allowed"
         id={id}
-        onClick={handleChange} // Trigger onChange when the radio button is clicked
+        defaultChecked={defaultChecked}
+        onCheckedChange={handleChange}
       />
       <Label className="font-mont font-semibold text-black text-xs md:text-base" htmlFor={id}>
         {sanitizedValue}

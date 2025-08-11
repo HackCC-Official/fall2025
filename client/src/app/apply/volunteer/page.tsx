@@ -86,7 +86,7 @@ export default function VolunteerApplicationPage() {
                 <BackButton className="top-[-3rem] left-[1rem] absolute">
                     Go back home
                 </BackButton>
-                <h1 className="font-bagel md:text-[2rem] text-xl text-center">Thank you for Applying!</h1>
+                <h1 className="font-bagel md:text-[2rem] text-xl text-center">Thank you for your interest!</h1>
                 <p className="mt-2 md:mt-4 px-4 md:px-20 font-semibold text-muted-foreground text-xs md:text-sm text-center">
                     Join us as a volunteer for our upcoming hackathon. Volunteers play a key role in making the event run smoothly. We’d love to know a bit about you and why you’re interested in helping out. 
                     Our team will collect applications from from August 10th - October 10th, 2025.

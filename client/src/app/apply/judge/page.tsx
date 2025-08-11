@@ -42,6 +42,8 @@ export default function JudgeApplicationPage() {
         );
     }
 
+    console.log(applicationQuery.data)
+
     if (applicationQuery && applicationQuery.data && applicationQuery.data.status === ApplicationStatus.SUBMITTED) {
         return (
             <FrontPageSecondaryLayout>
@@ -56,7 +58,7 @@ export default function JudgeApplicationPage() {
                         <BackButton className="top-[-3rem] left-[1rem] absolute">
                             Go back home
                         </BackButton>
-                        <h1 className="font-bagel 2xl:text-[40px] xl:text-[36px] text-2xl">Thank you for Applying!</h1>
+                        <h1 className="font-bagel 2xl:text-[40px] xl:text-[36px] text-2xl">Thank you for your interest!</h1>
                         <div className="inline-block bg-white mt-8 md:mt-8 lg:mt-10 xl:mt-12 p-10 rounded-2xl text-[#696E75] text-sm md:text-base lg:text-lg xl:text-xl">
                             Application Status: <span className="block md:inline font-semibold text-[#4C27A0] text-base md:text-base lg:text-lg xl:text-xl">Under Review</span>
                         </div>
@@ -86,7 +88,7 @@ export default function JudgeApplicationPage() {
                 <BackButton className="top-[-3rem] left-[1rem] absolute">
                     Go back home
                 </BackButton>
-                <h1 className="font-bagel md:text-[2rem] text-xl text-center">Thank you for Applying!</h1>
+                <h1 className="font-bagel md:text-[2rem] text-xl text-center">Thank you for your interest!</h1>
                 <p className="mt-2 md:mt-4 px-4 md:px-20 font-semibold text-muted-foreground text-xs md:text-sm text-center">
                     Apply to be a judge and help us evaluate projects during the hackathon. We're looking for individuals with experience in tech, design, or entrepreneurship. Let us know about your background and what makes you a great fit to judge.
                      Our team will collect applications from from August 10th - October 10th, 2025.
