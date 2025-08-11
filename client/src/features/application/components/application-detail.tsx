@@ -86,9 +86,11 @@ export function ApplicationResponse({ response } : { response: SubmissionRequest
           <CardTitle>{data && data.question.prompt}</CardTitle>
         </CardHeader>
         <CardContent>
-          {response.answer.split(',').map((a, i) => (
-            <Badge key={i}>{a}</Badge>
-          ))}
+          <div className='space-x-2'>
+            {response.answer.split(',').map((a, i) => (
+              <Badge key={i}>{a}</Badge>
+            ))}
+          </div>
         </CardContent>
       </Card>
     )
