@@ -21,7 +21,7 @@ export default function About () {
                 <div className='z-10 my-0 sm:my-8 px-8 font-mont text-base sm:text-lg md:text-2xl 2xl:text-3xl sm:text-center'>
                     <p>A 250 person, 36 hour hackathon for <br className='hidden 2xl:hidden lg:inline' /> community college students across California.</p>
                 </div>
-                <div className='flex items-stretch gap-16'>
+                <div className='flex md:flex-row flex-col items-stretch gap-8 md:gap-16 mb-4 md:mb-0'>
                     <div className='w-full sm:w-1/2 font-mont'>
                         <DarkCard className='w-[325px] md:w-[325px] lg:w-[425px] h-full text-xs md:text-base 2xl:text-lg'>
                             <p>HackCC is California's statewide hackathon created for community college students, providing a platform to explore new technologies, build innovative projects, and colloborate with peers. <br /> <br /> Unlike university hackathons, HackCC bridges the gap for 250 students who often lack access to these opportunities, fostering an inclusive, hands-on environment where creativity and technology solve real-world problems.</p>
