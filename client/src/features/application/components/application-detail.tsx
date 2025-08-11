@@ -18,6 +18,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getSubmissionById } from "@/features/submission/api/submission";
 import { ApplicationStatus } from "../types/status.enum";
+import { QuestionType } from "@/features/question/types/question-type.enum";
 
 export function ApplicationHeader({ application } : { application: ApplicationResponseDTO }) {
   return (
@@ -77,7 +78,21 @@ export function ApplicationResponse({ response } : { response: SubmissionRequest
     return <ApplicationResponseSkeleton />
   }
 
-
+  if (data?.question.type === QuestionType.MULTIPLE)
+  {
+    return (
+      <Card className="shadow-none">
+        <CardHeader>
+          <CardTitle>{data && data.question.prompt}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {response.answer.split(',').map((a, i) => (
+            <Badge key={i}>{a}</Badge>
+          ))}
+        </CardContent>
+      </Card>
+    )
+  }
   return (
     <Card className="shadow-none">
       <CardHeader>
