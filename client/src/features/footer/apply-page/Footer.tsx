@@ -12,7 +12,7 @@ import FooterBg from '../../../../public/Footer Background.webp'
 //<Image className="" src={BackgroundDarkCloud} alt="Back CLoud"></Image>
 export default function Footer() {
     return (
-        <div className="relative bg-bgpurple -mt-[5px] w-full overflow-hidden">
+        <div className="relative bg-bgpurple w-full overflow-hidden">
             
             <Image sizes="(min-width: 1520px) 100vw, (min-width: 1040px) calc(29.57vw + 1057px), (min-width: 780px) 1281px, 907px" src={FooterBg} className='z-0 absolute w-screen max-w-full object-cover 2xl:object-fill pointer-events-none' alt="bg" fill />
             <div className="flex justify-center mx-auto py-[200px] md:py-[300px]">

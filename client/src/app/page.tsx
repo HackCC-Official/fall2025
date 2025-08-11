@@ -24,7 +24,7 @@ export default function HomePage() {
       <Faq></Faq>
       <Carousel></Carousel>
       <AttendeeContainer/>
-      <Slider></Slider>
+      {/* <Slider></Slider> */}
       <Footer></Footer>
     </div>
   )
