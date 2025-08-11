@@ -43,6 +43,8 @@ export default function ApplicationDetailPage() {
       queryClient.invalidateQueries({ queryKey: ['application',router.query.id] })
     }
   })
+
+  console.log(data)
   
   return (
     <>
@@ -60,7 +62,7 @@ export default function ApplicationDetailPage() {
               <ApplicationResponse key={s.questionId} response={s} />
             )
           }
-          <ApplicationFile prompt="Transcript" url={data.transcriptUrl} />
+          {data.transcriptUrl && <ApplicationFile prompt="Transcript" url={data.transcriptUrl} />}
           <ApplicationFile prompt="Resume" url={data.resumeUrl} />
           <div className={cn([
             "hidden justify-end gap-4",

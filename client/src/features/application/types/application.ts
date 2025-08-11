@@ -32,3 +32,10 @@ export interface ApplicationStatistics {
   accepted: number;
   denied: number;
 }
+
+export enum ApplicationType {
+  HACKATHON = 'HACKATHON',
+  ORGANIZER = 'ORGANIZER',
+  VOLUNTEER = 'VOLUNTEER',
+  JUDGE = 'JUDGE'
+}

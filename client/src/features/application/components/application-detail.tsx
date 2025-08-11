@@ -18,6 +18,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getSubmissionById } from "@/features/submission/api/submission";
 import { ApplicationStatus } from "../types/status.enum";
+import { QuestionType } from "@/features/question/types/question-type.enum";
 
 export function ApplicationHeader({ application } : { application: ApplicationResponseDTO }) {
   return (
@@ -68,7 +69,6 @@ export function ApplicationResponseSkeleton() {
 }
 
 export function ApplicationResponse({ response } : { response: SubmissionRequestDTO }) {
-  console.log(response)
   const { isLoading, data } = useQuery({
     queryKey: ['question', response.id],
     queryFn: () => getSubmissionById(String(response.id))
@@ -78,7 +78,23 @@ export function ApplicationResponse({ response } : { response: SubmissionRequest
     return <ApplicationResponseSkeleton />
   }
 
-
+  if (data?.question.type === QuestionType.MULTIPLE)
+  {
+    return (
+      <Card className="shadow-none">
+        <CardHeader>
+          <CardTitle>{data && data.question.prompt}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className='space-x-2'>
+            {response.answer.split(',').map((a, i) => (
+              <Badge key={i}>{a}</Badge>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    )
+  }
   return (
     <Card className="shadow-none">
       <CardHeader>
@@ -115,7 +131,7 @@ export function ApplicationFile({ prompt, url }: { prompt: string, url: string }
       </CardHeader>
       <CardContent>
         <Document 
-          key={'/evan-resume-4.pdf'}
+          key={'resume'}
           file={{ url }}
           onLoadSuccess={onLoadSuccess}
           options={options}

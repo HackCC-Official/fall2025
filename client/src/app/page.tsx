@@ -1,7 +1,7 @@
 //import Image from "next/image";
 //import QRScanner from "../components/qrscan"
 
-import FrontPage from "../features/home-page/home"
+import Home from "../features/home-page/home"
 import AttendeeContainer from "@/features/attendee/AttendeeContainer";
 import Footer from "@/features/footer/apply-page/Footer";
 import VolunteerJudgeContainer from "../features/volunteer-judge/VolunteerJudgeContainer";
@@ -11,20 +11,21 @@ import Collage from "@/features/collage/Collage";
 import Slider from "@/features/organizers/Slider";
 import Carousel from "@/features/events/carosoul";
 import Faq from "@/features/faq/Faq";
+
+// TODO-IF-ACTION: Rearrange VolunterJudgeContainer to above Footer
 export default function HomePage() {
   return (
     <div className="flex flex-wrap w-screen h-screen">
-      {/* <Navbar></Navbar> */}
-      {<FrontPage></FrontPage>}
-      {/* <About></About>
+      <Navbar></Navbar>
+      <Home></Home>
+      <VolunteerJudgeContainer></VolunteerJudgeContainer>
+      <About></About>
       <Collage></Collage>
       <Faq></Faq>
       <Carousel></Carousel>
       <AttendeeContainer/>
       <Slider></Slider>
-      <VolunteerJudgeContainer></VolunteerJudgeContainer>
-      <Footer></Footer> */}
-
+      <Footer></Footer>
     </div>
   )
 }

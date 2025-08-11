@@ -32,9 +32,9 @@ const EMAIL_TEMPLATES: ExtendedEmailTemplate[] = [
     {
         id: "cold-email",
         name: "Cold Outreach Email",
-        subject: "Meet the best students in X town this May",
+        subject: "Meet the best students in X town this November",
         content:
-            "Hello [recipient_name],\n\nI hope this email finds you well. My name is [sender_name], and I am a [sender_year_and_major] student at [sender_school]. I am also a sponsorship coordinator with HackCC, a student-led initiative providing California community college students with the opportunity to compete in weekend-long invention marathons. Taking place May 2nd-4th at [venue], we're expecting 250 hackers this year!\n\nI am reaching out to inquire about getting [company_name] on board as a sponsor for one (or more!) of our hackathons. I was wondering if [company_name] has any interest in sponsoring hackathons at this time?\n\nBest regards,",
+            "Hello [recipient_name],\n\nI hope this email finds you well. My name is [sender_name], and I am a [sender_year_and_major] student at [sender_school]. I am also a sponsorship coordinator with HackCC, a student-led initiative providing California community college students with the opportunity to compete in weekend-long invention marathons. Taking place November 8th-9th at [venue], we're expecting 250 hackers this year!\n\nI am reaching out to inquire about getting [company_name] on board as a sponsor for one (or more!) of our hackathons. I was wondering if [company_name] has any interest in sponsoring hackathons at this time?\n\nBest regards,",
         type: "employers",
     },
     {
@@ -47,7 +47,7 @@ const EMAIL_TEMPLATES: ExtendedEmailTemplate[] = [
     {
         id: "2",
         name: "Follow-Up Email",
-        subject: "Re: Meet the best students in X town this May",
+        subject: "Re: Meet the best students in X town this November",
         content: "Hi [Name],\n\nI hope this email finds you well...",
         type: "employers",
     },
@@ -113,14 +113,14 @@ export const EmailContentEditor: React.FC<EmailContentEditorProps> = ({
             if (template.name === "Sponsorship Confirmation") {
                 setEmailContent(
                     "Hello [recipient_name],\n\n" +
-                        "I hope this email finds you well. My name is [sender_name], and I am a [sender_year_and_major] student at [sender_school]. I am also a sponsorship coordinator with HackCC, a student-led initiative providing California community college students with the opportunity to compete in weekend-long invention marathons. Taking place May 2nd-4th at [venue], we're expecting 250 hackers this year!\n\n" +
+                        "I hope this email finds you well. My name is [sender_name], and I am a [sender_year_and_major] student at [sender_school]. I am also a sponsorship coordinator with HackCC, a student-led initiative providing California community college students with the opportunity to compete in weekend-long invention marathons. Taking place November 8th-9th at [venue], we're expecting 250 hackers this year!\n\n" +
                         "I am reaching out to inquire about getting [company_name] on board as a sponsor for one (or more!) of our hackathons. I was wondering if [company_name] has any interest in sponsoring hackathons at this time?\n\n" +
                         "Best regards,"
                 );
             } else if (template.name === "Follow-Up Email") {
                 setEmailContent(
                     "Hi [recipient_name],\n\n" +
-                        "I hope this email finds you well. My name is [sender_name], and I am a [sender_year_and_major] student at [sender_school]. I am also a sponsorship coordinator with HackCC, a student-led initiative providing California community college students with the opportunity to compete in weekend-long invention marathons. Taking place May 2nd-4th at [venue], we're expecting 250 hackers this year!\n\n" +
+                        "I hope this email finds you well. My name is [sender_name], and I am a [sender_year_and_major] student at [sender_school]. I am also a sponsorship coordinator with HackCC, a student-led initiative providing California community college students with the opportunity to compete in weekend-long invention marathons. Taking place November 8th-9th at [venue], we're expecting 250 hackers this year!\n\n" +
                         "I reached out to you on Tuesday about getting [company_name] on board as a sponsor for one (or more!) of our hackathons. I was wondering if [company_name] has any interest in sponsoring hackathons at this time?\n\n" +
                         "Best regards,"
                 );
@@ -154,8 +154,8 @@ export const EmailContentEditor: React.FC<EmailContentEditorProps> = ({
 
     return (
         <div className="space-y-6">
-            <div className="flex items-center justify-between">
-                <h3 className="text-lg font-medium">Email Content</h3>
+            <div className="flex justify-between items-center">
+                <h3 className="font-medium text-lg">Email Content</h3>
                 {recipientType === "employers" && (
                     <Select onValueChange={handleTemplateChange}>
                         <SelectTrigger className="w-[200px]">
@@ -203,9 +203,9 @@ export const EmailContentEditor: React.FC<EmailContentEditorProps> = ({
 
             {recipientType === "employers" && selectedTemplate && (
                 <div>
-                    <div className="flex items-center justify-between mb-2">
+                    <div className="flex justify-between items-center mb-2">
                         <Label htmlFor="content">Template Content</Label>
-                        <div className="text-xs text-muted-foreground">
+                        <div className="text-muted-foreground text-xs">
                             Available variables: [recipient_name],
                             [company_name], [sender_name],
                             [sender_year_and_major], [sender_school]
@@ -221,7 +221,7 @@ export const EmailContentEditor: React.FC<EmailContentEditorProps> = ({
                 </div>
             )}
 
-            <div className="text-sm text-muted-foreground">
+            <div className="text-muted-foreground text-sm">
                 Email will be sent to {selectedRecipients.size}{" "}
                 {selectedRecipients.size === 1 ? "recipient" : "recipients"}{" "}
                 using your outreach team member information.
@@ -247,7 +247,7 @@ export const EmailContentEditor: React.FC<EmailContentEditorProps> = ({
                     }
                 >
                     Preview Email
-                    <ChevronRight className="h-4 w-4 ml-1" />
+                    <ChevronRight className="ml-1 w-4 h-4" />
                 </Button>
             </div>
         </div>

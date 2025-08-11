@@ -61,7 +61,7 @@ export const ColdEmail = ({
     };
 
     const parsedSubject = parseContent(
-        subject || "Meet the best students in X town this May"
+        subject || "Meet the best students in X town this November"
     );
 
     return (
@@ -96,7 +96,7 @@ export const ColdEmail = ({
                                     initiative providing California community
                                     college students with the opportunity to
                                     compete in weekend-long invention marathons.
-                                    Taking place May 2nd-4th at {venue},
+                                    Taking place November 8th-9th at {venue},
                                     we&apos;re expecting 250 hackers this year!
                                 </Text>
 

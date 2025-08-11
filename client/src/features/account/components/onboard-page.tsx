@@ -14,6 +14,7 @@ import { DarkCard } from '@/components/dark-card';
 import { AuthInput } from "@/features/auth/components/auth-input";
 import { AuthCardSkeletonDefault } from '@/features/auth/components/auth-card-skeleton';
 import { AuthButton } from '@/features/auth/components/auth-btn';
+import { FrontPagePrimaryLayout } from '@/layouts/front-page-layout';
 
 interface TokenParams {
   access_token: string;
@@ -101,8 +102,7 @@ export function OnboardPageContent() {
   };
 
   return (
-    <div className="relative w-screen h-screen overflow-hidden">
-      <Homebg />
+    <FrontPagePrimaryLayout>
       <div className="flex flex-col justify-center items-center p-4 min-h-screen">
         <div className="relative flex">
             <Image className="z-10 ml-[5%] w-auto h-40 sm:h-48 md:h-48 lg:h-48 2xl:h-56" src={Logo} alt="HackCC Logo"></Image>
@@ -159,6 +159,6 @@ export function OnboardPageContent() {
                 )}
         </DarkCard>
       </div>
-    </div>
+    </FrontPagePrimaryLayout>
   );  
 }

@@ -1,4 +1,3 @@
-
 import Image, { StaticImageData } from "next/image"
 import quote from "../../../../public/Quote.webp"
 interface Props {
@@ -15,7 +14,9 @@ export default function AttendeeCard({imgPath, text, name}:Props) {
                 <h2 className="font-mont font-bold text-white text-xs md:text-base 2xl:text-lg text-center">{name}</h2>
             </div>
             <div className="px-4 sm:px-5">
-                <Image src={quote} alt="quote" className="w-[50px] h-auto" sizes="50px"></Image>
+                <div className="relative w-[50px] h-auto">
+                    <Image src={quote} alt="quote" className="w-[50px] h-auto [filter:brightness(0)_saturate(100%)_invert(90%)_sepia(12%)_saturate(1074%)_hue-rotate(231deg)_brightness(103%)_contrast(104%)]" sizes="50px"></Image>
+                </div>
                 <p className="mt-3 font-mont text-white text-xs md:text-base 2xl:text-lg break-normal">{text}</p>               
             </div>
         </div>

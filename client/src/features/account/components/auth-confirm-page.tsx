@@ -10,6 +10,7 @@ import HotAirBalloon from "../../../../public/Hot Air Balloon.webp"
 import { DarkCard } from "@/components/dark-card";
 import { AuthButton } from "@/features/auth/components/auth-btn";
 import { useEffect, useState } from "react";
+import { FrontPagePrimaryLayout } from "@/layouts/front-page-layout";
 
 export function ConfirmContent() {
   const [init, setInit] = useState(false);
@@ -61,16 +62,13 @@ export function ConfirmContent() {
 
   if (!init) {
     return (
-      <div className="relative w-screen h-screen overflow-hidden">
-        <Homebg />
-      </div>
+      <FrontPagePrimaryLayout />
     )
   }
   
 
   return (
-    <div className="relative w-screen h-screen overflow-hidden">
-      <Homebg />
+    <FrontPagePrimaryLayout>
       <div className="flex flex-col justify-center items-center p-4 min-h-screen">
         <div className="relative flex">
             <Image className="z-10 ml-[5%] w-auto h-40 sm:h-48 md:h-48 lg:h-48 2xl:h-56" src={Logo} alt="HackCC Logo"></Image>
@@ -91,6 +89,6 @@ export function ConfirmContent() {
           />
         </DarkCard>
       </div>
-    </div>
+    </FrontPagePrimaryLayout>
   )
 }
