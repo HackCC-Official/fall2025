@@ -35,6 +35,7 @@ export const Navbar = () => {
                 <a onClick={() => {
                             smoothScroll("scheduleTab");
                         }}>Schedule</a>
+                <a href="/sponsor">Sponsor us</a>
                 {/* <ApplyButton text="Apply" size="sm" directory="/apply"></ApplyButton> */}
             </div>
             <div className={`${isMenuOpen? 'sm:hidden flex' : 'hidden'} font-mont top-0 left-0 fixed w-screen h-screen bg-white z-50 flex-col justify-center align-center items-center text-center [&>*]:my-2 [&>*]:whitespace-nowrap overflow-hidden`}>
@@ -57,6 +58,8 @@ export const Navbar = () => {
                         smoothScroll("scheduleTab");
                         toggleMenu()
                         }}>Schedule</a>
+            <div className="bg-activeyellow w-16 h-[1px]"></div>
+            <a href="/sponsor">Sponsor us</a>
             <div className="bg-activeyellow w-16 h-[1px]"></div>
             <a target='_blank' href="https://discord.gg/yRShGV7Py4"><FontAwesomeIcon className="mr-2" icon={faDiscord} />  Discord Server</a>
             <div></div>

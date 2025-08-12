@@ -1,10 +1,11 @@
-import Logo from "../../../public/Logo.webp"
 import Image from "next/image"
+import { Logo } from "../logo"
 export default function Nav() {
     return(
-        <div className={`text-nowrap text-base 2xl:text-xl sm:flex  z-50 font-mont text-white fixed flex justify-between items-center p-3  w-screen l-0 t-0 [&>*]:mx-6 bg-hoverpurple [&>*]:cursor-pointer`}>
-            <a href="/"><Image src={Logo} className="w-16 min-w-16 h-full" alt="logo"></Image></a>
-            <h2 className="hover:text-black"><a href="/">Back to Main Page</a></h2>
+        <div className="z-[100]">
+            <div className={`text-base 2xl:text-xl flex justify-end z-50 font-mont text-white fixed p-3  w-screen l-0 t-0 [&>*]:mx-6 bg-glass backdrop-blur-md [&>*]:cursor-pointer`}>
+                <h2><a href="/">Back to Main Page</a></h2>
+            </div>
         </div>
     )
 }
