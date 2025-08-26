@@ -98,7 +98,7 @@ export default function SponsorPage() {
         <main>
             <FrontPageSecondaryLayout> 
                 <Nav></Nav>
-                <div className="py-20">
+                <div className="py-20 pb-30 lg:pb-30">
                     <div className="place-content-center grid">
                         <Logo className="lg:h-24 2xl:h-36" />
                     </div>
