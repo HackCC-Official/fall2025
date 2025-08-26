@@ -98,14 +98,14 @@ export default function SponsorPage() {
         <main>
             <FrontPageSecondaryLayout> 
                 <Nav></Nav>
-                <div className="py-20">
+                <div className="py-20 pb-30 lg:pb-30">
                     <div className="place-content-center grid">
                         <Logo className="lg:h-24 2xl:h-36" />
                     </div>
                     {/* Fixed container with proper flex setup */}
-                    <div className="flex md:flex-row flex-col items-stretch gap-y-8 md:gap-x-10 md:gap-y-0 mx-auto mt-8 w-[90%] lg:w-[80%] min-w-[200px] max-w-[1600px]">
-                        {/* First card - removed h-full, added flex-1 */}
-                        <DarkCard className="flex flex-col flex-1 md:basis-1/2">
+                    <div className="flex lg:flex-row flex-col items-stretch gap-y-8 lg:gap-x-10 lg:gap-y-0 mx-auto mt-8 md:px-20 lg:px-0 w-[90%] lg:w-[80%] min-w-[200px] max-w-[1600px]">
+                        {/* First card - removed h-full, added flex-1   */}
+                        <DarkCard className="flex flex-col flex-1 w-full sm:w-full md:w-full lg:w-full lg:basis-1/2">
                             <div className="flex-1 font-mont text-black">
                                 <h1 className="mb-6 font-bagel text-[#9947DC] text-2xl sm:text-3xl md:text-4xl 2xl:text-6xl">
                                     Sponsor Us
@@ -142,7 +142,7 @@ export default function SponsorPage() {
                         </DarkCard>
                         
                         {/* Second card - removed h-full, added flex-1 */}
-                        <DarkCard className="flex flex-col flex-1 text-white md:basis-1/2">
+                        <DarkCard className="flex flex-col flex-1 w-full sm:w-full md:w-full lg:w-full text-white lg:basis-1/2">
                             <Form {...form}>
                                 <div className="flex flex-col flex-1">
                                     <h2 className="font-bagel text-[#9947DC] text-2xl sm:text-3xl md:text-4xl 2xl:text-6xl">Sponsorship Form</h2>
