@@ -254,11 +254,11 @@ export const Interest = () => {
 
             {!isSubmitting && !success && !isDuplicate && (
                 <div className="relative animate-fadeIn">
-                    <p className="mb-3 font-semibold text-white/90">
+                    <p className="mb-3 font-semibold text-white/90 text-lg">
                         Sign up to receive updates{" "}
                         <br className="sm:hidden inline" /> about the event
                     </p>
-                    <div className="relative flex sm:flex-row flex-col items-center pt-3 md:pt-4">
+                    <div className="relative flex sm:flex-row flex-col items-center pt-2">
                         <div className="group relative w-full sm:w-2/3">
                             <div className="top-1/2 left-3 absolute text-navyblue -translate-y-1/2 transform">
                                 <FiMail />
