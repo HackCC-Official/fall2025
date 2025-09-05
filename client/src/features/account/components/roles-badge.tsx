@@ -40,13 +40,13 @@ export function RolesBadge({ roles }: { roles: AccountRoles[] }) {
         roles.map(role => {
           switch(role) {
             case AccountRoles.ADMIN:
-              return <AdminBadge />
+              return <AdminBadge key={role} />
             case AccountRoles.JUDGE:
-              return <JudgeBadge />
+              return <JudgeBadge key={role} />
             case AccountRoles.ORGANIZER:
-              return <OrganizerBadge />
+              return <OrganizerBadge key={role} />
             default:
-              return <UserBadge />
+              return <UserBadge key={role} />
           }
         })
       }

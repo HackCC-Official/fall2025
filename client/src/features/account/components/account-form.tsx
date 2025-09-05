@@ -51,7 +51,6 @@ export function AccountForm({ accountId, setOpen } : { accountId?: string, setOp
   useEffect(() => {
     if (accountId && accountQuery.data) {
       const account = accountQuery.data;
-      console.log(account)
       form.reset({
         id: '',
         email: account.email,
@@ -90,8 +89,6 @@ export function AccountForm({ accountId, setOpen } : { accountId?: string, setOp
     accountMutation.mutate(values)
     setOpen(false)
   }
-
-  console.log(form.getValues())
 
   return (
     <Form {...form} >
@@ -168,7 +165,6 @@ export function AccountForm({ accountId, setOpen } : { accountId?: string, setOp
                 variant='secondary'
                 options={roleOptions}
                 onValueChange={field.onChange}
-                defaultValue={field.value}
                 value={field.value}
                 placeholder="Select roles"
                 animation={2}

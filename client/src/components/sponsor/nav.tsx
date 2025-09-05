@@ -1,5 +1,6 @@
 import Image from "next/image"
 import { Logo } from "../logo"
+import { ReactElement } from "react";
 export default function Nav() {
     return(
         <div className="z-[100]">
