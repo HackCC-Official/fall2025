@@ -107,11 +107,6 @@ server {
       proxy_set_header X-Forwarded-Proto $scheme;
   }
 
-  upstream planka {
-      server localhost:1337;
-      keepalive 32;
-  }
-
   # Make sure to allow socket.io connections
   location ~* \.io {
       proxy_set_header Upgrade $http_upgrade;
@@ -130,7 +125,7 @@ server {
       proxy_connect_timeout 1d;
       proxy_send_timeout 1d;
       proxy_read_timeout 1d;
-      proxy_pass http://planka;
+      proxy_pass http://planka:1337;
   }
 
   location /board/ {
@@ -149,6 +144,13 @@ server {
       proxy_cache_use_stale timeout;
       proxy_cache_lock on;
       proxy_http_version 1.1;
-      proxy_pass http://planka;
+      proxy_pass http://planka:1337;
+
+      # Handle static assets
+      location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$ {
+          proxy_pass http://planka:1337;
+          proxy_hide_header Cache-Control;
+          add_header Cache-Control "public, max-age=31536000";
+      }
   }
 }
