@@ -28,6 +28,8 @@ services:
     build:
       context: .
       dockerfile: nginx.Dockerfile
+      args:
+        IS_PRODUCTION: ${IS_PRODUCTION}
     env_file:
       - .env
     ports:

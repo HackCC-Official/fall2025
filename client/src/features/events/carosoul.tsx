@@ -16,8 +16,7 @@ export default function carousel() {
             <div className="-right-[1190px] md:absolute">
                 <div className="flex md:flex-row flex-col items-center gap-[20px] w-full h-auto md:animate-marqueeEffect md:hover:pause" >
                     <Plane></Plane>
-                    <Card day="Day 1" text={day1Text}></Card>
-                    <Card day="Day 2" text={day2Text}></Card>           
+                    <Card day="Day 1" text={day1Text}></Card>         
                 </div>  
             </div>
         </div>
