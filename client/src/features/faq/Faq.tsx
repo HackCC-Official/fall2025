@@ -17,8 +17,8 @@ import cloud2 from "../../../public/Pink Cloud Cluster 3.webp"
 
 import stars from "../../../public/Cross Stars.webp"
 
-const text1 = "Applications are now open for all California community college students! If you're looking to take advantage of an exciting opportunity, be sure to submit your application between March 22nd and April 18th. This is the official application period, Don’t wait until the last minute—start and complete your application as soon as possible to avoid missing out!"
-const text2 = "A Hackathon is an event where developers, designers, and tons of other tech interested people can come together to build projects within a short timeframe (36 hours at HackCC), to discover new opportunities and win awesome prizes."
+const text1 = "Applications are now open for all California community college students! If you're looking to take advantage of an exciting opportunity, be sure to submit your application between October 13th and October 31st. This is the official application period, Don’t wait until the last minute—start and complete your application as soon as possible to avoid missing out!"
+const text2 = "A Hackathon is an event where developers, designers, and tons of other tech interested people can come together to build projects within a short timeframe (14 hours at HackCC), to discover new opportunities and win awesome prizes."
 const text3 = "Participants can form teams of up to 4 members. There will be a team formation event at the beginning of HackCC to ensure you find a team that works for you. We encourage you to reach out and make new connections all through out the event!"
 const text4 = "Attending HackCC is an incredible opportunity, and the best part is, it comes at absolutely no cost to you! It is completely free to both apply to and attend HackCC. This means you can focus on what really matters: gaining hands-on experience, collaborating with like-minded peers, and expanding your knowledge in a fun, innovative environment"
 

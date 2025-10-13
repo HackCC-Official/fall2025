@@ -19,9 +19,9 @@ export default function Home() {
                 </div>
                 <div className="z-10 flex flex-col mt-4 mb-8 text-center">
                     <p className="font-bagel text-2xl sm:text-3xl md:text-4xl">November 8th, 2025 </p> 
-                    <p className="mt-2 font- font-mont text-base sm:text-lg md:text-xl text-right">TBA, California</p>
+                    <p className="mt-2 font- font-mont text-base sm:text-lg md:text-xl text-right">MiraCosta, California</p>
                 </div>
-                <Interest></Interest>
+                {/* <Interest></Interest> */}
                 <ApplyButton text="Apply to Attend" size="xl" directory="/apply"></ApplyButton>
             </div>
         </FrontPagePrimaryLayout>
