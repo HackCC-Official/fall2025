@@ -18,11 +18,11 @@ export default function Home() {
                     <Image className="-right-12 sm:-right-32 md:-right-40 2xl:-right-80 bottom-1/4 z-10 absolute w-auto h-28 sm:h-32 md:h-36 2xl:h-40 animate-bobbing ease-linear" src={HotAirBalloon} alt="Hot Air Balloon" sizes="(min-width: 1540px) 116px, (min-width: 780px) 104px, (min-width: 640px) 93px, 81px" priority></Image>
                 </div>
                 <div className="z-10 flex flex-col mt-4 mb-8 text-center">
-                    <p className="font-bagel text-2xl sm:text-3xl md:text-4xl">November 8th - 9th, 2025 </p> 
-                    <p className="mt-2 font- font-mont text-base sm:text-lg md:text-xl text-right">Miracosta, California</p>
+                    <p className="font-bagel text-2xl sm:text-3xl md:text-4xl">November 8th, 2025 </p> 
+                    <p className="mt-2 font- font-mont text-base sm:text-lg md:text-xl text-right">MiraCosta, California</p>
                 </div>
-                <Interest></Interest>
-                {/* <ApplyButton text="Apply to Attend" size="xl" directory="/apply"></ApplyButton> */}
+                {/* <Interest></Interest> */}
+                <ApplyButton text="Apply to Attend" size="xl" directory="/apply"></ApplyButton>
             </div>
         </FrontPagePrimaryLayout>
     )

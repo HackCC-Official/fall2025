@@ -91,7 +91,7 @@ export default function JudgeApplicationPage() {
                 <h1 className="font-bagel md:text-[2rem] text-xl text-center">Thank you for your interest!</h1>
                 <p className="mt-2 md:mt-4 px-4 md:px-20 font-semibold text-muted-foreground text-xs md:text-sm text-center">
                     Apply to be a judge and help us evaluate projects during the hackathon. We're looking for individuals with experience in tech, design, or entrepreneurship. Let us know about your background and what makes you a great fit to judge.
-                     Our team will collect applications from from August 10th - October 10th, 2025.
+                     Our team will collect applications from from October 13th - October 31st, 2025.
                 </p>
                 <p className="mt-4 text-xs md:text-sm text-center italic">
                     All Fields Required

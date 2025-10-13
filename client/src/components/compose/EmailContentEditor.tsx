@@ -34,7 +34,7 @@ const EMAIL_TEMPLATES: ExtendedEmailTemplate[] = [
         name: "Cold Outreach Email",
         subject: "Meet the best students in X town this November",
         content:
-            "Hello [recipient_name],\n\nI hope this email finds you well. My name is [sender_name], and I am a [sender_year_and_major] student at [sender_school]. I am also a sponsorship coordinator with HackCC, a student-led initiative providing California community college students with the opportunity to compete in weekend-long invention marathons. Taking place November 8th-9th at [venue], we're expecting 250 hackers this year!\n\nI am reaching out to inquire about getting [company_name] on board as a sponsor for one (or more!) of our hackathons. I was wondering if [company_name] has any interest in sponsoring hackathons at this time?\n\nBest regards,",
+            "Hello [recipient_name],\n\nI hope this email finds you well. My name is [sender_name], and I am a [sender_year_and_major] student at [sender_school]. I am also a sponsorship coordinator with HackCC, a student-led initiative providing California community college students with the opportunity to compete in weekend-long invention marathons. Taking place November 8th at [venue], we're expecting 250 hackers this year!\n\nI am reaching out to inquire about getting [company_name] on board as a sponsor for one (or more!) of our hackathons. I was wondering if [company_name] has any interest in sponsoring hackathons at this time?\n\nBest regards,",
         type: "employers",
     },
     {
@@ -113,14 +113,14 @@ export const EmailContentEditor: React.FC<EmailContentEditorProps> = ({
             if (template.name === "Sponsorship Confirmation") {
                 setEmailContent(
                     "Hello [recipient_name],\n\n" +
-                        "I hope this email finds you well. My name is [sender_name], and I am a [sender_year_and_major] student at [sender_school]. I am also a sponsorship coordinator with HackCC, a student-led initiative providing California community college students with the opportunity to compete in weekend-long invention marathons. Taking place November 8th-9th at [venue], we're expecting 250 hackers this year!\n\n" +
+                        "I hope this email finds you well. My name is [sender_name], and I am a [sender_year_and_major] student at [sender_school]. I am also a sponsorship coordinator with HackCC, a student-led initiative providing California community college students with the opportunity to compete in weekend-long invention marathons. Taking place November 8th at [venue], we're expecting 250 hackers this year!\n\n" +
                         "I am reaching out to inquire about getting [company_name] on board as a sponsor for one (or more!) of our hackathons. I was wondering if [company_name] has any interest in sponsoring hackathons at this time?\n\n" +
                         "Best regards,"
                 );
             } else if (template.name === "Follow-Up Email") {
                 setEmailContent(
                     "Hi [recipient_name],\n\n" +
-                        "I hope this email finds you well. My name is [sender_name], and I am a [sender_year_and_major] student at [sender_school]. I am also a sponsorship coordinator with HackCC, a student-led initiative providing California community college students with the opportunity to compete in weekend-long invention marathons. Taking place November 8th-9th at [venue], we're expecting 250 hackers this year!\n\n" +
+                        "I hope this email finds you well. My name is [sender_name], and I am a [sender_year_and_major] student at [sender_school]. I am also a sponsorship coordinator with HackCC, a student-led initiative providing California community college students with the opportunity to compete in weekend-long invention marathons. Taking place November 8th at [venue], we're expecting 250 hackers this year!\n\n" +
                         "I reached out to you on Tuesday about getting [company_name] on board as a sponsor for one (or more!) of our hackathons. I was wondering if [company_name] has any interest in sponsoring hackathons at this time?\n\n" +
                         "Best regards,"
                 );
