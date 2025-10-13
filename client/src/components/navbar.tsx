@@ -36,7 +36,7 @@ export const Navbar = () => {
                             smoothScroll("scheduleTab");
                         }}>Schedule</a>
                 <a href="/sponsor">Sponsor us</a>
-                {/* <ApplyButton text="Apply" size="sm" directory="/apply"></ApplyButton> */}
+                <ApplyButton text="Apply" size="sm" directory="/apply"></ApplyButton>
             </div>
             <div className={`${isMenuOpen? 'sm:hidden flex' : 'hidden'} font-mont top-0 left-0 fixed w-screen h-screen bg-white z-50 flex-col justify-center align-center items-center text-center [&>*]:my-2 [&>*]:whitespace-nowrap overflow-hidden`}>
             <a onClick={() => {

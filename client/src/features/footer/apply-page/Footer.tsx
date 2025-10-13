@@ -22,10 +22,10 @@ export default function Footer() {
                         <h2 className={`text-white  text-[3rem] font-bagel  z-10 md:text-[4rem] lg:text-[5rem] xl:text-[6rem]`}>
                             Apply
                         </h2>
-                        <h3 className={`text-white text-[0.8rem] font-mont z-10 text-base sm:text-lg md:text-2xl 2xl:text-3xl`}>
+                        {/* <h3 className={`text-white text-[0.8rem] font-mont z-10 text-base sm:text-lg md:text-2xl 2xl:text-3xl`}>
                             Application will be live soon!
-                        </h3>
-                        {/* <ApplyButton text="Apply now" size="lg" directory="/apply"></ApplyButton> */}
+                        </h3> */}
+                        <ApplyButton text="Apply now" size="lg" directory="/apply"></ApplyButton>
                     </div>
                 </div>
             </div>

@@ -96,7 +96,7 @@ export const ColdEmail = ({
                                     initiative providing California community
                                     college students with the opportunity to
                                     compete in weekend-long invention marathons.
-                                    Taking place November 8th-9th at {venue},
+                                    Taking place November 8th at {venue},
                                     we&apos;re expecting 250 hackers this year!
                                 </Text>
 
