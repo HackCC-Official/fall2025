@@ -73,7 +73,7 @@ export default function AccountPage() {
       onClick: sendInvite
     },
     {
-      label: 'Delete accountp',
+      label: 'Delete account',
       icon: Trash,
       onClick: onDelete
     }
