@@ -118,7 +118,7 @@ export function LoginFormPage() {
                                     />
                                     <div className="flex justify-end items-center w-full">
                                         <a
-                                            href="#"
+                                            href="/forgot-password"
                                             className="text-white hover:text-royalpurple text-xs transition"
                                         >
                                             Forgot password?

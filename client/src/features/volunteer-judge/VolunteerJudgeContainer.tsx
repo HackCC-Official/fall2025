@@ -8,8 +8,8 @@ import BalloonCat from "../../../public/Balloon Cat.webp"
 import PinkPawL from "../../../public/Pink Paw.webp"
 import PinkPawR from "../../../public/Pink Paw 2.webp"
 
-import { ApplyButton } from "@/components/applybutton"
 import { Title } from "@/components/title"
+import { ApplyButton } from "@/components/navbar"
 
 
 export default function VolunteerJudgeContainer() {

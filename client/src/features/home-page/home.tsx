@@ -2,11 +2,11 @@ import Image from "next/image";
 import Logo from "../../../public/Logo.webp"
 import HotAirBalloon from "../../../public/Hot Air Balloon.webp"
 import { Homebg } from "./components/homebg";
-import { ApplyButton } from "@/components/applybutton";
 import { FrontPagePrimaryLayout } from "@/layouts/front-page-layout";
 import PinkPawL from "../../../public/Pink Paw.webp"
 import PinkPawR from "../../../public/Pink Paw 2.webp"
 import { Interest } from "./components/interest";
+import { ApplyButton } from "@/components/navbar";
 
 // TODO-IF-ACTION: make apply button active
 export default function Home() {
@@ -22,7 +22,7 @@ export default function Home() {
                     <p className="mt-2 font- font-mont text-base sm:text-lg md:text-xl text-right">MiraCosta, California</p>
                 </div>
                 {/* <Interest></Interest> */}
-                <ApplyButton text="Apply to Attend" size="xl" directory="/apply"></ApplyButton>
+                <ApplyButton text="Apply to Attend" size="xl"></ApplyButton>
             </div>
         </FrontPagePrimaryLayout>
     )
