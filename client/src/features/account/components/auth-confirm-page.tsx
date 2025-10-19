@@ -18,7 +18,7 @@ export function ConfirmContent() {
 
   useEffect(() => {
       const checkAuth = async () => {
-        const supabase = await getBrowserClient()
+          const supabase = await getBrowserClient()
           const { data: { session } } = await supabase.auth.getSession();
           if (session) {
             redirect('/')

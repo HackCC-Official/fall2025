@@ -22,7 +22,7 @@ export default function Home() {
                     <p className="mt-2 font- font-mont text-base sm:text-lg md:text-xl text-right">MiraCosta, California</p>
                 </div>
                 {/* <Interest></Interest> */}
-                <ApplyButton text="Apply to Attend" size="xl" directory="/apply"></ApplyButton>
+                <ApplyButton text="Apply to Attend" size="xl"></ApplyButton>
             </div>
         </FrontPagePrimaryLayout>
     )
