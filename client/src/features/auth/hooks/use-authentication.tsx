@@ -3,7 +3,7 @@ import { getBrowserClient } from "../lib/supabase-client";
 import { useRouter, usePathname } from "next/navigation";
 import { User } from "@supabase/supabase-js";
 
-export function useAuthentication({ redirect = true } : { redirect?: boolean }) {
+export function useAuthentication({ redirect = true } : { redirect?: boolean } = {}) {
   const [user, setUser] = useState<User | null>(null);
   const [authCheck, setAuthChecked] = useState(false);
   const router = useRouter();
