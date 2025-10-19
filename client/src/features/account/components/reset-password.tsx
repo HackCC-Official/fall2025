@@ -12,6 +12,7 @@ import { AuthButton } from "@/features/auth/components/auth-btn";
 import { useEffect, useState } from "react";
 import { FrontPagePrimaryLayout } from "@/layouts/front-page-layout";
 import { AuthInput } from "@/features/auth/components/auth-input";
+import { AlertCircle } from "lucide-react";
 
 export function ResetPasswordContent() {
   const searchParams = useSearchParams();
@@ -23,6 +24,7 @@ export function ResetPasswordContent() {
   const [loading, setLoading] = useState<boolean>(false)
   const [complete, setComplete] = useState<boolean>(false)
   const supabase = getBrowserClient()
+    const [error, setError] = useState('')
 
   useEffect(() => {
       const checkAuth = async () => {
@@ -66,9 +68,12 @@ export function ResetPasswordContent() {
     setLoading(true);
     const { data, error } = await supabase.auth.updateUser({ password: password })
     if (!error) {
-      setLoading(false);
       setComplete(true);
+    } else {
+
     }
+
+    setLoading(false);
   }
   
 
@@ -83,6 +88,12 @@ export function ResetPasswordContent() {
           <h1>Reset Password</h1>
         </div>
         <DarkCard>
+            {error && (
+              <div className="flex items-center gap-2 bg-red-50 mb-4 p-3 border border-red-200 rounded-md text-red-600 text-sm">
+                <AlertCircle className="w-4 h-4" />
+                <span>{error}</span>
+              </div>
+            )}
             {!complete &&
               <form className="space-y-4">
                 <p className="font-mont text-white">Enter your new password</p>
