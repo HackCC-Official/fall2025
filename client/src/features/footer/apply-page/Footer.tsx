@@ -4,9 +4,9 @@ import { Socials } from "../../../components/socials"
 import CatCloudCluster from "../../../../public/Cat Cloud.webp"
 import BalloonCat from "../../../../public/Balloon Cat.webp"
 import DarkCloud from "../../../../public/Violet Cloud Cluster 3.webp"
-import { ApplyButton } from "@/components/applybutton"
 import Logo from '../../../../public/Logo.webp'
 import FooterBg from '../../../../public/Footer Background.webp'
+import { ApplyButton } from "@/components/navbar"
 
 // TODO-IF-ACTION: Remove padding and make apply button active
 //<Image className="" src={BackgroundDarkCloud} alt="Back CLoud"></Image>
@@ -18,14 +18,10 @@ export default function Footer() {
             <div className="flex justify-center mx-auto py-[200px] md:py-[300px]">
                 <div className="relative flex">
                 <Image sizes="(min-width: 1040px) 288px, (min-width: 780px) 208px, 177px" className="-top-[100px] md:-top-[125px] lg:-top-[125px] -left-32 md:-left-48 z-10 absolute w-48 md:w-52 lg:w-72 h-auto animate-bobbing ease-linear pointer-events-none" src={BalloonCat} alt="cat" />
-                    <div className="z-50 flex flex-col items-center py-10 overflow-hidden" >
-                        <h2 className={`text-white  text-[3rem] font-bagel  z-10 md:text-[4rem] lg:text-[5rem] xl:text-[6rem]`}>
-                            Apply
-                        </h2>
-                        {/* <h3 className={`text-white text-[0.8rem] font-mont z-10 text-base sm:text-lg md:text-2xl 2xl:text-3xl`}>
-                            Application will be live soon!
-                        </h3> */}
-                        <ApplyButton text="Apply now" size="lg" directory="/apply"></ApplyButton>
+                    <div className="z-50 flex flex-col items-center overflow-hidden" >
+                        <h2 className={`text-white  text-[3rem] font-bagel  z-10 md:text-[4rem] lg:text-[5rem] xl:text-[6rem]`}>Apply</h2>
+                        <h3 className={`text-white text-[0.8rem] font-mont z-10 text-base sm:text-lg md:text-2xl 2xl:text-3xl`}>Apply to register as a participant</h3>
+                        <ApplyButton text="Apply now" size="lg" to="/apply"></ApplyButton>
                     </div>
                 </div>
             </div>
