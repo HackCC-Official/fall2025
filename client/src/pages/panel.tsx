@@ -3,6 +3,7 @@ import { useState } from 'react';
 
 import Apps from '../components/applications';
 import Judgeblocks from '../components/judgesystem';
+import JudgeEdit from '../components/judgeEdit';
 import EmailManager from '../components/emailmanage';
 import QRSys from '../components/qrscan';
 import Button5 from '../components/applications';
@@ -29,8 +30,8 @@ export default function AdminPanel() {
         <button onClick={() => loadComponent(QRSys)} className="w-full py-2 mb-2 bg-gray-300">
           QR Codes
         </button>
-        <button onClick={() => loadComponent(Button5)} className="w-full py-2 mb-2 bg-gray-300">
-          Button 5
+        <button onClick={() => loadComponent(JudgeEdit)} className="w-full py-2 mb-2 bg-gray-300">
+          Judge Editor
         </button>
         <button onClick={() => loadComponent(Button6)} className="w-full py-2 mb-2 bg-gray-300">
           Button 6

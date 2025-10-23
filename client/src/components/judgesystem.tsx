@@ -1,338 +1,562 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 
+type Assignment = { judge: string; team: string };
+type Round = { round: number; assignments: Assignment[]; time: string };
+type Row = {
+  id: number;
+  round: number;
+  judge: number;
+  team: number;
+  startTime: string;
+  private: boolean;
+};
 
 export default function EditJudgeBlocks() {
   const [numJudges, setNumJudges] = useState(0);
   const [numTeams, setNumTeams] = useState(0);
   const [schedule, setSchedule] = useState<{ team: string; judges: string[] }[]>([]);
   const [judgeToTeams, setJudgeToTeams] = useState<Record<string, string[]>>({});
-  const [rounds, setRounds] = useState<{ round: number; assignments: { judge: string; team: string }[] }[]>([]);
+  const [rounds, setRounds] = useState<Round[]>([]);
+  const [backendPayload, setBackendPayload] = useState<Omit<Row, "id">[]>([]);
   const [showSchedule, setShowSchedule] = useState(false);
- const [startTime, setStartTime] = useState("12:00 AM");
-  const [buttonState, setButtonState] = useState("initial");
+  const [startTime, setStartTime] = useState("12:00 PM");
+  const [buttonState, setButtonState] = useState<"initial" | "goLive" | "makePrivate">("initial");
+  const [isGenerated, setIsGenerated] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadingPercent, setLoadingPercent] = useState(0);
 
-  function generateSchedule() {
-    if (numJudges < 3) {
-      alert("Please ensure the number of judges is at least 3 to assign unique judges to each team.");
-      return;
-    }
-    if (numTeams === 0 || numJudges === 0) {
-      alert("Please enter valid numbers for judges and teams.");
-      return;
-    }
-
-    const judges = Array.from({ length: numJudges }, (_, i) => `Judge ${i + 1}`);
-    const teams = Array.from({ length: numTeams }, (_, i) => `Team ${i + 1}`);
-    const assignments: Record<string, number> = Object.fromEntries(judges.map((judge) => [judge, 0]));
-    const judgePairs: Record<string, number> = {};
-    const judgeTeamsMap: Record<string, string[]> = Object.fromEntries(judges.map((judge) => [judge, []]));
-    const teamJudgesMap: Record<string, string[]> = Object.fromEntries(teams.map((team) => [team, []]));
-
-    function getPairKey(judge1: string, judge2: string): string {
-      return [judge1, judge2].sort().join("-");
-    }
-
-    const generatedSchedule: { team: string; judges: string[] }[] = teams.map((team) => {
-      const assignedJudges: string[] = [];
-      const sortedJudges = judges.slice().sort((a, b) => assignments[a] - assignments[b]);
-
-      for (let i = 0; i < 3; i++) {
-        const availableJudges = sortedJudges.filter((judge) => !assignedJudges.includes(judge));
-
-        availableJudges.sort((a, b) => {
-          const aPairScore = assignedJudges.reduce((sum, assigned) => sum + (judgePairs[getPairKey(a, assigned)] || 0), 0);
-          const bPairScore = assignedJudges.reduce((sum, assigned) => sum + (judgePairs[getPairKey(b, assigned)] || 0), 0);
-          return aPairScore - bPairScore;
-        });
-
-        const judge = availableJudges[0];
-        assignedJudges.push(judge);
-        assignments[judge]++;
-
-        assignedJudges.forEach((otherJudge) => {
-          if (judge !== otherJudge) {
-            const pairKey = getPairKey(judge, otherJudge);
-            judgePairs[pairKey] = (judgePairs[pairKey] || 0) + 1;
-          }
-        });
-
-        judgeTeamsMap[judge].push(team);
-      }
-
-      teamJudgesMap[team] = assignedJudges;
-      return { team, judges: assignedJudges };
-    });
-
-    const rounds: { round: number; assignments: { judge: string; team: string }[] }[] = [];
-    let remainingTeams = [...teams];
-
-    while (remainingTeams.some((team) => teamJudgesMap[team].length > 0)) {
-      const currentRound: { judge: string; team: string }[] = [];
-      const usedJudges = new Set<string>();
-
-      remainingTeams.sort((a, b) => teamJudgesMap[b].length - teamJudgesMap[a].length);
-
-      for (const team of remainingTeams) {
-        const availableJudges = teamJudgesMap[team].filter((judge) => !usedJudges.has(judge));
-        if (availableJudges.length > 0) {
-          const judge = availableJudges[0];
-          currentRound.push({ judge, team });
-          usedJudges.add(judge);
-          teamJudgesMap[team] = teamJudgesMap[team].filter((j) => j !== judge);
-        }
-      }
-
-      remainingTeams = remainingTeams.filter((team) => teamJudgesMap[team].length > 0);
-      rounds.push({
-        round: rounds.length + 1,
-        assignments: currentRound.sort((a, b) => {
-          const judgeANumber = parseInt(a.judge.match(/\d+/)?.[0] || "0", 10);
-          const judgeBNumber = parseInt(b.judge.match(/\d+/)?.[0] || "0", 10);
-          return judgeANumber - judgeBNumber;
-        }),
-      });
-    }
-
-    setSchedule(generatedSchedule);
-    setJudgeToTeams(judgeTeamsMap);
-    setRounds(rounds);
-    setShowSchedule(true);
-    setButtonState("goLive");
-  }
-
-  function calculateRoundTimes(start : string) {
-    const [time, meridiem] = start.split(" ");
+  function parseTimeToMinutes(t: string) {
+    const [time, meridiem] = t.split(" ");
     let [hour, minute] = time.split(":").map(Number);
-  
-    // Adjust hour based on AM/PM
     if (meridiem === "PM" && hour !== 12) hour += 12;
     if (meridiem === "AM" && hour === 12) hour = 0;
-  
-    const roundDurations = rounds.map((round, index) => {
-      const formattedTime = `${String(hour % 12 || 12).padStart(2, "0")}:${String(minute).padStart(2, "0")} ${
-        hour < 12 ? "AM" : "PM"
-      }`;
-  
-      minute += 10; // Increment by 10 minutes for each round
-      if (minute >= 60) {
-        minute -= 60;
-        hour += 1;
-      }
-  
-      return {
-        ...round,
-        time: formattedTime,
-      };
-    });
-  
-    return roundDurations;
+    return hour * 60 + minute;
   }
   
-  function handleButtonClick() {
-    if (buttonState === "goLive") {
-      if (confirm("Are you sure?")) {
-        // Prepare data for the backend with private: false for each round
-        const updatedRounds = calculateRoundTimes(startTime); // Get rounds with updated times
-       console.log(updatedRounds);
-        const scheduleData = updatedRounds.map((round) => ({
-          round: round.round,
-          assignments: round.assignments,//JSON.stringify(round.assignments),
-          startTime: round.time,
-          private: false, // Schedule is public (live)
+  function formatMinutes(m: number) {
+    const hh24 = Math.floor(m / 60) % 24;
+    const mm = m % 60;
+    const hh12 = hh24 % 12 || 12;
+    const suffix = hh24 < 12 ? "AM" : "PM";
+    return `${String(hh12).padStart(2, "0")}:${String(mm).padStart(2, "0")} ${suffix}`;
+  }
+  
+  useEffect(() => {
+    const loadSchedule = async () => {
+      try {
+        setLoadingPercent(10);
+        const { data } = await axios.get<Row[]>("http://localhost:5000/rounds");
+        
+        if (!data.length) {
+          setLoadingPercent(100);
+          setTimeout(() => setIsLoading(false), 100);
+          return;
+        }
+        
+        setLoadingPercent(25);
+        const map = new Map<string, Row>();
+        data.forEach((row) => {
+          const key = `${row.round}|${row.judge}|${row.team}`;
+          if (!map.has(key)) map.set(key, row);
+        });
+        const unique = Array.from(map.values());
+        setLoadingPercent(40);
+        
+        const jm: Record<string, Set<string>> = {};
+        const tm: Record<string, Set<string>> = {};
+        unique.forEach(({ judge, team }) => {
+          const jKey = `Judge ${judge}`, tKey = `Team ${team}`;
+          (jm[jKey] ||= new Set()).add(tKey);
+          (tm[tKey] ||= new Set()).add(jKey);
+        });
+        setLoadingPercent(55);
+        
+        const sortedJudges = Object.keys(jm).sort((a, b) => +a.match(/\d+/)![0] - +b.match(/\d+/)![0]);
+        const sortedTeams = Object.keys(tm).sort((a, b) => +a.match(/\d+/)![0] - +b.match(/\d+/)![0]);
+        
+        const judgeCount = sortedJudges.length;
+        const teamCount = sortedTeams.length;
+        
+        const judgeToTeamsMap = Object.fromEntries(
+          sortedJudges.map((j) => [j, Array.from(jm[j]).sort((a, b) => +a.match(/\d+/)![0] - +b.match(/\d+/)![0])])
+        );
+        
+        const scheduleMap = sortedTeams.map((t) => ({
+          team: t,
+          judges: Array.from(tm[t]).sort((a, b) => +a.match(/\d+/)![0] - +b.match(/\d+/)![0]),
         }));
         
-        console.log("Data to be sent to the backend:", scheduleData, updatedRounds);
-  
-        axios
-          .post("http://localhost:5007/rounds", scheduleData)
-          .then((response) => {
-            console.log("Schedule saved successfully:", response.data);
-            setButtonState("makePrivate");
+        setLoadingPercent(70);
+        
+        const byR: Record<number, { assignments: Assignment[]; time: string }> = {};
+        unique.forEach(({ round, judge, team, startTime }) => {
+          byR[round] ||= { assignments: [], time: startTime };
+          byR[round].assignments.push({ judge: `Judge ${judge}`, team: `Team ${team}` });
+        });
+        
+        const loadedRounds: Round[] = Object.entries(byR)
+          .map(([r, info]) => {
+            const seen = new Set<string>();
+            const uniqAssignments = info.assignments.filter((a) => {
+              const k = `${a.judge}|${a.team}`;
+              if (seen.has(k)) return false;
+              seen.add(k);
+              return true;
+            });
+            return {
+              round: +r,
+              time: info.time,
+              assignments: uniqAssignments.sort((a, b) => +a.judge.match(/\d+/)![0] - +b.judge.match(/\d+/)![0]),
+            };
           })
-          .catch((error) => {
-            console.error("Error saving schedule:", error);
-            alert("Failed to save the schedule. Please try again.");
-          });
+          .sort((a, b) => a.round - b.round);
+        
+        setLoadingPercent(85);
+        
+        const payload = unique.map(({ id, ...rest }) => rest);
+        const publicCount = unique.filter((i) => i.private === false || i.private === 0).length;
+        const currentState = publicCount > 0 ? "makePrivate" : "goLive";
+        
+        setLoadingPercent(95);
+        
+        setNumJudges(judgeCount);
+        setNumTeams(teamCount);
+        setJudgeToTeams(judgeToTeamsMap);
+        setSchedule(scheduleMap);
+        setRounds(loadedRounds);
+        setBackendPayload(payload);
+        setButtonState(currentState);
+        setStartTime(loadedRounds[0].time);
+        setShowSchedule(true);
+        setIsGenerated(false);
+        setLoadingPercent(100);
+        setTimeout(() => setIsLoading(false), 200);
+        
+      } catch (err) {
+        console.error("GET /rounds failed:", err);
+        setLoadingPercent(100);
+        setTimeout(() => setIsLoading(false), 200);
       }
-    } else if (buttonState === "makePrivate") {
-      if (confirm("Are you sure you want to make the schedule private?")) {
-        // Prepare data for the backend with private: true for each round
-        const updatedRounds = calculateRoundTimes(startTime); // Recalculate or reuse rounds if needed
-        const scheduleData = updatedRounds.map((round) => ({
-          round: round.round,
-          assignments: round.assignments,//JSON.stringify(round.assignments),
-          startTime: round.time,
-          private: false, // Schedule is public (live)
-        }));
+    };
+    loadSchedule();
+  }, []);
   
-        console.log("Data to be sent to the backend (private):", scheduleData);
+  useEffect(() => {
+    if (!isGenerated) return;
+    const base = parseTimeToMinutes(startTime);
+    const updated = rounds.map((r) => ({ ...r, time: formatMinutes(base + (r.round - 1) * 10) }));
+    setRounds(updated);
+    const payload = updated.flatMap((r) =>
+      r.assignments.map((a) => ({
+        round: r.round,
+        judge: +a.judge.replace(/\D/g, ""),
+        team: +a.team.replace(/\D/g, ""),
+        startTime: r.time,
+        private: false,
+      }))
+    );
+    setBackendPayload(payload);
+  }, [startTime, isGenerated]);
   
-        axios
-          .post("http://localhost:5007/rounds", scheduleData)
-          .then((response) => {
-            console.log("Schedule successfully marked as private:", response.data);
-            // Clear local states after update
-            setSchedule([]);
-            setRounds([]);
-            setShowSchedule(false);
-            setButtonState("initial");
-          })
-          .catch((error) => {
-            console.error("Error making schedule private:", error);
-            alert("Failed to make the schedule private. Please try again.");
-          });
+  function generateSchedule() {
+    if (numJudges < 3) return alert("Need at least 3 judges.");
+    if (!numJudges || !numTeams) return alert("Enter valid numbers.");
+    
+    const judges = Array.from({ length: numJudges }, (_, i) => `Judge ${i + 1}`);
+    const teams = Array.from({ length: numTeams }, (_, i) => `Team ${i + 1}`);
+    
+    const loadCount = Object.fromEntries(judges.map((j) => [j, 0]));
+    const pairCount: Record<string, number> = {};
+    const jtMap: Record<string, string[]> = Object.fromEntries(judges.map((j) => [j, []]));
+    const tmMap: Record<string, string[]> = Object.fromEntries(teams.map((t) => [t, []]));
+    const pk = (a: string, b: string) => [a, b].sort().join("-");
+    
+    const scheduleMap = teams.map((team) => {
+      const assigned: string[] = [];
+      for (let i = 0; i < 3; i++) {
+        const pick = judges
+          .filter((j) => !assigned.includes(j))
+          .sort((a, b) => {
+            const d = loadCount[a] - loadCount[b];
+            if (d) return d;
+            const pa = assigned.reduce((s, o) => s + (pairCount[pk(a, o)] || 0), 0);
+            const pb = assigned.reduce((s, o) => s + (pairCount[pk(b, o)] || 0), 0);
+            return pa - pb;
+          })[0]!;
+        assigned.push(pick);
+        loadCount[pick]++;
+        assigned.forEach((o) => {
+          if (o !== pick) pairCount[pk(pick, o)] = (pairCount[pk(pick, o)] || 0) + 1;
+        });
+        jtMap[pick].push(team);
       }
+      tmMap[team] = assigned;
+      return { team, judges: assigned };
+    });
+    
+    let rem = [...teams];
+    const raw: { round: number; assignments: Assignment[] }[] = [];
+    const tmp = { ...tmMap };
+    
+    while (rem.length) {
+      const used = new Set<string>();
+      const thisRound: Assignment[] = [];
+      rem
+        .sort((a, b) => tmp[b].length - tmp[a].length)
+        .forEach((t) => {
+          const avail = tmp[t].filter((j) => !used.has(j));
+          if (avail.length) {
+            used.add(avail[0]);
+            thisRound.push({ judge: avail[0], team: t });
+            tmp[t] = tmp[t].filter((j) => j !== avail[0]);
+          }
+        });
+      raw.push({
+        round: raw.length + 1,
+        assignments: thisRound.sort((a, b) => +a.judge.match(/\d+/)![0] - +b.judge.match(/\d+/)![0]),
+      });
+      rem = rem.filter((t) => tmp[t].length);
+    }
+    
+    const base = parseTimeToMinutes(startTime);
+    const timed: Round[] = raw.map((r) => ({ ...r, time: formatMinutes(base + (r.round - 1) * 10) }));
+    const payload = timed.flatMap((r) =>
+      r.assignments.map((a) => ({
+        round: r.round,
+        judge: +a.judge.replace(/\D/g, ""),
+        team: +a.team.replace(/\D/g, ""),
+        startTime: r.time,
+        private: false,
+      }))
+    );
+    
+    setSchedule(scheduleMap);
+    setJudgeToTeams(jtMap);
+    setRounds(timed);
+    setBackendPayload(payload);
+    setShowSchedule(true);
+    setButtonState("goLive");
+    setIsGenerated(true);
+  }
+  async function handleButtonClick() {
+  if (buttonState === "goLive") {
+    if (!confirm("Go live with this schedule?")) return;
+    try {
+      console.log("🚀 Starting Go Live...");
+      
+      // Step 1: Delete ALL existing records (ignore 404 errors)
+      const { data: existing } = await axios.get<Row[]>("http://localhost:5000/rounds");
+      console.log(`🗑️ Deleting ${existing.length} existing records...`);
+      
+      for (const record of existing) {
+        try {
+          await axios.delete(`http://localhost:5000/rounds/${record.id}`);
+        } catch (err: any) {
+          // Ignore 404 errors (record already deleted)
+          if (err.response?.status !== 404) {
+            throw err; // Re-throw other errors
+          }
+        }
+      }
+      console.log("✅ All records deleted");
+      
+      // Step 2: Post new schedule
+      console.log("📝 Posting new schedule...");
+      const publicPayload = backendPayload.map(r => ({ 
+        ...r, 
+        private: false,
+        inUse: true
+      }));
+      
+      for (const record of publicPayload) {
+        await axios.post<Row>("http://localhost:5000/rounds/", record);
+      }
+      
+      console.log(`✅ Posted ${publicPayload.length} new records`);
+      
+      setBackendPayload(publicPayload);
+      setButtonState("makePrivate");
+      alert("Schedule is now live!");
+      
+    } catch (err) {
+      console.error("❌ Failed:", err);
+      alert("Failed to save schedule. Check console.");
+    }
+  } else {
+    // Make Private
+    if (!confirm("Make the schedule private?")) return;
+    try {
+      const { data: existing } = await axios.get<Row[]>("http://localhost:5000/rounds");
+      
+      for (const record of existing) {
+        try {
+          await axios.put(`http://localhost:5000/rounds/${record.id}`, {
+            ...record,
+            private: true,
+            inUse: false
+          });
+        } catch (err: any) {
+          if (err.response?.status !== 404) {
+            throw err;
+          }
+        }
+      }
+      
+      setButtonState("goLive");
+      alert("Schedule is now private!");
+    } catch (err) {
+      console.error("❌ Failed:", err);
+      alert("Failed to make private. Check console.");
     }
   }
+}
   
-
-
+  const btnText =
+    buttonState === "goLive" ? "🚀 Go Live" : buttonState === "makePrivate" ? "🔒 Make Private" : "Generate";
   
-
-  const buttonText =
+  const btnColor =
     buttonState === "goLive"
-      ? "Go Live"
+      ? "bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 shadow-lg shadow-green-500/50"
       : buttonState === "makePrivate"
-      ? "Make Private"
-      : "Generate Schedule First";
-
-  const buttonColor =
-    buttonState === "goLive"
-      ? "bg-green-500 hover:bg-green-600"
-      : buttonState === "makePrivate"
-      ? "bg-red-500 hover:bg-red-600"
+      ? "bg-gradient-to-r from-red-500 to-pink-600 hover:from-red-600 hover:to-pink-700 shadow-lg shadow-red-500/50"
       : "bg-gray-400 cursor-not-allowed";
 
-  const scheduledRounds = calculateRoundTimes(startTime);
-
   return (
-    <div className="bg-gray-100 p-6 rounded-lg shadow-md w-full max-w-5xl mx-auto mt-8">
-      <div className="flex justify-between mb-6">
-        <div className="flex flex-col w-1/3">
-          <label htmlFor="numJudges" className="mb-2 text-gray-700 font-medium">
-            Num of Judges
-          </label>
-          <input
-            id="numJudges"
-            type="number"
-            value={numJudges || ""}
-            onChange={(e) => setNumJudges(Number(e.target.value) || 0)}
-            className="px-4 py-2 border border-gray-300 rounded-md text-black focus:outline-none focus:ring-2 focus:ring-blue-400"
-            placeholder="Enter number"
-          />
+    <div className="relative bg-gradient-to-br from-slate-50 to-blue-50 p-8 rounded-2xl shadow-2xl w-full max-w-7xl mx-auto mt-8 min-h-[600px]">
+      {isLoading && (
+        <div className="absolute inset-0 bg-gradient-to-br from-indigo-900/95 via-purple-900/95 to-pink-900/95 backdrop-blur-sm flex items-center justify-center z-50 rounded-2xl">
+          <div className="text-center">
+            <div className="mb-8 relative">
+              <div className="inline-block w-20 h-20 border-4 border-white/30 border-t-white rounded-full animate-spin"></div>
+              <div className="absolute inset-0 inline-block w-20 h-20 border-4 border-pink-400/30 border-b-pink-400 rounded-full animate-spin" style={{ animationDirection: 'reverse', animationDuration: '0.8s' }}></div>
+            </div>
+            <h2 className="text-3xl font-bold text-white mb-4 animate-pulse">Loading Schedule...</h2>
+            <div className="w-80 bg-white/20 rounded-full h-3 mb-4 overflow-hidden">
+              <div
+                className="bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 h-3 rounded-full transition-all duration-300 ease-out"
+                style={{ width: `${loadingPercent}%` }}
+              ></div>
+            </div>
+            <p className="text-2xl font-bold bg-gradient-to-r from-blue-200 to-pink-200 bg-clip-text text-transparent">{loadingPercent}%</p>
+          </div>
         </div>
-        <div className="flex flex-col w-1/3">
-          <label htmlFor="numTeams" className="mb-2 text-gray-700 font-medium">
-            Num of Teams
-          </label>
-          <input
-            id="numTeams"
-            type="number"
-            value={numTeams || ""}
-            onChange={(e) => setNumTeams(Number(e.target.value) || 0)}
-            className="px-4 py-2 border border-gray-300 rounded-md text-black focus:outline-none focus:ring-2 focus:ring-blue-400"
-            placeholder="Enter number"
-          />
-        </div>
-        <button
-          onClick={generateSchedule}
-          className="px-6 py-2 bg-blue-500 text-white font-medium rounded-md hover:bg-blue-600 self-end"
-        >
-          Create
-        </button>
-      </div>
+      )}
 
-      {showSchedule && (
-        <>
-          <div className="flex flex-col mb-6">
-            <label htmlFor="startTime" className="mb-2 text-gray-700 font-medium">
-              Select Start Time
+      <div className={isLoading ? "opacity-30 pointer-events-none" : ""}>
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center justify-center w-14 h-14 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl mb-4 shadow-lg">
+            <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+          </div>
+          <h2 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent mb-2">
+            Schedule Generator
+          </h2>
+          <p className="text-gray-600 text-lg">Create and manage judging rounds</p>
+        </div>
+
+        <div className="bg-white/80 backdrop-blur-sm border border-blue-100 rounded-2xl p-6 shadow-xl mb-6">
+          <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center">
+            <svg className="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+            </svg>
+            Configuration
+          </h3>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+            <div className="group">
+              <label htmlFor="numJudges" className="block mb-2 text-sm font-semibold text-gray-700 flex items-center">
+                <svg className="w-4 h-4 mr-1.5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                </svg>
+                Number of Judges
+              </label>
+              <input
+                id="numJudges"
+                type="number"
+                value={numJudges || ""}
+                onChange={(e) => setNumJudges(+e.target.value || 0)}
+                className="w-full px-4 py-3 bg-white border-2 border-gray-200 rounded-xl text-gray-900 font-medium focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all duration-200 group-hover:border-blue-300"
+                placeholder="Enter number"
+              />
+            </div>
+
+            <div className="group">
+              <label htmlFor="numTeams" className="block mb-2 text-sm font-semibold text-gray-700 flex items-center">
+                <svg className="w-4 h-4 mr-1.5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+                Number of Teams
+              </label>
+              <input
+                id="numTeams"
+                type="number"
+                value={numTeams || ""}
+                onChange={(e) => setNumTeams(+e.target.value || 0)}
+                className="w-full px-4 py-3 bg-white border-2 border-gray-200 rounded-xl text-gray-900 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition-all duration-200 group-hover:border-indigo-300"
+                placeholder="Enter number"
+              />
+            </div>
+
+            <div className="flex items-end">
+              <button
+                onClick={generateSchedule}
+                className="w-full px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-bold rounded-xl hover:from-blue-600 hover:to-indigo-700 transform hover:scale-105 transition-all duration-200 shadow-lg shadow-blue-500/30 flex items-center justify-center"
+              >
+                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                </svg>
+                Generate Schedule
+              </button>
+            </div>
+          </div>
+
+          <div className="group">
+            <label htmlFor="startTime" className="block mb-2 text-sm font-semibold text-gray-700 flex items-center">
+              <svg className="w-4 h-4 mr-1.5 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              Start Time
             </label>
             <select
               id="startTime"
               value={startTime}
               onChange={(e) => setStartTime(e.target.value)}
-              className="px-4 py-2 border border-gray-300 rounded-md text-black focus:outline-none focus:ring-2 focus:ring-blue-400"
+              className="w-full px-4 py-3 bg-white border-2 border-gray-200 rounded-xl text-gray-900 font-medium focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent transition-all duration-200 cursor-pointer group-hover:border-purple-300"
             >
               {Array.from({ length: 48 }, (_, i) => {
                 const hour = Math.floor(i / 2) % 12 || 12;
                 const minute = i % 2 === 0 ? "00" : "30";
                 const period = i < 24 ? "AM" : "PM";
-                return (
-                  <option key={i} value={`${hour}:${minute} ${period}`}>
-                    {`${hour}:${minute} ${period}`}
-                  </option>
-                );
+                const v = `${hour}:${minute} ${period}`;
+                return <option key={i} value={v}>{v}</option>;
               })}
             </select>
           </div>
+        </div>
 
-          <div className="bg-white p-4 rounded-md shadow-md mb-6">
-            <h3 className="text-lg font-bold text-gray-700 mb-4">Teams and Their Judges</h3>
-            <div className="flex flex-row space-x-4 overflow-x-auto">
-              {schedule.map((entry, index) => (
-                <div key={index} className="bg-gray-200 p-4 rounded-md shadow min-w-[200px]">
-                  <h4 className="text-md font-bold text-gray-700">{entry.team}</h4>
-                  <ul className="list-disc pl-6 text-gray-600">
-                    {entry.judges.map((judge, judgeIndex) => (
-                      <li key={judgeIndex}>{judge}</li>
-                    ))}
-                  </ul>
+        {showSchedule && (
+          <div className="space-y-6">
+            <div className="bg-gradient-to-br from-pink-50 to-purple-50 border border-pink-200 rounded-2xl p-6 shadow-xl">
+              <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center">
+                <div className="w-8 h-8 bg-gradient-to-br from-pink-400 to-purple-500 rounded-lg flex items-center justify-center mr-3">
+                  <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                  </svg>
                 </div>
-              ))}
+                Teams and Their Judges
+              </h3>
+              <div className="flex space-x-4 overflow-x-auto pb-4">
+                {schedule.map((e, i) => (
+                  <div key={i} className="bg-white/80 backdrop-blur-sm border border-pink-200 p-5 rounded-xl shadow-md hover:shadow-lg transition-all duration-200 min-w-[220px] hover:scale-105">
+                    <h4 className="font-bold text-gray-800 mb-3 text-lg flex items-center">
+                      <span className="w-7 h-7 bg-gradient-to-br from-pink-400 to-purple-500 rounded-lg flex items-center justify-center text-white text-sm mr-2">{i + 1}</span>
+                      {e.team}
+                    </h4>
+                    <div className="space-y-2">
+                      {e.judges.map((j, idx) => (
+                        <div key={idx} className="flex items-center text-gray-700 bg-pink-50 px-3 py-2 rounded-lg">
+                          <div className="w-2 h-2 bg-pink-400 rounded-full mr-2"></div>
+                          <span className="text-sm font-medium">{j}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 rounded-2xl p-6 shadow-xl">
+              <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center">
+                <div className="w-8 h-8 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-lg flex items-center justify-center mr-3">
+                  <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                  </svg>
+                </div>
+                Judges and Their Teams
+              </h3>
+              <div className="flex space-x-4 overflow-x-auto pb-4">
+                {Object.entries(judgeToTeams).map(([j, teams], i) => (
+                  <div key={i} className="bg-white/80 backdrop-blur-sm border border-blue-200 p-5 rounded-xl shadow-md hover:shadow-lg transition-all duration-200 min-w-[220px] hover:scale-105">
+                    <h4 className="font-bold text-gray-800 mb-3 text-lg flex items-center">
+                      <span className="w-7 h-7 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-lg flex items-center justify-center text-white text-sm mr-2">{i + 1}</span>
+                      {j}
+                    </h4>
+                    <div className="space-y-2">
+                      {teams.map((t, idx) => (
+                        <div key={idx} className="flex items-center text-gray-700 bg-blue-50 px-3 py-2 rounded-lg">
+                          <div className="w-2 h-2 bg-blue-400 rounded-full mr-2"></div>
+                          <span className="text-sm font-medium">{t}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="bg-gradient-to-br from-emerald-50 to-teal-50 border border-emerald-200 rounded-2xl p-6 shadow-xl">
+              <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center">
+                <div className="w-8 h-8 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-lg flex items-center justify-center mr-3">
+                  <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                Rounds Schedule
+              </h3>
+              <div className="flex space-x-4 overflow-x-auto pb-4">
+                {rounds.map((r) => (
+                  <div key={r.round} className="min-w-[320px] bg-white/80 backdrop-blur-sm border border-emerald-200 p-5 rounded-xl shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105">
+                    <div className="flex items-center justify-between mb-4 pb-3 border-b border-emerald-200">
+                      <h4 className="font-bold text-gray-800 text-lg flex items-center">
+                        <span className="w-8 h-8 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-lg flex items-center justify-center text-white mr-2">{r.round}</span>
+                        Round {r.round}
+                      </h4>
+                      <div className="flex items-center text-emerald-700 bg-emerald-100 px-3 py-1 rounded-lg">
+                        <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span className="text-sm font-semibold">{r.time}</span>
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      {r.assignments.map((a, idx) => (
+                        <div key={idx} className="flex items-center justify-between bg-emerald-50 px-3 py-2 rounded-lg">
+                          <span className="text-blue-600 font-semibold text-sm">{a.judge}</span>
+                          <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                          </svg>
+                          <span className="text-purple-600 font-semibold text-sm">{a.team}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
+        )}
 
-          <div className="bg-white p-4 rounded-md shadow-md mb-6">
-            <h3 className="text-lg font-bold text-gray-700 mb-4">Judges and Their Teams</h3>
-            <div className="flex flex-row space-x-4 overflow-x-auto">
-              {Object.entries(judgeToTeams).map(([judge, teams], index) => (
-                <div key={index} className="bg-gray-200 p-4 rounded-md shadow min-w-[200px]">
-                  <h4 className="text-md font-bold text-gray-700">{judge}</h4>
-                  <ul className="list-disc pl-6 text-gray-600">
-                    {teams.map((team, teamIndex) => (
-                      <li key={teamIndex}>{team}</li>
-                    ))}
-                  </ul>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="bg-white p-4 rounded-md shadow-md">
-            <h3 className="text-lg font-bold text-gray-700 mb-4">Rounds Schedule</h3>
-            <div className="flex space-x-4 overflow-x-auto">
-              {scheduledRounds.map((round) => (
-                <div
-                  key={round.round}
-                  className="min-w-[300px] bg-gray-100 p-4 rounded-md shadow-md"
-                >
-                  <h4 className="text-md font-bold text-gray-700 mb-2">
-                    Round {round.round} - {round.time}
-                  </h4>
-                  <ul className="list-disc pl-6 text-gray-600">
-                    {round.assignments.map((assignment, index) => (
-                      <li key={index}>
-                        {assignment.judge} → {assignment.team}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              ))}
-            </div>
-          </div>
-        </>
-      )}
-
-      <div className="flex justify-center mt-6">
-        <button
-          onClick={handleButtonClick}
-          className={`px-6 py-2 text-white font-medium rounded-md ${buttonColor}`}
-          disabled={buttonState === "initial"}
-        >
-          {buttonText}
-        </button>
+        <div className="flex justify-center mt-8">
+          <button
+            onClick={handleButtonClick}
+            className={`px-10 py-4 text-white text-lg font-bold rounded-xl transform hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center ${btnColor}`}
+            disabled={buttonState === "initial"}
+          >
+            {buttonState === "goLive" && (
+              <svg className="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+              </svg>
+            )}
+            {buttonState === "makePrivate" && (
+              <svg className="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              </svg>
+            )}
+            {btnText}
+          </button>
+        </div>
       </div>
     </div>
   );
