@@ -63,7 +63,7 @@ export default function ApplicationDetailPage() {
             )
           }
           {data.transcriptUrl && <ApplicationFile prompt="Transcript" url={data.transcriptUrl} />}
-          <ApplicationFile prompt="Resume" url={data.resumeUrl} />
+          {data.resumeUrl && <ApplicationFile prompt="Resume" url={data.resumeUrl} />}
           <div className={cn([
             "hidden justify-end gap-4",
             data.status === ApplicationStatus.SUBMITTED && 'flex'

@@ -70,7 +70,7 @@ export function ResetPasswordContent() {
     if (!error) {
       setComplete(true);
     } else {
-
+      setError(error.message)
     }
 
     setLoading(false);
