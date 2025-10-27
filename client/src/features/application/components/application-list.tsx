@@ -30,20 +30,22 @@ export function ApplicationItem({ application } : { application: ApplicationResp
   const router = useRouter()
   return (
     <Card onClick={() => router.push('/panel/application/' + application.id)} className="group hover:bg-lightpurple transition-all cursor-pointer">
-      <CardHeader className="flex flex-row items-center gap-4 p-4">
+      <CardHeader className="flex lg:flex-row flex-col lg:items-centerg gap-1 lg:gap-4 p-4">
         <CardTitle className="flex items-center gap-4 font-semibold group-hover:text-white text-xl">
-          <div className="flex bg-purple-50 p-2 border border-lightpurple rounded-md text-lightpurple">
-            <CircleUser />
+          <div className="flex bg-purple-50 p-1 border border-lightpurple rounded-md text-lightpurple">
+            <CircleUser className="w-4 lg:w-8 h-4 lg:h-8" />
           </div>
-          <div>
-            {application.firstName} { application.lastName}
+          <div className="text-lg lg:text-xl">
+            {application.firstName} {application.lastName}
           </div>
         </CardTitle>
-        <Separator className="h-8" orientation="vertical" />
-        <CardDescription className="space-x-2">
-          <EmailBadge>{application.email}</EmailBadge>
-          <ContactBadge>{application.phoneNumber}</ContactBadge>
-          <SchoolBadge>{application.school}</SchoolBadge>
+        <Separator className="max-lg:hidden h-8" orientation="vertical" />
+        <CardDescription className="flex items-center">
+          <div className="flex flex-wrap gap-1 md:gap-2">
+            <EmailBadge>{application.email}</EmailBadge>
+            <ContactBadge>{application.phoneNumber}</ContactBadge>
+            <SchoolBadge>{application.school}</SchoolBadge>
+          </div>
         </CardDescription>
       </CardHeader>
     </Card>
