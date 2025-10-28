@@ -10,6 +10,7 @@ import { format } from "date-fns";
 import { InputSearch } from "@/components/input-search";
 import { EventSelect } from "@/features/attendance/components/event-select";
 import { MealTab } from "@/features/meal/components/meal-tab";
+import { PanelHeader } from "@/components/panel-header";
 
 export default function MealPage() {
   const [q, setQ] = useState('');
@@ -55,8 +56,8 @@ export default function MealPage() {
 
   return (
     <div>
-      <h1 className="font-bold text-3xl">Meal</h1>
-      <div className="flex justify-between items-center mt-8">
+      <PanelHeader>Meals</PanelHeader>
+      <div className="flex justify-between items-center gap-4 mt-8">
         <InputSearch q={q} setQ={debouncedSetQ} placeholder="Search accounts..." />
         <EventSelect events={eventQuery.data || []} value={event} onClick={setEvent} />
       </div>
