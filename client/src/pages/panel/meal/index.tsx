@@ -11,6 +11,7 @@ import { InputSearch } from "@/components/input-search";
 import { EventSelect } from "@/features/attendance/components/event-select";
 import { MealTab } from "@/features/meal/components/meal-tab";
 import { PanelHeader } from "@/components/panel-header";
+import { QrCodeScanner } from "@/components/qr-code-scanner";
 
 export default function MealPage() {
   const [q, setQ] = useState('');
@@ -56,12 +57,22 @@ export default function MealPage() {
 
   return (
     <div>
-      <PanelHeader>Meals</PanelHeader>
+      <div className="flex justify-between items-center">
+        <PanelHeader>Meals</PanelHeader>
+        <QrCodeScanner buttonLabel="Confirm Meal" />
+      </div>
       <div className="flex justify-between items-center gap-4 mt-8">
         <InputSearch q={q} setQ={debouncedSetQ} placeholder="Search accounts..." />
-        <EventSelect events={eventQuery.data || []} value={event} onClick={setEvent} />
+          <div className='md:hidden block w-full'>
+            <EventSelect events={eventQuery.data || []} value={event} onClick={setEvent} />
+          </div>
       </div>
-      <MealTab data={queriedData || []} isLoading={mealAccountQuery.isLoading} className="mt-4" setMealType={setMealType} />
+      <MealTab data={queriedData || []} isLoading={mealAccountQuery.isLoading} className="mt-4" setMealType={setMealType} 
+        EventSelect={
+          <div className='hidden md:block'>
+            <EventSelect events={eventQuery.data || []} value={event} onClick={setEvent} />
+          </div>
+        }/>
     </div>
   )
 }
