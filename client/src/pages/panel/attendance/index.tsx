@@ -54,7 +54,7 @@ export default function AttendancePage() {
   return (
     <div>
       <PanelHeader>Attendance</PanelHeader>
-      <div className="flex justify-between items-center mt-8">
+      <div className="flex justify-between items-center gap-4 mt-8">
         <InputSearch q={q} setQ={debouncedSetQ} placeholder="Search attendances..." />
         <EventSelect events={eventQuery.data || []} value={event} onClick={setEvent} />
       </div>
