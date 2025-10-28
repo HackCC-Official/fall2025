@@ -220,15 +220,15 @@ export default function Inbox({ className, emails = [] }: InboxProps) {
 
     return (
         <div className={cn("flex flex-col h-full min-h-0", className)}>
-            <div className="flex items-center justify-between px-4 py-2">
-                <h1 className="text-xl font-bold">Sent</h1>
+            <div className="flex justify-between items-center px-4 py-2">
+                <h1 className="font-bold text-lg lg:text-xl">Sent</h1>
                 <Button
                     variant="ghost"
                     size="sm"
                     onClick={() => setShowFilters(!showFilters)}
                     className={cn(hasActiveFilters && "text-primary")}
                 >
-                    <Filter className="h-4 w-4 mr-2" />
+                    <Filter className="mr-2 w-4 h-4" />
                     Filters
                     {hasActiveFilters && (
                         <Badge className="ml-2" variant="secondary">
@@ -245,9 +245,9 @@ export default function Inbox({ className, emails = [] }: InboxProps) {
 
             {showFilters && (
                 <div className="bg-muted/40 p-4 md:p-6">
-                    <div className="grid grid-cols-1 gap-6">
+                    <div className="gap-6 grid grid-cols-1">
                         <div className="space-y-3">
-                            <h3 className="text-sm font-medium">Status</h3>
+                            <h3 className="font-medium text-sm">Status</h3>
                             <div className="flex flex-wrap gap-4">
                                 {statusOptions.map((status) => (
                                     <div
@@ -275,16 +275,16 @@ export default function Inbox({ className, emails = [] }: InboxProps) {
                         </div>
 
                         <div className="space-y-3">
-                            <h3 className="text-sm font-medium">Date Range</h3>
+                            <h3 className="font-medium text-sm">Date Range</h3>
                             <div className="flex flex-wrap gap-4">
                                 <div className="w-full sm:w-auto">
                                     <Popover>
                                         <PopoverTrigger asChild>
                                             <Button
                                                 variant="outline"
-                                                className="w-full sm:w-[200px] justify-start text-left font-normal"
+                                                className="justify-start w-full sm:w-[200px] font-normal text-left"
                                             >
-                                                <Calendar className="mr-2 h-4 w-4 flex-shrink-0" />
+                                                <Calendar className="flex-shrink-0 mr-2 w-4 h-4" />
                                                 <span className="truncate">
                                                     {filters.dateRange.from
                                                         ? format(
@@ -297,7 +297,7 @@ export default function Inbox({ className, emails = [] }: InboxProps) {
                                             </Button>
                                         </PopoverTrigger>
                                         <PopoverContent
-                                            className="w-auto p-0"
+                                            className="p-0 w-auto"
                                             align="start"
                                         >
                                             <CalendarComponent
@@ -322,9 +322,9 @@ export default function Inbox({ className, emails = [] }: InboxProps) {
                                         <PopoverTrigger asChild>
                                             <Button
                                                 variant="outline"
-                                                className="w-full sm:w-[200px] justify-start text-left font-normal"
+                                                className="justify-start w-full sm:w-[200px] font-normal text-left"
                                             >
-                                                <Calendar className="mr-2 h-4 w-4 flex-shrink-0" />
+                                                <Calendar className="flex-shrink-0 mr-2 w-4 h-4" />
                                                 <span className="truncate">
                                                     {filters.dateRange.to
                                                         ? format(
@@ -337,7 +337,7 @@ export default function Inbox({ className, emails = [] }: InboxProps) {
                                             </Button>
                                         </PopoverTrigger>
                                         <PopoverContent
-                                            className="w-auto p-0"
+                                            className="p-0 w-auto"
                                             align="start"
                                         >
                                             <CalendarComponent
@@ -358,7 +358,7 @@ export default function Inbox({ className, emails = [] }: InboxProps) {
                         </div>
 
                         <div className="space-y-3">
-                            <h3 className="text-sm font-medium">
+                            <h3 className="font-medium text-sm">
                                 Other Filters
                             </h3>
                             <div className="flex items-center space-x-2">
@@ -394,10 +394,10 @@ export default function Inbox({ className, emails = [] }: InboxProps) {
                 </div>
             )}
 
-            <div className="bg-background/95 p-4 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+            <div className="bg-background/95 supports-[backdrop-filter]:bg-background/60 backdrop-blur p-4">
                 <form onSubmit={(e) => e.preventDefault()}>
                     <div className="relative">
-                        <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                        <Search className="top-2.5 left-2 absolute w-4 h-4 text-muted-foreground" />
                         <Input
                             placeholder="Search"
                             className="pl-8"
@@ -408,17 +408,17 @@ export default function Inbox({ className, emails = [] }: InboxProps) {
                             <Button
                                 size="sm"
                                 variant="ghost"
-                                className="absolute right-1 top-1 h-7 w-7 p-0"
+                                className="top-1 right-1 absolute p-0 w-7 h-7"
                                 onClick={() => setSearchQuery("")}
                             >
-                                <X className="h-4 w-4" />
+                                <X className="w-4 h-4" />
                             </Button>
                         )}
                     </div>
                 </form>
 
                 {hasActiveFilters && (
-                    <div className="flex items-center gap-2 mt-2 text-sm text-muted-foreground">
+                    <div className="flex items-center gap-2 mt-2 text-muted-foreground text-sm">
                         <span>Filters:</span>
                         {filters.status.map((status) => (
                             <Badge
@@ -430,10 +430,10 @@ export default function Inbox({ className, emails = [] }: InboxProps) {
                                 <Button
                                     size="sm"
                                     variant="ghost"
-                                    className="h-4 w-4 p-0 ml-1"
+                                    className="ml-1 p-0 w-4 h-4"
                                     onClick={() => toggleStatusFilter(status)}
                                 >
-                                    <X className="h-3 w-3" />
+                                    <X className="w-3 h-3" />
                                 </Button>
                             </Badge>
                         ))}
@@ -443,7 +443,7 @@ export default function Inbox({ className, emails = [] }: InboxProps) {
                                 <Button
                                     size="sm"
                                     variant="ghost"
-                                    className="h-4 w-4 p-0 ml-1"
+                                    className="ml-1 p-0 w-4 h-4"
                                     onClick={() =>
                                         updateFilter("dateRange", {
                                             from: undefined,
@@ -451,7 +451,7 @@ export default function Inbox({ className, emails = [] }: InboxProps) {
                                         })
                                     }
                                 >
-                                    <X className="h-3 w-3" />
+                                    <X className="w-3 h-3" />
                                 </Button>
                             </Badge>
                         )}
@@ -461,12 +461,12 @@ export default function Inbox({ className, emails = [] }: InboxProps) {
                                 <Button
                                     size="sm"
                                     variant="ghost"
-                                    className="h-4 w-4 p-0 ml-1"
+                                    className="ml-1 p-0 w-4 h-4"
                                     onClick={() =>
                                         updateFilter("showBatchOnly", false)
                                     }
                                 >
-                                    <X className="h-3 w-3" />
+                                    <X className="w-3 h-3" />
                                 </Button>
                             </Badge>
                         )}
@@ -483,12 +483,12 @@ export default function Inbox({ className, emails = [] }: InboxProps) {
             </div>
 
             {isLoading ? (
-                <div className="flex items-center justify-center h-full">
+                <div className="flex justify-center items-center h-full">
                     <p className="text-muted-foreground">Loading emails...</p>
                 </div>
             ) : displayedEmails.length === 0 ? (
-                <div className="flex items-center justify-center h-full">
-                    <p className="text-muted-foreground">
+                <div className="flex justify-center items-center h-full">
+                    <p className="text-muted-foreground text-sm lg:text-base">
                         {selectedAccount
                             ? hasActiveFilters
                                 ? "No emails match your filters"
@@ -503,7 +503,7 @@ export default function Inbox({ className, emails = [] }: InboxProps) {
                             <button
                                 key={item.id}
                                 className={cn(
-                                    "flex flex-col items-start gap-2 rounded-lg border p-3 text-left text-sm transition-all hover:bg-accent",
+                                    "flex flex-col items-start gap-2 hover:bg-accent p-3 border rounded-lg text-sm text-left transition-all",
                                     mail.selected === item.id && "bg-muted"
                                 )}
                                 onClick={() => {
@@ -522,17 +522,17 @@ export default function Inbox({ className, emails = [] }: InboxProps) {
                                     });
                                 }}
                             >
-                                <div className="flex w-full flex-col gap-1">
+                                <div className="flex flex-col gap-1 w-full">
                                     <div className="flex items-center">
                                         <div className="flex items-center gap-2">
                                             <div className="font-semibold">
-                                                <span className="text-muted-foreground mr-1">
+                                                <span className="mr-1 text-muted-foreground">
                                                     From:
                                                 </span>
                                                 {item.from || "Unknown sender"}
                                             </div>
                                             {!item.read && (
-                                                <span className="flex h-2 w-2 rounded-full bg-blue-600" />
+                                                <span className="flex bg-blue-600 rounded-full w-2 h-2" />
                                             )}
                                         </div>
                                         <div
@@ -552,7 +552,7 @@ export default function Inbox({ className, emails = [] }: InboxProps) {
                                         </div>
                                     </div>
                                     <div className="text-xs">
-                                        <span className="text-muted-foreground mr-1">
+                                        <span className="mr-1 text-muted-foreground">
                                             To:
                                         </span>
                                         {item.to && item.to.length > 0
@@ -560,11 +560,11 @@ export default function Inbox({ className, emails = [] }: InboxProps) {
                                               item.to[0].email
                                             : "Unknown recipient"}
                                     </div>
-                                    <div className="text-xs font-medium">
+                                    <div className="font-medium text-xs">
                                         {item.subject || "(No subject)"}
                                     </div>
                                 </div>
-                                <div className="line-clamp-2 text-xs text-muted-foreground">
+                                <div className="text-muted-foreground text-xs line-clamp-2">
                                     {item.html
                                         .replace(/<[^>]*>/g, "")
                                         .replace(/&nbsp;/g, " ")
@@ -589,7 +589,7 @@ export default function Inbox({ className, emails = [] }: InboxProps) {
                                     )}
                                 </div>
                                 {item.to && item.to.length > 1 && (
-                                    <div className="mt-2 text-xs text-muted-foreground">
+                                    <div className="mt-2 text-muted-foreground text-xs">
                                         <span className="font-medium">
                                             All recipients:{" "}
                                         </span>
