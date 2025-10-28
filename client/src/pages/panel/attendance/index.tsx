@@ -12,7 +12,7 @@ import { AttendanceStatus } from "@/features/attendance/types/attendance-dto"
 import { useDebounce } from 'use-debounce';
 import { PanelHeader } from "@/components/panel-header"
 import { Button } from "@/components/ui/button"
-import { QrCodeScanner } from "@/components/qr-code-scanner"
+import { QrCodeScanner, ScannerAction } from "@/components/qr-code-scanner"
 export default function AttendancePage() {
   const [q, setQ] = useState('');
   const [debouncedSetQ] = useDebounce(setQ, 500);
@@ -57,7 +57,7 @@ export default function AttendancePage() {
     <div>
       <div className="flex justify-between items-center">
         <PanelHeader>Attendance</PanelHeader>
-        <QrCodeScanner />
+        <QrCodeScanner type={ScannerAction.ATTENDANCE} currentEvent={event} />
       </div>
       <div className="flex justify-between items-center gap-4 mt-4">
         <InputSearch q={q} setQ={debouncedSetQ} placeholder="Search attendances..." />

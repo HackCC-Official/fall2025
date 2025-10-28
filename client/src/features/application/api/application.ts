@@ -7,7 +7,6 @@ export interface Document {
 }
 
 export async function getApplicationById(id: string) : Promise<ApplicationResponseDTO> {
-  // Make the POST request with formData
   return (
     await applyClient.request({
       method: "GET",
@@ -15,6 +14,17 @@ export async function getApplicationById(id: string) : Promise<ApplicationRespon
     })
   ).data;
 }
+
+
+export async function getApplicationByUserId(userId: string) : Promise<ApplicationResponseDTO> {
+  return (
+    await applyClient.request({
+      method: "GET",
+      url: "applications/user/" + userId,
+    })
+  ).data;
+}
+
 
 export async function acceptApplication(applicationId: string) : Promise<ApplicationResponseDTO> {
   return (

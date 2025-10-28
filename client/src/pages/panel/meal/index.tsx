@@ -11,7 +11,7 @@ import { InputSearch } from "@/components/input-search";
 import { EventSelect } from "@/features/attendance/components/event-select";
 import { MealTab } from "@/features/meal/components/meal-tab";
 import { PanelHeader } from "@/components/panel-header";
-import { QrCodeScanner } from "@/components/qr-code-scanner";
+import { QrCodeScanner, ScannerAction } from "@/components/qr-code-scanner";
 
 export default function MealPage() {
   const [q, setQ] = useState('');
@@ -59,7 +59,7 @@ export default function MealPage() {
     <div>
       <div className="flex justify-between items-center">
         <PanelHeader>Meals</PanelHeader>
-        <QrCodeScanner buttonLabel="Confirm Meal" />
+        <QrCodeScanner type={ScannerAction.MEAL} buttonLabel="Confirm Meal" currentEvent={event} />
       </div>
       <div className="flex justify-between items-center gap-4 mt-8">
         <InputSearch q={q} setQ={debouncedSetQ} placeholder="Search accounts..." />

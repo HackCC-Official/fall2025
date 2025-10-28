@@ -10,6 +10,13 @@ export async function getAttendances(query?: AttendanceQueryParamDTO): Promise<A
   })).data
 }
 
+export async function getAttendanceByEventIdAndAccountId(eventId: string, accountId: string): Promise<AttendanceDTO> {
+  return (await qrClient.request({
+    method: 'GET',
+    url: `attendances/event/${eventId}/account/${accountId}`,
+  })).data
+}
+
 export async function takeAttendance(attendanceDTO : { event_id: string, account_id: string }): Promise<AttendanceDTO[]> {
   return (await qrClient.request({
     method: 'POST',

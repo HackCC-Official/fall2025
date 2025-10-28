@@ -10,7 +10,7 @@ import { deleteWorkshop, getWorkshops } from "@/features/workshop/api/workshop"
 import { columns } from "@/features/workshop/components/workshop-table/columns"
 import { WorkshopForm } from "@/features/workshop/components/workshop-form"
 import { WorkshopResponseDTO } from "@/features/workshop/types/workshop"
-import { QrCodeScanner } from "@/components/qr-code-scanner"
+import { QrCodeScanner, ScannerAction } from "@/components/qr-code-scanner"
 import { PanelHeader } from "@/components/panel-header"
 
 export default function WorkshopPage() {
@@ -65,7 +65,6 @@ export default function WorkshopPage() {
     <div>
       <div className="flex justify-between items-center">
         <PanelHeader>Workshop</PanelHeader>
-        <QrCodeScanner />
       </div>
       <div className="flex space-x-4 my-4">
         <Sheet open={open} onOpenChange={setOpen} modal={false}>
