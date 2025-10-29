@@ -11,6 +11,7 @@ JudgesEditorPage.getLayout =(page: React.ReactElement) => page
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { judgeClient } from "@/api/judge-client";
+import { useAuthentication } from "@/features/auth/hooks/use-authentication";
 
 export function JudgesPortal() {
   const [rounds, setRounds] = useState<

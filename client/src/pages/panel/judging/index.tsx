@@ -11,6 +11,7 @@ JudgingPage.getLayout =(page: React.ReactElement) => <PanelLayout>{page}</PanelL
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { judgeClient } from "@/api/judge-client";
+import { accountClient } from "@/api/account-client";
 
 type Assignment = { judge: string; team: string };
 type Round = { round: number; assignments: Assignment[]; time: string };
@@ -334,7 +335,7 @@ export function JudgeSystem() {
       : "bg-gray-400 cursor-not-allowed";
 
   return (
-    <div className="relative bg-gradient-to-br from-slate-50 to-blue-50 shadow-2xl mx-auto mt-8 mb-16 p-8 rounded-2xl min-h-[600px]">
+    <div className="relative bg-gradient-to-br from-slate-50 to-blue-50 shadow-2xl mx-auto mt-8 mb-16 p-8 rounded-2xl max-w-6xl min-h-[600px]">
       {isLoading && (
         <div className="z-50 absolute inset-0 flex justify-center items-center bg-gradient-to-br from-indigo-900/95 via-purple-900/95 to-pink-900/95 backdrop-blur-sm rounded-2xl">
           <div className="text-center">
