@@ -123,7 +123,7 @@ export default function EditJudgeBlocks() {
         setNumJudges(judgeCount);
         setNumTeams(teamCount);
         setJudgeToTeams(judgeToTeamsMap);
-        setSchedule(scheduleMap);
+        setSchedule(scheduleMap); 
         setRounds(loadedRounds);
         setBackendPayload(payload);
         setButtonState(currentState);
