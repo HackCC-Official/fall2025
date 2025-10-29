@@ -1,6 +1,5 @@
 import { DeadlinesSection } from "./deadlines-section";
 import { HackPassSection } from "./hack-pass-section";
-import { RemindersSection } from "./reminders-section";
 import { RulesSection } from "./rules-section";
 import { ScheduleSection } from "./schedule-section";
 
@@ -13,8 +12,6 @@ export function MainContent({ activeSection } : { activeSection: string }) {
                 return <ScheduleSection />;
             case 'deadlines':
                 return <DeadlinesSection />;
-            case 'reminders':
-                return <RemindersSection />;
             case 'rules':
                 return <RulesSection />;
             default:

@@ -1,6 +1,7 @@
 export enum AccountRoles {
   ADMIN = 'ADMIN',
   ORGANIZER = 'ORGANIZER',
+  VOLUNTEER = 'VOLUNTEER',
   JUDGE = 'JUDGE',
   USER = 'USER'
 }

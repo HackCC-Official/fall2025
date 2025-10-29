@@ -11,7 +11,7 @@ import { InputSearch } from "@/components/input-search";
 import { EventSelect } from "@/features/attendance/components/event-select";
 import { MealTab } from "@/features/meal/components/meal-tab";
 import { PanelHeader } from "@/components/panel-header";
-import { QrCodeScanner, ScannerAction } from "@/components/qr-code-scanner";
+import { QrCodeScanner, ScannerAction } from "@/features/qr-code/components/qr-code-scanner"
 
 export default function MealPage() {
   const [q, setQ] = useState('');

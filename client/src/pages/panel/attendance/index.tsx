@@ -11,8 +11,7 @@ import { getAttendances } from "@/features/attendance/api/attendance"
 import { AttendanceStatus } from "@/features/attendance/types/attendance-dto"
 import { useDebounce } from 'use-debounce';
 import { PanelHeader } from "@/components/panel-header"
-import { Button } from "@/components/ui/button"
-import { QrCodeScanner, ScannerAction } from "@/components/qr-code-scanner"
+import { QrCodeScanner, ScannerAction } from "@/features/qr-code/components/qr-code-scanner"
 export default function AttendancePage() {
   const [q, setQ] = useState('');
   const [debouncedSetQ] = useDebounce(setQ, 500);
