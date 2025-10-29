@@ -1,3 +1,13 @@
+import PanelLayout from "../layout"
+
+export default function JudgesEditorPage() {
+  return (
+    <JudgeEditor />
+  )
+}
+
+JudgesEditorPage.getLayout =(page: React.ReactElement) => <PanelLayout>{page}</PanelLayout>
+
 // src/pages/manage-judges.tsx
 import { useState, useEffect } from "react";
 import { judgeClient } from "@/api/judge-client";
@@ -5,7 +15,7 @@ import { judgeClient } from "@/api/judge-client";
 type RoundRow = { judge: number };
 type Judge    = { id: number; judgeId: number; name: string; inUse: boolean };
 
-export default function ManageJudges() {
+export function JudgeEditor() {
   const [rounds, setRounds]   = useState<RoundRow[]>([]);
   const [judges, setJudges]   = useState<Judge[]>([]);
   const [newName, setNewName] = useState("");

@@ -21,6 +21,9 @@ import {
     Network,
     Theater,
     Ham,
+    EditIcon,
+    UserRoundPen,
+    Settings,
 } from "lucide-react";
 import { LogoIcon } from "../logo-icon";
 import { NavUser } from "./nav-user";
@@ -50,8 +53,18 @@ const items: MenuItem[] = [
         icon: Mail,
     },
     {
+        title: "Judges Editor",
+        url: "/panel/judges-editor",
+        icon: UserRoundPen,
+    },
+    {
         title: "Judging",
         url: "/panel/judging",
+        icon: Settings,
+    },
+    {
+        title: "Judge Portal",
+        url: "/panel/judges-portal",
         icon: Dices,
     },
     {

@@ -1,9 +1,18 @@
-import "./globals.css";
+import PanelLayout from "../layout"
+
+export default function JudgesEditorPage() {
+  return (
+    <JudgesPortal />
+  )
+}
+
+JudgesEditorPage.getLayout =(page: React.ReactElement) => page
+
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { judgeClient } from "@/api/judge-client";
 
-export default function JudgesPage() {
+export function JudgesPortal() {
   const [rounds, setRounds] = useState<
     { round: number; startTime: string; assignments: { judge: string; team: string }[] }[]
   >([]);
