@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
+import { judgeClient } from "@/api/judge-client";
 
 type Assignment = { judge: string; team: string };
 type Round = { round: number; assignments: Assignment[]; time: string };
@@ -46,7 +47,7 @@ export default function EditJudgeBlocks() {
     const loadSchedule = async () => {
       try {
         setLoadingPercent(10);
-        const { data } = await axios.get<Row[]>("http://localhost:5000/rounds");
+        const { data } = await judgeClient.get<Row[]>("/rounds");
         
         if (!data.length) {
           setLoadingPercent(100);
@@ -246,12 +247,12 @@ export default function EditJudgeBlocks() {
       console.log("🚀 Starting Go Live...");
       
       // Step 1: Delete ALL existing records (ignore 404 errors)
-      const { data: existing } = await axios.get<Row[]>("http://localhost:5000/rounds");
+      const { data: existing } = await judgeClient.get<Row[]>("/rounds");
       console.log(`🗑️ Deleting ${existing.length} existing records...`);
       
       for (const record of existing) {
         try {
-          await axios.delete(`http://localhost:5000/rounds/${record.id}`);
+          await judgeClient.delete(`rounds/${record.id}`);
         } catch (err: any) {
           // Ignore 404 errors (record already deleted)
           if (err.response?.status !== 404) {
@@ -270,7 +271,7 @@ export default function EditJudgeBlocks() {
       }));
       
       for (const record of publicPayload) {
-        await axios.post<Row>("http://localhost:5000/rounds/", record);
+        await judgeClient.post<Row>("/rounds/", record);
       }
       
       console.log(`✅ Posted ${publicPayload.length} new records`);
@@ -287,11 +288,11 @@ export default function EditJudgeBlocks() {
     // Make Private
     if (!confirm("Make the schedule private?")) return;
     try {
-      const { data: existing } = await axios.get<Row[]>("http://localhost:5000/rounds");
+      const { data: existing } = await judgeClient.get<Row[]>("/rounds");
       
       for (const record of existing) {
         try {
-          await axios.put(`http://localhost:5000/rounds/${record.id}`, {
+          await judgeClient.put(`/rounds/${record.id}`, {
             ...record,
             private: true,
             inUse: false
@@ -323,51 +324,51 @@ export default function EditJudgeBlocks() {
       : "bg-gray-400 cursor-not-allowed";
 
   return (
-    <div className="relative bg-gradient-to-br from-slate-50 to-blue-50 p-8 rounded-2xl shadow-2xl w-full max-w-7xl mx-auto mt-8 min-h-[600px]">
+    <div className="relative bg-gradient-to-br from-slate-50 to-blue-50 shadow-2xl mx-auto mt-8 p-8 rounded-2xl w-full max-w-7xl min-h-[600px]">
       {isLoading && (
-        <div className="absolute inset-0 bg-gradient-to-br from-indigo-900/95 via-purple-900/95 to-pink-900/95 backdrop-blur-sm flex items-center justify-center z-50 rounded-2xl">
+        <div className="z-50 absolute inset-0 flex justify-center items-center bg-gradient-to-br from-indigo-900/95 via-purple-900/95 to-pink-900/95 backdrop-blur-sm rounded-2xl">
           <div className="text-center">
-            <div className="mb-8 relative">
-              <div className="inline-block w-20 h-20 border-4 border-white/30 border-t-white rounded-full animate-spin"></div>
-              <div className="absolute inset-0 inline-block w-20 h-20 border-4 border-pink-400/30 border-b-pink-400 rounded-full animate-spin" style={{ animationDirection: 'reverse', animationDuration: '0.8s' }}></div>
+            <div className="relative mb-8">
+              <div className="inline-block border-4 border-white/30 border-t-white rounded-full w-20 h-20 animate-spin"></div>
+              <div className="inline-block absolute inset-0 border-4 border-pink-400/30 border-b-pink-400 rounded-full w-20 h-20 animate-spin" style={{ animationDirection: 'reverse', animationDuration: '0.8s' }}></div>
             </div>
-            <h2 className="text-3xl font-bold text-white mb-4 animate-pulse">Loading Schedule...</h2>
-            <div className="w-80 bg-white/20 rounded-full h-3 mb-4 overflow-hidden">
+            <h2 className="mb-4 font-bold text-white text-3xl animate-pulse">Loading Schedule...</h2>
+            <div className="bg-white/20 mb-4 rounded-full w-80 h-3 overflow-hidden">
               <div
-                className="bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 h-3 rounded-full transition-all duration-300 ease-out"
+                className="bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 rounded-full h-3 transition-all duration-300 ease-out"
                 style={{ width: `${loadingPercent}%` }}
               ></div>
             </div>
-            <p className="text-2xl font-bold bg-gradient-to-r from-blue-200 to-pink-200 bg-clip-text text-transparent">{loadingPercent}%</p>
+            <p className="bg-clip-text bg-gradient-to-r from-blue-200 to-pink-200 font-bold text-transparent text-2xl">{loadingPercent}%</p>
           </div>
         </div>
       )}
 
       <div className={isLoading ? "opacity-30 pointer-events-none" : ""}>
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-14 h-14 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl mb-4 shadow-lg">
+        <div className="mb-8 text-center">
+          <div className="inline-flex justify-center items-center bg-gradient-to-br from-blue-500 to-indigo-600 shadow-lg mb-4 rounded-xl w-14 h-14">
             <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
             </svg>
           </div>
-          <h2 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent mb-2">
+          <h2 className="bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600 mb-2 font-bold text-transparent text-4xl">
             Schedule Generator
           </h2>
           <p className="text-gray-600 text-lg">Create and manage judging rounds</p>
         </div>
 
-        <div className="bg-white/80 backdrop-blur-sm border border-blue-100 rounded-2xl p-6 shadow-xl mb-6">
-          <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center">
-            <svg className="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="bg-white/80 shadow-xl backdrop-blur-sm mb-6 p-6 border border-blue-100 rounded-2xl">
+          <h3 className="flex items-center mb-4 font-bold text-gray-800 text-xl">
+            <svg className="mr-2 w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
             </svg>
             Configuration
           </h3>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+          <div className="gap-6 grid grid-cols-1 md:grid-cols-3 mb-6">
             <div className="group">
-              <label htmlFor="numJudges" className="block mb-2 text-sm font-semibold text-gray-700 flex items-center">
-                <svg className="w-4 h-4 mr-1.5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <label htmlFor="numJudges" className="block flex items-center mb-2 font-semibold text-gray-700 text-sm">
+                <svg className="mr-1.5 w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                 </svg>
                 Number of Judges
@@ -377,14 +378,14 @@ export default function EditJudgeBlocks() {
                 type="number"
                 value={numJudges || ""}
                 onChange={(e) => setNumJudges(+e.target.value || 0)}
-                className="w-full px-4 py-3 bg-white border-2 border-gray-200 rounded-xl text-gray-900 font-medium focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all duration-200 group-hover:border-blue-300"
+                className="bg-white px-4 py-3 border-2 border-gray-200 focus:border-transparent group-hover:border-blue-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 w-full font-medium text-gray-900 transition-all duration-200"
                 placeholder="Enter number"
               />
             </div>
 
             <div className="group">
-              <label htmlFor="numTeams" className="block mb-2 text-sm font-semibold text-gray-700 flex items-center">
-                <svg className="w-4 h-4 mr-1.5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <label htmlFor="numTeams" className="block flex items-center mb-2 font-semibold text-gray-700 text-sm">
+                <svg className="mr-1.5 w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                 </svg>
                 Number of Teams
@@ -394,7 +395,7 @@ export default function EditJudgeBlocks() {
                 type="number"
                 value={numTeams || ""}
                 onChange={(e) => setNumTeams(+e.target.value || 0)}
-                className="w-full px-4 py-3 bg-white border-2 border-gray-200 rounded-xl text-gray-900 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition-all duration-200 group-hover:border-indigo-300"
+                className="bg-white px-4 py-3 border-2 border-gray-200 focus:border-transparent group-hover:border-indigo-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-400 w-full font-medium text-gray-900 transition-all duration-200"
                 placeholder="Enter number"
               />
             </div>
@@ -402,9 +403,9 @@ export default function EditJudgeBlocks() {
             <div className="flex items-end">
               <button
                 onClick={generateSchedule}
-                className="w-full px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-bold rounded-xl hover:from-blue-600 hover:to-indigo-700 transform hover:scale-105 transition-all duration-200 shadow-lg shadow-blue-500/30 flex items-center justify-center"
+                className="flex justify-center items-center bg-gradient-to-r from-blue-500 hover:from-blue-600 to-indigo-600 hover:to-indigo-700 shadow-blue-500/30 shadow-lg px-6 py-3 rounded-xl w-full font-bold text-white hover:scale-105 transition-all duration-200 transform"
               >
-                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="mr-2 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                 </svg>
                 Generate Schedule
@@ -413,8 +414,8 @@ export default function EditJudgeBlocks() {
           </div>
 
           <div className="group">
-            <label htmlFor="startTime" className="block mb-2 text-sm font-semibold text-gray-700 flex items-center">
-              <svg className="w-4 h-4 mr-1.5 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <label htmlFor="startTime" className="block flex items-center mb-2 font-semibold text-gray-700 text-sm">
+              <svg className="mr-1.5 w-4 h-4 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
               Start Time
@@ -423,7 +424,7 @@ export default function EditJudgeBlocks() {
               id="startTime"
               value={startTime}
               onChange={(e) => setStartTime(e.target.value)}
-              className="w-full px-4 py-3 bg-white border-2 border-gray-200 rounded-xl text-gray-900 font-medium focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent transition-all duration-200 cursor-pointer group-hover:border-purple-300"
+              className="bg-white px-4 py-3 border-2 border-gray-200 focus:border-transparent group-hover:border-purple-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-400 w-full font-medium text-gray-900 transition-all duration-200 cursor-pointer"
             >
               {Array.from({ length: 48 }, (_, i) => {
                 const hour = Math.floor(i / 2) % 12 || 12;
@@ -438,27 +439,27 @@ export default function EditJudgeBlocks() {
 
         {showSchedule && (
           <div className="space-y-6">
-            <div className="bg-gradient-to-br from-pink-50 to-purple-50 border border-pink-200 rounded-2xl p-6 shadow-xl">
-              <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center">
-                <div className="w-8 h-8 bg-gradient-to-br from-pink-400 to-purple-500 rounded-lg flex items-center justify-center mr-3">
+            <div className="bg-gradient-to-br from-pink-50 to-purple-50 shadow-xl p-6 border border-pink-200 rounded-2xl">
+              <h3 className="flex items-center mb-4 font-bold text-gray-800 text-xl">
+                <div className="flex justify-center items-center bg-gradient-to-br from-pink-400 to-purple-500 mr-3 rounded-lg w-8 h-8">
                   <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                   </svg>
                 </div>
                 Teams and Their Judges
               </h3>
-              <div className="flex space-x-4 overflow-x-auto pb-4">
+              <div className="flex space-x-4 pb-4 overflow-x-auto">
                 {schedule.map((e, i) => (
-                  <div key={i} className="bg-white/80 backdrop-blur-sm border border-pink-200 p-5 rounded-xl shadow-md hover:shadow-lg transition-all duration-200 min-w-[220px] hover:scale-105">
-                    <h4 className="font-bold text-gray-800 mb-3 text-lg flex items-center">
-                      <span className="w-7 h-7 bg-gradient-to-br from-pink-400 to-purple-500 rounded-lg flex items-center justify-center text-white text-sm mr-2">{i + 1}</span>
+                  <div key={i} className="bg-white/80 shadow-md hover:shadow-lg backdrop-blur-sm p-5 border border-pink-200 rounded-xl min-w-[220px] hover:scale-105 transition-all duration-200">
+                    <h4 className="flex items-center mb-3 font-bold text-gray-800 text-lg">
+                      <span className="flex justify-center items-center bg-gradient-to-br from-pink-400 to-purple-500 mr-2 rounded-lg w-7 h-7 text-white text-sm">{i + 1}</span>
                       {e.team}
                     </h4>
                     <div className="space-y-2">
                       {e.judges.map((j, idx) => (
-                        <div key={idx} className="flex items-center text-gray-700 bg-pink-50 px-3 py-2 rounded-lg">
-                          <div className="w-2 h-2 bg-pink-400 rounded-full mr-2"></div>
-                          <span className="text-sm font-medium">{j}</span>
+                        <div key={idx} className="flex items-center bg-pink-50 px-3 py-2 rounded-lg text-gray-700">
+                          <div className="bg-pink-400 mr-2 rounded-full w-2 h-2"></div>
+                          <span className="font-medium text-sm">{j}</span>
                         </div>
                       ))}
                     </div>
@@ -467,27 +468,27 @@ export default function EditJudgeBlocks() {
               </div>
             </div>
 
-            <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 rounded-2xl p-6 shadow-xl">
-              <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center">
-                <div className="w-8 h-8 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-lg flex items-center justify-center mr-3">
+            <div className="bg-gradient-to-br from-blue-50 to-indigo-50 shadow-xl p-6 border border-blue-200 rounded-2xl">
+              <h3 className="flex items-center mb-4 font-bold text-gray-800 text-xl">
+                <div className="flex justify-center items-center bg-gradient-to-br from-blue-400 to-indigo-500 mr-3 rounded-lg w-8 h-8">
                   <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                   </svg>
                 </div>
                 Judges and Their Teams
               </h3>
-              <div className="flex space-x-4 overflow-x-auto pb-4">
+              <div className="flex space-x-4 pb-4 overflow-x-auto">
                 {Object.entries(judgeToTeams).map(([j, teams], i) => (
-                  <div key={i} className="bg-white/80 backdrop-blur-sm border border-blue-200 p-5 rounded-xl shadow-md hover:shadow-lg transition-all duration-200 min-w-[220px] hover:scale-105">
-                    <h4 className="font-bold text-gray-800 mb-3 text-lg flex items-center">
-                      <span className="w-7 h-7 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-lg flex items-center justify-center text-white text-sm mr-2">{i + 1}</span>
+                  <div key={i} className="bg-white/80 shadow-md hover:shadow-lg backdrop-blur-sm p-5 border border-blue-200 rounded-xl min-w-[220px] hover:scale-105 transition-all duration-200">
+                    <h4 className="flex items-center mb-3 font-bold text-gray-800 text-lg">
+                      <span className="flex justify-center items-center bg-gradient-to-br from-blue-400 to-indigo-500 mr-2 rounded-lg w-7 h-7 text-white text-sm">{i + 1}</span>
                       {j}
                     </h4>
                     <div className="space-y-2">
                       {teams.map((t, idx) => (
-                        <div key={idx} className="flex items-center text-gray-700 bg-blue-50 px-3 py-2 rounded-lg">
-                          <div className="w-2 h-2 bg-blue-400 rounded-full mr-2"></div>
-                          <span className="text-sm font-medium">{t}</span>
+                        <div key={idx} className="flex items-center bg-blue-50 px-3 py-2 rounded-lg text-gray-700">
+                          <div className="bg-blue-400 mr-2 rounded-full w-2 h-2"></div>
+                          <span className="font-medium text-sm">{t}</span>
                         </div>
                       ))}
                     </div>
@@ -496,38 +497,38 @@ export default function EditJudgeBlocks() {
               </div>
             </div>
 
-            <div className="bg-gradient-to-br from-emerald-50 to-teal-50 border border-emerald-200 rounded-2xl p-6 shadow-xl">
-              <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center">
-                <div className="w-8 h-8 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-lg flex items-center justify-center mr-3">
+            <div className="bg-gradient-to-br from-emerald-50 to-teal-50 shadow-xl p-6 border border-emerald-200 rounded-2xl">
+              <h3 className="flex items-center mb-4 font-bold text-gray-800 text-xl">
+                <div className="flex justify-center items-center bg-gradient-to-br from-emerald-400 to-teal-500 mr-3 rounded-lg w-8 h-8">
                   <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                 </div>
                 Rounds Schedule
               </h3>
-              <div className="flex space-x-4 overflow-x-auto pb-4">
+              <div className="flex space-x-4 pb-4 overflow-x-auto">
                 {rounds.map((r) => (
-                  <div key={r.round} className="min-w-[320px] bg-white/80 backdrop-blur-sm border border-emerald-200 p-5 rounded-xl shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105">
-                    <div className="flex items-center justify-between mb-4 pb-3 border-b border-emerald-200">
-                      <h4 className="font-bold text-gray-800 text-lg flex items-center">
-                        <span className="w-8 h-8 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-lg flex items-center justify-center text-white mr-2">{r.round}</span>
+                  <div key={r.round} className="bg-white/80 shadow-md hover:shadow-lg backdrop-blur-sm p-5 border border-emerald-200 rounded-xl min-w-[320px] hover:scale-105 transition-all duration-200">
+                    <div className="flex justify-between items-center mb-4 pb-3 border-emerald-200 border-b">
+                      <h4 className="flex items-center font-bold text-gray-800 text-lg">
+                        <span className="flex justify-center items-center bg-gradient-to-br from-emerald-400 to-teal-500 mr-2 rounded-lg w-8 h-8 text-white">{r.round}</span>
                         Round {r.round}
                       </h4>
-                      <div className="flex items-center text-emerald-700 bg-emerald-100 px-3 py-1 rounded-lg">
-                        <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <div className="flex items-center bg-emerald-100 px-3 py-1 rounded-lg text-emerald-700">
+                        <svg className="mr-1.5 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
-                        <span className="text-sm font-semibold">{r.time}</span>
+                        <span className="font-semibold text-sm">{r.time}</span>
                       </div>
                     </div>
                     <div className="space-y-2">
                       {r.assignments.map((a, idx) => (
-                        <div key={idx} className="flex items-center justify-between bg-emerald-50 px-3 py-2 rounded-lg">
-                          <span className="text-blue-600 font-semibold text-sm">{a.judge}</span>
+                        <div key={idx} className="flex justify-between items-center bg-emerald-50 px-3 py-2 rounded-lg">
+                          <span className="font-semibold text-blue-600 text-sm">{a.judge}</span>
                           <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                           </svg>
-                          <span className="text-purple-600 font-semibold text-sm">{a.team}</span>
+                          <span className="font-semibold text-purple-600 text-sm">{a.team}</span>
                         </div>
                       ))}
                     </div>
@@ -545,12 +546,12 @@ export default function EditJudgeBlocks() {
             disabled={buttonState === "initial"}
           >
             {buttonState === "goLive" && (
-              <svg className="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="mr-2 w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
               </svg>
             )}
             {buttonState === "makePrivate" && (
-              <svg className="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="mr-2 w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
               </svg>
             )}

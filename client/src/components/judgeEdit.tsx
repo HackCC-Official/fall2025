@@ -1,6 +1,6 @@
 // src/pages/manage-judges.tsx
 import { useState, useEffect } from "react";
-import axios from "axios";
+import { judgeClient } from "@/api/judge-client";
 
 type RoundRow = { judge: number };
 type Judge    = { id: number; judgeId: number; name: string; inUse: boolean };
@@ -23,8 +23,8 @@ export default function ManageJudges() {
   async function fetchData() {
     try {
       const [ rRes, jRes ] = await Promise.all([
-        axios.get<RoundRow[]>("http://localhost:5000/rounds"),
-        axios.get<Judge[]   >("http://localhost:5000/judges?inUse=true"),
+        judgeClient.get<RoundRow[]>('rounds'),
+        judgeClient.get<Judge[]>('judges?inUse=true')
       ]);
       setRounds(rRes.data);
       setJudges(jRes.data);
@@ -42,7 +42,7 @@ export default function ManageJudges() {
     const next  = neededIds.find((id) => !used.has(id));
     if (!next) return;
     try {
-      await axios.post("http://localhost:5000/judges", {
+      await judgeClient.post("/judges", {
         judgeId: next,
         name: newName.trim(),
         inUse: true,
@@ -58,7 +58,7 @@ export default function ManageJudges() {
   async function handleRemove(j: Judge) {
     if (!confirm(`Remove judge "${j.name}"?`)) return;
     try {
-      await axios.delete(`http://localhost:5000/judges/${j.id}`);
+      await judgeClient.delete(`/judges/${j.id}`);
       fetchData();
     } catch {
       alert("Failed to remove judge.");
@@ -71,7 +71,7 @@ export default function ManageJudges() {
     try {
       await Promise.all(
         configured.map((j) =>
-          axios.delete(`http://localhost:5000/judges/${j.id}`)
+          judgeClient.delete(`/judges/${j.id}`)
         )
       );
       fetchData();
@@ -84,7 +84,7 @@ export default function ManageJudges() {
   async function handleSave(j: Judge) {
     if (!editingName.trim()) return;
     try {
-      await axios.put(`http://localhost:5000/judges/${j.id}`, {
+      await judgeClient.put(`/judges/${j.id}`, {
         name: editingName.trim(),
         inUse: j.inUse,
       });
@@ -96,9 +96,9 @@ export default function ManageJudges() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 py-10">
-      <div className="max-w-4xl mx-auto p-6 space-y-8">
-        <h1 className="text-4xl font-bold text-gray-800 flex justify-between items-center">
+    <div className="bg-gray-100 py-10 min-h-screen">
+      <div className="space-y-8 mx-auto p-6 max-w-4xl">
+        <h1 className="flex justify-between items-center font-bold text-gray-800 text-4xl">
           Manage Judges
           <button
             onClick={handleRemoveAll}
@@ -114,16 +114,16 @@ export default function ManageJudges() {
         </h1>
 
         {/* Summary & Progress */}
-        <div className="bg-white p-5 rounded-lg shadow flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
+        <div className="flex sm:flex-row flex-col sm:justify-between sm:items-center space-y-4 sm:space-y-0 bg-white shadow p-5 rounded-lg">
           <div className="space-y-1 text-gray-800">
             <p>Total Needed: <strong>{totalNeeded}</strong></p>
             <p>Configured:   <strong>{configured.length}</strong></p>
             <p>Left to Add:  <strong className="text-blue-600">{leftToAdd}</strong></p>
           </div>
           <div className="w-full sm:w-1/2">
-            <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
+            <div className="bg-gray-200 rounded-full w-full h-3 overflow-hidden">
               <div
-                className="h-3 rounded-full bg-green-500 transition-all"
+                className="bg-green-500 rounded-full h-3 transition-all"
                 style={{ width: `${pctFilled}%` }}
               />
             </div>
@@ -131,9 +131,9 @@ export default function ManageJudges() {
         </div>
 
         {/* Add Judge */}
-        <div className="bg-white p-6 rounded-lg shadow">
-          <h2 className="text-2xl font-medium text-gray-800 mb-2">Add a New Judge</h2>
-          <p className="text-sm text-gray-600 mb-4">
+        <div className="bg-white shadow p-6 rounded-lg">
+          <h2 className="mb-2 font-medium text-gray-800 text-2xl">Add a New Judge</h2>
+          <p className="mb-4 text-gray-600 text-sm">
             Format: <code>FirstName + first letter of LastName</code> (e.g. <strong>JaneD</strong>)
           </p>
           <div className="flex space-x-3">
@@ -142,7 +142,7 @@ export default function ManageJudges() {
               value={newName}
               onChange={(e) => setNewName(e.target.value)}
               placeholder="e.g. JohnD"
-              className="flex-1 border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 text-gray-800"
+              className="flex-1 px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400 text-gray-800"
             />
             <button
               onClick={handleAdd}
@@ -159,11 +159,11 @@ export default function ManageJudges() {
         </div>
 
         {/* Configured Judges */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="gap-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
           {configured.map((j) => (
             <div
               key={j.id}
-              className="bg-white p-5 rounded-lg shadow hover:shadow-xl transform hover:-translate-y-1 transition"
+              className="bg-white shadow hover:shadow-xl p-5 rounded-lg transition hover:-translate-y-1 transform"
             >
               {editingId === j.id ? (
                 <>
@@ -171,18 +171,18 @@ export default function ManageJudges() {
                     type="text"
                     value={editingName}
                     onChange={(e) => setEditingName(e.target.value)}
-                    className="w-full border border-gray-300 rounded px-3 py-2 mb-3 focus:outline-none focus:ring-2 focus:ring-green-400 text-gray-800"
+                    className="mb-3 px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-green-400 w-full text-gray-800"
                   />
                   <div className="flex justify-end space-x-2">
                     <button
                       onClick={() => handleSave(j)}
-                      className="px-4 py-1 bg-green-500 text-white rounded hover:bg-green-600"
+                      className="bg-green-500 hover:bg-green-600 px-4 py-1 rounded text-white"
                     >
                       Save
                     </button>
                     <button
                       onClick={() => setEditingId(null)}
-                      className="px-4 py-1 bg-gray-300 rounded hover:bg-gray-400"
+                      className="bg-gray-300 hover:bg-gray-400 px-4 py-1 rounded"
                     >
                       Cancel
                     </button>
@@ -190,8 +190,8 @@ export default function ManageJudges() {
                 </>
               ) : (
                 <>
-                  <h3 className="text-xl font-semibold text-gray-800">{j.name}</h3>
-                  <p className="text-sm text-gray-600 mb-4">
+                  <h3 className="font-semibold text-gray-800 text-xl">{j.name}</h3>
+                  <p className="mb-4 text-gray-600 text-sm">
                     Judge ID: <strong>{j.judgeId}</strong>
                   </p>
                   <div className="flex space-x-2">
@@ -200,13 +200,13 @@ export default function ManageJudges() {
                         setEditingId(j.id);
                         setEditingName(j.name);
                       }}
-                      className="flex-1 px-3 py-1 bg-yellow-400 text-white rounded hover:bg-yellow-500 transition"
+                      className="flex-1 bg-yellow-400 hover:bg-yellow-500 px-3 py-1 rounded text-white transition"
                     >
                       Edit
                     </button>
                     <button
                       onClick={() => handleRemove(j)}
-                      className="flex-1 px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition"
+                      className="flex-1 bg-red-500 hover:bg-red-600 px-3 py-1 rounded text-white transition"
                     >
                       Remove
                     </button>
