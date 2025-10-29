@@ -45,6 +45,7 @@
     "@tsparticles/slim": "^3.7.1",
     "@types/lodash": "^4.17.16",
     "@uidotdev/usehooks": "^2.4.1",
+    "@yudiel/react-qr-scanner": "^2.4.1",
     "axios": "^1.7.9",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -74,6 +75,7 @@
     "tailwind-merge": "^3.0.1",
     "tailwindcss-animate": "^1.0.7",
     "use-debounce": "^10.0.4",
+    "vaul": "^1.1.2",
     "zod": "^3.24.3",
     "zustand": "^5.0.3"
   },

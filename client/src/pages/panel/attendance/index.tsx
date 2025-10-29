@@ -11,6 +11,8 @@ import { getAttendances } from "@/features/attendance/api/attendance"
 import { AttendanceStatus } from "@/features/attendance/types/attendance-dto"
 import { useDebounce } from 'use-debounce';
 import { PanelHeader } from "@/components/panel-header"
+import { Button } from "@/components/ui/button"
+import { QrCodeScanner, ScannerAction } from "@/components/qr-code-scanner"
 export default function AttendancePage() {
   const [q, setQ] = useState('');
   const [debouncedSetQ] = useDebounce(setQ, 500);
@@ -53,12 +55,26 @@ export default function AttendancePage() {
 
   return (
     <div>
-      <PanelHeader>Attendance</PanelHeader>
-      <div className="flex justify-between items-center mt-8">
-        <InputSearch q={q} setQ={debouncedSetQ} placeholder="Search attendances..." />
-        <EventSelect events={eventQuery.data || []} value={event} onClick={setEvent} />
+      <div className="flex justify-between items-center">
+        <PanelHeader>Attendance</PanelHeader>
+        <QrCodeScanner type={ScannerAction.ATTENDANCE} currentEvent={event} />
       </div>
-      <AttendanceTab data={queriedData || []} isLoading={attendanceQuery.isLoading} className="mt-4" setStatus={setStatus} />
+      <div className="flex justify-between items-center gap-4 mt-4">
+        <InputSearch q={q} setQ={debouncedSetQ} placeholder="Search attendances..." />
+          <div className='md:hidden block w-full'>
+            <EventSelect events={eventQuery.data || []} value={event} onClick={setEvent} />
+          </div>
+      </div>
+      <div className="flex gap-4">
+        <AttendanceTab 
+          data={queriedData || []} isLoading={attendanceQuery.isLoading} className="mt-4" setStatus={setStatus} 
+          EventSelect={
+          <div className='hidden md:block'>
+            <EventSelect events={eventQuery.data || []} value={event} onClick={setEvent} />
+          </div>
+          }
+        />
+      </div>
     </div>
   )
 }

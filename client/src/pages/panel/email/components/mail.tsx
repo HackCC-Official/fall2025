@@ -104,7 +104,6 @@ export default function Mail({
                 onUploadClick={() => setIsUploadModalOpen(true)}
                 onAddContactClick={() => setIsAddContactModalOpen(true)}
             />
-
             <div className="flex-1 min-h-0">
                 <TooltipProvider delayDuration={0}>
                     <ResizablePanelGroup
@@ -114,7 +113,7 @@ export default function Mail({
                                 sizes
                             )}`;
                         }}
-                        className="h-full items-stretch"
+                        className="items-stretch h-full"
                     >
                         <ResizablePanel
                             defaultSize={defaultLayout[0]}

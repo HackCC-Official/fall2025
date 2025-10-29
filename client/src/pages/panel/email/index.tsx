@@ -336,11 +336,11 @@ export default function EmailPage() {
         isLoadingEmails
     ) {
         return (
-            <div className="flex flex-col items-center justify-center h-screen gap-4 bg-background">
+            <div className="flex flex-col justify-center items-center gap-4 bg-background h-screen">
                 <div className="animate-spin">
                     <LogoIcon className="w-16 h-16" />
                 </div>
-                <p className="text-lg text-muted-foreground">
+                <p className="text-muted-foreground text-lg">
                     Crunching the latest data
                 </p>
             </div>
@@ -348,318 +348,320 @@ export default function EmailPage() {
     }
 
     return (
-        <div className="flex flex-col h-screen bg-background">
+        <div className="flex flex-col bg-background min-h-screen">
             <Tabs
                 defaultValue="company"
                 className="flex flex-col h-full min-h-0"
             >
-                <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-                    <div className="flex items-center px-4 h-14 gap-4 max-w-[1400px] mx-auto w-full">
-                        <AccountSwitcher
-                            isCollapsed={false}
-                            accounts={allAccounts}
-                            onAccountChange={handleAccountChange}
-                            defaultEmail={selectedAccount}
-                        />
-                        <Dialog
-                            open={isModalOpen}
-                            onOpenChange={(open) => {
-                                if (!open) {
-                                    closeModal();
-                                } else {
-                                    setIsModalOpen(true);
-                                }
-                            }}
-                        >
-                            <DialogTrigger asChild>
-                                <Button
-                                    variant="outline"
-                                    className="ml-2 px-3 h-9"
-                                >
-                                    <Settings className="h-4 w-4 mr-2" />
-                                    <span>Settings</span>
-                                </Button>
-                            </DialogTrigger>
-                            <DialogContent className="sm:max-w-[800px]">
-                                <DialogHeader>
-                                    <DialogTitle>
-                                        Outreach Team Management
-                                    </DialogTitle>
-                                    <DialogDescription>
-                                        View, add, or edit members of your
-                                        outreach team.
-                                    </DialogDescription>
-                                </DialogHeader>
+                <header className="bg-background/95 supports-[backdrop-filter]:bg-background/60 backdrop-blur pb-4 lg:pb-0 border-b">
+                    <div className="lg:flex items-center gap-4 mx-auto lg:px-4 w-full max-w-[1400px] min-h-14">
+                        <div className='flex gap-2 w-full'>
+                            <AccountSwitcher
+                                isCollapsed={false}
+                                accounts={allAccounts}
+                                onAccountChange={handleAccountChange}
+                                defaultEmail={selectedAccount}
+                            />
+                            <Dialog
+                                open={isModalOpen}
+                                onOpenChange={(open) => {
+                                    if (!open) {
+                                        closeModal();
+                                    } else {
+                                        setIsModalOpen(true);
+                                    }
+                                }}
+                            >
+                                <DialogTrigger asChild>
+                                    <Button
+                                        variant="outline"
+                                        className="ml-2 px-3 h-9"
+                                    >
+                                        <Settings className="mr-2 w-4 h-4" />
+                                        <span>Settings</span>
+                                    </Button>
+                                </DialogTrigger>
+                                <DialogContent className="sm:max-w-[800px]">
+                                    <DialogHeader>
+                                        <DialogTitle>
+                                            Outreach Team Management
+                                        </DialogTitle>
+                                        <DialogDescription>
+                                            View, add, or edit members of your
+                                            outreach team.
+                                        </DialogDescription>
+                                    </DialogHeader>
 
-                                <div className="grid gap-6">
-                                    <div className="flex justify-between items-center">
-                                        <h3 className="text-lg font-medium">
-                                            Team Members
-                                        </h3>
-                                        <Button onClick={handleAddNewMember}>
-                                            Add New Member
-                                        </Button>
-                                    </div>
+                                    <div className="gap-6 grid">
+                                        <div className="flex justify-between items-center">
+                                            <h3 className="font-medium text-lg">
+                                                Team Members
+                                            </h3>
+                                            <Button onClick={handleAddNewMember}>
+                                                Add New Member
+                                            </Button>
+                                        </div>
 
-                                    {showForm ? (
-                                        <Form {...form}>
-                                            <form
-                                                onSubmit={(e) => {
-                                                    console.log(
-                                                        "Form submit event triggered"
-                                                    );
-                                                    form.handleSubmit(onSubmit)(
-                                                        e
-                                                    );
-                                                }}
-                                                className="space-y-4"
-                                            >
-                                                <div className="grid grid-cols-2 gap-4">
-                                                    <FormField
-                                                        control={form.control}
-                                                        name="email"
-                                                        render={({ field }) => (
-                                                            <FormItem>
-                                                                <FormLabel>
-                                                                    Email
-                                                                </FormLabel>
-                                                                <FormControl>
-                                                                    <Input
-                                                                        placeholder="email@example.com"
-                                                                        {...field}
-                                                                    />
-                                                                </FormControl>
-                                                                <FormMessage />
-                                                            </FormItem>
-                                                        )}
-                                                    />
-                                                    <FormField
-                                                        control={form.control}
-                                                        name="name"
-                                                        render={({ field }) => (
-                                                            <FormItem>
-                                                                <FormLabel>
-                                                                    Name
-                                                                </FormLabel>
-                                                                <FormControl>
-                                                                    <Input
-                                                                        placeholder="Full Name"
-                                                                        {...field}
-                                                                    />
-                                                                </FormControl>
-                                                                <FormMessage />
-                                                            </FormItem>
-                                                        )}
-                                                    />
-                                                    <FormField
-                                                        control={form.control}
-                                                        name="major"
-                                                        render={({ field }) => (
-                                                            <FormItem>
-                                                                <FormLabel>
-                                                                    Major
-                                                                </FormLabel>
-                                                                <FormControl>
-                                                                    <Input
-                                                                        placeholder="Computer Science"
-                                                                        {...field}
-                                                                    />
-                                                                </FormControl>
-                                                                <FormMessage />
-                                                            </FormItem>
-                                                        )}
-                                                    />
-                                                    <FormField
-                                                        control={form.control}
-                                                        name="year"
-                                                        render={({ field }) => (
-                                                            <FormItem>
-                                                                <FormLabel>
-                                                                    Year
-                                                                </FormLabel>
-                                                                <FormControl>
-                                                                    <Input
-                                                                        placeholder="e.g. Senior, Graduate, etc."
-                                                                        {...field}
-                                                                    />
-                                                                </FormControl>
-                                                                <FormMessage />
-                                                            </FormItem>
-                                                        )}
-                                                    />
-                                                    <FormField
-                                                        control={form.control}
-                                                        name="school"
-                                                        render={({ field }) => (
-                                                            <FormItem>
-                                                                <FormLabel>
-                                                                    School
-                                                                </FormLabel>
-                                                                <FormControl>
-                                                                    <Input
-                                                                        placeholder="University Name"
-                                                                        {...field}
-                                                                    />
-                                                                </FormControl>
-                                                                <FormMessage />
-                                                            </FormItem>
-                                                        )}
-                                                    />
-                                                    <FormField
-                                                        control={form.control}
-                                                        name="position"
-                                                        render={({ field }) => (
-                                                            <FormItem>
-                                                                <FormLabel>
-                                                                    Position
-                                                                </FormLabel>
-                                                                <FormControl>
-                                                                    <Input
-                                                                        placeholder="Outreach Coordinator"
-                                                                        {...field}
-                                                                    />
-                                                                </FormControl>
-                                                                <FormMessage />
-                                                            </FormItem>
-                                                        )}
-                                                    />
-                                                </div>
-                                                <DialogFooter>
-                                                    <Button
-                                                        type="button"
-                                                        variant="outline"
-                                                        onClick={handleCancel}
-                                                    >
-                                                        Cancel
-                                                    </Button>
-                                                    <Button
-                                                        type="button"
-                                                        onClick={() => {
-                                                            console.log(
-                                                                "Submit button clicked"
-                                                            );
-                                                            manualSubmit();
-                                                        }}
-                                                    >
-                                                        {editingMember
-                                                            ? "Update Member"
-                                                            : "Create Member"}
-                                                    </Button>
-                                                </DialogFooter>
-                                            </form>
-                                        </Form>
-                                    ) : (
-                                        <div className="border rounded-md">
-                                            <Table>
-                                                <TableHeader>
-                                                    <TableRow>
-                                                        <TableHead>
-                                                            Name
-                                                        </TableHead>
-                                                        <TableHead>
-                                                            Email
-                                                        </TableHead>
-                                                        <TableHead>
-                                                            Position
-                                                        </TableHead>
-                                                        <TableHead>
-                                                            School
-                                                        </TableHead>
-                                                        <TableHead>
-                                                            Actions
-                                                        </TableHead>
-                                                    </TableRow>
-                                                </TableHeader>
-                                                <TableBody>
-                                                    {outreachTeamResponse?.data?.data?.map(
-                                                        (
-                                                            member: OutreachTeamDto
-                                                        ) => (
-                                                            <TableRow
-                                                                key={
-                                                                    member.id ||
-                                                                    member.email
-                                                                }
-                                                            >
-                                                                <TableCell className="font-medium">
-                                                                    {
-                                                                        member.name
-                                                                    }
-                                                                </TableCell>
-                                                                <TableCell>
-                                                                    {
+                                        {showForm ? (
+                                            <Form {...form}>
+                                                <form
+                                                    onSubmit={(e) => {
+                                                        console.log(
+                                                            "Form submit event triggered"
+                                                        );
+                                                        form.handleSubmit(onSubmit)(
+                                                            e
+                                                        );
+                                                    }}
+                                                    className="space-y-4"
+                                                >
+                                                    <div className="gap-4 grid grid-cols-2">
+                                                        <FormField
+                                                            control={form.control}
+                                                            name="email"
+                                                            render={({ field }) => (
+                                                                <FormItem>
+                                                                    <FormLabel>
+                                                                        Email
+                                                                    </FormLabel>
+                                                                    <FormControl>
+                                                                        <Input
+                                                                            placeholder="email@example.com"
+                                                                            {...field}
+                                                                        />
+                                                                    </FormControl>
+                                                                    <FormMessage />
+                                                                </FormItem>
+                                                            )}
+                                                        />
+                                                        <FormField
+                                                            control={form.control}
+                                                            name="name"
+                                                            render={({ field }) => (
+                                                                <FormItem>
+                                                                    <FormLabel>
+                                                                        Name
+                                                                    </FormLabel>
+                                                                    <FormControl>
+                                                                        <Input
+                                                                            placeholder="Full Name"
+                                                                            {...field}
+                                                                        />
+                                                                    </FormControl>
+                                                                    <FormMessage />
+                                                                </FormItem>
+                                                            )}
+                                                        />
+                                                        <FormField
+                                                            control={form.control}
+                                                            name="major"
+                                                            render={({ field }) => (
+                                                                <FormItem>
+                                                                    <FormLabel>
+                                                                        Major
+                                                                    </FormLabel>
+                                                                    <FormControl>
+                                                                        <Input
+                                                                            placeholder="Computer Science"
+                                                                            {...field}
+                                                                        />
+                                                                    </FormControl>
+                                                                    <FormMessage />
+                                                                </FormItem>
+                                                            )}
+                                                        />
+                                                        <FormField
+                                                            control={form.control}
+                                                            name="year"
+                                                            render={({ field }) => (
+                                                                <FormItem>
+                                                                    <FormLabel>
+                                                                        Year
+                                                                    </FormLabel>
+                                                                    <FormControl>
+                                                                        <Input
+                                                                            placeholder="e.g. Senior, Graduate, etc."
+                                                                            {...field}
+                                                                        />
+                                                                    </FormControl>
+                                                                    <FormMessage />
+                                                                </FormItem>
+                                                            )}
+                                                        />
+                                                        <FormField
+                                                            control={form.control}
+                                                            name="school"
+                                                            render={({ field }) => (
+                                                                <FormItem>
+                                                                    <FormLabel>
+                                                                        School
+                                                                    </FormLabel>
+                                                                    <FormControl>
+                                                                        <Input
+                                                                            placeholder="University Name"
+                                                                            {...field}
+                                                                        />
+                                                                    </FormControl>
+                                                                    <FormMessage />
+                                                                </FormItem>
+                                                            )}
+                                                        />
+                                                        <FormField
+                                                            control={form.control}
+                                                            name="position"
+                                                            render={({ field }) => (
+                                                                <FormItem>
+                                                                    <FormLabel>
+                                                                        Position
+                                                                    </FormLabel>
+                                                                    <FormControl>
+                                                                        <Input
+                                                                            placeholder="Outreach Coordinator"
+                                                                            {...field}
+                                                                        />
+                                                                    </FormControl>
+                                                                    <FormMessage />
+                                                                </FormItem>
+                                                            )}
+                                                        />
+                                                    </div>
+                                                    <DialogFooter>
+                                                        <Button
+                                                            type="button"
+                                                            variant="outline"
+                                                            onClick={handleCancel}
+                                                        >
+                                                            Cancel
+                                                        </Button>
+                                                        <Button
+                                                            type="button"
+                                                            onClick={() => {
+                                                                console.log(
+                                                                    "Submit button clicked"
+                                                                );
+                                                                manualSubmit();
+                                                            }}
+                                                        >
+                                                            {editingMember
+                                                                ? "Update Member"
+                                                                : "Create Member"}
+                                                        </Button>
+                                                    </DialogFooter>
+                                                </form>
+                                            </Form>
+                                        ) : (
+                                            <div className="border rounded-md">
+                                                <Table>
+                                                    <TableHeader>
+                                                        <TableRow>
+                                                            <TableHead>
+                                                                Name
+                                                            </TableHead>
+                                                            <TableHead>
+                                                                Email
+                                                            </TableHead>
+                                                            <TableHead>
+                                                                Position
+                                                            </TableHead>
+                                                            <TableHead>
+                                                                School
+                                                            </TableHead>
+                                                            <TableHead>
+                                                                Actions
+                                                            </TableHead>
+                                                        </TableRow>
+                                                    </TableHeader>
+                                                    <TableBody>
+                                                        {outreachTeamResponse?.data?.data?.map(
+                                                            (
+                                                                member: OutreachTeamDto
+                                                            ) => (
+                                                                <TableRow
+                                                                    key={
+                                                                        member.id ||
                                                                         member.email
                                                                     }
-                                                                </TableCell>
-                                                                <TableCell>
-                                                                    {
-                                                                        member.position
-                                                                    }
-                                                                </TableCell>
-                                                                <TableCell>
-                                                                    {
-                                                                        member.school
-                                                                    }
-                                                                </TableCell>
-                                                                <TableCell>
-                                                                    <div className="flex space-x-2">
-                                                                        <Button
-                                                                            variant="outline"
-                                                                            size="sm"
-                                                                            onClick={() =>
-                                                                                handleEditMember(
-                                                                                    member
-                                                                                )
-                                                                            }
-                                                                        >
-                                                                            Edit
-                                                                        </Button>
-                                                                        <Button
-                                                                            variant="destructive"
-                                                                            size="sm"
-                                                                            onClick={() =>
-                                                                                handleDeleteMember(
-                                                                                    member.id ||
-                                                                                        member.email
-                                                                                )
-                                                                            }
-                                                                        >
-                                                                            Delete
-                                                                        </Button>
-                                                                    </div>
-                                                                </TableCell>
-                                                            </TableRow>
-                                                        )
-                                                    )}
-                                                </TableBody>
-                                            </Table>
-                                        </div>
-                                    )}
-                                </div>
-                            </DialogContent>
-                        </Dialog>
-                        <Separator orientation="vertical" className="h-6" />
-                        <nav className="flex-1">
-                            <TabsList className="inline-flex h-9 items-center justify-start rounded-lg bg-muted p-1">
+                                                                >
+                                                                    <TableCell className="font-medium">
+                                                                        {
+                                                                            member.name
+                                                                        }
+                                                                    </TableCell>
+                                                                    <TableCell>
+                                                                        {
+                                                                            member.email
+                                                                        }
+                                                                    </TableCell>
+                                                                    <TableCell>
+                                                                        {
+                                                                            member.position
+                                                                        }
+                                                                    </TableCell>
+                                                                    <TableCell>
+                                                                        {
+                                                                            member.school
+                                                                        }
+                                                                    </TableCell>
+                                                                    <TableCell>
+                                                                        <div className="flex space-x-2">
+                                                                            <Button
+                                                                                variant="outline"
+                                                                                size="sm"
+                                                                                onClick={() =>
+                                                                                    handleEditMember(
+                                                                                        member
+                                                                                    )
+                                                                                }
+                                                                            >
+                                                                                Edit
+                                                                            </Button>
+                                                                            <Button
+                                                                                variant="destructive"
+                                                                                size="sm"
+                                                                                onClick={() =>
+                                                                                    handleDeleteMember(
+                                                                                        member.id ||
+                                                                                            member.email
+                                                                                    )
+                                                                                }
+                                                                            >
+                                                                                Delete
+                                                                            </Button>
+                                                                        </div>
+                                                                    </TableCell>
+                                                                </TableRow>
+                                                            )
+                                                        )}
+                                                    </TableBody>
+                                                </Table>
+                                            </div>
+                                        )}
+                                    </div>
+                                </DialogContent>
+                            </Dialog>
+                        </div>
+                        <Separator orientation="vertical" className="hidden lg:block h-6" />
+                        <nav className="flex-1 mt-4 lg:mt-0">
+                            <TabsList className="inline-flex justify-start items-center bg-muted p-1 rounded-lg h-9">
                                 <TabsTrigger
                                     value="company"
                                     className="gap-2 px-3"
                                 >
-                                    <Building2 className="h-4 w-4" />
+                                    <Building2 className="w-4 h-4" />
                                     <span>Company Mail</span>
                                 </TabsTrigger>
                                 <TabsTrigger
                                     value="hackers"
                                     className="gap-2 px-3"
                                 >
-                                    <Users className="h-4 w-4" />
+                                    <Users className="w-4 h-4" />
                                     <span>Hackers List</span>
                                 </TabsTrigger>
                                 <TabsTrigger
                                     value="interested"
                                     className="gap-2 px-3"
                                 >
-                                    <Users className="h-4 w-4" />
+                                    <Users className="w-4 h-4" />
                                     <span>Interested Hackers</span>
                                 </TabsTrigger>
                             </TabsList>
@@ -670,7 +672,7 @@ export default function EmailPage() {
                 <main className="flex-1 min-h-0 overflow-hidden">
                     <TabsContent
                         value="company"
-                        className="h-full m-0 outline-none"
+                        className="m-0 outline-none h-full"
                     >
                         <MailComponent
                             accounts={allAccounts}
@@ -685,7 +687,7 @@ export default function EmailPage() {
                     </TabsContent>
                     <TabsContent
                         value="hackers"
-                        className="h-full m-0 outline-none"
+                        className="m-0 outline-none h-full"
                     >
                         <HackersMail
                             mails={HACKER_SAMPLE_DATA}
@@ -696,7 +698,7 @@ export default function EmailPage() {
                     </TabsContent>
                     <TabsContent
                         value="interested"
-                        className="h-full m-0 outline-none"
+                        className="m-0 outline-none h-full"
                     >
                         <HackersMail
                             mails={interestedUsersMails}

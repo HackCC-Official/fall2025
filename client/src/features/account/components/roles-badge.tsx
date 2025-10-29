@@ -35,7 +35,7 @@ export function UserBadge() {
 
 export function RolesBadge({ roles }: { roles: AccountRoles[] }) {
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className="flex flex-wrap gap-2 min-w-max">
       {
         roles.map(role => {
           switch(role) {

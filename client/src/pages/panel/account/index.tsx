@@ -12,6 +12,7 @@ import { useState } from "react";
 import { AccountDTO } from "@/features/account/types/account-dto";
 import { getBrowserClient } from "@/features/auth/lib/supabase-client";
 import { toast } from "sonner";
+import { PanelHeader } from "@/components/panel-header";
 
 export default function AccountPage() {
   const [accountId, setAccountId] = useState<string>('');
@@ -82,7 +83,7 @@ export default function AccountPage() {
 
   return (
     <div>
-      <h1 className="font-bold text-3xl">Account</h1>
+      <PanelHeader>Account</PanelHeader>
       <div className="flex space-x-4 my-4">
         <Sheet open={open} onOpenChange={setOpen}>
           <SheetTrigger asChild>
