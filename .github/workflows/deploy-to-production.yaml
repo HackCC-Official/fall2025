@@ -1,0 +1,67 @@
+name: Build and deploy frontend to production server
+run-name: ${{ github.actor }} is deploying to production server 🚀
+on:
+  push:
+    branches:
+      - main
+jobs:
+  build-and-publish:
+    name: build and publish image
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Login
+        run: |
+          echo ${{ secrets.PAT }} | docker login ghcr.io -u ${{ github.repository_owner }} --password-stdin
+
+      - name: Build and Publish
+        run: |
+          touch .env
+          echo "${{ secrets.PROD_ENV_FILE }}" > .env
+          docker compose -f docker-compose.yaml build --no-cache
+          docker compose -f docker-compose.yaml push
+  deployment:
+    needs: build-and-publish
+    name: deploy image
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: rsync docker compose config
+        uses: burnett01/rsync-deployments@5.2.1
+        with:
+          switches: -avzr --delete
+          path: docker-compose.yaml
+          remote_path: spring2025
+          remote_host: ${{ secrets.SSH_PROD_HOST }}
+          remote_user: ${{ secrets.SSH_USERNAME }}
+          remote_key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: rsync init-letsencrypt.sh
+        uses: burnett01/rsync-deployments@5.2.1
+        with:
+          switches: -avzr --delete
+          path: init-letsencrypt.sh
+          remote_path: spring2025
+          remote_host: ${{ secrets.SSH_PROD_HOST }}
+          remote_user: ${{ secrets.SSH_USERNAME }}
+          remote_key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: connect and deploy
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_PROD_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            docker system prune -a --volumes
+            docker network create hackcc-network
+            cd spring2025
+            echo "${{ secrets.PROD_ENV_FILE }}" > .env
+            echo "${{ secrets.PROD_ENV_FILE }}" > .env.production
+            echo "${{ secrets.PAT }}" | docker login ghcr.io --username "${{ github.repository_owner }}" --password-stdin
+            docker compose pull
+            docker compose up -d

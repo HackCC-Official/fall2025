@@ -1,0 +1,6 @@
+export enum ApplicationStatus {
+  NOT_AVAILABLE = 'NOT_AVAILABLE',
+  SUBMITTED = 'SUBMITTED',
+  ACCEPTED = 'ACCEPTED',
+  DENIED = 'DENIED'
+}
