@@ -59,7 +59,12 @@ export default function MealPage() {
     <div>
       <div className="flex justify-between items-center">
         <PanelHeader>Meals</PanelHeader>
-        <QrCodeScanner type={ScannerAction.MEAL} buttonLabel="Confirm Meal" currentEvent={event} />
+        <QrCodeScanner 
+          type={ScannerAction.MEAL} 
+          buttonLabel="Confirm Meal" 
+          currentEvent={event} 
+          mealType={mealType}
+        />
       </div>
       <div className="flex justify-between items-center gap-4 mt-8">
         <InputSearch q={q} setQ={debouncedSetQ} placeholder="Search accounts..." />

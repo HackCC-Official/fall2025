@@ -18,6 +18,10 @@ import { getEvents } from '@/features/event/api/event';
 import { format } from 'date-fns';
 import { ApplicationStatus } from '@/features/application/types/status.enum';
 import { AttendanceStatus } from '@/features/attendance/types/attendance-dto';
+import { claimMeal, getMealByAccountIdAndEventIDAndMealType } from '@/features/meal/api/meal';
+import { MealType, RequestMealDTO } from '@/features/meal/types/meal';
+import { getCurrentTime } from '@/features/event/utils/time';
+import { getHourAtPST, getMealType } from '@/features/meal/utils/meal';
 
 export enum ScannerAction {
   ATTENDANCE = 'ATTENDANCE',
@@ -34,8 +38,8 @@ interface ScannerContextI {
 
 export const ScannerContext = createContext<ScannerContextI>({ application: undefined, currentEvent: undefined, isLoading: false })
 
-export function QrCodeScanner({ buttonLabel = 'Take Attendance', type, currentEvent }
-  : { buttonLabel?: string, type: ScannerAction, currentEvent?: EventDTO }) {
+export function QrCodeScanner({ buttonLabel = 'Take Attendance', type, currentEvent, mealType }
+  : { buttonLabel?: string, type: ScannerAction, currentEvent?: EventDTO, mealType?: MealType; }) {
   
   const [open, setOpen] = useState(false)
   const [openAction, setOpenAction] = useState(false)
@@ -52,7 +56,7 @@ export function QrCodeScanner({ buttonLabel = 'Take Attendance', type, currentEv
       case ScannerAction.ATTENDANCE:
         return <AttendanceAction />;
       case ScannerAction.MEAL:
-        return <MealAction />;
+        return ( mealType && <MealAction mealType={mealType} /> );
       case ScannerAction.WORKSHOP:
         return <WorkshopAction />;
       case ScannerAction.BADGE:
@@ -187,10 +191,65 @@ function AttendanceAction() {
   )
 }
 
-function MealAction() {
+function MealAction({ mealType } : { mealType: MealType }) {
+  const { application, currentEvent } = useContext(ScannerContext)
+
+  const user_id: string = application && application.user.id || '';
+  const event_id: string = currentEvent?.id || '';
+
+
+  const currentHour = getHourAtPST()
+  const currentMealStatus = getMealType(currentHour)
+
+  const queryClient = useQueryClient();
+  const { data, isLoading } = useQuery({
+    queryFn: () => getMealByAccountIdAndEventIDAndMealType(
+      event_id,
+      currentMealStatus,
+      user_id
+    ),
+    queryKey: ['meal', user_id],
+    enabled: !!application
+  })
+
+  const claimMealMutation = useMutation({
+    mutationFn: async (requestMealDTO: RequestMealDTO) => claimMeal(requestMealDTO),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['meals'] })
+      queryClient.invalidateQueries({ queryKey: ['meal', user_id] })
+    }
+  });
+
+  const currentMealType: MealType = (data && data.mealType) ? data.mealType : MealType.UNCLAIMED;
+  console.log(currentMealType, data)
   return (
     <div>
       <AccountCard />
+      {
+        isLoading &&
+        <Spinner />
+      }
+      {
+        !isLoading &&
+        currentMealType === MealType.UNCLAIMED && (
+          <div className='place-content-center grid mt-4'>
+            <Button 
+              className='bg-emerald-500 hover:bg-emerald-600 cursor-pointer'
+              onClick={() => claimMealMutation.mutate({ event_id, account_id: user_id })}
+            >
+              <Check /> Confirm Meal Claim
+            </Button>
+          </div>
+        )
+      }
+      {
+        !isLoading && 
+        (currentMealType !== MealType.UNCLAIMED) && (
+          <div className='mt-4 font-semibold text-xl text-center'>
+            Meal already claimed
+          </div>
+        )
+      }
     </div>
   )
 }
