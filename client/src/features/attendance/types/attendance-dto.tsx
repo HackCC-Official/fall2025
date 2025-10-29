@@ -4,6 +4,7 @@ export enum AttendanceStatus {
   PRESENT = 'PRESENT',
   LATE = 'LATE',
   ABSENT = 'ABSENT',
+  NOT_AVAILABLE = 'NOT_AVAILABLE',
   ALL = 'ALL'
 }
 

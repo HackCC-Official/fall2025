@@ -96,12 +96,14 @@ export function ApplicationPageComponent({ applicationType }: ApplicationPageCom
 
   return (
     <div className="flex flex-col h-full">
-      <PanelHeader className="flex justify-between items-center">
-        <div className="flex items-center">
-          Applications
+      <PanelHeader className="md:flex justify-between items-center">
+        <div className="lg:flex items-center">
+          <div>
+            Applications
+          </div>
           {
             statQuery.data &&
-            <div className="inline-flex items-center gap-2 ml-4">
+            <div className="inline-flex items-center gap-2 lg:ml-4">
               <Badge>
                 Submitted
                 <span className="ml-2 font-light">{statQuery.data.submitted || 0}</span>
@@ -117,7 +119,7 @@ export function ApplicationPageComponent({ applicationType }: ApplicationPageCom
             </div>
           }
         </div>
-        <div>
+        <div className='mt-4 md:mt-0'>
           <Select value={applicationType} onValueChange={handleApplicationTypeChange}>
             <SelectTrigger>
               <SelectValue placeholder="Select application type" />

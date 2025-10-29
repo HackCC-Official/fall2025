@@ -9,7 +9,7 @@ interface PanelInterfaceProps {
 export function PanelHeader({ children, className }: PanelInterfaceProps) {
   return (
     <h1 className={cn([
-      "font-bold text-3xl",
+      "font-bold text:lg md:text-3xl",
       className
     ])}>
       {children}

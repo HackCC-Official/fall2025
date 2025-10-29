@@ -25,18 +25,22 @@ export function ApplicationHeader({ application } : { application: ApplicationRe
     <Card className="shadow-none">
       <CardHeader>
         <CardTitle className="flex items-center">
-          <div className="flex bg-purple-50 p-2 border border-lightpurple rounded-md text-lightpurple">
-              <CircleUser />
+          <div className="flex bg-purple-50 p-1 border border-lightpurple rounded-md text-lightpurple">
+            <CircleUser className="w-4 lg:w-8 h-4 lg:h-8" />
           </div>
-          <div className="ml-4 text-2xl">{application.firstName + ' ' + application.lastName}</div>
+          <div className="ml-2 text-lg lg:text-xl">
+            {application.firstName} {application.lastName}
+          </div>
           <Separator className="mx-4 h-6" orientation="vertical"/>
           <ApplicationStatusBadge status={application.status} />
         </CardTitle>
       </CardHeader>
       <CardContent className="space-x-2">
-        <EmailBadge>{application.email}</EmailBadge>
-        <ContactBadge>{application.phoneNumber}</ContactBadge>
-        <SchoolBadge>{application.school}</SchoolBadge>
+          <div className="flex flex-wrap gap-1 md:gap-2">
+            <EmailBadge>{application.email}</EmailBadge>
+            <ContactBadge>{application.phoneNumber}</ContactBadge>
+            <SchoolBadge>{application.school}</SchoolBadge>
+          </div>
       </CardContent>
     </Card>
   )

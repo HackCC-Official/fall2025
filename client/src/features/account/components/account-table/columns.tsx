@@ -26,6 +26,6 @@ export const columns: ColumnDef<AccountDTO>[] = [
   {
     accessorKey: 'createdAt',
     header: 'Created At',
-    cell: ({ row }) => format(row.original.createdAt || '', 'MMM, do yyyy hh:mm aaaa')
+    cell: ({ row }) => <div className='min-w-max'>{format(row.original.createdAt || '', 'MMM, do yyyy hh:mm aaaa')}</div>
   },
 ]

@@ -10,7 +10,7 @@ interface EventSelectProps {
 export function EventSelect({ value, onClick, events }: EventSelectProps) {
   return (
     <Select value={value?.date} onValueChange={(d) => onClick(events.find(e => e.date === d) as EventDTO)}>
-      <SelectTrigger className="w-[200px]">
+      <SelectTrigger >
         <SelectValue placeholder="Event date" />
       </SelectTrigger>
       <SelectContent>

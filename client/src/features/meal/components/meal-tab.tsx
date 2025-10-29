@@ -9,9 +9,10 @@ interface MealTabProps {
   setMealType: (mealType: MealType) => void;
   isLoading: boolean;
   data: ResponseMealAccountDTO[];
+  EventSelect: React.ReactNode
 }
 
-export function MealTab({ className, setMealType, isLoading, data }: MealTabProps) {
+export function MealTab({ className, setMealType, isLoading, data, EventSelect }: MealTabProps) {
   return (
     <Tabs defaultValue={MealType.ALL} 
       onValueChange={(mealType) => setMealType(mealType as MealType)}
@@ -20,13 +21,16 @@ export function MealTab({ className, setMealType, isLoading, data }: MealTabProp
         className
       ])}
     >
-      <TabsList className="w-full">
-      <TabsTrigger className="w-full" value={MealType.ALL}>All</TabsTrigger>
-        <TabsTrigger className="w-full" value={MealType.UNCLAIMED}>Unclaimed</TabsTrigger>
-        <TabsTrigger className="w-full" value={MealType.BREAKFAST}>Breakfast</TabsTrigger>
-        <TabsTrigger className="w-full" value={MealType.LUNCH}>Lunch</TabsTrigger>
-        <TabsTrigger className="w-full" value={MealType.DINNER}>Dinner</TabsTrigger>
-      </TabsList>
+      <div className="flex gap-4 mb-2">
+        <TabsList>
+          <TabsTrigger className="w-full" value={MealType.ALL}>All</TabsTrigger>
+          <TabsTrigger className="w-full" value={MealType.UNCLAIMED}>Unclaimed</TabsTrigger>
+          <TabsTrigger className="w-full" value={MealType.BREAKFAST}>Breakfast</TabsTrigger>
+          <TabsTrigger className="w-full" value={MealType.LUNCH}>Lunch</TabsTrigger>
+          <TabsTrigger className="w-full" value={MealType.DINNER}>Dinner</TabsTrigger>
+        </TabsList>
+        {EventSelect}
+      </div>
       <TabsContent value={MealType.ALL}>
         <DataTable isLoading={isLoading} data={data} columns={columns} />
       </TabsContent>

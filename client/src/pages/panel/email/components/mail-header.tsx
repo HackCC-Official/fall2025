@@ -15,16 +15,16 @@ export default function MailHeader({
     onAddContactClick,
 }: MailHeaderProps) {
     return (
-        <div className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-            <div className="max-w-[1400px] mx-auto w-full">
-                <div className="flex items-center justify-between p-6">
+        <div className="bg-background/95 supports-[backdrop-filter]:bg-background/60 backdrop-blur border-b">
+            <div className="mx-auto w-full max-w-[1400px]">
+                <div className="flex justify-between items-center gap-2 p-4 lg:p-6">
                     <div>
-                        <h2 className="text-2xl font-semibold tracking-tight">
+                        <h2 className="font-semibold text-lg lg:text-2xl tracking-tight">
                             {activeView === "mail"
                                 ? "Inbox"
                                 : "Contact Management"}
                         </h2>
-                        <p className="text-muted-foreground mt-1">
+                        <p className="mt-1 text-muted-foreground text-xs lg:text-base">
                             {activeView === "mail"
                                 ? "Manage your email communications and outreach campaigns"
                                 : "Manage and organize your contacts database"}
@@ -38,7 +38,7 @@ export default function MailHeader({
                                     className="gap-2"
                                     onClick={onAddContactClick}
                                 >
-                                    <UserPlus className="h-4 w-4" />
+                                    <UserPlus className="w-4 h-4" />
                                     Add Contact
                                 </Button>
                                 <Button
@@ -46,7 +46,7 @@ export default function MailHeader({
                                     className="gap-2"
                                     onClick={onUploadClick}
                                 >
-                                    <Upload className="h-4 w-4" />
+                                    <Upload className="w-4 h-4" />
                                     Upload Contacts
                                 </Button>
                             </>
@@ -58,7 +58,7 @@ export default function MailHeader({
                                 (window.location.href = "/panel/email/compose")
                             }
                         >
-                            <PenBox className="h-4 w-4" />
+                            <PenBox className="w-4 h-4" />
                             Compose
                         </Button>
                     </div>

@@ -6,15 +6,17 @@ import { AttendanceDTO, AttendanceStatus } from "../types/attendance-dto";
 import { useQueryClient, useMutation } from "@tanstack/react-query";
 import { takeAttendance } from "../api/attendance";
 import { UserCheck } from "lucide-react";
+import React from "react";
 
 interface AttendanceTabProps {
   className?: string;
   setStatus: (status: AttendanceStatus) => void;
   isLoading: boolean;
   data: AttendanceDTO[];
+  EventSelect: React.ReactNode;
 }
 
-export function AttendanceTab({ className, setStatus, isLoading, data } : AttendanceTabProps) {
+export function AttendanceTab({ className, setStatus, isLoading, data, EventSelect } : AttendanceTabProps) {
   const queryClient = useQueryClient();
   const takeAttendanceMutation = useMutation({
     mutationFn: async (attendanceDTO: AttendanceDTO) => takeAttendance({ 
@@ -44,12 +46,15 @@ export function AttendanceTab({ className, setStatus, isLoading, data } : Attend
         className
       ])}
     >
-      <TabsList className="w-full">
-        <TabsTrigger className="w-full" value={AttendanceStatus.ALL}>All</TabsTrigger>
-        <TabsTrigger className="w-full" value={AttendanceStatus.ABSENT}>Absent</TabsTrigger>
-        <TabsTrigger className="w-full" value={AttendanceStatus.LATE}>Late</TabsTrigger>
-        <TabsTrigger className="w-full" value={AttendanceStatus.PRESENT}>Present</TabsTrigger>
-      </TabsList>
+      <div className="flex gap-4 mb-2">
+        <TabsList>
+          <TabsTrigger className="w-full" value={AttendanceStatus.ALL}>All</TabsTrigger>
+          <TabsTrigger className="w-full" value={AttendanceStatus.ABSENT}>Absent</TabsTrigger>
+          <TabsTrigger className="w-full" value={AttendanceStatus.LATE}>Late</TabsTrigger>
+          <TabsTrigger className="w-full" value={AttendanceStatus.PRESENT}>Present</TabsTrigger>
+        </TabsList>
+        {EventSelect}
+      </div>
       <TabsContent value={AttendanceStatus.ALL}>
         <DataTable isLoading={isLoading} data={data} columns={columns} contextOptions={attendanceContextOptions} />
       </TabsContent>
