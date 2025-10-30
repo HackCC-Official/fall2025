@@ -1,6 +1,6 @@
 import { cn } from '@/lib/utils';
 import { Scanner } from '@yudiel/react-qr-scanner';
-import { Drawer, DrawerClose, DrawerContent, DrawerFooter, DrawerHeader, DrawerTitle, DrawerTrigger } from './ui/drawer';
+import { Drawer, DrawerClose, DrawerContent, DrawerFooter, DrawerHeader, DrawerTitle, DrawerTrigger } from '@/components/ui/drawer';
 import { Button } from '@/components/ui/button';
 import { createContext, useContext, useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
