@@ -28,7 +28,7 @@ export function HackpassSection() {
       <h1 className="mb-8 font-mont font-bold text-white text-4xl">
         Your Hackpass
       </h1>
-      <div className="bg-[#41374d] shadow-lg p-8 border border-[#534b75] rounded-lg">
+      <div className="bg-white shadow-lg p-8 border border-[#534b75] rounded-lg">
         {/* We use a conditional (ternary) operator:
           - IF selectedBadge is not null, show BadgeInformationComponent.
           - ELSE (if selectedBadge is null), show BadgeGridComponent.
