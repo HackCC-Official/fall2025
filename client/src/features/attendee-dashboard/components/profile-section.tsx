@@ -46,7 +46,7 @@ export function ProfileSection() {
     return (
         <div>
             {/* This h1 is just for the text, and it's correct as-is! */}
-            <h1 className="mb-8 font-mont text-white text-2xl sm:text-3xl md:text-4xl">
+            <h1 className="mb-8 font-bagel font-bold text-white text-2xl sm:text-3xl md:text-4xl">
                 Your QR Code
             </h1>
             <div className="bg-gradient-to-br from-[#4A376B] to-[#5C4580] shadow-2xl mx-auto border border-[#523B75] rounded-3xl max-w-md overflow-hidden">

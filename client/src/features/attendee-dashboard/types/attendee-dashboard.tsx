@@ -1,3 +1,4 @@
+import { LucideIcon } from "lucide-react";
 
 export interface User {
     username: string;
@@ -7,7 +8,7 @@ export interface User {
 export interface NavItem {
     id: string;
     label: string;
-    icon: React.ElementType;
+    icon: LucideIcon;
 };
 
 export interface Countdown {

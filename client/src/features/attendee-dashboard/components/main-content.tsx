@@ -1,32 +1,16 @@
 import { DeadlinesSection } from "./deadlines-section";
-<<<<<<< HEAD
-import { HackPassSection } from "./hack-pass-section";
-=======
 import { ProfileSection } from "./profile-section";
 import { TeamUpSection } from "./team-up";
->>>>>>> 88b24e2b2322d8a016d5c4ab702d228bdd109019
-import { RulesSection } from "./rules-section";
-import { ScheduleSection } from "./schedule-section";
-import { HackpassSection } from "./hackpass-section";
 
 export function MainContent({ activeSection } : { activeSection: string }) {
     const renderSection = () => {
         switch (activeSection) {
             case 'profile':
                 return <ProfileSection />;
-            case 'hackpass':
-                return <HackpassSection />;
-            case 'schedule':
-                return <ScheduleSection />;
+            case 'team-up':
+                return <TeamUpSection />;
             case 'deadlines':
                 return <DeadlinesSection />;
-<<<<<<< HEAD
-=======
-            case 'teamup':
-                return <TeamUpSection />;
->>>>>>> 88b24e2b2322d8a016d5c4ab702d228bdd109019
-            case 'rules':
-                return <RulesSection />;
             default:
                 return <ProfileSection />;
         }

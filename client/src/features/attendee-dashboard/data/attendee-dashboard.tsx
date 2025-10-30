@@ -13,9 +13,6 @@ export const mockUser: User = {
 
 export const navItems: NavItem[] = [
     { id: 'profile', label: 'Profile', icon: CircleUser },
-    { id: 'hackpass', label: 'Hackpass', icon: Badge },
-    { id: 'schedule', label: 'Schedule', icon: CalendarDays },
     { id: 'deadlines', label: 'Deadlines', icon: Timer },
-    { id: 'rules', label: 'Rules', icon: ScrollText },
-    { id: 'teamup', label: 'Team Up', icon: UserRoundPlus },
+    { id: 'team-up', label: 'Team Up', icon: UserRoundPlus },
 ];
