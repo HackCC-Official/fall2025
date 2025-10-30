@@ -16,13 +16,14 @@ import {
 } from 'lucide-react';
 
 import { DeadlinesSection } from '@/features/attendee-dashboard/components/deadlines-section';  
-import { HackPassSection } from '@/features/attendee-dashboard/components/hack-pass-section';
+import { ProfileSection } from '@/features/attendee-dashboard/components/profile-section';
 import { MainContent } from '@/features/attendee-dashboard/components/main-content';
 import { QRCodeSection } from '@/features/attendee-dashboard/components/qr-code-section';
-import { RemindersSection } from '@/features/attendee-dashboard/components/reminders-section';
+import { TeamUpSection } from '@/features/attendee-dashboard/components/team-up';
 import { RulesSection } from '@/features/attendee-dashboard/components/rules-section';
 import { ScheduleSection } from '@/features/attendee-dashboard/components/schedule-section';
 import { Sidebar } from '@/features/attendee-dashboard/components/sidebar';
+import { HackpassSection } from '@/features/attendee-dashboard/components/hackpass-section';
 
 
 
