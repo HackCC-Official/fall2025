@@ -1,25 +1,6 @@
 import { AccountDTO } from "@/features/account/types/account-dto";
 
 export function QRCodeSection({ user, qrCodeSrc, isLoading }: { user?: AccountDTO, qrCodeSrc?: string, isLoading: boolean }) {
-    // Error state - no user
-    if (!user && !qrCodeSrc) {
-        return (
-            <div className="flex flex-col items-center p-6 sm:p-8">
-                <div className="bg-red-500/10 p-6 border border-red-500/20 rounded-xl max-w-sm">
-                    <div className="flex items-center gap-3 mb-2">
-                        <svg className="w-6 h-6 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                        </svg>
-                        <h3 className="font-mont font-bold text-red-400 text-lg">Unable to Load Profile</h3>
-                    </div>
-                    <p className="font-mont text-red-300/80 text-sm">
-                        We couldn't load your profile information. Please try refreshing the page.
-                    </p>
-                </div>
-            </div>
-        );
-    }
-
     // Loading state
     if (isLoading) {
         return (
@@ -42,6 +23,25 @@ export function QRCodeSection({ user, qrCodeSrc, isLoading }: { user?: AccountDT
         );
     }
 
+        // Error state - no user
+    if (!user && !qrCodeSrc) {
+        return (
+            <div className="flex flex-col items-center p-6 sm:p-8">
+                <div className="bg-red-500/10 p-6 border border-red-500/20 rounded-xl max-w-sm">
+                    <div className="flex items-center gap-3 mb-2">
+                        <svg className="w-6 h-6 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                        <h3 className="font-mont font-bold text-red-400 text-lg">Unable to Load Profile</h3>
+                    </div>
+                    <p className="font-mont text-red-300/80 text-sm">
+                        We couldn't load your profile information. Please try refreshing the page.
+                    </p>
+                </div>
+            </div>
+        );
+    }
+
     // Error state - failed to load QR code
     if (!qrCodeSrc) {
         return (
@@ -51,7 +51,7 @@ export function QRCodeSection({ user, qrCodeSrc, isLoading }: { user?: AccountDT
                         <svg className="w-6 h-6 text-orange-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
-                        <h3 className="font-mont font-bold text-orange-400 text-lg">QR Code Unavailable</h3>
+                        <h3 className="font-bagel font-bold text-orange-400 text-lg">QR Code Unavailable</h3>
                     </div>
                     <p className="mb-4 font-mont text-orange-300/80 text-sm">
                         Your QR code couldn't be generated. Please contact support if this persists.
