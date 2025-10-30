@@ -16,14 +16,6 @@ export function RulesSection() {
                 </div>
                 <div className="bg-[#4A376B] shadow-lg p-8 border border-[#523B75] rounded-lg">
                     <h2 className="mb-4 font-mont font-semibold text-white text-2xl">
-                        Team Formation
-                    </h2>
-                    <p className="font-mont text-gray-300">
-                        Looking for a team? Head over to the HackCC discord server (or utilize our QR code feature)
-                    </p>
-                </div>
-                <div className="bg-[#4A376B] shadow-lg p-8 border border-[#523B75] rounded-lg">
-                    <h2 className="mb-4 font-mont font-semibold text-white text-2xl">
                         Judging Criteria
                     </h2>
                     <ul className="space-y-2 font-mont text-gray-300 list-disc list-inside">
