@@ -7,7 +7,7 @@ import { getQrCode } from "@/features/qr-code/api/qr-code";
 import { getAccountById } from "@/features/account/api/account";
 import { AccountRoles } from "@/features/account/types/account-dto";
 
-export function HackPassSection() {
+export function ProfileSection() {
     const { user } = useAuthentication()
 
     const accountQuery = useQuery({
