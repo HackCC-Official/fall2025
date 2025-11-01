@@ -50,7 +50,7 @@ export default function AttendeeDashboardPage() {
         }
 
         if (applicationQuery.data && 
-            [ApplicationStatus.SUBMITTED, ApplicationStatus.DENIED].includes(applicationQuery.data.status)) {
+            [ApplicationStatus.SUBMITTED, ApplicationStatus.DENIED, ApplicationStatus.NOT_AVAILABLE].includes(applicationQuery.data.status)) {
             console.log('Redirecting due to application status:', applicationQuery.data.status);
             router.push('/');
         }
