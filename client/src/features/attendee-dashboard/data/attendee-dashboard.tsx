@@ -8,7 +8,7 @@ import { NavItem } from "../types/attendee-dashboard";
 
 export const mockUser: User = {
     username: 'hack-attendee-01',
-    teamName: 'The Code Crusaders'
+    teamName: '-'
 };
 
 export const navItems: NavItem[] = [

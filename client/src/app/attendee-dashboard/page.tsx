@@ -20,7 +20,7 @@ import { Sidebar } from '@/features/attendee-dashboard/components/sidebar';
 import { SkyFixed } from '@/components/sky';
 
 export default function AttendeeDashboardPage() {
-    const [activeSection, setActiveSection] = useState('hackpass');
+    const [activeSection, setActiveSection] = useState('profile');
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
     return (
@@ -33,21 +33,6 @@ export default function AttendeeDashboardPage() {
             }}
         >
             <SkyFixed />
-            {/* Mobile Header */}
-            <header className="md:hidden flex justify-between items-center bg-[#4A376B] p-4 border-[#523B75] border-b w-full">
-                <div className="flex items-center gap-2">
-                    <div className="flex justify-center items-center w-8 h-8">
-                        {/* <Logo className="w-full h-full object-contain" /> */}
-                    </div>
-                    <h2 className="font-mont font-bold text-white text-xl">HackCC</h2>
-                </div>
-                <button
-                    onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-                    className="p-2 text-gray-300 hover:text-white"
-                >
-                    {isSidebarOpen ? <X size={24} strokeWidth={2.5} /> : <Menu size={24} strokeWidth={2.5} />}
-                </button>
-            </header>
 
             <Sidebar
                 activeSection={activeSection}
@@ -56,6 +41,7 @@ export default function AttendeeDashboardPage() {
                     setIsSidebarOpen(false); // Close sidebar on mobile nav
                 }}
                 isOpen={isSidebarOpen}
+                setIsOpen={setIsSidebarOpen}
             />
             <MainContent activeSection={activeSection} />
         </div>
