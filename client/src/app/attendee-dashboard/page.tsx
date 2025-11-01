@@ -69,7 +69,7 @@ export default function AttendeeDashboardPage() {
         return <FrontPageSecondaryLayout />;
     }
 
-    if ([ApplicationStatus.SUBMITTED, ApplicationStatus.DENIED].includes(applicationQuery.data.status)) {
+    if ([ApplicationStatus.SUBMITTED, ApplicationStatus.DENIED, ApplicationStatus.NOT_AVAILABLE].includes(applicationQuery.data.status)) {
         return <FrontPageSecondaryLayout />;
     }
 
