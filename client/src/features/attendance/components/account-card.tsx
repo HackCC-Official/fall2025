@@ -1,4 +1,4 @@
-import { ScannerContext } from "@/components/qr-code-scanner";
+import { ScannerContext } from "@/features/qr-code/components/qr-code-scanner";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Spinner } from "@/components/ui/spinner";

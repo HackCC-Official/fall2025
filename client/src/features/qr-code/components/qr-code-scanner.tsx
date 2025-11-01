@@ -1,7 +1,7 @@
 import { cn } from '@/lib/utils';
 import { Scanner } from '@yudiel/react-qr-scanner';
-import { Drawer, DrawerClose, DrawerContent, DrawerFooter, DrawerHeader, DrawerTitle, DrawerTrigger } from './ui/drawer';
-import { Button } from './ui/button';
+import { Drawer, DrawerClose, DrawerContent, DrawerFooter, DrawerHeader, DrawerTitle, DrawerTrigger } from '@/components/ui/drawer';
+import { Button } from '@/components/ui/button';
 import { createContext, useContext, useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import { Check, ScanIcon } from 'lucide-react';
@@ -11,7 +11,7 @@ import { getAccountById } from '@/features/account/api/account';
 import { AccountDTO } from '@/features/account/types/account-dto';
 import { getApplicationByUserId } from '@/features/application/api/application';
 import { ApplicationResponseDTO } from '@/features/application/types/application';
-import { Spinner } from './ui/spinner';
+import { Spinner } from '@/components/ui/spinner';
 import { getAttendanceByEventIdAndAccountId, takeAttendance } from '@/features/attendance/api/attendance';
 import { EventDTO } from '@/features/event/types/event-dto';
 import { getEvents } from '@/features/event/api/event';
@@ -41,7 +41,7 @@ export const ScannerContext = createContext<ScannerContextI>({ application: unde
 export function QrCodeScanner({ buttonLabel = 'Take Attendance', type, currentEvent, mealType }
   : { buttonLabel?: string, type: ScannerAction, currentEvent?: EventDTO, mealType?: MealType; }) {
   
-  const [open, setOpen] = useState(false)
+  const [open, setOpen] = useState<boolean>(false)
   const [openAction, setOpenAction] = useState(false)
   const [accountId, setAccountId] = useState<string | null>(null)
 
@@ -68,15 +68,15 @@ export function QrCodeScanner({ buttonLabel = 'Take Attendance', type, currentEv
 
   return (
     <Drawer open={open} 
-    onOpenChange={(open) => {
-      if (!open) {
-        setAccountId('')
-        setOpenAction(false)
-        setOpen(false);
-      } else {
-        setOpen(open)
-      }
-    }}>
+      onOpenChange={(open: boolean) => {
+        if (!open) {
+          setAccountId('')
+          setOpenAction(false)
+          setOpen(false);
+        } else {
+          setOpen(open)
+        }
+      }}>
       <DrawerTrigger asChild>
         <Button className='bg-green-500 hover:bg-green-600'><ScanIcon /> {buttonLabel}</Button>
       </DrawerTrigger>

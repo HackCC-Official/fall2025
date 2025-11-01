@@ -14,30 +14,31 @@ export const Navbar = () => {
     const queryClient = useQueryClient()
     const supabase = getBrowserClient();
     const router = useRouter()
-    const { user, setUser } = useAuthentication({ redirect: false });
-    const isLoggedIn = !!user;
+    const { user, setUser, authCheck } = useAuthentication({ redirect: false });
+    const accountId = user && user.id
+    const isLoggedIn = authCheck && !!user;
 
     const accountQuery = useQuery({
         queryKey: ['account'],
-        queryFn: () => getAccountById(isLoggedIn && user?.id ? user?.id : ''),
+        queryFn: () => getAccountById(accountId || ''),
         enabled: isLoggedIn 
     })
-
+    
     const applicationQuery = useQuery({
-        queryKey: ['hackathon'],
-        queryFn: () => getHackathonApplicationByUserId(isLoggedIn && user?.id ? user?.id : ''),
-        enabled: isLoggedIn 
-    })
+        queryKey: ['application', accountId],
+        queryFn: () => getApplicationByUserId(accountId || ''),
+        enabled: !!accountId
+    });
 
     const [isMenuOpen, setMenuOpen] = useState(false);
     
-    const hasAppliedToHackathon = applicationQuery.data?.status !== ApplicationStatus.NOT_AVAILABLE;
     const accountRoles = accountQuery.data && accountQuery.data.roles
     const isPartOfOrg = accountRoles?.includes(AccountRoles.ADMIN) || 
         accountRoles?.includes(AccountRoles.ORGANIZER) || 
         accountRoles?.includes(AccountRoles.JUDGE);
-    const showApply = !isLoggedIn  || (isLoggedIn  && !hasAppliedToHackathon && !isPartOfOrg);
-    const showDashboard = isLoggedIn && isPartOfOrg;
+    const isAccepted = !isLoggedIn  || (isLoggedIn  && applicationQuery.data?.status === ApplicationStatus.ACCEPTED);
+    const showOrgDashboard = isLoggedIn && isPartOfOrg;
+    const showAttendeeDashboard = isLoggedIn && !isPartOfOrg && isAccepted
     const showSignout = isLoggedIn;
 
     const toggleMenu = () => {
@@ -84,7 +85,8 @@ export const Navbar = () => {
                 <a href="/sponsor">Sponsor us</a>
                 <div className="space-x-4">
                     {!isLoggedIn && <a onClick={login}>Login</a>}
-                    {showDashboard && <DashboardButton />}
+                    {showOrgDashboard && <DashboardButton />}
+                    {showAttendeeDashboard && <AttendeeDashboardButton/>}
                     {showSignout && <a onClick={signOut}>Sign out</a>}
                 </div>
             </div>
@@ -114,7 +116,8 @@ export const Navbar = () => {
                 <a target='_blank' href="https://discord.gg/yRShGV7Py4"><FontAwesomeIcon className="mr-2" icon={faDiscord} />  Discord Server</a>
                 <div className="bg-activeyellow w-16 h-[1px]"></div>
                 {!isLoggedIn && <a onClick={login}>Login</a>}
-                {showDashboard && <DashboardButton />}
+                {showOrgDashboard && <DashboardButton />}
+                {showAttendeeDashboard && <AttendeeDashboardButton/>}
                 {showSignout && <a onClick={signOut}>Sign out</a>}
             </div>
             <h1 className={`${isMenuOpen? 'text-black' : 'text-white'} fixed z-50 top-4 right-4 text-3xl lg:hidden flex`} onClick={() => {toggleMenu()}}>{isMenuOpen ? 'X' : '☰'}</h1>
@@ -144,6 +147,7 @@ import { cn } from '@/lib/utils';
 import { useRouter } from 'next/navigation';
 import React from 'react'
 import { getBrowserClient } from "@/features/auth/lib/supabase-client";
+import { getApplicationByUserId } from "@/features/application/api/application";
 
 export const NavigationButton = (props: any) => {
     const { text, size, directory, to } = props;
@@ -206,5 +210,12 @@ export function ApplyButton({ text = 'Apply', size = 'sm', bypassDisable = false
 function DashboardButton({ className } : { className?: string }) {
    return (
      <NavigationButton className={className} text="Dashboard" size="sm" directory="/panel"></NavigationButton>
+   )
+}
+
+
+function AttendeeDashboardButton({ className } : { className?: string }) {
+   return (
+     <NavigationButton className={className} text="Dashboard" size="sm" directory="/attendee-dashboard"></NavigationButton>
    )
 }

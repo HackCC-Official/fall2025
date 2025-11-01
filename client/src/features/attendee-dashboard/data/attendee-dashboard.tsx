@@ -2,19 +2,17 @@
 // ... (mockUser and navItems are unchanged) ...
 
 import { User } from "../types/attendee-dashboard";
-import { Badge, CalendarDays, Timer, Bell, ScrollText } from "lucide-react";
+import { Badge, CalendarDays, Timer, Bell, CircleUser, ScrollText, UserRoundPlus, } from "lucide-react";
 import { NavItem } from "../types/attendee-dashboard";
 
 
 export const mockUser: User = {
     username: 'hack-attendee-01',
-    teamName: 'The Code Crusaders'
+    teamName: '-'
 };
 
 export const navItems: NavItem[] = [
-    { id: 'hackpass', label: 'Hack Pass', icon: Badge },
-    { id: 'schedule', label: 'Schedule', icon: CalendarDays },
+    { id: 'profile', label: 'Profile', icon: CircleUser },
     { id: 'deadlines', label: 'Deadlines', icon: Timer },
-    { id: 'reminders', label: 'Reminders', icon: Bell },
-    { id: 'rules', label: 'Rules & Team-Up', icon: ScrollText },
+    { id: 'team-up', label: 'Team Up', icon: UserRoundPlus },
 ];

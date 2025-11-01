@@ -1,24 +1,18 @@
 import { DeadlinesSection } from "./deadlines-section";
-import { HackPassSection } from "./hack-pass-section";
-import { RemindersSection } from "./reminders-section";
-import { RulesSection } from "./rules-section";
-import { ScheduleSection } from "./schedule-section";
+import { ProfileSection } from "./profile-section";
+import { TeamUpSection } from "./team-up";
 
 export function MainContent({ activeSection } : { activeSection: string }) {
     const renderSection = () => {
         switch (activeSection) {
-            case 'hackpass':
-                return <HackPassSection />;
-            case 'schedule':
-                return <ScheduleSection />;
+            case 'profile':
+                return <ProfileSection />;
+            case 'team-up':
+                return <TeamUpSection />;
             case 'deadlines':
                 return <DeadlinesSection />;
-            case 'reminders':
-                return <RemindersSection />;
-            case 'rules':
-                return <RulesSection />;
             default:
-                return <HackPassSection />;
+                return <ProfileSection />;
         }
     };
 

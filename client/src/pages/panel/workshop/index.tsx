@@ -10,7 +10,7 @@ import { deleteWorkshop, getWorkshops } from "@/features/workshop/api/workshop"
 import { columns } from "@/features/workshop/components/workshop-table/columns"
 import { WorkshopForm } from "@/features/workshop/components/workshop-form"
 import { WorkshopResponseDTO } from "@/features/workshop/types/workshop"
-import { QrCodeScanner, ScannerAction } from "@/components/qr-code-scanner"
+import { QrCodeScanner, ScannerAction } from "@/features/qr-code/components/qr-code-scanner"
 import { PanelHeader } from "@/components/panel-header"
 
 export default function WorkshopPage() {

@@ -1,8 +1,5 @@
 "use client"; 
-
 import React, { useState, useEffect } from 'react';
-
-
 import {
     Badge,
     CalendarDays,
@@ -14,55 +11,86 @@ import {
     Menu,
     X
 } from 'lucide-react';
-
-import { DeadlinesSection } from '@/features/attendee-dashboard/components/deadlines-section';  
-import { HackPassSection } from '@/features/attendee-dashboard/components/hack-pass-section';
 import { MainContent } from '@/features/attendee-dashboard/components/main-content';
-import { QRCodeSection } from '@/features/attendee-dashboard/components/qr-code-section';
-import { RemindersSection } from '@/features/attendee-dashboard/components/reminders-section';
-import { RulesSection } from '@/features/attendee-dashboard/components/rules-section';
-import { ScheduleSection } from '@/features/attendee-dashboard/components/schedule-section';
 import { Sidebar } from '@/features/attendee-dashboard/components/sidebar';
-
-
+import { SkyFixed } from '@/components/sky';
+import { useAuthentication } from '@/features/auth/hooks/use-authentication';
+import { useQuery } from '@tanstack/react-query';
+import { getApplicationByUserId } from '@/features/application/api/application';
+import { useRouter } from 'next/navigation';
+import { ApplicationStatus } from '@/features/application/types/status.enum';
+import { FrontPageSecondaryLayout } from '@/layouts/front-page-layout';
+import { getHackathonApplicationByUserId } from '@/features/application/api/hackathon-application';
 
 export default function AttendeeDashboardPage() {
-    const [activeSection, setActiveSection] = useState('hackpass');
+    const router = useRouter();
+    const { user, authCheck } = useAuthentication();
+    const accountId = user && user.id;
+    
+    // FIX 1: Corrected query key syntax - should be array
+    const applicationQuery = useQuery({
+        queryKey: ['application', accountId],
+        queryFn: () => getHackathonApplicationByUserId(accountId || ''),
+        enabled: !!accountId // FIX 2: Remove function wrapper
+    });
+    
+    const [activeSection, setActiveSection] = useState('profile');
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+    // FIX 3: Move all navigation to useEffect to avoid SSR issues
+    useEffect(() => {
+        if (authCheck && !user) {
+            router.push('/');
+            return;
+        }
+
+        if (applicationQuery.error) {
+            router.push('/');
+            return;
+        }
+
+        if (applicationQuery.data && 
+            [ApplicationStatus.SUBMITTED, ApplicationStatus.DENIED].includes(applicationQuery.data.status)) {
+            console.log('Redirecting due to application status:', applicationQuery.data.status);
+            router.push('/');
+        }
+    }, [authCheck, user, applicationQuery.isLoading, applicationQuery.data, router]);
+
+    // Show loading state
+    if (authCheck && !user) {
+        return <FrontPageSecondaryLayout />;
+    }
+
+    if (applicationQuery.isLoading) {
+        return <FrontPageSecondaryLayout />;
+    }
+
+    if (!applicationQuery.data) {
+        return <FrontPageSecondaryLayout />;
+    }
+
+    if ([ApplicationStatus.SUBMITTED, ApplicationStatus.DENIED, ApplicationStatus.NOT_AVAILABLE].includes(applicationQuery.data.status)) {
+        return <FrontPageSecondaryLayout />;
+    }
 
     return (
         <div 
             className="flex md:flex-row flex-col min-h-screen"
             style={{
-                backgroundImage: 'url("/Hero%20Background.webp")', 
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
                 backgroundAttachment: 'fixed'
             }}
         >
-            {/* Mobile Header */}
-            <header className="md:hidden flex justify-between items-center bg-[#4A376B] p-4 border-[#523B75] border-b w-full">
-                <div className="flex items-center gap-2">
-                    <div className="flex justify-center items-center w-8 h-8">
-                        {/* <Logo className="w-full h-full object-contain" /> */}
-                    </div>
-                    <h2 className="font-mont font-bold text-white text-xl">HackCC</h2>
-                </div>
-                <button
-                    onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-                    className="p-2 text-gray-300 hover:text-white"
-                >
-                    {isSidebarOpen ? <X size={24} strokeWidth={2.5} /> : <Menu size={24} strokeWidth={2.5} />}
-                </button>
-            </header>
-
+            <SkyFixed />
             <Sidebar
                 activeSection={activeSection}
                 setActiveSection={(section) => {
                     setActiveSection(section);
-                    setIsSidebarOpen(false); // Close sidebar on mobile nav
+                    setIsSidebarOpen(false);
                 }}
                 isOpen={isSidebarOpen}
+                setIsOpen={setIsSidebarOpen}
             />
             <MainContent activeSection={activeSection} />
         </div>
