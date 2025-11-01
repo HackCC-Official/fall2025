@@ -1,7 +1,7 @@
 export function TeamUpSection() {
     return (
         <div>
-            <h1 className="mb-8 font-bagel text-white text-4xl">Team Up</h1>
+            <h1 className="mb-8 font-bagel text-white text-2xl sm:text-3xl md:text-4xl">Team Up</h1>
             <div className="bg-[#4A376B] shadow-lg p-8 border border-[#523B75] rounded-2xl">
                 <h2 className="font-mont text-gray-300 text-2xl text-center">
                     To be added soon!

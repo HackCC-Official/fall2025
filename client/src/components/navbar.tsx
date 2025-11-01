@@ -84,10 +84,10 @@ export const Navbar = () => {
                         }}>Schedule</a>
                 <a href="/sponsor">Sponsor us</a>
                 <div className="space-x-4">
-                    {!isLoggedIn && <a onClick={login}>Login</a>}
-                    {showOrgDashboard && <DashboardButton />}
-                    {showAttendeeDashboard && <AttendeeDashboardButton/>}
-                    {showSignout && <a onClick={signOut}>Sign out</a>}
+                {!isLoggedIn && <a onClick={login}>Login</a>}
+                {showOrgDashboard && <DashboardButton />}
+                {showAttendeeDashboard && <AttendeeDashboardButton/>}
+                {showSignout && <a onClick={signOut}>Sign out</a>}
                 </div>
             </div>
             <div className={`${isMenuOpen? 'lg:hidden flex' : 'hidden'} font-mont top-0 left-0 fixed w-screen h-screen bg-white z-50 flex-col justify-center align-center items-center text-center [&>*]:my-2 [&>*]:whitespace-nowrap overflow-hidden`}>

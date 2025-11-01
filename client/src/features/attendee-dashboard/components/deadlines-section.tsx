@@ -28,7 +28,7 @@ export function DeadlinesSection() {
 
     return (
         <div>
-            <h1 className="mb-8 font-bagel text-white text-4xl">Project Deadlines</h1>
+            <h1 className="mb-8 font-bagel text-white text-2xl sm:text-3xl md:text-4xl">Project Deadlines</h1>
 
             <div className="bg-[#523B75] shadow-lg p-8 rounded-2xl">
                 <h2 className="mb-6 font-mont font-semibold text-white text-2xl text-center">
