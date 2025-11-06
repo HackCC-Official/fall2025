@@ -16,7 +16,7 @@ export default function AttendeeContainer() {
         //lg:desktop/laptop breakpoint
         //initally scaled for mobile->tablet->desktop/laptop
         //IN ORDER FOR CONTAINERS TO WORK! NAME HAS TO BE first_full_name and last initial: example = Gabriel F.
-        <div className="relative bg-gradient-to-b from-richpurple via-50% to-richpurple/100 py-2 pb-10 lg:pb-60 w-full h-auto overflow-x-clip pointer-events-none">
+        <div className="relative bg-gradient-to-b from-richpurple via-50% to-bgpurple py-2 pb-10 lg:pb-60 w-full h-auto overflow-x-clip pointer-events-none">
             <Image src={cloud} sizes="(min-width: 1540px) 1000px, (min-width: 780px) 500px, (min-width: 640px) 300px, 250px" className="top-[150px] md:top-[0px] -left-[50px] z-0 absolute w-[250px] sm:w-[300px] md:w-[500px] 2xl:w-[1000px] h-auto pointer-events-none" alt="cloud " />
             <Image src={cloud2} sizes="(min-width: 1540px) 1000px, (min-width: 780px) 500px, (min-width: 640px) 300px, 250px" className="top-[200px] md:top-[100px] -right-[40px] z-0 absolute w-[250px] sm:w-[300px] md:w-[500px] 2xl:w-[1000px] h-auto" alt="cloud" />
             <div className="relative mx-auto w-full max-w-[1400px] text-center">

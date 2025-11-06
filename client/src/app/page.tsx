@@ -19,7 +19,7 @@ export default function HomePage() {
     <div className="flex flex-wrap w-screen h-screen">
       <Navbar></Navbar>
       <Home></Home>
-            <VenueMap />
+      <VenueMap />
       <VolunteerJudgeContainer></VolunteerJudgeContainer>
       <About></About>
       <Collage></Collage>

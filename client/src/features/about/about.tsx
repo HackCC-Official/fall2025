@@ -18,7 +18,7 @@ export default function About () {
                     <Title text="About HackCC"></Title>
                     <Image className='bottom-0 -left-1/2 absolute w-16 md:w-20 2xl:w-28 h-auto' src={ShootingStar} alt='Shooting Stars' sizes="(min-width: 1540px) 112px, (min-width: 780px) 80px, 64px"></Image>
                 </div>
-                <div className='z-10 my-0 sm:my-8 px-8 font-mont text-base sm:text-lg md:text-2xl 2xl:text-3xl sm:text-center'>
+                <div className='z-10 my-2 sm:my-8 px-8 font-mont text-base sm:text-lg md:text-2xl 2xl:text-3xl sm:text-center'>
                     <p>A 250 person, 14 hour hackathon for <br className='hidden 2xl:hidden lg:inline' /> community college students across California.</p>
                 </div>
                 <div className='flex md:flex-row flex-col items-stretch gap-8 md:gap-16 mb-4 md:mb-0'>
