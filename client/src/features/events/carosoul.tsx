@@ -1,42 +1,49 @@
-
-
 import { Title } from "@/components/title";
 import Card from "./ui/Card"
 import Plane from "./ui/plane"
 
-const day1Text = "HackCC starts off with an exciting opening ceremony commencing the beginning of many fun workshops and activities throughout the day!  Along with fun activities, Lunch and dinner will be served as well as some snacks to keep the energy high throughout the day!"
-const day2Text = "Keeping the energy high through the night for those that continue. You can expect the next day to be full of activities again along with breakfast and lunch before the judging period begins and HackCC 2025 closing ceremony!"
+const morningItems = [
+    "8:00 AM  - Doors Open",
+    "9:00 AM  - Opening Ceremony",
+    "10:00 AM - Hacking Starts & Team Formation",
+    "11:00 AM - Workshop: Vibecoding/API Intro"
+]
+
+const afternoonItems = [
+    "12:00 PM - Lunch",
+    "1:00 PM  - Workshop: GitHub Intro",
+    "2:00 PM  - Super Smash Bros Tournament",
+    "4:00 PM  - Clash Royale Tournament",
+    "5:00 PM  - Poker Tournament"
+]
+
+const eveningItems = [
+    "6:30 PM - Dinner",
+    "7:00 PM - Submissions Due (Soft Deadline)",
+    "8:00 PM - Hacking Ends (Hard Deadline)",
+]
+
+const nightItems = [
+    "8:15 PM  - Project Expo",
+    "9:15 PM  - Closing Ceremony",
+    "10:00 PM - Doors Close"
+]
+
 export default function carousel() {
     return (
         <div id="scheduleTab" className="bg-gradient-to-b from-bgpurple to-richpurple -mt-[2px] py-20 w-full h-auto overflow-x-clip text-center">
-        <Title text="Event Schedule"></Title>
-        <div className="md:relative w-full h-auto md:h-[300px] lg:h-[400px]">
-
-            
-            <div className="-right-[1190px] md:absolute">
-                <div className="flex md:flex-row flex-col items-center gap-[20px] w-full h-auto md:animate-marqueeEffect md:hover:pause" >
-                    <Plane></Plane>
-                    <Card day="Day 1" text={day1Text}></Card>         
-                </div>  
+            <Title text="Event Schedule"></Title>
+            <div className="md:relative w-full h-auto md:h-[300px] lg:h-[400px]">
+                <div className="-right-[1190px] md:absolute">
+                    <div className="flex md:flex-row flex-col items-center gap-[20px] w-full h-auto md:animate-marqueeEffect md:hover:pause" >
+                        <Plane></Plane>
+                        <Card day="Morning (8-11 AM)" items={morningItems}></Card>      
+                        <Card day="Afternoon (12-6 PM)" items={afternoonItems}></Card>
+                        <Card day="Evening (6:30-8 PM)" items={eveningItems}></Card> 
+                        <Card day="Night (8-10 PM)" items={nightItems}></Card>          
+                    </div>  
+                </div>
             </div>
-        </div>
         </div>
     )
 }
-//-right-[1190px]
-//md:animate-marqueeEffect md:hover:pause
-
-
-
-
-
-//md:animate-marqueeEffect
-//animate-moveSpriteSheet
-//-right-[1068px]
-/*
-        <div className="bg-blue-500 w-full h-full">
-            <div className="relative w-[250px] h-[250px] overflow-clip">
-                <Image className="left-0 absolute w-[1250px] h-[250px] object-cover object-left overflow-visible animate-moveSpriteSheet" src={spritesheet} alt="plane" ></Image>
-            </div>
-        </div>
-*/
