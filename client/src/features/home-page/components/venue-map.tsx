@@ -39,14 +39,12 @@ export default function VenueMap() {
                   {/* Map - Full width on mobile, positioned absolutely on desktop */}
                   <div className="lg:right-0 lg:left-0 z-10 lg:absolute relative w-full h-[500px] lg:h-[600px]">
                       <iframe
-                          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1561.6998380152313!2d-117.30329786158038!3d33.18961263824465!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x80dc71006833409f%3A0xa0b134a57d1dd5bc!2sCafeteria!5e1!3m2!1sen!2sus!4v1762470414574!5m2!1sen!2sus"
+                          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1561.6998380152313!2d-117.30329786158038!3d33.18961263824465!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x80dc71006833409f%3A0xa0b134a57d1dd5bc!2sCafeteria!5e1!3m2!1sen!2sus!4v1762470414574!5m2!1sen!2sus&scale=2"
                           width="100%"
                           height="100%"
                           style={{ border: 0 }}
-                          allowFullScreen
-                          loading="lazy"
                           referrerPolicy="no-referrer-when-downgrade"
-                          className="grayscale-[30%] contrast-125 map-fade-mask"
+                          className="map-fade-mask"
                       ></iframe>
                   </div>
 
