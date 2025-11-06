@@ -1,5 +1,5 @@
 import Image from "next/image";
-import MiracostaCollegeImg from '../../public/miracosta-college.jpg'
+import MiracostaCollegeImg from '../../../../public/miracosta-college.jpg'
 
 export default function VenueMap() {
     return (
