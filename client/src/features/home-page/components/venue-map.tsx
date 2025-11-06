@@ -1,4 +1,5 @@
 import Image from "next/image";
+import MiracostaCollegeImg from '../../public/miracosta-college.jpg'
 
 export default function VenueMap() {
     return (
@@ -11,7 +12,7 @@ export default function VenueMap() {
                         <div className="font-bagel font-semibold text-4xl sm:text-5xl">Venue</div>
                         <div className="mt-4 mb-6 rounded-lg w-full h-40 sm:h-48 overflow-hidden">
                             <Image 
-                                src="/miracosta-college.jpg" 
+                                src={MiracostaCollegeImg} 
                                 alt="MiraCosta College"
                                 width={500}
                                 height={300}
