@@ -15,7 +15,7 @@ export const activitiesData: Activities[] = [
     type: "Workshop",
     location: "Azltan A",
     organizers: "Evan Ly",
-    time: "1:00 PM",
+    time: "1:00 PM - 1:30 PM",
     },
     {
     name: "Activity: Super Smash Bros Tournament",
