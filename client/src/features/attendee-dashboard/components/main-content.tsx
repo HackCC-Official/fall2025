@@ -7,8 +7,6 @@ export function MainContent({ activeSection } : { activeSection: string }) {
         switch (activeSection) {
             case 'profile':
                 return <ProfileSection />;
-            case 'team-up':
-                return <TeamUpSection />;
             case 'deadlines':
                 return <DeadlinesSection />;
             default:

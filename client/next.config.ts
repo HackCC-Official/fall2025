@@ -10,7 +10,7 @@ const nextConfig: NextConfig = {
         return [
             {
                 source: "/panel",
-                destination: "/panel/application",
+                destination: "/panel/qr-code",
                 permanent: true, // Set to false for a temporary redirect
             },
         ];

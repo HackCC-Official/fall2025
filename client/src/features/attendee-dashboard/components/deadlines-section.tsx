@@ -17,7 +17,7 @@ export function DeadlinesSection() {
 
     const TimeBlock: React.FC<{ value: number; label: string }> = ({ value, label }) => (
         <div className="flex flex-col justify-center items-center p-6 border border-[#523B75] min-w-[100px]">
-            <span className="font-bagel font-bold text-yellow-400 text-5xl">
+            <span className="font-bagel font-bold text-[#FBF574] text-5xl">
                 {value.toString().padStart(2, '0')}
             </span>
             <span className="mt-2 font-mont font-medium text-gray-400 text-sm uppercase">
