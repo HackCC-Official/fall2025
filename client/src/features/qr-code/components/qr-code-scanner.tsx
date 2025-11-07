@@ -2,7 +2,7 @@ import { cn } from '@/lib/utils';
 import { Scanner } from '@yudiel/react-qr-scanner';
 import { Drawer, DrawerClose, DrawerContent, DrawerFooter, DrawerHeader, DrawerTitle, DrawerTrigger } from '@/components/ui/drawer';
 import { Button } from '@/components/ui/button';
-import { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import { Check, ScanIcon } from 'lucide-react';
 import { AccountCard } from '@/features/attendance/components/account-card';
@@ -22,33 +22,66 @@ import { claimMeal, getMealByAccountIdAndEventIDAndMealType } from '@/features/m
 import { MealType, RequestMealDTO } from '@/features/meal/types/meal';
 import { getCurrentTime } from '@/features/event/utils/time';
 import { getHourAtPST, getMealType } from '@/features/meal/utils/meal';
+import { getTeamByAccountId } from '@/features/team/api/team';
+import { sendNotification } from '@/features/notification/api/notification';
+import { RequestNotificationDTO } from '@/features/notification/types/notification';
+import { ResponseTeamDTO } from '@/features/team/type/team';
+import { toast } from 'sonner';
 
 export enum ScannerAction {
   ATTENDANCE = 'ATTENDANCE',
   MEAL = 'MEAL',
   WORKSHOP = 'WORKSHOP',
-  BADGE = 'BADGE'
+  BADGE = 'BADGE',
+  TEAM = 'TEAM'
 }
 
 interface ScannerContextI {
   application?: ApplicationResponseDTO;
   currentEvent?: EventDTO;
+  account?: AccountDTO;
   isLoading: boolean;
+  currentTeam?: ResponseTeamDTO;
+  isPanel: boolean;
 }
 
-export const ScannerContext = createContext<ScannerContextI>({ application: undefined, currentEvent: undefined, isLoading: false })
+export const ScannerContext = createContext<ScannerContextI>({ application: undefined, currentEvent: undefined, isLoading: false, account: undefined, currentTeam: undefined, isPanel: true })
 
-export function QrCodeScanner({ buttonLabel = 'Take Attendance', type, currentEvent, mealType }
-  : { buttonLabel?: string, type: ScannerAction, currentEvent?: EventDTO, mealType?: MealType; }) {
+export function QrCodeScanner({ 
+  buttonLabel = 'Take Attendance', 
+  type, 
+  currentEvent, 
+  mealType,
+  button = <Button className='bg-green-500 hover:bg-green-600'><ScanIcon /> {buttonLabel}</Button>,
+  isPanel = true,
+  currentTeam
+}
+: 
+{ 
+  buttonLabel?: string,
+  type: ScannerAction, 
+  currentEvent?: EventDTO, 
+  mealType?: MealType,
+  button?: React.ReactElement,
+  isPanel?: boolean,
+  currentTeam?: ResponseTeamDTO
+}) {
   
   const [open, setOpen] = useState<boolean>(false)
   const [openAction, setOpenAction] = useState(false)
   const [accountId, setAccountId] = useState<string | null>(null)
 
+
   const applicationQuery = useQuery({
     queryKey: [`application`, accountId],
     queryFn: () => getApplicationByUserId(accountId || ''),
-    enabled: () => !!accountId
+    enabled: () => !!accountId && isPanel
+  })
+
+  const accountQuery = useQuery({
+    queryKey: [`account`, accountId],
+    queryFn: () => getAccountById(accountId || ''),
+    enabled: () => !!accountId && !isPanel
   })
   
   const ActionComponent = () => {
@@ -61,6 +94,12 @@ export function QrCodeScanner({ buttonLabel = 'Take Attendance', type, currentEv
         return <WorkshopAction />;
       case ScannerAction.BADGE:
         return <div>BADGE ACTION: NOT IMPLEMENTED</div>
+      case ScannerAction.TEAM:
+        return <TeamAction closeDrawer={() => {
+          setOpen(false)
+          setOpenAction(false)
+          setAccountId(null)
+        }} />
       default:
         return <div>Unknown action, error!</div>
     }
@@ -78,21 +117,23 @@ export function QrCodeScanner({ buttonLabel = 'Take Attendance', type, currentEv
         }
       }}>
       <DrawerTrigger asChild>
-        <Button className='bg-green-500 hover:bg-green-600'><ScanIcon /> {buttonLabel}</Button>
+        {button}
       </DrawerTrigger>
-      <DrawerContent>
+      <DrawerContent className={cn(!isPanel && 'bg-[#5C4580] !border-[#5C4580] !outline-[#5C4580]')}>
         <DrawerHeader>
-          <DrawerTitle>QR Code Scanner</DrawerTitle>
+          <DrawerTitle className={cn([
+            !isPanel && 'text-[#FBF574] font-bagel font-normal text-3xl'
+          ])}>QR Code Scanner</DrawerTitle>
         </DrawerHeader>
         <div className='mx-auto'>
           {
-            !currentEvent &&
+            !currentEvent && type !== ScannerAction.TEAM &&
             <div className='py-8 font-bold text-xl'> 
               {"There's no on-going event currently :("}
             </div>
           }
           {
-            currentEvent && open && !openAction &&
+            ((isPanel && currentEvent && open && !openAction) || (!isPanel && open && !openAction)) &&
             (
             <div className='px-4 pb-4 w-full max-w-md'>
               <div className='relative p-4 rounded-3xl overflow-hidden'>
@@ -115,11 +156,14 @@ export function QrCodeScanner({ buttonLabel = 'Take Attendance', type, currentEv
             )
           }
           {
-            currentEvent && openAction && (
+            ((isPanel && currentEvent && openAction) || (!isPanel && openAction)) && (
             <ScannerContext value={{
               application: applicationQuery.data,
               isLoading: applicationQuery.isLoading,
-              currentEvent
+              currentEvent,
+              account: accountQuery.data,
+              currentTeam,
+              isPanel
             }}>
               <ActionComponent />
             </ScannerContext>
@@ -127,7 +171,15 @@ export function QrCodeScanner({ buttonLabel = 'Take Attendance', type, currentEv
         </div>
         <DrawerFooter>
           <DrawerClose>
-            <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
+            <Button 
+              className={cn([
+                !isPanel && 'text-[#5C4580] font-mont bg-[#FBF574] border-0 rounded-xl hover:bg-[#f5ef60] font-semibold'
+              ])}
+              variant="outline"
+              onClick={() => setOpen(false)}
+            >
+                Cancel
+            </Button>
           </DrawerClose>
         </DrawerFooter>
       </DrawerContent>
@@ -221,7 +273,7 @@ function MealAction({ mealType } : { mealType: MealType }) {
   });
 
   const currentMealType: MealType = (data && data.mealType) ? data.mealType : MealType.UNCLAIMED;
-  console.log(currentMealType, data)
+
   return (
     <div>
       <AccountCard />
@@ -258,6 +310,60 @@ function WorkshopAction() {
   return (
     <div>
       <AccountCard />
+    </div>
+  )
+}
+
+function TeamAction({ closeDrawer } : { closeDrawer: () => void }) {
+    const { account, currentTeam, } = useContext(ScannerContext)
+
+  const user_id: string = account && account.id || '';
+
+  const queryClient = useQueryClient();
+  const { data, isLoading } = useQuery({
+    queryFn: () => getTeamByAccountId(user_id),
+    queryKey: ['team', user_id],
+    enabled: !!account
+  })
+
+  const sendNotificationlMutation = useMutation({
+    mutationFn: (notificationDTO: RequestNotificationDTO) => sendNotification(notificationDTO),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['team', user_id] })
+    }
+  });
+  
+
+  if (data) {
+    return (
+      <div className='my-8 font-mont text-white text-2xl'>
+        Hacker already has a team :(
+      </div>
+    )
+  }
+
+  return (
+    <div className='flex flex-col items-center my-4'>
+      <div className='my-8'>
+        <AccountCard />
+      </div>  
+      {
+        isLoading &&
+        <Spinner />
+      }
+      {
+        !isLoading &&
+        <Button 
+          className='bg-green-600 hover:bg-green-700 py-4 rounded-xl font-mont'
+          onClick={() => {
+            sendNotificationlMutation.mutate({ accountId: account?.id || '', teamId: currentTeam?.id || '' })
+            closeDrawer()
+            toast.success('User invited to team!')
+          }}
+        >
+            Invite to team
+        </Button>
+      }
     </div>
   )
 }

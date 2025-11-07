@@ -17,3 +17,12 @@ export interface Countdown {
     minutes: number;
     seconds: number;
 };
+
+export interface Activities {
+    name: string;
+    description: string;
+    type: "Workshop" | "Activity";
+    location: string;
+    organizers: string;
+    time: string;
+};

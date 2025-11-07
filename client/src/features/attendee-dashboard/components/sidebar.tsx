@@ -20,12 +20,11 @@ export function Sidebar({ activeSection, setActiveSection, isOpen, setIsOpen } :
             <button
                 onClick={() => {
                     setActiveSection(item.id);
-                    setIsOpen(false); // Close sheet on mobile after selection
                 }}
                 className={cn(
                     "flex items-center gap-3 px-4 py-3 rounded-lg w-full font-medium text-left transition-all ease-out",
                     isActive
-                        ? "bg-yellow-400 text-black shadow-lg"
+                        ? "bg-[#FBF574] text-black shadow-lg"
                         : "text-gray-300 hover:bg-purple-900/80 hover:text-white"
                 )}
             >

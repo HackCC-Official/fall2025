@@ -1,3 +1,4 @@
+import ActivitiesSection from "./activities-section";
 import { DeadlinesSection } from "./deadlines-section";
 import { ProfileSection } from "./profile-section";
 import { TeamUpSection } from "./team-up";
@@ -7,10 +8,10 @@ export function MainContent({ activeSection } : { activeSection: string }) {
         switch (activeSection) {
             case 'profile':
                 return <ProfileSection />;
-            case 'team-up':
-                return <TeamUpSection />;
             case 'deadlines':
                 return <DeadlinesSection />;
+            case 'activities':
+                return <ActivitiesSection />;
             default:
                 return <ProfileSection />;
         }
