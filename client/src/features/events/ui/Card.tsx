@@ -6,7 +6,7 @@ interface props {
 
 export default function Card({day="day -1", text="text goes here", items}:props) {
     return(
-        <div className="flex-shrink-0 bg-white hover:shadow-xl p-4 px-6 md:py-3 rounded-lg w-full max-w-md h-[250px]">
+        <div className="flex-shrink-0 bg-white hover:shadow-xl mx-2 md:mx-0 p-4 px-6 md:py-3 rounded-lg w-full max-w-md h-[250px]">
             <h2 className="font-bagel text-hoverpurple text-xl">{day}</h2>
             <h3 className="font-mont font-extrabold">what to expect</h3>
             {items ? (
