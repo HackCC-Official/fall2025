@@ -22,10 +22,10 @@ export default function ActivitiesSection() {
     const baseClass = "px-6 py-3 rounded-3xl font-mont font-medium transition-colors text-lg"; 
     if (filter === buttonFilter) {
       // Active button style - now yellow
-      return `${baseClass} bg-yellow-400 text-purple-900 shadow-md`; 
+      return `${baseClass} bg-[#FBF574] text-purple-900 shadow-md`; 
     }
     // Inactive button style - yellow outline, slightly darker background
-    return `${baseClass} bg-yellow-400/20 text-yellow-100 border border-yellow-400 hover:bg-yellow-400/40`;
+    return `${baseClass} bg-[#FBF574]/20 text-[#FBF574] border border-[#FBF574] hover:bg-yellow-400/40`;
   };
 
   // Helper function for styling the activity/workshop "pills"
@@ -37,8 +37,8 @@ export default function ActivitiesSection() {
   };
 
   return (
-    <section className="w-full max-w-6xl mx-auto py-12 px-4 font-mont"> {/* Set default font to mont */}
-      <h2 className="text-6xl font-bagel text-yellow-400 text-center mb-12 drop-shadow-lg"> {/* Yellow, bigger font-bagel */}
+    <section className="mx-auto px-4 py-12 w-full max-w-6xl font-mont"> {/* Set default font to mont */}
+      <h2 className="drop-shadow-lg mb-12 font-bagel text-[#FBF574] text-6xl text-center"> {/* Yellow, bigger font-bagel */}
         Activities & Workshops
       </h2>
 
@@ -65,15 +65,15 @@ export default function ActivitiesSection() {
       </div>
 
       {/* Activities Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="gap-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
         {filteredActivities.map((activity, index) => (
           <div 
             key={index} 
-            className="bg-purple-900/75 backdrop-blur-sm border border-purple-700 rounded-2xl shadow-xl p-6 flex flex-col text-white"
+            className="flex flex-col bg-purple-900/75 shadow-xl backdrop-blur-sm p-6 border border-purple-700 rounded-2xl text-white"
           >
             {/* Card Header */}
             <div className="flex justify-between items-start mb-2">
-              <h3 className="text-2xl font-semibold pr-2"> {/* Font mont for titles within cards */}
+              <h3 className="pr-2 font-semibold text-2xl"> {/* Font mont for titles within cards */}
                 {activity.name}
               </h3>
               <span 
@@ -84,12 +84,12 @@ export default function ActivitiesSection() {
             </div>
 
             {/* Card Body */}
-            <p className="text-purple-200 mb-4 text-base"> {/* Font mont for description */}
+            <p className="mb-4 text-purple-200 text-base"> {/* Font mont for description */}
               {activity.description}
             </p>
             
             {/* Card Footer (Details) */}
-            <div className="mt-auto border-t border-purple-700 pt-4 space-y-2 text-sm">
+            <div className="space-y-2 mt-auto pt-4 border-purple-700 border-t text-sm">
               <p className="text-purple-300"> {/* Font mont for details */}
                 <span className="font-medium text-purple-50">Time:</span> {activity.time}
               </p>
@@ -109,7 +109,7 @@ export default function ActivitiesSection() {
 
       {/* Handle empty state */}
       {filteredActivities.length === 0 && (
-        <p className="text-center text-purple-300 mt-8 font-mont text-base">
+        <p className="mt-8 font-mont text-purple-300 text-base text-center">
           No {filter === 'All' ? '' : filter.toLowerCase() + 's'} found.
         </p>
       )}
