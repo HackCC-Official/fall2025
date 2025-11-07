@@ -3,7 +3,7 @@ import { BadgeInformationComponent } from './badge-information-component';
 import BadgeGridComponent from './badge-grid-component';
 import { Badge } from '../types/badge-interface';
 // Import your actual badge data
-import { BADGE_DATA } from '../data/badge-data'; // Assuming the export is named BADGE_DATA
+import { BADGE_DATA } from '../data/badge-data'; 
 
 export function HackpassSection() {
   // --- State ---
