@@ -28,7 +28,7 @@ export function AccountCard() {
     return <></>;
   }
 
-  if (account) {
+  if (account && !isPanel) {
     return (
       <div className="flex items-center gap-4">
         <div className="flex justify-center items-center bg-[#FBF574] rounded-full w-16 h-16 font-bagel font-bold text-[#5C4580] text-3xl">
