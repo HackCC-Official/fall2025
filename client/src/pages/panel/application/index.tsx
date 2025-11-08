@@ -11,7 +11,7 @@ export default function ApplicationIndex() {
 export const getServerSideProps: GetServerSideProps = async () => {
   return {
     redirect: {
-      destination: '/panel/hackathon',
+      destination: '/panel/application/hackathon',
       permanent: false,
     },
   };
