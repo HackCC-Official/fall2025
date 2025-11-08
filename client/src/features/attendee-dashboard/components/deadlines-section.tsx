@@ -3,8 +3,8 @@ import { useState, useEffect } from "react";
 import { Countdown } from "../types/attendee-dashboard";
 import { calculateTimeLeft } from "../utils/deadline";
 
-const HACKATHON_START_TIME = new Date('2025-11-08T08:00:00').getTime();
-const PROJECT_SUBMISSION_DEADLINE = new Date('2025-11-08T22:00:00').getTime();
+const HACKATHON_START_TIME = new Date('2025-11-08T08:00:00-08:00').getTime();
+const PROJECT_SUBMISSION_DEADLINE = new Date('2025-11-08T20:00:00-08:00').getTime();
 
 // --- Labels ---
 const START_LABEL = "Get ready, Hackathon starts in";
