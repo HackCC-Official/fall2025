@@ -24,23 +24,6 @@ export function AccountCard() {
     )
   }
 
-  if (!account && !isPanel) {
-    return <></>;
-  }
-
-  if (account && !isPanel) {
-    return (
-      <div className="flex items-center gap-4">
-        <div className="flex justify-center items-center bg-[#FBF574] rounded-full w-16 h-16 font-bagel font-bold text-[#5C4580] text-3xl">
-          {account.firstName.charAt(0).toUpperCase()}
-        </div>
-        <div className="font-mont font-semibold text-white text-2xl">
-          {account.firstName} {account.lastName}
-        </div> 
-      </div>
-    )
-  }
-
   if (!application) {
     return (
       <Card className="mx-auto max-w-sm">
