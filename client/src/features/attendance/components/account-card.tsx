@@ -24,7 +24,7 @@ export function AccountCard() {
     )
   }
 
-  if (!account && isPanel) {
+  if (!account && !isPanel) {
     return <></>;
   }
 
